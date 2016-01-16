@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_filter"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:orderInCategory="101"
+        android:showAsAction="always"
+        android:title="@string/filter">
+        <!--<menu>
+            <item
+                android:id="@+id/menu_filter_by_type"
+                android:showAsAction="always|withText"
+                android:title="Opdater" />
+            <item
+                android:id="@+id/menu_filter_by_guard"
+                android:icon="@drawable/ic_action_rewind"
+                android:showAsAction="always|withText"
+                android:title="@string/restart"/>
+        </menu>-->
+    </item>
+
+</menu>

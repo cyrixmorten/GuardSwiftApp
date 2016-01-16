@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/CardView.Light"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    card_view:cardCornerRadius="@dimen/mini_padding"
+    card_view:cardElevation="@dimen/mini_padding"
+    card_view:cardUseCompatPadding="true"
+    card_view:contentPadding="@dimen/small_padding">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/card_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/small_padding">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                style="@style/Base.TextAppearance.AppCompat.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/layoutDelete"
+                android:text="@string/title_event_observed" />
+
+            <!-- wrap delete button in layout to add greater surface to click -->
+            <LinearLayout
+                android:id="@+id/layoutDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:clickable="true"
+                android:orientation="vertical">
+
+                <com.beardedhen.androidbootstrap.AwesomeTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/btnDelete"
+                    android:textSize="28dp"
+                    app:bootstrapBrand="danger"
+                    app:fontAwesomeIcon="fa_remove"
+                    tools:ignore="SpUsage"
+                    />
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/card_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Event -->
+            <LinearLayout
+                android:id="@+id/layout_event"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Base.TextAppearance.AppCompat.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_event_observed" />
+
+                <include
+                    android:id="@+id/tv_area_event"
+                    layout="@layout/gs_card_event" />
+            </LinearLayout>
+
+            <!-- Amount -->
+            <LinearLayout
+                android:id="@+id/layout_amount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Base.TextAppearance.AppCompat.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_event_amount" />
+
+                <include
+                    android:id="@+id/tv_area_amount"
+                    layout="@layout/gs_card_event" />
+            </LinearLayout>
+
+            <!-- People -->
+            <LinearLayout
+                android:id="@+id/layout_people"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Base.TextAppearance.AppCompat.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_people" />
+
+                <include
+                    android:id="@+id/tv_area_people"
+                    layout="@layout/gs_card_event" />
+            </LinearLayout>
+
+            <!-- Location -->
+            <LinearLayout
+                android:id="@+id/layout_locations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Base.TextAppearance.AppCompat.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_event_location" />
+
+                <include
+                    android:id="@+id/tv_area_location"
+                    layout="@layout/gs_card_event" />
+            </LinearLayout>
+
+            <!-- Remark -->
+            <LinearLayout
+                android:id="@+id/layout_remarks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/Base.TextAppearance.AppCompat.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_event_remarks" />
+
+                <include
+                    android:id="@+id/tv_area_remarks"
+                    layout="@layout/gs_card_event" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/card_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/micro_padding">
+
+            <TextView
+                android:id="@+id/tv_timestamp"
+                style="@style/Base.TextAppearance.AppCompat.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:paddingTop="@dimen/micro_padding"
+
+                android:text="14/12/2015 18:35" />
+
+            <LinearLayout
+                android:id="@+id/footer_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_timestamp"
+                android:paddingTop="@dimen/small_padding"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+            <Button
+                android:id="@+id/btn_copy_to_report"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/copy_to_report" />
+
+            </LinearLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
+
+</android.support.v7.widget.CardView>

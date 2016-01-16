@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_add" android:title="Skriv rapport" android:icon="@android:drawable/ic_menu_help"/>
+    <item android:id="@+id/menu_checkpoints" android:title="Checkpoints" android:icon="@android:drawable/ic_menu_help"/>
+    <!--<item android:id="@+id/menu_edit" android:title="Rediger rapport" android:icon="@android:drawable/ic_menu_help"/>-->
+    <!--<group android:id="@+id/menu_helpgroup">-->
+        <!--<item android:id="@+id/menu_help" android:title="Hjælp" android:icon="@android:drawable/ic_menu_help"/>-->
+    <!--</group>-->
+</menu>

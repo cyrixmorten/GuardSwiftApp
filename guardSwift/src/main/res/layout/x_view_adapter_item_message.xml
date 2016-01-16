@@ -1,0 +1,45 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="5dp"
+    android:background="@drawable/x_highlight_default">
+
+    <TextView
+        android:id="@+id/info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/button_mark_read"
+        android:paddingRight="5dp"
+        android:fontFamily="sans-serif"
+        android:singleLine="false"
+        android:text="remarksremarksremarksremarksremarksremarksremarksremarksremarksremarks"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/relativeTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/button_mark_read"
+        android:paddingRight="5dp"
+        android:layout_below="@+id/info"
+        android:text="20:20 31/5"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/info"
+        android:paddingRight="5dp"
+        android:text="Ole Hansen" />
+
+    <com.beardedhen.androidbootstrap.BootstrapButton
+        android:id="@+id/button_mark_read"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="" />
+
+</RelativeLayout>

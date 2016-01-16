@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    -->
+    <style name="AppBaseTheme" parent="@style/Theme.AppCompat.Light.NoActionBar" >
+        <!--
+    Theme customizations available in newer API levels can go in
+    res/values-vXX/styles.xml, while customizations related to
+    backward-compatibility can go here.
+-->
+        <item name="colorPrimary">@color/bootstrap_brand_secondary_border</item>
+        <item name="colorPrimaryDark">@color/bootstrap_gray_light</item>
+    </style>
+    <style name="AppTheme" parent="AppBaseTheme" />
+
+    <style name="AppTheme.Light.Dialog" parent="@style/Theme.AppCompat.Light.Dialog" />
+
+
+    <style name="LargeBoldText">
+
+        <!--
+        <item name="android:shadowColor">@color/Grey</item>
+        <item name="android:shadowDx">2</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">2</item>
+        -->
+        <item name="android:textColor">@color/selector_dark_bright_focused</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:typeface">sans</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:textIsSelectable">false</item>
+    </style>
+
+    <style name="MediumText">
+
+        <!--
+        <item name="android:shadowColor">@color/Grey</item>
+        <item name="android:shadowDx">2</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">2</item>
+        -->
+        <item name="android:textColor">@color/selector_dark_bright_focused</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:typeface">sans</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:textIsSelectable">false</item>
+    </style>
+
+    <style name="MediumBoldText" parent="MediumText">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="LargeBoldCroutonText">
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MediumBoldCroutonText">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="DetailsBox" parent="LargeBoldText">
+        <item name="android:padding">20dp</item>
+        <item name="android:layout_margin">15dp</item>
+        <item name="android:background">@drawable/layout_infobox</item>
+    </style>
+
+    <style name="wrapping">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="wrapping_button" parent="wrapping">
+        <item name="android:layout_marginRight">@dimen/mini_padding</item>
+    </style>
+
+    <style name="wrapping_micropadding" parent="wrapping">
+        <item name="android:paddingEnd">@dimen/mini_padding</item>
+        <item name="android:paddingStart">@dimen/mini_padding</item>
+    </style>
+
+
+    <style name="LoginFormContainer">
+        <item name="android:layout_width">400dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:padding">16dp</item>
+    </style>
+
+</resources>

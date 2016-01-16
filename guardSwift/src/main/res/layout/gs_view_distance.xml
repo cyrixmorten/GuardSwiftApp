@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="end"
+    android:orientation="horizontal">
+
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:id="@+id/tv_distance_text"
+        android:textSize="14sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:fontAwesomeIcon="fa_map_marker"
+        android:visibility="gone"/>
+
+    <com.beardedhen.androidbootstrap.AwesomeTextView
+        android:id="@+id/tv_distance_icon"
+        android:textSize="16sp"
+        android:paddingStart="@dimen/mini_padding"
+        android:paddingEnd="@dimen/mini_padding"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:bootstrapBrand="warning"
+        app:fontAwesomeIcon="fa_warning"
+        android:visibility="gone"/>
+</LinearLayout>

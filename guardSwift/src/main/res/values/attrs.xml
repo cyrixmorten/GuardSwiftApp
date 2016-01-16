@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="QuestionCardView">
+
+
+        <attr name="questionText" format="string" localization="suggested" />
+
+        <attr name="showQuestion" format="boolean" />
+        <attr name="showButtons" format="boolean" />
+
+    </declare-styleable>
+    <declare-styleable name="EditTextFormView">
+        <attr name="descriptionText" format="string" localization="suggested" />
+    </declare-styleable>
+</resources>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="AppBaseTheme">
+
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+
+        <!--
+By default, the positive action text color is derived
+from the colorAccent attribute of AppCompat or android:colorAccent
+attribute of the Material theme.
+-->
+
+
+        <!--<item name="md_positive_color">#5cb85c</item>-->
+
+        <!--&lt;!&ndash;-->
+            <!--By default, the positive action text color is derived-->
+            <!--from the colorAccent attribute of AppCompat or android:colorAccent-->
+            <!--attribute of the Material theme.-->
+        <!--&ndash;&gt;-->
+        <!--<item name="md_neutral_color">#f0ad4e</item>-->
+
+        <!--&lt;!&ndash;-->
+            <!--By default, the positive action text color is derived-->
+            <!--from the colorAccent attribute of AppCompat or android:colorAccent-->
+            <!--attribute of the Material theme.-->
+        <!--&ndash;&gt;-->
+        <!--<item name="md_negative_color">#d9534f</item>-->
+        <!--<item name="colorAccent">@android:color/holo_blue_dark</item>-->
+        <!--<item name="colorPrimary">@color/holo_blue_dark</item>-->
+        <!--<item name="android:navigationBarColor">@color/white</item>-->
+        <!--<item name="android:textColorPrimary">@android:color/primary_text_dark</item>-->
+    </style>
+
+
+</resources>

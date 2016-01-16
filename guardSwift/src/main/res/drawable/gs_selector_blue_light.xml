@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/bootstrap_brand_primary" android:state_selected="true"/>
+    <item android:drawable="@color/bootstrap_brand_primary" android:state_activated="true"/>
+    <item android:drawable="@color/bootstrap_brand_primary" android:state_checked="true"/>
+    <item android:drawable="@color/bootstrap_gray_lighter" android:state_pressed="true"/>
+    <item android:drawable="@color/bootstrap_gray_lightest" android:state_active="true"/>
+    <item android:drawable="@android:color/transparent"/>
+</selector>

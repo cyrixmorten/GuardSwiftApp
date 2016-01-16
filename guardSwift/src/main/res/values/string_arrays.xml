@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation" >
+
+    <string-array name="task_circuit_options">
+        <item>Åben</item>
+        <item>Ankommet</item>
+        <item>Afbryd</item>
+        <item>Afslut</item>
+    </string-array>
+
+    <string-array name="extra_circuitunit_types">
+        <item>EKTRA Razzia</item>
+        <item>EKTRA Indendørs</item>
+        <item>EKTRA Udendørs</item>
+    </string-array>
+    
+    <string-array name="extra_time_minutes_values">
+        <item>0</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+    </string-array>
+    
+    <string-array name="extra_time_minutes_strings">
+        <item>Ingen ekstra tid</item>
+        <item>5 minutter</item>
+        <item>10 minutter</item>
+        <item>15 minutter</item>
+        <item>20 minutter</item>
+        <item>25 minutter</item>
+        <item>30 minutter</item>
+    </string-array>
+
+    <string-array name="edit_delete">
+        <item>Rediger</item>
+        <item>Slet</item>
+    </string-array>
+
+    <string-array name="add_event_options">
+        <item>Opret ny</item>
+        <item>Fra historik</item>
+    </string-array>
+
+</resources>

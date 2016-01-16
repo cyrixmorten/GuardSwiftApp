@@ -1,0 +1,287 @@
+package com.guardswift.ui.parse.documentation.report.create.fragment;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.text.InputType;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListView;
+
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.guardswift.R;
+import com.guardswift.dagger.InjectingListFragment;
+import com.guardswift.persistence.cache.data.ClientCache;
+import com.guardswift.persistence.cache.data.EventTypeCache;
+import com.guardswift.persistence.parse.data.EventType;
+import com.guardswift.persistence.parse.data.client.Client;
+import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.ui.common.UpdateFloatingActionButton;
+import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
+import com.parse.ParseException;
+import com.parse.ParseQuery;
+import com.parse.ParseQueryAdapter;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+public class AddEventTypeFragment extends InjectingListFragment implements EventEntryFragment, UpdateFloatingActionButton {
+
+	protected static final String TAG = AddEventTypeFragment.class
+			.getSimpleName();
+
+	public static AddEventTypeFragment newInstance(Client client) {
+
+        GuardSwiftApplication.getInstance().getCacheFactory().getClientCache().setSelected(client);
+
+		AddEventTypeFragment fragment = new AddEventTypeFragment();
+		Bundle args = new Bundle();
+		fragment.setArguments(args);
+		return fragment;
+	}
+
+	public AddEventTypeFragment() {
+	}
+
+
+    @Inject
+    ClientCache clientCache;
+    @Inject
+    EventTypeCache eventTypeCache;
+
+	private EventTypeParseAdapter mAdapter;
+
+//    @Bind(R.id.header) TextView tv_header;
+    @Bind(R.id.btn_footer)
+    FloatingActionButton footerButton;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// disableCroutons();
+		super.onCreate(savedInstanceState);
+	}
+
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		View rootView = inflater.inflate(R.layout.gs_listview_selectable_fab,
+				container, false);
+
+		ButterKnife.bind(this, rootView);
+
+//		final Client client = localData.getSelectedClient();
+		// addButton.setText(R.string.add_type);
+
+		// new EventType.QueryBuilder(true).matchingIncludes(client).sortByTimesUsed()
+		// .build()
+		// .findInBackground(new FindCallback<EventType>() {
+		//
+		// @Override
+		// public void done(List<EventType> objects, ParseException e) {
+		// if (e != null) {
+		// Log.e(TAG, e.getMessage(), e);
+		// return;
+		// }
+		//
+		// for (EventType type : objects) {
+		// Log.d(TAG, type.getName());
+		// }
+		//
+		// }
+		// });
+
+		// mAdapter = new AddEventTypeAdapter(getActivity());
+		mAdapter = new EventTypeParseAdapter(getActivity(),
+				new ParseQueryAdapter.QueryFactory<EventType>() {
+
+					@Override
+					public ParseQuery<EventType> create() {
+						return new EventType.QueryBuilder(true)
+								.matchingIncludes(clientCache.getSelected()).sortByTimesUsed()
+								.build();
+					}
+				});
+
+        mAdapter.addOnQueryLoadListener(new ParseQueryAdapter.OnQueryLoadListener<EventType>() {
+            @Override
+            public void onLoading() {
+
+            }
+
+            @Override
+            public void onLoaded(List<EventType> eventTypes, Exception e) {
+
+				if (getActivity() == null || !isAdded())
+					return;
+
+                loadPreselected();
+
+                mAdapter.removeOnQueryLoadListener(this);
+            }
+        });
+
+		setListAdapter(mAdapter);
+
+//		tv_header.setText(getString(R.string.event_observed).toUpperCase(
+//				Locale.getDefault()));
+
+//        footerButton.setText(getString(R.string.add_event_type));
+
+		return rootView;
+	}
+
+    private void loadPreselected() {
+
+        String selectedEvent = ((AddEventHandler)getActivity()).getEventType();
+
+        if (selectedEvent == null)
+            return;
+
+        for (int i = 0; i<getListView().getCount(); i++) {
+            EventType eventType = (EventType) getListView().getItemAtPosition(i);
+
+            if (eventType.getName().equals(selectedEvent)) {
+                getListView().setItemChecked(i, true);
+                eventTypeCache.setSelected(eventType);
+                return;
+            }
+        }
+    }
+
+
+    @Override
+	public void onListItemClick(ListView l, View v, int position, long id) {
+		EventType event = mAdapter.getItem(position);
+
+//        new EventRemark().updateAll(
+//                EventRemark.getQueryBuilder(false).matching(Client.Recent.getSelected()).matching(event)
+//                        .build());
+        selectEvent(event);
+
+		super.onListItemClick(l, v, position, id);
+	}
+
+    private void selectEvent(EventType eventType) {
+//        Toast.makeText(getActivity(), eventType.getName(), Toast.LENGTH_SHORT)
+//                .show();
+
+        eventType.increment(EventType.timesUsed);
+        eventType.pinThenSaveEventually();
+
+        eventTypeCache.setSelected(eventType);
+
+
+        // jump to next if amount is not needed
+        ((AddEventHandler) getActivity()).setEventType(eventType);
+
+
+    }
+
+
+
+    @Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		ButterKnife.unbind(this);
+	}
+
+    @OnClick(R.id.btn_footer)
+    public void addEventType() {
+        new MaterialDialog.Builder(getActivity())
+                .title(R.string.add_event_type)
+                .content(R.string.add_event_type_desc)
+                .inputType(InputType.TYPE_CLASS_TEXT)
+                .input(R.string.event, R.string.input_empty, new MaterialDialog.InputCallback() {
+                    @Override
+                    public void onInput(MaterialDialog dialog, CharSequence input) {
+                        if (input.length() > 0) {
+                             final EventType new_type = new EventType();
+                             new_type.setOwner(ParseUser.getCurrentUser());
+                             new_type.setName(input.toString());
+                             new_type.pinInBackground(EventType.PIN, new SaveCallback() {
+                                 @Override
+                                 public void done(ParseException e) {
+                                     selectEvent(new_type);
+                                     if (mAdapter != null) {
+                                         mAdapter.loadObjects();
+                                     }
+                                 }
+                             });
+
+
+                        }
+                    }
+                }).negativeText(android.R.string.cancel).show();
+    }
+
+    @Override
+    public void fragmentBecameVisible() {
+
+    }
+
+    @Override
+    public void fragmentBecameInvisible() {
+
+    }
+
+    @Override
+    public int getTitle() {
+        return R.string.title_event_type;
+    }
+
+    @Override
+    public void updateFloatingActionButton(Context context, android.support.design.widget.FloatingActionButton
+                                                   floatingActionButton) {
+        floatingActionButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_add_white_18dp));
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addEventType();
+            }
+        });
+        floatingActionButton.show();
+    }
+
+    // @Override
+	// public void onViewStateRestored(Bundle savedInstanceState) {
+	// mAdapter.loadObjects();
+	// super.onViewStateRestored(savedInstanceState);
+	// }
+
+	// @OnClick(R.id.addUnique)
+	// public void addUnique(Button button) {
+	//
+	// GenericEditTextDialogFragment addDialog = GenericEditTextDialogFragment
+	// .newInstance(new GenericEditTextDialogInterface() {
+	//
+	// @Override
+	// public void okClicked(final String editTextString) {
+	// final EventType new_type = new EventType();
+	// new_type.setOwner(ParseUser.getCurrentUser());
+	// new_type.setName(editTextString);
+	// new_type.saveEventually();
+	// mAdapter.loadObjects();
+	//
+	// Toast.makeText(
+	// getActivity(),
+	// getString(R.string.successfully_added_var,
+	// editTextString), Toast.LENGTH_SHORT)
+	// .show();
+	// }
+	// }, R.string.add_type);
+	//
+	// getChildFragmentManager().beginTransaction().addToBackStack(null)
+	// .addUnique(addDialog, "addUnique").commit();
+	//
+	// }
+
+}

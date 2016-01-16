@@ -1,0 +1,43 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/layout_form"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?android:attr/listPreferredItemHeight"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Form:"
+            android:textStyle="bold"
+            android:paddingRight="5dp"
+            android:paddingEnd="5dp" />
+
+        <EditText
+            android:id="@+id/edittext"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:isScrollContainer="true"
+            android:scrollbarStyle="insideInset"
+            android:scrollbars="vertical"
+            android:singleLine="false"
+            android:inputType="textCapSentences|textMultiLine"
+            android:gravity="top|start"
+            android:maxLines="10" />
+
+        <!--<com.gc.materialdesign.views.ButtonFlat-->
+            <!--android:id="@+id/submit_button"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/saveAsync"-->
+            <!--android:visibility="gone"/>-->
+
+    </LinearLayout>
+
+</merge>

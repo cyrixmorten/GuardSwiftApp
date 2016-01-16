@@ -1,0 +1,161 @@
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardview"
+    style="@style/CardView.Light"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    card_view:cardCornerRadius="@dimen/mini_padding"
+    card_view:cardElevation="@dimen/mini_padding"
+    card_view:cardUseCompatPadding="true">
+
+
+    <!--
+    android:layout_margin="5dp"
+    android:drawSelectorOnTop="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    card_view:contentPadding="5dp"
+    card_view:cardCornerRadius="4dp"
+    card_view:cardElevation="4dp"
+    card_view:cardBackgroundColor="@color/cardview_light_background"-->
+
+    <!--<RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >-->
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:id="@+id/content_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/task_state_arrived"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:singleLine="true"
+                android:text="@string/event_arrived"
+                app:bootstrapSize="lg" />
+
+
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/task_state_aborted"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:singleLine="true"
+                android:text="@string/event_aborted"
+                app:bootstrapSize="lg" />
+
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/task_state_finished"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:singleLine="true"
+                android:text="@string/event_finished"
+                app:bootstrapSize="lg" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/content_colorBorder_top"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:background="@color/bootstrap_brand_info" />
+
+        <LinearLayout
+            android:id="@+id/content_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/small_padding">
+
+
+            <include
+                layout="@layout/gs_view_client"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/taskTypeDesc"
+                style="@style/Base.TextAppearance.AppCompat.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:textStyle="bold" />
+
+            <include
+                layout="@layout/gs_view_distance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/content_footer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@drawable/divider_dark"
+            android:dividerPadding="0dp"
+            android:orientation="vertical"
+            android:showDividers="beginning|middle|end"
+            android:visibility="gone">
+
+
+            <Button
+                android:id="@+id/btn_write_report"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/write_report" />
+
+            <Button
+                android:id="@+id/btn_task_description"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/task_description" />
+
+            <Button
+                android:id="@+id/btn_client_info"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/client_contacts" />
+
+            <Button
+                android:id="@+id/btn_checkpoints"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/checkpoints" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/content_colorBorder_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:background="@color/bootstrap_brand_info" />
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
+

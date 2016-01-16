@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_arrived" android:title="Ankommet" android:icon="@android:drawable/ic_menu_help"/>
+    <item android:id="@+id/menu_aborted" android:title="Afbrudt" android:icon="@android:drawable/ic_menu_help"/>
+    <item android:id="@+id/menu_finish" android:title="Afsluttet" android:icon="@android:drawable/ic_menu_help"/>
+    <group android:id="@+id/menu_helpgroup">
+        <item android:id="@+id/menu_reset" android:title="Nulstil" android:icon="@android:drawable/ic_menu_help"/>
+        <!--<item android:id="@+id/menu_help" android:title="Hjælp" android:icon="@android:drawable/ic_menu_help"/>-->
+    </group>
+</menu>

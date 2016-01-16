@@ -1,0 +1,104 @@
+<com.guardswift.ui.view.CheckableFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?android:attr/listPreferredItemHeight"
+        android:orientation="vertical">
+
+        <ProgressBar
+            android:id="@+id/progress1"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:indeterminate="false"
+            android:max="100"
+            android:progressDrawable="@drawable/greenprogress" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <com.beardedhen.androidbootstrap.AwesomeTextView
+                android:id="@+id/qualityIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:layout_margin="10dp"
+                android:textSize="24sp"
+                app:bootstrapBrand="success"
+                app:fontAwesomeIcon="fa_warning"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+
+                <CheckedTextView
+                    android:id="@+id/item"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+                    android:clickable="false"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="6dip"
+                    android:paddingRight="6dip"
+                    android:text="Test"
+                    android:textAppearance="?android:attr/textAppearanceLarge" />
+
+                <LinearLayout
+                    android:id="@+id/layout_estimated"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:layout_below="@+id/item"
+                    android:layout_marginTop="-20dp"
+                    android:paddingBottom="10dp"
+                    android:paddingTop="10dp"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="6dip"
+                        android:text="@string/estimated_distance"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:visibility="gone"
+                        />
+
+                    <TextView
+                        android:id="@+id/tv_est_distance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="6dip"
+                        android:text="1.5454"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                         />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress2"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_alignParentBottom="true"
+            android:indeterminate="false"
+            android:max="100"
+            android:progressDrawable="@drawable/greenprogress" />
+    </LinearLayout>
+
+
+</com.guardswift.ui.view.CheckableFrameLayout>
+

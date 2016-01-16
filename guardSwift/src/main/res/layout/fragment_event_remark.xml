@@ -1,0 +1,153 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    tools:ctx="com.guardswift.ui.activity.MainActivity">
+
+    <!--<TextView-->
+        <!--android:id="@+id/header"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:gravity="center"-->
+        <!--android:padding="5dp"-->
+        <!--android:text="@string/remark"-->
+        <!--android:textAppearance="?android:attr/textAppearanceMedium"-->
+        <!--android:textColor="@android:color/holo_blue_dark"-->
+        <!--android:textStyle="bold" />-->
+
+<!--    <EditText
+        android:id="@+id/edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="45dp"
+        android:layout_marginTop="10dp"
+        android:hint="@string/remark"
+        android:inputType="textMultiLine" >
+
+        <requestFocus />
+    </EditText> -->
+
+    <MultiAutoCompleteTextView
+        android:id="@+id/edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/header"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="45dp"
+        android:layout_marginTop="10dp"
+        android:hint="@string/remark"
+        android:inputType="textMultiLine" >
+
+        <requestFocus />
+    </MultiAutoCompleteTextView>
+
+    <ImageView
+        android:id="@+id/btn_clear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="clear remark"
+        android:layout_alignBottom="@+id/edittext"
+        android:layout_alignParentRight="true"
+        android:paddingRight="5dp"
+        android:src="@drawable/ic_action_cancel" />
+
+    <CheckedTextView
+        android:id="@+id/check_save_to_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/edittext"
+        android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+        android:checked="true"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical|right"
+        android:text="@string/save_to_list"
+        android:visibility="invisible" />
+
+    <!--<com.beardedhen.androidbootstrap.BootstrapButton
+        android:id="@+id/btn_accept"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/check_save_to_list"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:text="@string/approve"
+        bootstrapbutton:bb_gradient="true"
+        bootstrapbutton:bb_roundedCorners="true"
+        bootstrapbutton:bb_type="info"
+        android:visibility="invisible" />-->
+
+    <ListView
+        android:id="@+id/list_previous_remarks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/edittext"
+        android:paddingTop="5dp"
+        android:choiceMode="singleChoice"
+        android:dividerHeight="1dp"
+        android:listSelector="@drawable/gs_selector_blue_light"/>
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_below="@+id/check_save_to_list"
+        android:layout_centerHorizontal="true" />
+
+    <!--
+    <LinearLayout
+        android:id="@+id/layout_previous_remarks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_accept"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <TextView
+            android:id="@+id/previous_remarks_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="10dp"
+            android:text="@string/previous_remarks"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/black"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_client_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="@android:color/black" />
+
+        <ListView
+            android:id="@+id/list_previous_remarks"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingTop="5dp"
+            android:choiceMode="singleChoice"
+            android:divider="@color/Grey"
+            android:dividerHeight="1dp"
+            android:listSelector="@drawable/gs_selector_blue_light"/>
+
+        <TextView
+            android:id="@+id/list_empty_previous_remarks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="@string/no_previous_remarks"
+            android:textColor="@android:color/holo_blue_dark" />
+    </LinearLayout>-->
+
+
+
+</RelativeLayout>
