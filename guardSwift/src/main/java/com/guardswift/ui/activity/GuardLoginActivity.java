@@ -12,7 +12,6 @@ import android.os.AsyncTask.Status;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
@@ -42,17 +41,12 @@ import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.AlarmGroup;
 import com.guardswift.persistence.parse.data.Guard;
-import com.guardswift.persistence.parse.execution.alarm.Alarm;
 import com.guardswift.util.Device;
 import com.guardswift.util.ToastHelper;
-import com.parse.DeleteCallback;
-import com.parse.FindCallback;
 import com.parse.ParseException;
-import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 import com.squareup.picasso.Picasso;
 
 import java.io.BufferedReader;
@@ -75,16 +69,12 @@ import bolts.Task;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import cn.pedant.SweetAlert.SweetAlertDialog;
 import de.greenrobot.event.EventBus;
 
-//import com.guardswift.modules.LocationsModule;
 
 public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     private static final String TAG = GuardLoginActivity.class.getSimpleName();
-
-    public static final String INTENT_EXTRA_LOGOUT = "guard_logout";
 
     public static final String UPDATE_VERSIONCHECK_URL = "http://www.guardswift.com/downloads/latest-versioncode.txt";
     public static final String UPDATE_DOWNLOAD_URL = "http://www.guardswift.com/downloads/guardswift.apk";
@@ -160,229 +150,22 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         setContentView(R.layout.activity_guard_login);
         ButterKnife.bind(this);
 
-//        mSignInButton.setText("Login");
-
-        Crashlytics.start(this);
 
         hasGooglePlayServices();
 
-        unpinAllParseObjects();
-
-        // Load banner
-        String logo = ParseUser.getCurrentUser().getString("logoUrl");
-        Picasso.with(context).load(logo).into(bannerImageView);
-
         version.setText(device.getVersionName());
+        loadBanner();
 
         mGuardIdView.requestFocus();
-
         if (!BuildConfig.DEBUG) {
             development_badge.setVisibility(View.INVISIBLE);
         }
 
     }
 
-
-    //    private void removeGeofences() {
-//        Log.d(TAG, "removeGeofences");
-//        startService(new Intent(this, RegisterGeofencesIntentService.class).setAction(RegisterGeofencesIntentService.REMOVE));
-//    }
-//
-//    public void onEventMainThread(GeofenceCompleteEvent ev) {
-//        if (ev.action.equals(RegisterGeofencesIntentService.REMOVE)) {
-//            unpinAllParseObjects();
-//        }
-//    }
-
-    private void unpinAllParseObjects() {
-//        final long now = System.currentTimeMillis();
-
-        ParseObject.unpinAllInBackground(ParseObject.DEFAULT_PIN);
-        for (final ExtendedParseObject parseObject : parseObjectFactory.getAll()) {
-            ParseObject.unpinAllInBackground(parseObject.getPin(), new DeleteCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e != null) {
-                        Log.e(TAG, e.getMessage(), e);
-                        return;
-                    }
-
-                    Log.d(TAG, "Done unpinning " + parseObject.getPin());
-                }
-            });
-
-        }
-    }
-
-//    @OnCheckedChanged(R.id.switch_receive_alarms)
-//    public void switchReceiveAlarms(Switch switchReceiveAlarms) {
-//        parseModule.getPreferences().setNotifyAlarmsWhileNotLoggedIn(switchReceiveAlarms.isChecked());
-//    }
-
-
-
-
-    private boolean hasGooglePlayServices() {
-        int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
-        if (result != ConnectionResult.SUCCESS) {
-            Crashlytics.log("GooglePlayServices: " + result);
-            GooglePlayServicesUtil.showErrorDialogFragment(result, this, 10);
-            return false;
-        }
-        return true;
-    }
-
-
-
-    private Task<Void> updateAllClassesAsync() {
-
-        final AtomicInteger updateClassProgress = new AtomicInteger(0);
-        final AtomicInteger updateClassTotal = new AtomicInteger(0);
-
-        // Prepare dialog showing progress
-        final MaterialDialog updateDialog = new MaterialDialog.Builder(this)
-                .title(R.string.working)
-                .content(R.string.please_wait)
-                .progress(false, 0, true)
-                .show();
-
-        Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
-            @Override
-            public List<ParseObject> then(Task<List<ParseObject>> task) throws Exception {
-                int currentProgress = updateClassProgress.incrementAndGet();
-                int outOfTotal = updateClassTotal.get();
-
-                int percentProgress = (currentProgress/outOfTotal)*100;
-
-                if (updateDialog != null) {
-                    updateDialog.setMaxProgress(outOfTotal);
-                    updateDialog.setProgress(currentProgress);
-                }
-
-                Log.d(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
-
-                return null;
-            }
-        };
-
-        final Task<Void>.TaskCompletionSource successful = Task.create();
-
-        Task<List<ParseObject>> alarmGroup = new AlarmGroup().updateAllAsync();
-
-        Task<List<ParseObject>> alarm = parseObjectFactory
-                .getAlarm().updateAllAsync();
-
-        Task<List<ParseObject>> districtWatchClient = parseObjectFactory
-                .getDistrictWatchClient().updateAllAsync();
-        // Includes circuit and client
-        Task<List<ParseObject>> circuitUnit = parseObjectFactory
-                .getCircuitUnit().updateAllAsync();
-
-        // Removed in version 2.0.0
-//        Task<List<ParseObject>> checklistStartTask = parseObjectFactory
-//                .getChecklistCircuitStarting().updateAllAsync();
-//        Task<List<ParseObject>> checklistEndTask = parseObjectFactory
-//                .getChecklistCircuitEnding().updateAllAsync();
-
-        Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted()
-                .updateAllAsync();
-        Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory
-                .getDistrictWatchStarted().updateAllAsync();
-
-        Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType()
-                .updateAllAsync();
-
-
-        ArrayList<Task<List<ParseObject>>> tasks = new ArrayList<Task<List<ParseObject>>>();
-        tasks.add(alarmGroup.onSuccess(updateClassSuccess));
-        tasks.add(alarm.onSuccess(updateClassSuccess));
-        tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
-        tasks.add(circuitUnit.onSuccess(updateClassSuccess));
-//        tasks.addUnique(checklistStartTask);
-//        tasks.addUnique(checklistEndTask);
-        tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
-        tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
-        tasks.add(eventTypes.onSuccess(updateClassSuccess));
-
-        Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
-
-            @Override
-            public Void then(Task<Void> result) throws Exception {
-                if (result.isCancelled() || result.isFaulted()) {
-                    successful.setError(result.getError());
-                } else {
-                    successful.setResult(null);
-                }
-
-                if (updateDialog!= null) {
-                    updateDialog.dismiss();
-                }
-
-                return null;
-            }
-        });
-
-        updateClassTotal.set(tasks.size());
-
-        return successful.getTask();
-    }
-
-    @Override
-    public void onBackPressed() {
-//        if (Guard.Recent.getSelected() != null) {
-//            showProgress(false);
-//        } else {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_HOME);
-            // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            super.onBackPressed();
-//        }
-    }
-
-//    public void onEventMainThread(DataSyncEvent ev) {
-//        String message = getString(R.string.login_progress_synchronizing,
-//                ev.missingUpdates, ev.totalUpdates);
-//        mLoginStatusMessageView.setText(message);
-//    }
-
-    @Override
-    protected void onResume() {
-        new FetchLatestVersion(this).execute();
-
-        if (mAlarmQueryAdapter != null)
-            mAlarmQueryAdapter.loadObjects();
-
-        super.onResume();
-    }
-
-    @Override
-    protected void onPostResume() {
-
-        getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
-        if (!device.hasGpsAndNetworkEnabled()) {
-            showMissingLocationsDialog();
-        }
-
-        super.onPostResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (mDownloadTask != null) {
-            MaterialDialog dialog = mDownloadTask.working_dialog;
-            if (dialog != null) {
-                dialog.cancel();
-            }
-        }
-        super.onDestroy();
+    private void loadBanner() {
+        String logo = ParseUser.getCurrentUser().getString("logoUrl");
+        Picasso.with(context).load(logo).into(bannerImageView);
     }
 
     @OnClick(R.id.sign_in_button)
@@ -471,10 +254,8 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                 Log.d(TAG, "loginGuard " + guardId);
 
                 for (final Guard guard : guards) {
-
-//                    Guard guard = Guard.Recent.getSelected(parsePreferences);
                     if (guard.getGuardId() == guardId) {
-                        updateAllClassesAsync().continueWith(new Continuation<Void, Void>() {
+                        bootstrapParseObjectsLocally().continueWith(new Continuation<Void, Void>() {
 
                             @Override
                             public Void then(Task<Void> result) throws Exception {
@@ -484,12 +265,12 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                                 }
 
                                 parseModule.login(guard);
-
-//                checkForUnassignedAlarms(guard);
+                                showProgress(false);
 
                                 return null;
                             }
                         });
+
                         return;
                     }
                 }
@@ -508,98 +289,141 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
 
 
+    private boolean hasGooglePlayServices() {
+        int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
+        if (result != ConnectionResult.SUCCESS) {
+            Crashlytics.log("GooglePlayServices: " + result);
+            GooglePlayServicesUtil.showErrorDialogFragment(result, this, 10);
+            return false;
+        }
+        return true;
+    }
 
-    private void checkForUnassignedAlarms(final Guard guard) {
-        new Alarm.QueryBuilder(false).whereNotAssigned().whereNotIgnoredBy(guard).build().findInBackground(new FindCallback<Alarm>() {
+
+
+    private Task<Void> bootstrapParseObjectsLocally() {
+
+        final AtomicInteger updateClassProgress = new AtomicInteger(0);
+        final AtomicInteger updateClassTotal = new AtomicInteger(0);
+
+        // Prepare dialog showing progress
+        final MaterialDialog updateDialog = new MaterialDialog.Builder(this)
+                .title(R.string.working)
+                .content(R.string.please_wait)
+                .progress(false, 0, true)
+                .show();
+
+        Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
             @Override
-            public void done(final List<Alarm> alarms, ParseException e) {
-                if (e != null) {
-                    handleFailedLogin("checkForUnassignedAlarms query", e);
-                    return;
+            public List<ParseObject> then(Task<List<ParseObject>> task) throws Exception {
+                int currentProgress = updateClassProgress.incrementAndGet();
+                int outOfTotal = updateClassTotal.get();
+
+                int percentProgress = (currentProgress/outOfTotal)*100;
+
+                if (updateDialog != null) {
+                    updateDialog.setMaxProgress(outOfTotal);
+                    updateDialog.setProgress(currentProgress);
                 }
 
-                if (!alarms.isEmpty()) {
-                    for (Alarm alarm: alarms) {
-                        alarm.setIgnored(guard);
-                    }
-                    ParseObject.pinAllInBackground(Alarm.PIN, alarms, new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            ParseObject.saveAllInBackground(alarms, new SaveCallback() {
-                                @Override
-                                public void done(ParseException e) {
-                                    if (e != null) {
-                                        handleFailedLogin("checkForUnassignedAlarms pin", e);
-                                    }
+                Log.d(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
 
-                                    new SweetAlertDialog(GuardLoginActivity.this, SweetAlertDialog.WARNING_TYPE)
-                                            .setTitleText(getString(R.string.title_alarms))
-                                            .setContentText(getString(R.string.unassigned_alarms_msg, alarms.size()))
-                                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                                @Override
-                                                public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                                    new Handler().postDelayed(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            if (!isFinishing()) {
-                                                                enterGuardSwift(guard);
-                                                            }
-                                                        }
-                                                    }, 1000);
-                                                    sweetAlertDialog.dismissWithAnimation();
+                return null;
+            }
+        };
 
-                                                }
-                                            })
-                                            .show();
 
-                                }
-                            });
-                        }
-                    });
 
-                } else {
-                    enterGuardSwift(guard);
+        Task<List<ParseObject>> districtWatchClient = parseObjectFactory
+                .getDistrictWatchClient().updateAllAsync();
+        Task<List<ParseObject>> circuitUnit = parseObjectFactory
+                .getCircuitUnit().updateAllAsync();
+        Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted()
+                .updateAllAsync();
+        Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory
+                .getDistrictWatchStarted().updateAllAsync();
+        Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType()
+                .updateAllAsync();
+
+
+        ArrayList<Task<List<ParseObject>>> tasks = new ArrayList<>();
+        tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
+        tasks.add(circuitUnit.onSuccess(updateClassSuccess));
+        tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
+        tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
+        tasks.add(eventTypes.onSuccess(updateClassSuccess));
+
+        updateClassTotal.set(tasks.size());
+
+
+        return Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
+            @Override
+            public Void then(Task<Void> result) throws Exception {
+                // no matter what happens e.g. success/error, the dialog should be dismissed
+                if (updateDialog!= null) {
+                    updateDialog.dismiss();
                 }
-
+                return null;
             }
         });
     }
 
-    private void enterGuardSwift(Guard guard) {
-        Toast.makeText(GuardLoginActivity.this,
-                getString(R.string.toast_welcome, guard.getName()),
-                Toast.LENGTH_LONG).show();
-
-
-//        Intent intent = new Intent(GuardLoginActivity.this, MainActivity.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
-
-//        Intent intent = new Intent(GuardLoginActivity.this,
-//                ChecklistStartActivity.class);
-//        startActivity(intent);
-
-        this.finish();
-
+    @Override
+    public void onBackPressed() {
+//        if (Guard.Recent.getSelected() != null) {
+//            showProgress(false);
+//        } else {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            super.onBackPressed();
+//        }
     }
 
-    private void incrementAppVersionIfNeeded() {
-        ParseInstallation installation = ParseInstallation
-                .getCurrentInstallation();
+//    public void onEventMainThread(DataSyncEvent ev) {
+//        String message = getString(R.string.login_progress_synchronizing,
+//                ev.missingUpdates, ev.totalUpdates);
+//        mLoginStatusMessageView.setText(message);
+//    }
 
-        Log.d(TAG, "incrementAppVersionIfNeeded");
+    @Override
+    protected void onResume() {
+        new FetchLatestVersion(this).execute();
 
-        String deviceVersion = device.getVersionName();
-        String installationVersion = installation.getString("appVersion");
+        if (mAlarmQueryAdapter != null)
+            mAlarmQueryAdapter.loadObjects();
 
-        Log.d(TAG, deviceVersion);
-        Log.d(TAG, installationVersion);
+        super.onResume();
+    }
 
-        if (!deviceVersion.equals(installationVersion)) {
-            Log.d(TAG, "Incrementing appVersion!");
-            installation.put("appVersion", deviceVersion);
-            installation.saveInBackground();
+    @Override
+    protected void onPostResume() {
+
+        getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        if (!device.hasGpsAndNetworkEnabled()) {
+            showMissingLocationsDialog();
         }
+
+        super.onPostResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (mDownloadTask != null) {
+            MaterialDialog dialog = mDownloadTask.working_dialog;
+            if (dialog != null) {
+                dialog.cancel();
+            }
+        }
+        super.onDestroy();
     }
 
     /**
@@ -866,218 +690,5 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                 ).show();
     }
 
-
-/*
-    ALARM GROUP SETTINGS REMOVED
- */
-//    private void loadUserSettings() {
-//        ParseUser.getCurrentUser().fetchInBackground().onSuccess(new Continuation<ParseObject, Void>() {
-//            @Override
-//            public Void then(Task<ParseObject> task) throws Exception {
-//                populateAlarmGroupSpinners();
-//                return null;
-//            }
-//        });
-//
-//    }
-//
-//
-//    private List<AlarmGroup> mAlarmGroups = Lists.newArrayList();
-//
-//    private void populateAlarmGroupSpinners() {
-//
-//        // If broadcasting alarms is true there is no need to select an alarm group
-//        if (ParseUser.getCurrentUser().getBoolean("broadcast_alarms"))
-//            return;
-//
-////        final ParseQueryAdapter<ParseObject> adapter = new ParseQueryAdapter<ParseObject>(this, "AlarmGroup");
-//        mAlarmQueryAdapter = new SimpleParseAdapter<AlarmGroup>(this, AlarmGroup.name, new ParseQueryAdapter.QueryFactory<AlarmGroup>() {
-//            @Override
-//            public ParseQuery<AlarmGroup> create() {
-//                return AlarmGroup.getQueryBuilder(false).sortByName().build();
-//            }
-//        });
-//        mAlarmQueryAdapter.addOnQueryLoadListener(new ParseQueryAdapter.OnQueryLoadListener<AlarmGroup>() {
-//            @Override
-//            public void onLoading() {
-//            }
-//
-//            @Override
-//            public void onLoaded(List<AlarmGroup> list, Exception e) {
-//
-//                if (list != null && !list.isEmpty() && mLayoutAlarmGroup != null) {
-//
-//                    mAlarmGroups = list;
-//
-//                    mLayoutAlarmGroup.setVisibility(View.VISIBLE);
-//
-//                    // locate preselected signed alarm group
-//                    ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
-//                    if (parseInstallation.has("alarmGroupName")) {
-//                        String preselectedGroup = parseInstallation.getString("alarmGroupName");
-//                        for (int i = 0; i < list.size(); i++) {
-//
-//                            AlarmGroup group = list.get(i);
-//                            String groupName = group.getName();
-//                            if (preselectedGroup.equals(groupName)) {
-//                                mAlarmGroupSigned.setSelection(i);
-//                            }
-//                        }
-//                    }
-//
-//                    // locate preselected responsible alarm group
-//                    for (int i = 0; i < list.size(); i++) {
-//                        boolean isResponsible = list.get(i).isResponsible();
-//                        if (isResponsible) {
-//                            mAlarmGroupResponsible.setSelection(i);
-//                        }
-//                    }
-//
-//
-//
-//
-//                }
-//
-//            }
-//        });
-//        mAlarmQueryAdapter.setTextKey(AlarmGroup.name);
-//
-//        mAlarmGroupSigned.setAdapter(mAlarmQueryAdapter);
-//        mAlarmGroupSigned.setOnItemSelectedListener(new AlarmGroupSelectedListener(mAlarmQueryAdapter));
-//
-//        mAlarmGroupResponsible.setAdapter(mAlarmQueryAdapter);
-//        mAlarmGroupResponsible.setOnItemSelectedListener(new AlarmResponsibleSelectedListener(mAlarmQueryAdapter));
-//    }
-//
-//    private void updateAlarmResponsibility(AlarmGroup selected) {
-//        if (selected.isResponsible()) {
-//            parsePreferences.setAlarmResponsible(true);
-//            Toast.makeText(this, "Denne enhed er nu ansvarlig for indgående alarmer", Toast.LENGTH_LONG).show();
-//        } else {
-//            parsePreferences.setAlarmResponsible(false);
-//        }
-//    }
-//
-//    private boolean initialResponsibleSelection = true;
-//    private class AlarmResponsibleSelectedListener implements AdapterView.OnItemSelectedListener {
-//
-//        private final ParseQueryAdapter<AlarmGroup> adapter;
-//
-//        public AlarmResponsibleSelectedListener(ParseQueryAdapter<AlarmGroup> adapter) {
-//
-//            this.adapter = adapter;
-//        }
-//
-//        @Override
-//        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//
-//            // ignore initial item selection
-//            if (initialResponsibleSelection) {
-//                initialResponsibleSelection = false;
-//                return;
-//            }
-//
-//            AlarmGroup alarmGroup = adapter.getItem(position);
-//
-//            // ignore if already marked as responsible
-//            if (alarmGroup.isResponsible())
-//                return;
-//
-//            Set<AlarmGroup> modifiedGroups = Sets.newHashSet();
-//            for (AlarmGroup group: mAlarmGroups) {
-//                if (group.isResponsible()) {
-//                    group.setResponsible(false);
-//                    modifiedGroups.addUnique(group);
-//                }
-//            }
-//
-//            alarmGroup.setResponsible(true);
-//            modifiedGroups.addUnique(alarmGroup);
-//
-//            final MaterialDialog dialog = new MaterialDialog.Builder(GuardLoginActivity.this)
-//                    .content(getString(R.string.working))
-//                    .progress(true, 0)
-//                    .show();
-////                Toast.makeText(GuardLoginActivity.this, "Group selected: " + adapter.getItem(position).get("name"), Toast.LENGTH_SHORT).show();
-//
-//
-//            ParseObject.saveAllInBackground(Lists.newArrayList(modifiedGroups), new SaveCallback() {
-//                @Override
-//                public void done(ParseException e) {
-//                    if (e != null) {
-//                        new HandleException(GuardLoginActivity.this, TAG, "saveAsync modified groups", e);
-//                    }
-//
-//                    dialog.dismiss();
-//                }
-//            });
-//        }
-//
-//        @Override
-//        public void onNothingSelected(AdapterView<?> parent) {
-//
-//        }
-//    }
-//
-//    private class AlarmGroupSelectedListener implements AdapterView.OnItemSelectedListener {
-//
-//        private final ParseQueryAdapter<AlarmGroup> adapter;
-//
-//        public AlarmGroupSelectedListener(ParseQueryAdapter<AlarmGroup> adapter) {
-//
-//            this.adapter = adapter;
-//        }
-//
-//        @Override
-//        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//
-//            // ignore initial item selection
-////            if (initialGroupSelection) {
-////                initialGroupSelection = false;
-////                return;
-////            }
-//
-//            ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
-//            final AlarmGroup alarmGroup = adapter.getItem(position);
-//            String groupName = alarmGroup.getName();
-//
-//            // test if this is the currently selected group
-//            if (parseInstallation.has("alarmGroupName")) {
-//                String preselectedGroup = parseInstallation.getString("alarmGroupName");
-//                Log.d(TAG, "Preselected group: " + preselectedGroup);
-//                Log.d(TAG, "Group name: " + groupName);
-//                if (preselectedGroup.equals(groupName)) {
-//                    return;
-//                }
-//            }
-//
-//            final MaterialDialog dialog = new MaterialDialog.Builder(GuardLoginActivity.this)
-//                    .content(getString(R.string.working))
-//                    .progress(true, 0)
-//                    .show();
-////                Toast.makeText(GuardLoginActivity.this, "Group selected: " + adapter.getItem(position).get("name"), Toast.LENGTH_SHORT).show();
-//
-//
-//            parseInstallation.put("alarmGroup", alarmGroup);
-//            parseInstallation.put("alarmGroupName", groupName);
-//            parseInstallation.saveInBackground(new SaveCallback() {
-//                @Override
-//                public void done(ParseException e) {
-//                    if (e != null) {
-//                        new HandleException(GuardLoginActivity.this, TAG, "saveAsync parseInstallation", e);
-//                    }
-//
-//                    updateAlarmResponsibility(alarmGroup);
-//
-//                    dialog.dismiss();
-//                }
-//            });
-//        }
-//
-//        @Override
-//        public void onNothingSelected(AdapterView<?> parent) {
-//
-//        }
-//    }
 
 }

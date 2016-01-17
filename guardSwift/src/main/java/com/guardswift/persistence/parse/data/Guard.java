@@ -146,7 +146,7 @@ public class Guard extends ExtendedParseObject implements Positioned {
         return getParseObject(owner);
     }
 
-    public void setLastLogin(Date lastLogin) {
+    private void setLastLogin(Date lastLogin) {
         put(Guard.lastLogin, lastLogin);
     }
 
@@ -154,7 +154,7 @@ public class Guard extends ExtendedParseObject implements Positioned {
         return getDate(Guard.lastLogin);
     }
 
-    public void setLastLogout(Date lastLogout) {
+    private void setLastLogout(Date lastLogout) {
         put(Guard.lastLogout, lastLogout);
     }
 
@@ -186,6 +186,11 @@ public class Guard extends ExtendedParseObject implements Positioned {
     }
 
     public void setOnline(boolean online) {
+        if (online) {
+            setLastLogin(new Date());
+        } else {
+            setLastLogout(new Date());
+        }
         put(isOnline, online);
     }
 

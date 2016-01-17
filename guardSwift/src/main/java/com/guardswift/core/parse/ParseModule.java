@@ -3,18 +3,27 @@ package com.guardswift.core.parse;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.util.Log;
 
+import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule.ForApplication;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.GSTasksCache;
+import com.guardswift.persistence.parse.ExtendedParseObject;
+import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
+import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.activity.MainActivity;
+import com.parse.GetCallback;
+import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ProgressCallback;
 import com.parse.SaveCallback;
@@ -22,10 +31,14 @@ import com.parse.SaveCallback;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import bolts.Continuation;
+import bolts.Task;
 
 @Singleton
 public class ParseModule {
@@ -59,7 +72,9 @@ public class ParseModule {
 
 
     public void login(Guard guard) {
-//        Guard.Recent.setSelected(guard);
+		guard.setOnline(true);
+		guard.pinThenSaveEventually();
+
 		guardCache.setLoggedIn(guard);
 
         new EventLog.Builder(context)
@@ -69,42 +84,47 @@ public class ParseModule {
 		GuardSwiftApplication.getInstance().startServices();
 
 		Intent intent = new Intent(context, MainActivity.class);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
     }
 
 
     public void logout(final SaveCallback saveCallback, ProgressCallback progressCallback) {
 
-//		Guard guard = guardCache.getLoggedIn();
-//		if (guard != null) {
-//			LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
-//				@Override
-//				public Object then(Task<String> task) throws Exception {
-//					if (!task.isFaulted()) {
-//						new EventLog.Builder(context)
-//								.event(context.getString(R.string.logout))
-//								.locationTrackerUrl(task.getResult())
-//								.eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new SaveCallback() {
-//							@Override
-//							public void done(ParseException e) {
-//								clearData();
-//							}
-//						});
-//						GuardLoginActivity.start(context);
-//						saveCallback.done(null);
-//
-//					} else {
-//						saveCallback.done(new ParseException(task.getError()));
-//					}
-//					return null;
-//				}
-//			});
-//		} else {
-			GuardLoginActivity.start(context);
+		Guard guard = guardCache.getLoggedIn();
+		if (guard != null) {
+			guard.setOnline(false);
+			guard.pinThenSaveEventually();
+
+			LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
+				@Override
+				public Object then(Task<String> task) throws Exception {
+					if (task.isFaulted()) {
+						new HandleException(context, TAG, "upload guard locations", task.getError());
+					}
+					else {
+						Log.w(TAG, "Location url: " + task.getResult());
+						new EventLog.Builder(context)
+								.event(context.getString(R.string.logout))
+								.locationTrackerUrl(task.getResult())
+								.eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
+							@Override
+							public void done(EventLog object, ParseException e) {
+								clearData();
+							}
+						});
+					}
+
+					saveCallback.done(null);
+					GuardLoginActivity.start(context);
+
+					return null;
+				}
+			});
+		} else {
 			saveCallback.done(null);
+			GuardLoginActivity.start(context);
 			clearData();
-//		}
+		}
 
     }
 
@@ -112,12 +132,28 @@ public class ParseModule {
 
 		guardCache.removeLoggedIn();
 		tasksCache.clearGeofencedTasks();
+		GuardSwiftApplication.getInstance().getCacheFactory().getCircuitStartedCache().clear();
 
 		GuardSwiftApplication.getInstance().stopServices();
 
-//		GuardSwiftApplication.getInstance().getCacheFactory().clearAll();
+
+		unpinAllParseObjects();
     }
 
+	private void unpinAllParseObjects() {
+
+		List<Task<Void>> unpinClassNamed = Lists.newArrayList();
+		for (ExtendedParseObject parseObject : new ParseObjectFactory().getAll()) {
+			unpinClassNamed.add(ParseObject.unpinAllInBackground(parseObject.getPin()));
+		}
+
+		Task.whenAll(unpinClassNamed).continueWith(new Continuation<Void, Object>() {
+			@Override
+			public Object then(Task<Void> task) throws Exception {
+				return ParseObject.unpinAllInBackground(ParseObject.DEFAULT_PIN);
+			}
+		});
+	}
 //    private void reCreateRecentObjects() {
 //        Guard.Recent.getSelected(preferences);
 //        Circuit.Recent.getSelected(preferences);

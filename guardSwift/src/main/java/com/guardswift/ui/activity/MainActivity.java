@@ -9,8 +9,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.crashlytics.android.Crashlytics;
-import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
@@ -61,11 +59,6 @@ public class MainActivity extends InjectingAppCompatActivity {
 
         setContentView(R.layout.gs_activity_main);
         ButterKnife.bind(this);
-
-        if (BuildConfig.USE_CRASHLYTICS) {
-            Crashlytics.start(this);
-        }
-
 
         setSupportActionBar(toolbar);
 

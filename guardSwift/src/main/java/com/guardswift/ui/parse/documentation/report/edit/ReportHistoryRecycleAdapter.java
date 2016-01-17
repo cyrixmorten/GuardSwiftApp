@@ -17,9 +17,9 @@ import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.view.card.EventLogCard;
 import com.guardswift.util.ToastHelper;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQueryAdapter;
-import com.parse.SaveCallback;
 
 import java.util.List;
 import java.util.Map;
@@ -88,17 +88,16 @@ public class ReportHistoryRecycleAdapter extends ParseRecyclerQueryAdapter<Event
         holder.eventLogCard.onCopyToReportClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final EventLog copiedEvent = new EventLog.Builder(context).from(eventLog, task).build();
                 ToastHelper.toast(context, context.getString(R.string.copying_to_report, eventLog.getEvent()));
-                copiedEvent.pinThenSaveEventually(new SaveCallback() {
+                new EventLog.Builder(context).from(eventLog, task).saveAsync(new GetCallback<EventLog>() {
                     @Override
-                    public void done(ParseException e) {
+                    public void done(final EventLog copiedEventLog, ParseException e) {
                         Snackbar snackbar = Snackbar
-                                .make(snackBar, context.getString(R.string.entity_copied, eventLog.getEvent()), Snackbar.LENGTH_LONG);
+                                .make(snackBar, context.getString(R.string.entity_copied, copiedEventLog.getEvent()), Snackbar.LENGTH_LONG);
                         snackbar.setAction(R.string.undo, new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                copiedEvent.deleteEventually();
+                                copiedEventLog.deleteEventually();
                             }
                         });
                         snackbar.show();

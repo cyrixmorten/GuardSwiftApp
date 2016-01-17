@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.guardswift.core.documentation.eventlog.context.LogStrategyFactory;
 import com.guardswift.core.documentation.eventlog.context.TaskLogStrategyFactory;
+import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.persistence.parse.execution.BaseTask;
@@ -27,12 +28,26 @@ public class StandardTaskReportingStrategy<T extends BaseTask> implements TaskRe
         this.task = task;
     }
 
-    private Task<Report> prepareReport(final Context context) {
-        return Report.getQueryBuilder(true).matching(task).build().getFirstInBackground().continueWithTask(new Continuation<Report, Task<Report>>() {
+    private Task<Report> prepareReport(final Context context, boolean queryOnline) {
+        final boolean useLocalDatastore = !queryOnline;
+        return Report.getQueryBuilder(useLocalDatastore).matching(task).build().getFirstInBackground().continueWithTask(new Continuation<Report, Task<Report>>() {
             @Override
             public Task<Report> then(Task<Report> reportTask) throws Exception {
+                if (reportTask.isFaulted()) {
+                    Exception error = reportTask.getError();
+                    if (error instanceof ParseException && ((ParseException) error).getCode() != ParseException.OBJECT_NOT_FOUND) {
+                        // it is expected that new reports are not found, any other errors, however, are reported
+                        new HandleException(context, TAG, "Prepare standard report", reportTask.getError());
+                        return null;
+                    } else {
+                        if (useLocalDatastore) {
+                            Log.w(TAG, "Report not found locally - attempt online");
+                            return prepareReport(context, true);
+                        }
+                    }
+                }
                 Report report = reportTask.getResult();
-                if (reportTask.isFaulted() || report == null) {
+                if (report == null) {
                     // Report not found
                     Log.w(TAG, "No report found - creating new for " + task.getClient().getName());
                     report = Report.create(new LogStrategyFactory(context), new TaskLogStrategyFactory(), task);
@@ -45,7 +60,7 @@ public class StandardTaskReportingStrategy<T extends BaseTask> implements TaskRe
     @Override
     public void addUnique(final Context context, final EventLog eventLog, final SaveCallback saveCallback) {
         Log.w(TAG, "Adding eventlog to report");
-        prepareReport(context).onSuccess(new Continuation<Report, Object>() {
+        prepareReport(context, false).onSuccess(new Continuation<Report, Object>() {
             @Override
             public Object then(Task<Report> reportTask) throws Exception {
                 // Report found or created
@@ -76,7 +91,7 @@ public class StandardTaskReportingStrategy<T extends BaseTask> implements TaskRe
 
     @Override
     public void remove(Context context, final EventLog eventLog, final SaveCallback saveCallback) {
-        prepareReport(context).onSuccess(new Continuation<Report, Object>() {
+        prepareReport(context, false).onSuccess(new Continuation<Report, Object>() {
             @Override
             public Object then(Task<Report> reportTask) throws Exception {
                 // Report found or created

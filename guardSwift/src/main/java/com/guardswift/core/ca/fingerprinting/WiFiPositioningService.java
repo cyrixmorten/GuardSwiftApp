@@ -156,8 +156,22 @@ public class WiFiPositioningService extends InjectingService implements WiFiPosi
     public static void start(Context context) {
         CircuitUnitCache tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getCircuitUnitCache();
         if (!tasksCache.getArrived().isEmpty()) {
-            Log.d(TAG, "Starting WiFi positioning");
-            context.startService(new Intent(context, WiFiPositioningService.class));
+            Log.d(TAG, "Starting WiFi positioning - arrived at tasks " + tasksCache.getArrived().size());
+            boolean hasCheckpoints = false;
+            for (GSTask task: tasksCache.getArrived()) {
+                boolean clientHasCheckpoints = task.getClient().hasCheckPoints();
+                boolean taskIsRegularType = task.getTaskType() == GSTask.TASK_TYPE.REGULAR;
+                Log.d(TAG, "Arrived at: " + task.getClientName() + " isRegular: " + taskIsRegularType + " hasCheckpoints: " + clientHasCheckpoints);
+                if (taskIsRegularType && clientHasCheckpoints) {
+                    hasCheckpoints = true;
+                }
+            }
+            if (hasCheckpoints) {
+                Log.d(TAG, "Starting WiFi positioning");
+                context.startService(new Intent(context, WiFiPositioningService.class));
+            } else {
+                Log.d(TAG, "Starting aborted - no checkpoints");
+            }
         } else {
             Log.d(TAG, "Starting aborted - not arrived at any tasks");
         }

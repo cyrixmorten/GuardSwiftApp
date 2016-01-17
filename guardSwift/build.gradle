@@ -4,22 +4,23 @@ buildscript {
         maven {
             url 'https://maven.parse.com/repo'
         }
-        maven { url 'http://download.crashlytics.com/maven' }
         flatDir {
             dirs 'aars' //this way we can findFrom the .aar file in libs folder
         }
+        maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
         classpath 'com.parse.tools:gradle:1.1'
-        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.16.0'
+//        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.16.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
+        classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 
 apply plugin: 'com.parse'
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
 apply plugin: 'com.neenbedankt.android-apt'
-apply plugin: 'crashlytics'
 
 android {
     compileSdkVersion 23
@@ -30,7 +31,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 23
         versionCode 302
-        versionName "3.0.2 beta"
+        versionName "3.0.3 beta"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -43,15 +44,15 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
-            buildConfigField "boolean", "AUTOMATION_ENABLED", "false"
+//            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
+//            buildConfigField "boolean", "AUTOMATION_ENABLED", "false"
 //            ext.enableCrashlytics = false
 //            minifyEnabled true
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', 'dagger-proguard-keepnames.cfg'
         }
         release {
-            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
-            buildConfigField "boolean", "AUTOMATION_ENABLED", "false"
+//            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
+//            buildConfigField "boolean", "AUTOMATION_ENABLED", "false"
 //            ext.enableCrashlytics = true
             // enable after Dagger 2 migration
 //            minifyEnabled true
@@ -80,11 +81,11 @@ parse {
 repositories {
     jcenter()
     mavenCentral()
-    maven { url 'http://download.crashlytics.com/maven' }
     maven { url 'https://dl.bintray.com/drummer-aidan/maven' }
     maven { url "https://jitpack.io" }
     maven { url "https://github.com/shaubert/maven-repo/raw/master/snapshots" }
 //    maven {url 'https://clojars.org/repo/'} // IcePick
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 dependencies {
@@ -161,8 +162,10 @@ dependencies {
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'net.danlew:android.joda:2.5.1'
     compile 'com.google.guava:guava:18.0'
-    // Crashlytics
-    compile 'com.crashlytics.android:crashlytics:1.1.13'
     // Multidex
     compile 'com.android.support:multidex:1.0.1'
+    // Crashlytics
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+        transitive = true;
+    }
 }

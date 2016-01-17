@@ -184,7 +184,7 @@ public class EventLogCard extends LinearLayout {
 
     @SuppressLint("PrivateResource")
     private void updateLayout(ViewGroup layout, CardView cardView, TextView textView, String value, String entryName) {
-        Log.w("EventLogCard", "updateLayout: " + value);
+//        Log.w("EventLogCard", "updateLayout: " + value);
 //        cardView.setEnabled(editable);
         layout.setVisibility(VISIBLE);
         if (value == null || value.trim().isEmpty()) {
@@ -193,11 +193,11 @@ public class EventLogCard extends LinearLayout {
             String click_to_add_msg = getContext().getString(R.string.click_to_add_x, entryName);
             textView.setText(click_to_add_msg);
             textView.setTextAppearance(getContext(), android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Body1);
-            Log.w("EventLogCard", entryName + " : " + click_to_add_msg);
+//            Log.w("EventLogCard", entryName + " : " + click_to_add_msg);
         } else {
             textView.setText(value);
             textView.setTextAppearance(getContext(), android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Body2);
-            Log.w("EventLogCard", entryName + " : " + value);
+//            Log.w("EventLogCard", entryName + " : " + value);
         }
     }
 

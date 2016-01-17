@@ -28,6 +28,7 @@ import com.guardswift.persistence.parse.execution.alarm.Alarm;
 import com.guardswift.persistence.parse.execution.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
 import com.guardswift.util.GeocodedAddress;
+import com.parse.GetCallback;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -53,8 +54,6 @@ import dk.alexandra.positioning.wifi.AccessPoint;
 
 @ParseClassName("EventLog")
 public class EventLog extends ExtendedParseObject {
-
-
 
 
     public static class Recent {
@@ -108,7 +107,6 @@ public class EventLog extends ExtendedParseObject {
     }
 
 
-
     public static class Builder {
 
         private String TAG = "EventLog.Builder";
@@ -150,7 +148,7 @@ public class EventLog extends ExtendedParseObject {
         private void applyDefaultLogValues() {
             List<LogContextStrategy> logStrategies = new LogStrategyFactory(context).getStrategies();
 
-            for (LogContextStrategy logStrategy: logStrategies) {
+            for (LogContextStrategy logStrategy : logStrategies) {
                 logStrategy.log(this.eventLog);
             }
         }
@@ -170,7 +168,7 @@ public class EventLog extends ExtendedParseObject {
         }
 
         public Builder remarks(String remarks) {
-            this.eventLog.put(EventLog.remarks, (remarks!=null) ? remarks : "");
+            this.eventLog.put(EventLog.remarks, (remarks != null) ? remarks : "");
             return this;
         }
 
@@ -215,7 +213,7 @@ public class EventLog extends ExtendedParseObject {
 
             List<LogTaskStrategy> logStrategies = logStrategyFactory.getStrategies();
 
-            for (LogTaskStrategy logStrategy: logStrategies) {
+            for (LogTaskStrategy logStrategy : logStrategies) {
                 logStrategy.log(task, eventLog);
             }
 
@@ -223,7 +221,6 @@ public class EventLog extends ExtendedParseObject {
 //            eventLog.put(EventLog.task_type, task.getTaskType().toString());
             eventLog.put(EventLog.task_event, event_type.toString());
             eventCode(task.getEventCode());
-
 
 
             return this;
@@ -360,10 +357,10 @@ public class EventLog extends ExtendedParseObject {
          * before calling saveeventually and broadcast a UI init
          */
         public void saveAsync() {
-                    saveAsync(null);
+            saveAsync(null);
         }
 
-        public EventLog saveAsync(final SaveCallback saveCallback) {
+        public void saveAsync(final GetCallback<EventLog> pinnedCallback) {
 
             Log.e(TAG, "Save event " + eventLog.getEvent());
 
@@ -384,13 +381,12 @@ public class EventLog extends ExtendedParseObject {
                     }
 
 
-
                     Log.w(TAG, "3) Save event");
                     eventLog.pinThenSaveEventually(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
-                            if (saveCallback != null) {
-                                saveCallback.done(e);
+                            if (pinnedCallback != null) {
+                                pinnedCallback.done(eventLog, e);
                             }
                             EventBusController.postUIUpdate(eventLog);
                             Log.w(TAG, "4) Save event - pinned");
@@ -405,6 +401,9 @@ public class EventLog extends ExtendedParseObject {
                                 gsTask.getTaskReportingStrategy().addUnique(context, eventLog, new SaveCallback() {
                                     @Override
                                     public void done(ParseException e) {
+                                        if (e != null) {
+                                            new HandleException(context, TAG, "Save report online", e);
+                                        }
                                         updateGuardInfo(geocodedAddress.get());
                                     }
                                 });
@@ -412,28 +411,13 @@ public class EventLog extends ExtendedParseObject {
                                 Log.w(TAG, "Not for task");
                                 updateGuardInfo(geocodedAddress.get());
                             }
-
-
                         }
                     });
-
-
-
-                    return null;
-                }
-            }).continueWith(new Continuation<Object, Object>() {
-                @Override
-                public Object then(Task<Object> taskResult) throws Exception {
-
-
-
-
 
                     return null;
                 }
             });
 
-            return eventLog;
         }
 
         // Assert: eventlog is saved online
@@ -442,20 +426,6 @@ public class EventLog extends ExtendedParseObject {
             Guard guard = eventLog.getGuard();
             if (guard == null) {
                 return;
-            }
-
-            switch (eventLog.getEventCode()) {
-                case EventCodes.GUARD_LOGIN: {
-                    guard.setLastLogin(new Date());
-                    guard.setOnline(true);
-                    break;
-                }
-
-                case EventCodes.GUARD_LOGOUT: {
-                    guard.setLastLogout(new Date());
-                    guard.setOnline(false);
-                    break;
-                }
             }
 
             guard.setPosition(eventLog.getPosition());
@@ -541,7 +511,6 @@ public class EventLog extends ExtendedParseObject {
             return this;
         }
     }
-
 
 
     // pointers
@@ -1124,8 +1093,13 @@ public class EventLog extends ExtendedParseObject {
         put(deviceTimestamp, date);
     }
 
+    public void setAmount(int amount) {
+        put(EventLog.amount, amount);
+    }
+
     /**
      * Fetches EventLog matching the given task and pin them to the datastore
+     *
      * @param task
      */
     public void updateDatastore(GSTask task) {
@@ -1149,5 +1123,6 @@ public class EventLog extends ExtendedParseObject {
             }
         });
     }
+
 
 }

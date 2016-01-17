@@ -1,7 +1,6 @@
 package com.guardswift.persistence.cache.task;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.guardswift.persistence.cache.ParseCache;
 import com.guardswift.persistence.parse.execution.GSTask;
@@ -61,7 +60,6 @@ public abstract class BaseTaskCache<T extends ParseObject & GSTask> extends Pars
     @SuppressWarnings("unchecked")
     @Override
     public Set<GSTask> getArrived() {
-        Log.w("WiFi", "getArrived: " + getSet(ARRIVED).size());
         return (Set<GSTask>) (Set<?>) getSet(ARRIVED);
     }
 

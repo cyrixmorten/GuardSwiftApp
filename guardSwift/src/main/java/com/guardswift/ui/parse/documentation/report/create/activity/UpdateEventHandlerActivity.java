@@ -267,16 +267,16 @@ public class UpdateEventHandlerActivity extends InjectingAppCompatActivity imple
             final EventLog eventLog = eventLogCache.getSelected();
             switch (eventRequest) {
                 case REQUEST_EVENT_TYPE:
-                    eventLog.put(EventLog.event, eventBundle.getString(EXTRA_EVENT_TYPE));
+                    eventLog.put(EventLog.event, eventBundle.getString(EXTRA_EVENT_TYPE, ""));
                     break;
                 case REQUEST_EVENT_PEOPLE:
-                    eventLog.put(EventLog.people, eventBundle.getString(EXTRA_PEOPLE));
+                    eventLog.put(EventLog.people, eventBundle.getString(EXTRA_PEOPLE, ""));
                     break;
                 case REQUEST_EVENT_LOCATIONS:
-                    eventLog.put(EventLog.clientLocation, eventBundle.getString(EXTRA_LOCATIONS));
+                    eventLog.put(EventLog.clientLocation, eventBundle.getString(EXTRA_LOCATIONS, ""));
                     break;
                 case REQUEST_EVENT_REMARKS:
-                    eventLog.put(EventLog.remarks, eventBundle.getString(EXTRA_REMARKS));
+                    eventLog.put(EventLog.remarks, eventBundle.getString(EXTRA_REMARKS, ""));
                     break;
             }
             eventLog.pinThenSaveEventually(new SaveCallback() {

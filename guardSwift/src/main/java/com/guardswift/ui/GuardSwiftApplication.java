@@ -42,12 +42,14 @@ import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
 import com.parse.Parse;
 import com.parse.ParseACL;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
 import javax.inject.Inject;
 
 import de.greenrobot.event.EventBus;
+import io.fabric.sdk.android.Fabric;
 import rx.plugins.RxJavaErrorHandler;
 import rx.plugins.RxJavaPlugins;
 
@@ -74,6 +76,8 @@ public class GuardSwiftApplication extends InjectingApplication {
 	public void onCreate() {
 		super.onCreate();
 
+		instance = this;
+
 		EventBus.builder().logNoSubscriberMessages(false).throwSubscriberException(BuildConfig.DEBUG).installDefaultEventBus();
 
 		// Android-Bootstrap https://github.com/Bearded-Hen/Android-Bootstrap
@@ -81,23 +85,40 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         JodaTimeAndroid.init(this);
 
-		instance = this;
+		setupParse();
+		setupFabric();
+
+		RxJavaPlugins.getInstance().registerErrorHandler(new RxJavaErrorHandler() {
+			@Override
+			public void handleError(Throwable e) {
+				Log.w("Error", e);
+				Crashlytics.log("RxJavaError: " + e.getMessage());
+				Crashlytics.logException(e);
+			}
+		});
 
 
+		if (parseCacheFactory.getGuardCache().isLoggedIn()) {
+			startServices();
+		}
+	}
+
+
+	private void setupParse() {
 		ParseObject.registerSubclass(GPSLog.class);
 		ParseObject.registerSubclass(Report.class);
 		ParseObject.registerSubclass(Alarm.class);
 		ParseObject.registerSubclass(AlarmGroup.class);
 		ParseObject.registerSubclass(Circuit.class);
-        ParseObject.registerSubclass(Client.class);
+		ParseObject.registerSubclass(Client.class);
 		ParseObject.registerSubclass(Person.class);
-        ParseObject.registerSubclass(ClientContact.class);
-        ParseObject.registerSubclass(Message.class);
-        ParseObject.registerSubclass(ClientLocation.class);
-        ParseObject.registerSubclass(CircuitUnit.class);
-        ParseObject.registerSubclass(CircuitStarted.class);
-        ParseObject.registerSubclass(ChecklistCircuitStarting.class);
-        ParseObject.registerSubclass(ChecklistCircuitEnding.class);
+		ParseObject.registerSubclass(ClientContact.class);
+		ParseObject.registerSubclass(Message.class);
+		ParseObject.registerSubclass(ClientLocation.class);
+		ParseObject.registerSubclass(CircuitUnit.class);
+		ParseObject.registerSubclass(CircuitStarted.class);
+		ParseObject.registerSubclass(ChecklistCircuitStarting.class);
+		ParseObject.registerSubclass(ChecklistCircuitEnding.class);
 		ParseObject.registerSubclass(DistrictWatch.class);
 		ParseObject.registerSubclass(DistrictWatchStarted.class);
 		ParseObject.registerSubclass(DistrictWatchUnit.class);
@@ -105,9 +126,9 @@ public class GuardSwiftApplication extends InjectingApplication {
 		ParseObject.registerSubclass(EventLog.class);
 		ParseObject.registerSubclass(EventType.class);
 		ParseObject.registerSubclass(EventRemark.class);
-        ParseObject.registerSubclass(Guard.class);
+		ParseObject.registerSubclass(Guard.class);
 
-        ParseObject.registerSubclass(LocationTracker.class);
+		ParseObject.registerSubclass(LocationTracker.class);
 
 
 		Parse.enableLocalDatastore(this);
@@ -124,27 +145,23 @@ public class GuardSwiftApplication extends InjectingApplication {
 			Log.d(TAG, "Parse initialized");
 		}
 
-//		PushService.setDefaultPushCallback(this, MainActivity.class);
-
 		ParseACL defaultACL = new ParseACL();
 		defaultACL.setPublicWriteAccess(false);
 		defaultACL.setPublicReadAccess(false);
 		ParseACL.setDefaultACL(defaultACL, true);
+	}
 
-//		PushService.startServiceIfRequired(this);
+	private void setupFabric() {
+		Fabric.with(this, new Crashlytics());
+		logUser();
+	}
 
-		RxJavaPlugins.getInstance().registerErrorHandler(new RxJavaErrorHandler() {
-			@Override
-			public void handleError(Throwable e) {
-				Log.w("Error",e);
-                Crashlytics.log("RxJavaError: " + e.getMessage());
-                Crashlytics.logException(e);
-			}
-		});
-
-
-		if (parseCacheFactory.getGuardCache().isLoggedIn()) {
-			startServices();
+	private void logUser() {
+		ParseUser user = ParseUser.getCurrentUser();
+		if (user != null) {
+			Crashlytics.setUserIdentifier(user.getObjectId());
+			Crashlytics.setUserEmail(user.getEmail());
+			Crashlytics.setUserName(user.getUsername());
 		}
 	}
 

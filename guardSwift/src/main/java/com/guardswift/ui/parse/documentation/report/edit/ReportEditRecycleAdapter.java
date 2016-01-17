@@ -7,7 +7,6 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -92,8 +91,12 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
                 new CommonDialogsBuilder.BetterPicks(activity.getSupportFragmentManager()).enterEventAmount(eventLog.getEvent(), new NumberPickerDialogFragment.NumberPickerDialogHandler() {
                     @Override
                     public void onDialogNumberSet(int reference, int number, double decimal, boolean isNegative, double fullNumber) {
-                        ((TextView) view).setText(String.valueOf(number));
-
+//                        ((TextView) view).setText(String.valueOf(number));
+                        // update locally
+                        eventLog.setAmount(number);
+                        // update card
+                        holder.eventLogCard.setEventLog(eventLog);
+                        // save online
                         eventLog.pinThenSaveEventually();
                     }
                 }).show();

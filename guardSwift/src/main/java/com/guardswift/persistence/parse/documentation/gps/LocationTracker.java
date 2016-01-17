@@ -208,38 +208,40 @@ public class LocationTracker extends ExtendedParseObject {
             String jsonArrayLocationString = "[" + jsonObjectsLocationString + "]";
 
             if (string.isEmpty()) {
-                throw new IOException("Empty file");
+                taskResult.setError(new IOException("Empty file"));
             }
-            final ParseFile file = new ParseFile("gps.json", jsonArrayLocationString.getBytes());
-            file.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e != null) {
-                        new HandleException(context, PIN, "upload gpsFile", e);
-                        taskResult.setError(e);
-                    } else {
-                        Log.d(PIN, "Associate gps file and submit GPSTracker");
+            else {
+                final ParseFile file = new ParseFile("gps.json", jsonArrayLocationString.getBytes());
+                file.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e != null) {
+                            new HandleException(context, PIN, "upload gpsFile", e);
+                            taskResult.setError(e);
+                        } else {
+                            Log.d(PIN, "Associate gps file and submit GPSTracker");
 
-                        put(LocationTracker.gpsFile, file);
+                            put(LocationTracker.gpsFile, file);
 
-                        saveInBackground(new SaveCallback() {
-                            @Override
-                            public void done(ParseException e) {
-                                Log.d(PIN, "Save GPSTracker callback " + e);
-                                if (e != null) {
-                                    new HandleException(context, PIN, "saveAsync GPSTracker", e);
+                            saveInBackground(new SaveCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    Log.d(PIN, "Save GPSTracker callback " + e);
+                                    if (e != null) {
+                                        new HandleException(context, PIN, "saveAsync GPSTracker", e);
+                                    }
+
+                                    boolean successfullyDeleted = getLocalFileForCurrentGuard(guard).delete();
+                                    Log.d(PIN, "Delete local gpsFile - success: " + successfullyDeleted);
+
                                 }
+                            });
 
-                                boolean successfullyDeleted = getLocalFileForCurrentGuard(guard).delete();
-                                Log.d(PIN, "Delete local gpsFile - success: " + successfullyDeleted);
-
-                            }
-                        });
-
-                        taskResult.setResult(file.getUrl());
+                            taskResult.setResult(file.getUrl());
+                        }
                     }
-                }
-            }, progressCallback);
+                }, progressCallback);
+            }
         } catch (IllegalStateException e) {
             Log.e(PIN, "Get local file name", e);
             taskResult.setError(e);
@@ -277,7 +279,6 @@ public class LocationTracker extends ExtendedParseObject {
             FileIO.writeToFile(context, getLocalFileNameForCurrentGuard(guard), Context.MODE_APPEND, ",");
         } catch (IOException e) {
             new HandleException(context, TAG, "appendLocation to file", e);
-            e.printStackTrace();
         }
 
     }

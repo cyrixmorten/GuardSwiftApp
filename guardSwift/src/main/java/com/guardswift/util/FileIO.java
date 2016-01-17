@@ -22,6 +22,9 @@ public class FileIO {
      * @param data Context.MODE_*
      */
     public static void writeToFile(Context context, String filename, int mode, String data) throws IOException {
+        if (filename == null || filename.isEmpty())
+            return;
+
         OutputStreamWriter outputStreamWriter = null;
         try {
             outputStreamWriter = new OutputStreamWriter(context.openFileOutput(filename, mode));
