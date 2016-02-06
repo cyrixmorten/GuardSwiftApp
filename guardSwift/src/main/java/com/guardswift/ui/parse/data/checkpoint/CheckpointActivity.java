@@ -6,7 +6,7 @@ import android.support.v4.app.Fragment;
 
 import com.guardswift.R;
 import com.guardswift.persistence.cache.task.CircuitUnitCache;
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.AbstractToolbarActivity;
 import com.guardswift.ui.parse.execution.circuit.CircuitUnitCheckpointsFragment;

@@ -232,8 +232,8 @@
 //	}
 //
 //	@Override
-//	public void onListItemClick(ListView l, View v, int position, long id) {
-//		DistrictWatchClient districtWatchClient = mAdapter.getItem(position);
+//	public void onListItemClick(ListView l, View v, int clientPosition, long id) {
+//		DistrictWatchClient districtWatchClient = mAdapter.getItem(clientPosition);
 //		// go to details view
 ////        DistrictWatchClient.Recent.setSelected(districtWatchClient);
 ////
@@ -243,7 +243,7 @@
 //
 //        controller.performAction(TaskController.ACTION.OPEN, districtWatchClient, false);
 //
-//		super.onListItemClick(l, v, position, id);
+//		super.onListItemClick(l, v, clientPosition, id);
 //	}
 //
 //	@Override
@@ -313,7 +313,7 @@
 //                            final List<DistrictWatchClient> saveList = Lists.newArrayList();
 //
 //							for (DistrictWatchClient districtWatchClient : objects) {
-//                                if (districtWatchClient.isArrived())
+//                                if (districtWatchClient.isStarted())
 //                                    saveList.addUnique(districtWatchClient);
 //
 //								districtWatchClient.reset();

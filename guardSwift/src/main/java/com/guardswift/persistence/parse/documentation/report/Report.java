@@ -11,6 +11,7 @@ import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.parse.ParseClassName;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -19,7 +20,6 @@ import org.json.JSONObject;
 @ParseClassName("Report")
 public class Report extends ExtendedParseObject implements GSReport {
 
-    public static final String PIN = "Report";
 
     public static final String reportId = "reportId";
     public static final String reportEntries = "reportEntries";
@@ -69,8 +69,8 @@ public class Report extends ExtendedParseObject implements GSReport {
     }
 
     @Override
-    public String getPin() {
-        return PIN;
+    public String getParseClassName() {
+        return Report.class.getSimpleName();
     }
 
     @SuppressWarnings("unchecked")
@@ -92,7 +92,7 @@ public class Report extends ExtendedParseObject implements GSReport {
     public static class QueryBuilder extends ParseQueryBuilder<Report> {
 
         public QueryBuilder(boolean fromLocalDatastore) {
-            super(PIN, fromLocalDatastore, ParseQuery.getQuery(Report.class));
+            super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery.getQuery(Report.class));
         }
 
         public QueryBuilder matching(GSTask task) {

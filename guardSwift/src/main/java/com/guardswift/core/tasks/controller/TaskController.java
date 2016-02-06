@@ -9,7 +9,7 @@ import com.guardswift.persistence.parse.execution.GSTask;
 public interface TaskController<T extends BaseTask> {
 
 
-    enum ACTION {OPEN, ACCEPT, IGNORE, ARRIVE, ABORT, FINISH, OPEN_ADD_EVENT, OPEN_CHECKPOINTS, FORWARD, RESET}
+    enum ACTION {OPEN, ACCEPT, IGNORE, ARRIVE, ABORT, FINISH, OPEN_WRITE_REPORT, OPEN_CHECKPOINTS, FORWARD, RESET}
 
     GSTask.TASK_STATE translatesToState(ACTION action);
 

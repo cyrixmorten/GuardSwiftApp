@@ -83,7 +83,6 @@ public class Guard extends ExtendedParseObject implements Positioned {
 
     }
 
-    public static final String PIN = "Guard";
 
     public static final String guardId = "guardId";
     public static final String name = "name";
@@ -98,8 +97,8 @@ public class Guard extends ExtendedParseObject implements Positioned {
     private static String isOnline = "isOnline";
 
     @Override
-    public String getPin() {
-        return PIN;
+    public String getParseClassName() {
+        return Guard.class.getSimpleName();
     }
 
     @SuppressWarnings("unchecked")
@@ -121,7 +120,7 @@ public class Guard extends ExtendedParseObject implements Positioned {
     public static class QueryBuilder extends ParseQueryBuilder<Guard> {
 
         public QueryBuilder(boolean fromLocalDatastore) {
-            super(PIN, fromLocalDatastore, ParseQuery.getQuery(Guard.class));
+            super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery.getQuery(Guard.class));
         }
 
         @Override

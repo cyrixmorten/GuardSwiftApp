@@ -45,7 +45,7 @@
 //    BootstrapButton button_mark_read;
 //
 //    @Override
-//    public View getView(int position, View convertView, ViewGroup parent) {
+//    public View getView(int clientPosition, View convertView, ViewGroup parent) {
 //        LayoutInflater inflater = (LayoutInflater) context
 //                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 //        View rowView = inflater.inflate(
@@ -53,7 +53,7 @@
 //
 //        ButterKnife.bind(this, rowView);
 //
-//        Message message = values.get(position);
+//        Message message = values.get(clientPosition);
 //
 //        info.setText(message.getMessage());
 //        author.setText(message.getAuthor());

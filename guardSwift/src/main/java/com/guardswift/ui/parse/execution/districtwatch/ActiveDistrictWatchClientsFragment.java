@@ -5,8 +5,8 @@ import android.content.Context;
 
 import com.guardswift.persistence.cache.planning.DistrictWatchStartedCache;
 import com.guardswift.persistence.parse.execution.BaseTask;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchClient;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchStarted;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
@@ -36,7 +36,7 @@ public class ActiveDistrictWatchClientsFragment extends AbstractTasksRecycleFrag
     }
 
     @Override
-    public ParseQueryAdapter.QueryFactory<DistrictWatchClient> getNetworkQueryFactory() {
+    public ParseQueryAdapter.QueryFactory<DistrictWatchClient> createNetworkQueryFactory() {
         return new ParseQueryAdapter.QueryFactory<DistrictWatchClient>() {
 
             @Override

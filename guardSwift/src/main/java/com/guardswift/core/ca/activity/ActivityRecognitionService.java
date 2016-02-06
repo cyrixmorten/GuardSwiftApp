@@ -12,18 +12,18 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationRequest;
 import com.guardswift.BuildConfig;
-import com.guardswift.dagger.InjectingService;
 import com.guardswift.core.ca.ActivityDetectionModule;
-import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
 import com.guardswift.core.ca.GeofencingModule;
-import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
+import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.parse.ParseModule;
-import com.guardswift.persistence.parse.documentation.activity.ActivityRecognition;
+import com.guardswift.dagger.InjectingService;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -44,6 +44,8 @@ import rx.Subscription;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
+
+//import com.guardswift.persistence.parse.documentation.activity.ActivityRecognition;
 
 public class ActivityRecognitionService extends InjectingService {
     private static final String TAG = ActivityRecognitionService.class.getSimpleName();
@@ -348,7 +350,7 @@ public class ActivityRecognitionService extends InjectingService {
 
         int type = detectedActivity.getType();
         int confidence = detectedActivity.getConfidence();
-        String name = ActivityRecognition.getNameFromType(detectedActivity.getType());
+        String name = ActivityRecognitionService.getNameFromType(detectedActivity.getType());
 
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("activityType", type);
@@ -359,6 +361,34 @@ public class ActivityRecognitionService extends InjectingService {
         JSONObject jsonObject = new JSONObject(map);
 
         return jsonObject;
+    }
+
+        /**
+     * Map detected activity types to strings
+     *
+     * @param activityType The detected activity type
+     * @return A user-readable name for the type
+     */
+    public static String getNameFromType(int activityType) {
+        switch (activityType) {
+            case DetectedActivity.WALKING:
+                return "walking";
+            case DetectedActivity.IN_VEHICLE:
+                return "in vehicle";
+            case DetectedActivity.ON_BICYCLE:
+                return "on bicycle";
+            case DetectedActivity.ON_FOOT:
+                return "on foot";
+            case DetectedActivity.STILL:
+                return "still";
+            case DetectedActivity.UNKNOWN:
+                return "unknown";
+            case DetectedActivity.TILTING:
+                return "tilting";
+            case DetectedActivity.RUNNING:
+                return "running";
+        }
+        return "unknown";
     }
 
 

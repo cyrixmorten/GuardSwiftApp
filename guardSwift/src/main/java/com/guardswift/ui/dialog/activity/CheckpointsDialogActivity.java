@@ -8,7 +8,7 @@ import android.view.MenuItem;
 
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 
 public class CheckpointsDialogActivity extends InjectingAppCompatActivity {

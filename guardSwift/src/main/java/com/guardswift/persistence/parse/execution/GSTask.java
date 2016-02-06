@@ -9,6 +9,7 @@ import com.guardswift.persistence.cache.task.BaseTaskCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.Positioned;
 import com.guardswift.persistence.parse.TaskQueryBuilder;
+import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 
 /**
@@ -19,9 +20,9 @@ public interface GSTask<T extends BaseTask> extends Positioned {
 
 
 
-    enum TASK_TYPE {REGULAR, DISTRICTWATCH, ALARM}
+    enum TASK_TYPE {REGULAR, DISTRICTWATCH, ALARM, STATIC}
     enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINSIHED}
-    enum EVENT_TYPE {ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER}
+    enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER}
 
     TASK_TYPE getTaskType();
 
@@ -33,6 +34,7 @@ public interface GSTask<T extends BaseTask> extends Positioned {
      * @return unique id
      */
     String getObjectId();
+    String getGeofenceId();
 
     /*
      * A small descriptive name specified by the guarding company during planning
@@ -56,14 +58,14 @@ public interface GSTask<T extends BaseTask> extends Positioned {
 
     boolean isWithinScheduledTime();
 
-    boolean isArrived();
+    boolean isStarted();
     boolean isAborted();
     boolean isFinished();
 
 //    boolean automaticArrival(Context context);
 //    boolean automaticDeparture(Context context);
 
-
+    Guard getGuard();
     Client getClient();
     String getClientName();
 

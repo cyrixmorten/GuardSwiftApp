@@ -103,11 +103,11 @@
 //    }
 //
 //    @Override
-//    public void onListItemClick(ListView l, View v, int position, long id) {
-//        Alarm alarm = mAdapter.getItem(position);
+//    public void onListItemClick(ListView l, View v, int clientPosition, long id) {
+//        Alarm alarm = mAdapter.getItem(clientPosition);
 //        // go to details view
 //        controller.performAction(AlarmController.ACTION.OPEN, alarm, false);
-//        super.onListItemClick(l, v, position, id);
+//        super.onListItemClick(l, v, clientPosition, id);
 //    }
 //
 //    private void refreshParseData() {

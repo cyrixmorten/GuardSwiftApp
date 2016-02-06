@@ -9,7 +9,7 @@ import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.persistence.parse.execution.BaseTask;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchClient;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
 

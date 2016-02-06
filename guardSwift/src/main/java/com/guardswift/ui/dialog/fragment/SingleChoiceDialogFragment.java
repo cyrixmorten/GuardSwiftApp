@@ -95,12 +95,12 @@
 //				cs = res.getStringArray(bundle.getInt(DATA_ARRAY_ID));
 //			}
 //
-//			int position = bundle.getInt(LOGGED_IN, 0);
+//			int clientPosition = bundle.getInt(LOGGED_IN, 0);
 //
-//			value = cs[position].toString();
+//			value = cs[clientPosition].toString();
 //
 //            if (bundle.containsKey(LOGGED_IN)) {
-//                dialog.setSingleChoiceItems(cs, position, selectItemListener);
+//                dialog.setSingleChoiceItems(cs, clientPosition, selectItemListener);
 //                dialog.setPositiveButton(android.R.string.ok,
 //                        new PositiveButtonClickListener());
 //            } else {

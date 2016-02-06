@@ -82,7 +82,7 @@ public class CheckpointAdapter extends
         ButterKnife.bind(this, rowView);
 
         ClientLocation checkpoint = checkpoints.get(position);
-        String checkpointName = checkpoint.getLocation();//checkpointNames.get(position);
+        String checkpointName = checkpoint.getLocation();//checkpointNames.get(clientPosition);
 
         item.setText(checkpointName);
 

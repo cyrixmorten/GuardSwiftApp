@@ -149,7 +149,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
         for (int i = 0; i<getListView().getCount(); i++) {
             EventType eventType = (EventType) getListView().getItemAtPosition(i);
 
-            if (eventType.getName().equals(selectedEvent)) {
+            if (eventType != null && eventType.getName().equals(selectedEvent)) {
                 getListView().setItemChecked(i, true);
                 eventTypeCache.setSelected(eventType);
                 return;
@@ -207,7 +207,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
                              final EventType new_type = new EventType();
                              new_type.setOwner(ParseUser.getCurrentUser());
                              new_type.setName(input.toString());
-                             new_type.pinInBackground(EventType.PIN, new SaveCallback() {
+                             new_type.pinInBackground(new SaveCallback() {
                                  @Override
                                  public void done(ParseException e) {
                                      selectEvent(new_type);

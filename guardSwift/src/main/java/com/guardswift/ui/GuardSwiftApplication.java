@@ -1,9 +1,12 @@
 package com.guardswift.ui;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.TypefaceProvider;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.analytics.GoogleAnalytics;
@@ -13,32 +16,30 @@ import com.guardswift.R;
 import com.guardswift.core.ca.activity.ActivityRecognitionService;
 import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
 import com.guardswift.core.ca.location.FusedLocationTrackerService;
+import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingApplication;
 import com.guardswift.persistence.cache.ParseCacheFactory;
-import com.guardswift.persistence.parse.data.AlarmGroup;
+import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.Guard;
-import com.guardswift.persistence.parse.data.Message;
-import com.guardswift.persistence.parse.data.checklist.ChecklistCircuitEnding;
-import com.guardswift.persistence.parse.data.checklist.ChecklistCircuitStarting;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.data.client.ClientContact;
 import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.data.client.Person;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
-import com.guardswift.persistence.parse.documentation.gps.GPSLog;
 import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
 import com.guardswift.persistence.parse.documentation.report.Report;
-import com.guardswift.persistence.parse.execution.alarm.Alarm;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatch;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchClient;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchStarted;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchUnit;
-import com.guardswift.persistence.parse.execution.regular.Circuit;
-import com.guardswift.persistence.parse.execution.regular.CircuitStarted;
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchUnit;
+import com.guardswift.persistence.parse.execution.task.regular.Circuit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.parse.Parse;
 import com.parse.ParseACL;
 import com.parse.ParseObject;
@@ -46,8 +47,14 @@ import com.parse.ParseUser;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import javax.inject.Inject;
 
+import bolts.Continuation;
+import bolts.Task;
 import de.greenrobot.event.EventBus;
 import io.fabric.sdk.android.Fabric;
 import rx.plugins.RxJavaErrorHandler;
@@ -60,11 +67,14 @@ public class GuardSwiftApplication extends InjectingApplication {
 	@Inject
 	ParseCacheFactory parseCacheFactory;
 
+
 	private static GuardSwiftApplication instance;
 
 	public static GuardSwiftApplication getInstance() {
 		return instance;
 	}
+
+	private boolean parseObjectsBootstrapped;
 
 	@Override
 	protected void attachBaseContext(Context base) {
@@ -105,20 +115,18 @@ public class GuardSwiftApplication extends InjectingApplication {
 
 
 	private void setupParse() {
-		ParseObject.registerSubclass(GPSLog.class);
 		ParseObject.registerSubclass(Report.class);
-		ParseObject.registerSubclass(Alarm.class);
-		ParseObject.registerSubclass(AlarmGroup.class);
+		ParseObject.registerSubclass(StaticTask.class);
+//		ParseObject.registerSubclass(Alarm.class);
+//		ParseObject.registerSubclass(AlarmGroup.class);
 		ParseObject.registerSubclass(Circuit.class);
 		ParseObject.registerSubclass(Client.class);
 		ParseObject.registerSubclass(Person.class);
 		ParseObject.registerSubclass(ClientContact.class);
-		ParseObject.registerSubclass(Message.class);
+//		ParseObject.registerSubclass(Message.class);
 		ParseObject.registerSubclass(ClientLocation.class);
 		ParseObject.registerSubclass(CircuitUnit.class);
 		ParseObject.registerSubclass(CircuitStarted.class);
-		ParseObject.registerSubclass(ChecklistCircuitStarting.class);
-		ParseObject.registerSubclass(ChecklistCircuitEnding.class);
 		ParseObject.registerSubclass(DistrictWatch.class);
 		ParseObject.registerSubclass(DistrictWatchStarted.class);
 		ParseObject.registerSubclass(DistrictWatchUnit.class);
@@ -196,5 +204,101 @@ public class GuardSwiftApplication extends InjectingApplication {
 		return parseCacheFactory;
 	}
 
+	public Task<Void> bootstrapParseObjectsLocally(final Activity activity) {
+		return bootstrapParseObjectsLocally(activity, false);
+	}
 
+	public Task<Void> bootstrapParseObjectsLocally(final Activity activity, boolean performInBackground) {
+
+		if (parseObjectsBootstrapped) {
+			return Task.forResult(null);
+		}
+
+		ParseObjectFactory parseObjectFactory = new ParseObjectFactory();
+
+		final AtomicInteger updateClassProgress = new AtomicInteger(0);
+		final AtomicInteger updateClassTotal = new AtomicInteger(0);
+
+		// Prepare dialog showing progress
+		final MaterialDialog updateDialog = new MaterialDialog.Builder(activity)
+				.title(R.string.working)
+				.content(R.string.please_wait)
+				.progress(false, 0, true).build();
+
+		if (!performInBackground) {
+			updateDialog.show();
+		}
+
+		Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
+			@Override
+			public List<ParseObject> then(Task<List<ParseObject>> task) throws Exception {
+				int currentProgress = updateClassProgress.incrementAndGet();
+				int outOfTotal = updateClassTotal.get();
+
+				int percentProgress = (currentProgress/outOfTotal)*100;
+
+				if (updateDialog != null) {
+					updateDialog.setMaxProgress(outOfTotal);
+					updateDialog.setProgress(currentProgress);
+				}
+
+				Log.d(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
+
+				return null;
+			}
+		};
+
+
+
+		Task<List<ParseObject>> districtWatchClient = parseObjectFactory
+				.getDistrictWatchClient().updateAllAsync();
+		Task<List<ParseObject>> circuitUnit = parseObjectFactory
+				.getCircuitUnit().updateAllAsync();
+		Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted()
+				.updateAllAsync();
+		Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory
+				.getDistrictWatchStarted().updateAllAsync();
+		Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType()
+				.updateAllAsync();
+
+
+		ArrayList<Task<List<ParseObject>>> tasks = new ArrayList<>();
+		tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
+		tasks.add(circuitUnit.onSuccess(updateClassSuccess));
+		tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
+		tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
+		tasks.add(eventTypes.onSuccess(updateClassSuccess));
+
+		updateClassTotal.set(tasks.size());
+
+
+		return Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
+			@Override
+			public Void then(Task<Void> result) throws Exception {
+				// no matter what happens e.g. success/error, the dialog should be dismissed
+				if (updateDialog!= null) {
+					updateDialog.dismiss();
+				}
+
+				if (result.getError() == null) {
+					parseObjectsBootstrapped = true;
+				} else {
+					new HandleException(TAG, "bootstrapParseObjectsLocally", result.getError());
+					new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {
+						@Override
+						public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
+							bootstrapParseObjectsLocally(activity);
+						}
+					}).cancelable(false).show();
+				}
+
+				return null;
+			}
+		});
+	}
+
+	public void teardownParseObjectsLocally() {
+		// todo move last part of logout process here
+		parseObjectsBootstrapped = false;
+	}
 }

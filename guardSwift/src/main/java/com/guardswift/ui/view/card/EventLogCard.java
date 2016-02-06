@@ -5,12 +5,12 @@ import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.beardedhen.androidbootstrap.AwesomeTextView;
@@ -32,16 +32,8 @@ import static com.beardedhen.androidbootstrap.font.FontAwesome.FA_REMOVE;
 public class EventLogCard extends LinearLayout {
 
 
-//    public interface EventLogCardCallback {
-//        void eventClicked(EventLog eventLog, TextView event);
-//        void amountClicked(EventLog eventLog, TextView amount);
-//        void peopleClicked(EventLog eventLog, TextView people);
-//        void locationsClicked(EventLog eventLog, TextView locations);
-//        void remarksClicked(EventLog eventLog, TextView remarks);
-//        void deleteClicked(EventLog eventLog);
-//    }
-//
-//    private EventLogCardCallback eventLogCardCallback;
+    @Bind(R.id.card_header)
+    RelativeLayout cardHeader;
 
     @Bind(R.id.tvTitle)
     TextView tvTitle;
@@ -139,6 +131,11 @@ public class EventLogCard extends LinearLayout {
 
     public EventLogCard(Context context) {
         this(context, null, null);
+
+        setEditable(true);
+        setDeletable(true);
+        setTimestamped(true);
+        setCopyToReportEnabled(false);
     }
 
     public void setEventLog(EventLog eventLog) {
@@ -158,7 +155,8 @@ public class EventLogCard extends LinearLayout {
         layoutEvent.setVisibility((editable) ? VISIBLE : GONE); // shown as title
 
         String amount = getContext().getString(R.string.amount);
-        updateLayout(layoutAmount, cardAmount, tvAmount, String.valueOf(eventLog.getAmount()), amount);
+        String amountText = (eventLog.getAmount() != 0) ? String.valueOf(eventLog.getAmount()) : "";
+        updateLayout(layoutAmount, cardAmount, tvAmount, amountText, amount);
 
         String people = getContext().getString(R.string.people);
         updateLayout(layoutPeople, cardPeople, tvPeople, eventLog.getPeople(), people);
@@ -194,11 +192,19 @@ public class EventLogCard extends LinearLayout {
             textView.setText(click_to_add_msg);
             textView.setTextAppearance(getContext(), android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Body1);
 //            Log.w("EventLogCard", entryName + " : " + click_to_add_msg);
+
+            // indicator that a value is missing
+            textView.setTag(null);
         } else {
             textView.setText(value);
             textView.setTextAppearance(getContext(), android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Body2);
 //            Log.w("EventLogCard", entryName + " : " + value);
+
+            // indicator that a value has been set
+            textView.setTag(value);
+
         }
+
     }
 
     public void onEventClickListener(final OnClickListener clickListener) {
@@ -233,41 +239,6 @@ public class EventLogCard extends LinearLayout {
         tvTimestamp.setOnClickListener(clickListener);
     }
 
-
-//    @OnClick(R.id.layout_event)
-//    public void eventClicked() {
-//        ToastHelper.toastDebug(getContext(), tvEvent.getText().toString());
-//        UpdateEventHandlerActivity.newInstance(getContext(), eventLog, UpdateEventHandler.REQUEST_EVENT_TYPE);
-//    }
-//
-//    @OnClick(R.id.layout_amount)
-//    public void amountClicked() {
-//        ToastHelper.toastDebug(getContext(), tvAmount.getText().toString());
-//    }
-//
-//    @OnClick(R.id.layout_people)
-//    public void peopleClicked() {
-//        ToastHelper.toastDebug(getContext(), tvPeople.getText().toString());
-//        UpdateEventHandlerActivity.newInstance(getContext(), eventLog, UpdateEventHandler.REQUEST_EVENT_PEOPLE);
-//    }
-//
-//    @OnClick(R.id.layout_locations)
-//    public void locationsClicked() {
-//        ToastHelper.toastDebug(getContext(), tvLocations.getText().toString());
-//        UpdateEventHandlerActivity.newInstance(getContext(), eventLog, UpdateEventHandler.REQUEST_EVENT_LOCATIONS);
-//    }
-//
-//    @OnClick(R.id.layout_remarks)
-//    public void remarksClicked() {
-//        ToastHelper.toastDebug(getContext(), tvRemarks.getText().toString());
-//        UpdateEventHandlerActivity.newInstance(getContext(), eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS);
-//    }
-
-//    @OnClick(R.id.btnDelete)
-//    public void deleteClicked() {
-//        ToastHelper.toastDebug(getContext(), "delete");
-//    }
-
     public boolean isEditable() {
         return editable;
     }
@@ -300,6 +271,18 @@ public class EventLogCard extends LinearLayout {
         this.copyToReportEnabled = copyToReportEnabled;
     }
 
+    public void setHeaderVisibility(int visibility) {
+        this.cardHeader.setVisibility(visibility);
+    }
+
+    public void setRemarksVisibility(int visibility) {
+        this.layoutRemarks.setVisibility(visibility);
+    }
+
+    public boolean hasRemarks() {
+        return tvRemarks.getTag() != null;
+    }
+
     private class EventClickListener implements OnClickListener {
 
         private final OnClickListener parentClickListener;
@@ -314,10 +297,6 @@ public class EventLogCard extends LinearLayout {
             parentClickListener.onClick(childView);
         }
     }
-
-//    public void setEventLogCardCallback(EventLogCardCallback eventLogCardCallback) {
-//        this.eventLogCardCallback = eventLogCardCallback;
-//    }
 
 
 

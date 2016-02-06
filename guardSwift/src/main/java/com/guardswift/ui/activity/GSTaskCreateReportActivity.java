@@ -12,7 +12,6 @@ import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.documentation.eventlog.AbstractEventFragment;
-import com.guardswift.ui.parse.documentation.eventlog.AlarmEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.CircuitUnitEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.DistrictWatchClientEventFragment;
 
@@ -67,13 +66,13 @@ public class GSTaskCreateReportActivity extends InjectingAppCompatActivity {
                     fragment = DistrictWatchClientEventFragment.newInstance(this, parseCacheFactory.getDistrictWatchClientCache().getSelected());
                     break;
 
-                case ALARM:
-                    fragment = AlarmEventFragment.newInstance(this, parseCacheFactory.getAlarmCache().getSelected());
-                    break;
+//                case ALARM:
+//                    fragment = AlarmEventFragment.newInstance(this, parseCacheFactory.getAlarmCache().getSelected());
+//                    break;
             }
 
 
-            getSupportFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.content, fragment).commit();
 
         } else {
             Toast.makeText(this, "Missing fragment type!", Toast.LENGTH_LONG).show();

@@ -1,9 +1,7 @@
 package com.guardswift.eventbus;
 
 import android.os.Handler;
-import android.util.Log;
 
-import com.guardswift.eventbus.events.ParseObjectUpdatedEvent;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.util.Device;
@@ -24,7 +22,8 @@ public class EventBusController {
     }
 
     public static void postParseObjectUpdated(ExtendedParseObject object) {
-        post(new ParseObjectUpdatedEvent(object));
+        // ignore
+//        post(new ParseObjectUpdatedEvent(object));
     }
 
     public static void postUIUpdate(final Object object, int delayMilliseconds) {
@@ -38,7 +37,7 @@ public class EventBusController {
 
     public static void postUIUpdate(Object object) {
         if (!Device.isScreenOn()) {
-            Log.w("EventBusController", "Blocked UI Event - screen is off " + object.getClass().getSimpleName());
+//            Log.w("EventBusController", "Blocked UI Event - screen is off " + object.getClass().getSimpleName());
         }
         if (object instanceof List) {
             List objList = (List)object;
@@ -50,9 +49,9 @@ public class EventBusController {
         }
     }
 
-    public static void postUIUpdate() {
-        postUIUpdate(new ForceUIUpdate());
-    }
+//    public static void postUIUpdate() {
+//        postUIUpdate(new ForceUIUpdate());
+//    }
 
 
 

@@ -1,23 +1,24 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content"
+    android:background="@android:color/background_light"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:ctx="com.guardswift.ui.activity.MainActivity">
 
     <com.guardswift.ui.view.slidingtab.SlidingTabLayout
         android:id="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="@dimen/mini_padding"
-        android:background="@color/bootstrap_gray_lighter"/>
+        android:background="@color/bootstrap_gray_lighter"
+        android:elevation="@dimen/mini_padding" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
-        android:layout_below="@+id/tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        >
+        android:layout_below="@+id/tabs">
 
     </android.support.v4.view.ViewPager>
 
@@ -32,13 +33,12 @@
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="24dp"
-            android:layout_marginBottom="@dimen/small_padding"
-            android:src="@drawable/ic_add_white_18dp"
             android:layout_gravity="end|bottom"
-            app:borderWidth="0dp"
+            android:layout_marginBottom="@dimen/small_padding"
+            android:layout_marginEnd="24dp"
+            android:src="@drawable/ic_add_white_18dp"
             android:visibility="invisible"
-            />
+            app:borderWidth="0dp" />
 
     </android.support.design.widget.CoordinatorLayout>
 

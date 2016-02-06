@@ -24,7 +24,7 @@
 //
 //	@Override
 //	public ParseQuery<Alarm> getQueryNetwork() {
-//		return new Alarm().getQueryBuilder(false).whereNotEnded().sortedByCreateDate().build();
+//		return new Alarm().getQueryBuilder(false).active().sortedByCreateDate().build();
 //	}
 //
 //    @Override

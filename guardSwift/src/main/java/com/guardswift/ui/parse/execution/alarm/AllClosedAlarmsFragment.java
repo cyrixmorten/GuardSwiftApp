@@ -18,7 +18,7 @@
 //
 //	@Override
 //	public ParseQuery<Alarm> getQueryNetwork() {
-//		return new Alarm().getQueryBuilder(false).whereEnded().sortedByCreateDate().build();
+//		return new Alarm().getQueryBuilder(false).finished().sortedByCreateDate().build();
 //	}
 //
 //    @Override

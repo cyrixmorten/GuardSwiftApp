@@ -34,7 +34,7 @@ import com.guardswift.persistence.cache.task.CircuitUnitCache;
 import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.data.checkpoint.CheckpointAdapter;
 import com.guardswift.util.Analytics;
@@ -231,7 +231,7 @@ public class CircuitUnitCheckpointsFragment extends InjectingListFragment {
     }
 
     private void enabledIfArrived() {
-        boolean arrived = mCircuitUnit.isArrived();
+        boolean arrived = mCircuitUnit.isStarted();
         boolean finished = mCircuitUnit.isFinished();
         getListView().setEnabled(arrived && !finished);
     }
@@ -348,7 +348,7 @@ public class CircuitUnitCheckpointsFragment extends InjectingListFragment {
 //                                          @Override
 //                                          public void onNeutral(MaterialDialog dialog) {
 //                                              // do nothing
-//                                              getListView().setItemChecked(position, false);
+//                                              getListView().setItemChecked(clientPosition, false);
 //                                          }
 //
 //                                      }
@@ -356,7 +356,7 @@ public class CircuitUnitCheckpointsFragment extends InjectingListFragment {
 //                            ).show();
 //                } else {
 
-                    //TODO confirm position before adjusting fingerprint
+                    //TODO confirm clientPosition before adjusting fingerprint
                     Set<AccessPoint> sample = fingerprintingModule.getLastKnownSample();
                     checkpoint.adjustFingerprint(sample);
                     saveCheckpointEvent(checkpoint, true);
@@ -487,7 +487,7 @@ public class CircuitUnitCheckpointsFragment extends InjectingListFragment {
 
 
             checkpoint.setChecked(isChecked);
-            checkpoint.pinInBackground(ClientLocation.PIN, new SaveCallback() {
+            checkpoint.pinInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
                     if (e != null) {

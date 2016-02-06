@@ -15,6 +15,8 @@ import java.io.OutputStreamWriter;
  */
 public class FileIO {
 
+    private static final String TAG = FileIO.class.getSimpleName();
+
     /**
      * @param context
      * @param filename
@@ -22,6 +24,7 @@ public class FileIO {
      * @param data Context.MODE_*
      */
     public static void writeToFile(Context context, String filename, int mode, String data) throws IOException {
+        Log.d(TAG, "writeToFile: " + filename + " - " + data);
         if (filename == null || filename.isEmpty())
             return;
 
@@ -43,7 +46,7 @@ public class FileIO {
 
 
     public static String readFromFile(Context context, String filename) throws IOException {
-
+        Log.d(TAG, "readFromFile: " + filename);
         String ret = "";
 
         try {
@@ -70,6 +73,8 @@ public class FileIO {
             Log.e("login activity", "Can not read file: " + e.toString());
             throw e;
         }
+
+        Log.d(TAG, "readFromFile: " + ret.length());
 
         return ret;
     }

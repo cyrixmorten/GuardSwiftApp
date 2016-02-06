@@ -6,6 +6,7 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import bolts.Task;
@@ -21,6 +22,21 @@ abstract class BaseGeofenceStrategy<T extends BaseTask> implements TaskGeofenceS
         this.task = task;
     }
 
+    @Override
+    public int getGeofenceRadius() {
+        return 0;
+    }
+
+    /**
+     * Unless implemented by concrete class, no tasks are scheduled for geofencing
+     *
+     * @param withinKm
+     * @param callback
+     */
+    @Override
+    public void queryGeofencedTasks(int withinKm, FindCallback<ParseObject> callback) {
+        callback.done(new ArrayList<ParseObject>(), null);
+    }
     /*
      * Called when at the border of the geofence
      * client_radius > dist_client < (client_radius + 200)

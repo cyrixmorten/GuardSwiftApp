@@ -1,17 +1,15 @@
 package com.guardswift.core.documentation.eventlog.task;
 
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatch;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchClient;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchStarted;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
 import com.parse.ParseObject;
 
 /**
  * Created by cyrix on 6/7/15.
  */
 public class TaskDistrictWatchLogStrategy implements LogTaskStrategy {
-
-    public static final String reportId = "reportId"; // an id generated to uniquely identify relevant report for this log entry
 
 
     public static final String districtWatchStarted = "districtWatchStarted";
@@ -38,7 +36,6 @@ public class TaskDistrictWatchLogStrategy implements LogTaskStrategy {
 
             setDistrictWatchStarted(districtWatchStarted, toParseObject);
 
-            toParseObject.put(TaskDistrictWatchLogStrategy.reportId, districtWatchClient.getReportId());
         }
 
     }

@@ -9,6 +9,7 @@ import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.parse.ParseClassName;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import org.json.JSONObject;
@@ -16,7 +17,6 @@ import org.json.JSONObject;
 @ParseClassName("EventRemark")
 public class EventRemark extends ExtendedParseObject {
 
-	public static final String PIN = "EventRemark";
 
 	public static final String objectName = "Event";
 	public static final String eventType = "eventType";
@@ -39,8 +39,8 @@ public class EventRemark extends ExtendedParseObject {
     };
 
 	@Override
-	public String getPin() {
-		return PIN;
+	public String getParseClassName() {
+		return EventRemark.class.getSimpleName();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -64,7 +64,7 @@ public class EventRemark extends ExtendedParseObject {
 		private String TAG = QueryBuilder.this.getClass().getSimpleName();
 
 		public QueryBuilder(boolean fromLocalDatastore) {
-			super(PIN, fromLocalDatastore, ParseQuery
+			super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery
 					.getQuery(EventRemark.class));
 		}
 

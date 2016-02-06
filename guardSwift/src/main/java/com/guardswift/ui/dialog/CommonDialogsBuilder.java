@@ -2,10 +2,7 @@ package com.guardswift.ui.dialog;
 
 import android.content.Context;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.LinearLayoutCompat;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -14,12 +11,6 @@ import com.codetroopers.betterpickers.numberpicker.NumberPickerBuilder;
 import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.persistence.parse.data.client.Client;
-import com.guardswift.persistence.parse.data.client.ClientContact;
-import com.guardswift.util.Intents;
-
-import java.util.List;
-
-import butterknife.ButterKnife;
 
 /**
  * Created by cyrix on 2/24/15.
@@ -47,6 +38,8 @@ public class CommonDialogsBuilder {
                     .setPlusMinusVisibility(View.INVISIBLE)
                     .setDecimalVisibility(View.INVISIBLE);
         }
+
+
     }
 
     public static class MaterialDialogs {
@@ -55,6 +48,14 @@ public class CommonDialogsBuilder {
 
         public MaterialDialogs(Context activityContext) {
             this.context = activityContext;
+        }
+
+        public MaterialDialog.Builder ok(int title, String content, MaterialDialog.SingleButtonCallback onPositive) {
+            return new MaterialDialog.Builder(context)
+                    .title(title)
+                    .content(content)
+                    .positiveText(android.R.string.ok)
+                    .onPositive(onPositive);
         }
 
         public MaterialDialog.Builder okCancel(int title, String content, MaterialDialog.SingleButtonCallback onPositive) {
@@ -66,44 +67,70 @@ public class CommonDialogsBuilder {
                     .onPositive(onPositive);
         }
 
+        public MaterialDialog.Builder okCancel(int title, String content, MaterialDialog.SingleButtonCallback onPositive, final MaterialDialog.SingleButtonCallback onCancel) {
+            return new MaterialDialog.Builder(context)
+                    .title(title)
+                    .content(content)
+                    .positiveText(android.R.string.ok)
+                    .negativeText(android.R.string.cancel)
+                    .onPositive(onPositive)
+                    .onNegative(onCancel)
+                    .cancelable(false);
+
+        }
+
         public MaterialDialog.Builder clientContacts(Client client) {
 
-            final List<ClientContact> contacts = client.getContactsWithNames();
-
-            LinearLayout layout = new LinearLayout(context);
-            layout.setLayoutParams(new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            layout.setOrientation(LinearLayout.VERTICAL);
-
-            LayoutInflater li = LayoutInflater.from(context);
+            LinearLayout layout = client.createContactsList(context);
 
             TextView callContactTip = new TextView(context);
             callContactTip.setText(context.getString(R.string.tip_click_contact_to_call));
-            layout.addView(callContactTip);
-
-            for (final ClientContact contact: contacts) {
-                View contactView = li.inflate(R.layout.gs_view_clientcontact, null);
-                TextView name = ButterKnife.findById(contactView, R.id.tvName);
-                TextView phone = ButterKnife.findById(contactView, R.id.tvPhoneNumber);
-                TextView desc = ButterKnife.findById(contactView, R.id.tvDescription);
-
-                name.setText(contact.getName());
-                phone.setText(contact.getPhoneNumber());
-                desc.setText(contact.getDesc());
-
-                final String phoneNumber = contact.getPhoneNumber();
-                contactView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intents.dialPhoneNumber(context, phoneNumber);
-                    }
-                });
-                layout.addView(contactView);
-            }
+            layout.addView(callContactTip, 0);
 
             return new MaterialDialog.Builder(context)
                     .title(client.getName())
                     .customView(layout, true);
 
         }
+
+        public MaterialDialog.Builder infoDialog(int  title, int content) {
+            return infoDialog(title, context.getString(content));
+        }
+
+        public MaterialDialog.Builder infoDialog(int  title, String content) {
+            return new MaterialDialog.Builder(context)
+                    .title(title)
+                    .content(content);
+        }
+
+        public MaterialDialog.Builder missingInternetContent() {
+            return infoDialog(R.string.message_no_internet_connection, "");
+        }
+
+        public MaterialDialog.Builder intermediateProgress() {
+            return intermediateProgress(context.getString(R.string.working), context.getString(R.string.please_wait));
+        }
+
+        public MaterialDialog.Builder intermediateProgress(int content) {
+            return intermediateProgress(context.getString(R.string.working), context.getString(content));
+        }
+
+        public MaterialDialog.Builder intermediateProgress(int title, int content) {
+            return intermediateProgress(context.getString(title), context.getString(content));
+        }
+
+        public MaterialDialog.Builder intermediateProgress(String title, int content) {
+            return intermediateProgress(title, context.getString(content));
+        }
+
+        public MaterialDialog.Builder intermediateProgress(String title, String content) {
+            return new MaterialDialog.Builder(context)
+                    .title(title)
+                    .content(content)
+                    .progress(true, 0);
+        }
+
+
+
     }
 }

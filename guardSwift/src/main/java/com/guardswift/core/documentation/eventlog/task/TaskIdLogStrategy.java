@@ -17,6 +17,6 @@ public class TaskIdLogStrategy implements LogTaskStrategy {
 
     @Override
     public void log(GSTask task, ParseObject toParseObject) {
-        toParseObject.put(EventLog.taskId, task.getParseObject().getObjectId());
+        toParseObject.put(EventLog.taskId, task.getObjectId());
     }
 }

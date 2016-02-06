@@ -19,10 +19,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule;
-import com.guardswift.core.tasks.alarm.ParseAlarmReceiver;
 import com.guardswift.core.ca.fingerprinting.WifiPositionReceiver;
-import com.guardswift.core.receiver.ParseUpdateReceiver;
-import com.guardswift.core.receiver.ScreenReceiver;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -110,8 +107,7 @@ public class InjectingBroadcastReceiver extends BroadcastReceiver implements
 	/**
 	 * The dagger module associated with {@link InjectingBroadcastReceiver}
 	 */
-	@Module(addsTo = InjectingApplicationModule.class, injects = {ScreenReceiver.class,
-			ParseUpdateReceiver.class, ParseAlarmReceiver.class, WifiPositionReceiver.class}, library = true)
+	@Module(addsTo = InjectingApplicationModule.class, injects = {WifiPositionReceiver.class}, library = true)
 	public static class InjectingBroadcastReceiverModule {
 		Context mContext;
 		android.content.BroadcastReceiver mReceiver;

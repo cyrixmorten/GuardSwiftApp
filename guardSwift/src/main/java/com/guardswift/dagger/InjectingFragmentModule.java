@@ -28,13 +28,11 @@
 
 package com.guardswift.dagger;
 
-import com.guardswift.ui.dialog.fragment.AlarmDialogFragment;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
 import com.guardswift.ui.parse.documentation.eventlog.AbstractEventFragment;
-import com.guardswift.ui.parse.documentation.eventlog.AlarmEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.CircuitUnitEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.DistrictWatchClientEventFragment;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventLocationFragment;
@@ -45,7 +43,8 @@ import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventType
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventViewPagerFragment;
 import com.guardswift.ui.parse.documentation.report.edit.ReportEditListFragment;
 import com.guardswift.ui.parse.documentation.report.edit.ReportEditViewPagerFragment;
-import com.guardswift.ui.parse.documentation.report.edit.ReportHistoryListFragment;
+import com.guardswift.ui.parse.documentation.report.edit.ReportSuggestionsListFragment;
+import com.guardswift.ui.parse.documentation.report.edit.ReportSummaryFragment;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.guardswift.ui.parse.execution.circuit.ActiveCircuitUnitsFragment;
 import com.guardswift.ui.parse.execution.circuit.CircuitUnitCheckpointsFragment;
@@ -55,6 +54,10 @@ import com.guardswift.ui.parse.execution.circuit.FinishedCircuitUnitsFragment;
 import com.guardswift.ui.parse.execution.districtwatch.ActiveDistrictWatchClientsFragment;
 import com.guardswift.ui.parse.execution.districtwatch.DistrictwatchViewPagerFragment;
 import com.guardswift.ui.parse.execution.districtwatch.FinishedDistrictWatchClientsFragment;
+import com.guardswift.ui.parse.execution.statictask.ActiveStaticTasksFragment;
+import com.guardswift.ui.parse.execution.statictask.FinishedStaticTasksFragment;
+import com.guardswift.ui.parse.execution.statictask.PendingStaticTasksFragment;
+import com.guardswift.ui.parse.execution.statictask.StaticTaskViewPagerFragment;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -84,6 +87,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		GuardListFragment.class,
 		ClientListFragment.class,
 		// - Execution
+		// -- StaticTask
+		StaticTaskViewPagerFragment.class,
+		PendingStaticTasksFragment.class,
+		ActiveStaticTasksFragment.class,
+		FinishedStaticTasksFragment.class,
 		// -- CircuitUnit
         ActiveCircuitUnitsFragment.class,
 		FinishedCircuitUnitsFragment.class,
@@ -100,14 +108,14 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		AddEventSummaryFragment.class,
 		AbstractEventFragment.class,
 		CircuitUnitEventFragment.class, DistrictWatchClientEventFragment.class,
-		AlarmEventFragment.class,
 		CircuitViewPagerFragment.class, AbstractTasksRecycleFragment.class,
 		CircuitUnitCheckpointsFragment.class,
-		AlarmDialogFragment.class, CircuitUnitDescriptionWebViewFragment.class,
+		CircuitUnitDescriptionWebViewFragment.class,
 		// Report
 		ReportEditViewPagerFragment.class,
 		ReportEditListFragment.class,
-		ReportHistoryListFragment.class
+		ReportSuggestionsListFragment.class,
+		ReportSummaryFragment.class
 		}, library = true)
 public class InjectingFragmentModule {
 	private final android.support.v4.app.Fragment mFragment;

@@ -33,4 +33,12 @@
         style="@style/Base.TextAppearance.AppCompat.Caption"
         android:text="Beskrivelse"
         />
+    <TextView
+        android:id="@+id/tvEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvDescription"
+        style="@style/Base.TextAppearance.AppCompat.Body1"
+        android:text="some@email.com"
+        />
 </RelativeLayout>

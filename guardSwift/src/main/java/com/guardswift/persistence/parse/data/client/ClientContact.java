@@ -5,6 +5,7 @@ import android.content.Context;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.parse.ParseClassName;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import org.json.JSONObject;
@@ -12,15 +13,16 @@ import org.json.JSONObject;
 @ParseClassName("ClientContact")
 public class ClientContact extends ExtendedParseObject {
 
-	public static final String PIN = "ClientContact";
 
 	public static final String name = "name";
 	public static final String desc = "desc";
 	public static final String phoneNumber = "phoneNumber";
+	public static final String email = "email";
+	public static final String receiveReports = "receiveReports";
 
 	@Override
-	public String getPin() {
-		return PIN;
+	public String getParseClassName() {
+		return ClientContact.class.getSimpleName();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -39,17 +41,25 @@ public class ClientContact extends ExtendedParseObject {
 		return new QueryBuilder(fromLocalDatastore);
 	}
 
+	public String getEmail() {
+		return (has(ClientContact.email)) ? getString(ClientContact.email) : "";
+	}
+
+	public boolean isReceivingReports() {
+		return getBoolean(receiveReports);
+	}
+
 	public static class QueryBuilder extends ParseQueryBuilder<ClientContact> {
 
 		public QueryBuilder(boolean fromLocalDatastore) {
-			super(PIN, fromLocalDatastore, ParseQuery
+			super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery
 					.getQuery(ClientContact.class));
 		}
 
 	}
 
 	public String getName() {
-        return getString(name);
+        return (has(name)) ? getString(name) : "";
     }
 
     public String getDesc() {

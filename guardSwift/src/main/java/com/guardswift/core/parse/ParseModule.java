@@ -1,10 +1,12 @@
 package com.guardswift.core.parse;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.core.ca.LocationModule;
@@ -20,6 +22,8 @@ import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.activity.MainActivity;
+import com.guardswift.ui.dialog.CommonDialogsBuilder;
+import com.guardswift.util.Device;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -43,23 +47,23 @@ import bolts.Task;
 @Singleton
 public class ParseModule {
 
-	private static final String TAG = ParseModule.class.getSimpleName();
+    private static final String TAG = ParseModule.class.getSimpleName();
 
-	public static final String DEVApplicationID = "7fynHGuQW5NZLROiIDcCzLddbINcUSwPdoE0L72d";
-	public static final String DEVClientKey = "esiyR18YFQ5Ew1dMZDwcFuFYTZls8TwYWUtPs5Tu";
-	public static final String ApplicationID = "gejAg1OFJrBwepcORHB3U7V7fawoDjlymRe8grHJ";
-	public static final String ClientKey = "ZOZ7GGeu2tfOQXGRcMSOtDMg1qTGVZaxjO8gl89p";
+    public static final String DEVApplicationID = "7fynHGuQW5NZLROiIDcCzLddbINcUSwPdoE0L72d";
+    public static final String DEVClientKey = "esiyR18YFQ5Ew1dMZDwcFuFYTZls8TwYWUtPs5Tu";
+    public static final String ApplicationID = "gejAg1OFJrBwepcORHB3U7V7fawoDjlymRe8grHJ";
+    public static final String ClientKey = "ZOZ7GGeu2tfOQXGRcMSOtDMg1qTGVZaxjO8gl89p";
 
-	private final Context context;
-	private final GSTasksCache tasksCache;
-	private final GuardCache guardCache;
+    private final Context context;
+    private final GSTasksCache tasksCache;
+    private final GuardCache guardCache;
 
-	@Inject
-	public ParseModule(@ForApplication Context context) {
-		this.context = context;
-		this.tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
-		this.guardCache = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache();
-	}
+    @Inject
+    public ParseModule(@ForApplication Context context) {
+        this.context = context;
+        this.tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
+        this.guardCache = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache();
+    }
 
 //	public static boolean isAlarmResponsible() {
 //		ParseInstallation installation = ParseInstallation.getCurrentInstallation();
@@ -72,130 +76,172 @@ public class ParseModule {
 
 
     public void login(Guard guard) {
-		guard.setOnline(true);
-		guard.pinThenSaveEventually();
+        guard.setOnline(true);
 
-		guardCache.setLoggedIn(guard);
+        guardCache.setLoggedIn(guard);
 
         new EventLog.Builder(context)
                 .event(context.getString(R.string.login))
                 .eventCode(EventLog.EventCodes.GUARD_LOGIN).saveAsync();
 
-		GuardSwiftApplication.getInstance().startServices();
+        GuardSwiftApplication.getInstance().startServices();
 
-		Intent intent = new Intent(context, MainActivity.class);
-		context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
+        Intent intent = new Intent(context, MainActivity.class);
+        context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
     }
 
 
-    public void logout(final SaveCallback saveCallback, ProgressCallback progressCallback) {
+    private void logout(final SaveCallback saveCallback, ProgressCallback progressCallback) {
 
-		Guard guard = guardCache.getLoggedIn();
-		if (guard != null) {
-			guard.setOnline(false);
-			guard.pinThenSaveEventually();
+        Guard guard = guardCache.getLoggedIn();
+        Log.w(TAG, "LOGOUG GUARD: " + guard);
 
-			LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
-				@Override
-				public Object then(Task<String> task) throws Exception {
-					if (task.isFaulted()) {
-						new HandleException(context, TAG, "upload guard locations", task.getError());
-					}
-					else {
-						Log.w(TAG, "Location url: " + task.getResult());
-						new EventLog.Builder(context)
-								.event(context.getString(R.string.logout))
-								.locationTrackerUrl(task.getResult())
-								.eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
-							@Override
-							public void done(EventLog object, ParseException e) {
-								clearData();
-							}
-						});
-					}
+        if (guard != null) {
+            guard.setOnline(false);
+            guard.pinThenSaveEventually();
 
-					saveCallback.done(null);
-					GuardLoginActivity.start(context);
+            LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
+                @Override
+                public Object then(Task<String> task) throws Exception {
+                    if (task.isFaulted()) {
+                        new HandleException(context, TAG, "upload guard locations", task.getError());
+                        saveCallback.done((ParseException) task.getError());
+                    } else {
+                        Log.w(TAG, "Location url: " + task.getResult());
+                        new EventLog.Builder(context)
+                                .event(context.getString(R.string.logout))
+                                .locationTrackerUrl(task.getResult())
+                                .eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
+                            @Override
+                            public void done(EventLog object, ParseException e) {
+                                saveCallback.done(e);
+                            }
+                        });
+                    }
 
-					return null;
-				}
-			});
-		} else {
-			saveCallback.done(null);
-			GuardLoginActivity.start(context);
-			clearData();
-		}
+                    return null;
+                }
+            });
+        } else {
+            saveCallback.done(null);
+        }
 
     }
 
     private void clearData() {
 
-		guardCache.removeLoggedIn();
-		tasksCache.clearGeofencedTasks();
-		GuardSwiftApplication.getInstance().getCacheFactory().getCircuitStartedCache().clear();
+        guardCache.removeLoggedIn();
+        tasksCache.clear();
 
-		GuardSwiftApplication.getInstance().stopServices();
+        GuardSwiftApplication.getInstance().getCacheFactory().getCircuitStartedCache().clear();
+        GuardSwiftApplication.getInstance().getCacheFactory().getDistrictWatchStartedCache().clear();
+
+        GuardSwiftApplication.getInstance().stopServices();
 
 
-		unpinAllParseObjects();
+        unpinAllParseObjects();
     }
 
-	private void unpinAllParseObjects() {
+    private void unpinAllParseObjects() {
 
-		List<Task<Void>> unpinClassNamed = Lists.newArrayList();
-		for (ExtendedParseObject parseObject : new ParseObjectFactory().getAll()) {
-			unpinClassNamed.add(ParseObject.unpinAllInBackground(parseObject.getPin()));
-		}
+        List<Task<Object>> unpinClassNamed = Lists.newArrayList();
+        for (ExtendedParseObject parseObject : new ParseObjectFactory().getAll()) {
+            unpinClassNamed.add(parseObject.unpinAllPinnedToClass());
+        }
 
-		Task.whenAll(unpinClassNamed).continueWith(new Continuation<Void, Object>() {
-			@Override
-			public Object then(Task<Void> task) throws Exception {
-				return ParseObject.unpinAllInBackground(ParseObject.DEFAULT_PIN);
-			}
-		});
-	}
-//    private void reCreateRecentObjects() {
-//        Guard.Recent.getSelected(preferences);
-//        Circuit.Recent.getSelected(preferences);
-//        CircuitStarted.Recent.getSelected(preferences);
-//    }
-
-//    public boolean isGuardLoggedIn() {
-//        return guardCache.isLoggedIn();
-//    }
+        Task.whenAll(unpinClassNamed).continueWith(new Continuation<Void, Object>() {
+            @Override
+            public Object then(Task<Void> task) throws Exception {
+                GuardSwiftApplication.getInstance().teardownParseObjectsLocally();
+                return ParseObject.unpinAllInBackground(ParseObject.DEFAULT_PIN);
+            }
+        });
+    }
 
 
+    public static ParseGeoPoint geoPointFromLocation(Location loc) {
+        if (loc == null)
+            return null;
 
-	public static ParseGeoPoint geoPointFromLocation(Location loc) {
-		if (loc == null)
-			return null;
+        return new ParseGeoPoint(loc.getLatitude(), loc.getLongitude());
+    }
 
-		return new ParseGeoPoint(loc.getLatitude(), loc.getLongitude());
-	}
+    public void logout(final Activity activity) {
+        if (!new Device(activity).isOnline()) {
+            // Missing internet connection
+            new CommonDialogsBuilder.MaterialDialogs(activity).infoDialog(R.string.title_internet_missing, R.string.could_not_connect_to_server).show();
+            return;
+        }
+        // Prepare progress dialog
+        final MaterialDialog updateDialog = new MaterialDialog.Builder(activity)
+                .title(R.string.working)
+                .content(R.string.please_wait)
+                .progress(false, 0, true)
+                .show();
+
+        updateDialog.setMaxProgress(100);
+        updateDialog.setCancelable(false);
 
 
+        // Perform logout, upload
+        logout(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
 
-	public static class DistanceStrings {
+                updateDialog.dismiss();
 
-		public static final String METERS = "meter";
-		public static final String KILOMETERS = "km";
+                Log.d(TAG, "Logout completed! " + e);
+                if (e != null) {
+                    if (e.getCode() == ParseException.TIMEOUT) {
+                        new CommonDialogsBuilder.MaterialDialogs(activity).infoDialog(R.string.title_internet_missing, R.string.could_not_connect_to_server).show();
+                    } else {
+                        new CommonDialogsBuilder.MaterialDialogs(activity).infoDialog(R.string.error_an_error_occured, e.getMessage()).show();
+                    }
 
-		public String distanceType;
-		public String distanceValue;
+                    new HandleException(TAG, "Guard logout", e);
+                    return;
+                }
 
-		public int km;
-		public int meters;
+                GuardLoginActivity.start(activity);
+                clearData();
 
-		public DistanceStrings(String distanceType, String distanceValue,
-				int km, int meters) {
-			super();
-			this.distanceType = distanceType;
-			this.distanceValue = distanceValue;
-			this.km = km;
-			this.meters = meters;
-		}
+                activity.finish();
 
-	}
+                return;
+            }
+        }, new ProgressCallback() {
+            @Override
+            public void done(Integer percentDone) {
+                Log.e(TAG, "Logout progress: " + percentDone);
+//                                sDialog.getProgressHelper()
+//                                        .setProgress(percentDone);
+                updateDialog.setProgress(percentDone);
+            }
+        });
+    }
+
+
+    public static class DistanceStrings {
+
+        public static final String METERS = "meter";
+        public static final String KILOMETERS = "km";
+
+        public String distanceType;
+        public String distanceValue;
+
+        public int km;
+        public int meters;
+
+        public DistanceStrings(String distanceType, String distanceValue,
+                               int km, int meters) {
+            super();
+            this.distanceType = distanceType;
+            this.distanceValue = distanceValue;
+            this.km = km;
+            this.meters = meters;
+        }
+
+    }
 
 //    public static ParseModule.DistanceStrings getDistanceStrings(Client client) {
 //        Location deviceLocation = LocationModule.Recent.getLastKnownLocation();
@@ -204,49 +250,49 @@ public class ParseModule {
 //                deviceLocation, targetGeoPoint);
 //    }
 
-	public static DistanceStrings distanceBetweenString(
-			Location deviceLocation, ParseGeoPoint targetGeoPoint) {
-		double distance = distanceBetweenKilomiters(deviceLocation, targetGeoPoint);
-		if (distance == -1) {
-			return null;
-		}
+    public static DistanceStrings distanceBetweenString(
+            Location deviceLocation, ParseGeoPoint targetGeoPoint) {
+        double distance = distanceBetweenKilomiters(deviceLocation, targetGeoPoint);
+        if (distance == -1) {
+            return null;
+        }
 
-		int wholeKms = (int) distance;
+        int wholeKms = (int) distance;
 
-		// use meters instead
-		if (wholeKms == 0) {
-			double meters = distance - Math.floor(distance);
+        // use meters instead
+        if (wholeKms == 0) {
+            double meters = distance - Math.floor(distance);
 
-			DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(
-					Locale.ENGLISH);
-			otherSymbols.setDecimalSeparator(',');
-			otherSymbols.setGroupingSeparator('.');
+            DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(
+                    Locale.ENGLISH);
+            otherSymbols.setDecimalSeparator(',');
+            otherSymbols.setGroupingSeparator('.');
 
-			DecimalFormat df = new DecimalFormat("#.###", otherSymbols);
+            DecimalFormat df = new DecimalFormat("#.###", otherSymbols);
 
-			String meterString = df.format(meters);
-			if (meterString.contains(",")) {
-				String[] splitMeters = meterString.split("\\,");
-				int meterInt = Integer.parseInt(splitMeters[1]);
-				return new DistanceStrings(DistanceStrings.METERS,
-						String.valueOf(meterInt), 0, meterInt);
-			} else {
-				return new DistanceStrings(DistanceStrings.METERS, meterString,
-						0, (int) meters);
-			}
-		} else {
-			DecimalFormat df = new DecimalFormat("##.##");
-			df.setRoundingMode(RoundingMode.HALF_UP);
-			return new DistanceStrings(DistanceStrings.KILOMETERS,
-					df.format(distance), wholeKms, 0);
-		}
-	}
+            String meterString = df.format(meters);
+            if (meterString.contains(",")) {
+                String[] splitMeters = meterString.split("\\,");
+                int meterInt = Integer.parseInt(splitMeters[1]);
+                return new DistanceStrings(DistanceStrings.METERS,
+                        String.valueOf(meterInt), 0, meterInt);
+            } else {
+                return new DistanceStrings(DistanceStrings.METERS, meterString,
+                        0, (int) meters);
+            }
+        } else {
+            DecimalFormat df = new DecimalFormat("##.##");
+            df.setRoundingMode(RoundingMode.HALF_UP);
+            return new DistanceStrings(DistanceStrings.KILOMETERS,
+                    df.format(distance), wholeKms, 0);
+        }
+    }
 
     public static float distanceBetweenMeters(Location deviceLocation,
-                                                   ParseGeoPoint targetGeoPoint) {
-		if (deviceLocation == null || targetGeoPoint == null) {
-			return Float.MAX_VALUE;
-		}
+                                              ParseGeoPoint targetGeoPoint) {
+        if (deviceLocation == null || targetGeoPoint == null) {
+            return Float.MAX_VALUE;
+        }
 
 
         Location targetLocation = new Location("");
@@ -256,23 +302,23 @@ public class ParseModule {
         return deviceLocation.distanceTo(targetLocation);
     }
 
-	public static double distanceBetweenKilomiters(Location deviceLocation,
+    public static double distanceBetweenKilomiters(Location deviceLocation,
                                                    ParseGeoPoint targetGeoPoint) {
-		if (deviceLocation == null || targetGeoPoint == null)
-			return -1;
+        if (deviceLocation == null || targetGeoPoint == null)
+            return -1;
 
-		ParseGeoPoint deviceGeoPoint = new ParseGeoPoint(
-				deviceLocation.getLatitude(), deviceLocation.getLongitude());
+        ParseGeoPoint deviceGeoPoint = new ParseGeoPoint(
+                deviceLocation.getLatitude(), deviceLocation.getLongitude());
 
-		return deviceGeoPoint.distanceInKilometersTo(targetGeoPoint);
-	}
+        return deviceGeoPoint.distanceInKilometersTo(targetGeoPoint);
+    }
 
-	public static <T extends ParseQuery<?>> void sortNearest(T query, String key) {
+    public static <T extends ParseQuery<?>> void sortNearest(T query, String key) {
         Location lastLocation = LocationModule.Recent.getLastKnownLocation();
-		if (lastLocation != null) {
-			ParseGeoPoint geoPoint = ParseModule
-					.geoPointFromLocation(lastLocation);
-			query.whereNear(key, geoPoint);
-		}
-	}
+        if (lastLocation != null) {
+            ParseGeoPoint geoPoint = ParseModule
+                    .geoPointFromLocation(lastLocation);
+            query.whereNear(key, geoPoint);
+        }
+    }
 }

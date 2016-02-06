@@ -55,12 +55,13 @@ public class Sounds {
 
 	}
 
+    private boolean disabled = true;
 
 	public void playNotification(int raw) {
 		Log.i(TAG, "playNotification");
 
-//        if (BuildConfig.DEBUG)
-//            return;
+        if (disabled)
+            return;
 
         // ignore requests while playing
         if (notificationMediaPlayer != null && notificationMediaPlayer.isPlaying())

@@ -8,7 +8,7 @@ import android.util.Log;
 import com.google.common.collect.Maps;
 import com.guardswift.R;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
-import com.guardswift.persistence.parse.execution.regular.CircuitStarted;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 

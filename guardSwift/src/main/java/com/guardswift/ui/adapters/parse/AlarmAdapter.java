@@ -112,7 +112,7 @@
 //        if (!alarm.isAccepted() || alarm.isAborted()) {
 //            state_not_accepted();
 //        }
-//        if (alarm.isArrived()) {
+//        if (alarm.isStarted()) {
 //            state_arrived();
 //        }
 //        if (alarm.isClosed()) {
@@ -280,7 +280,7 @@
 //                                alarm.getUpdatedAt())));
 //                sharedText.setType("inverse");
 //            }
-//            if (alarm.isArrived()) {
+//            if (alarm.isStarted()) {
 //                sharedText.setText(getContext().getString(
 //                        R.string.marked_arrived,
 //                        alarm.getGuardName(),
@@ -311,7 +311,7 @@
 //    @OnClick(R.id.button_add_event)
 //    public void addEvent(BootstrapButton button) {
 //        Alarm alarm = (Alarm) button.getTag();
-//        controller.performAction(AlarmController.ACTION.OPEN_ADD_EVENT, alarm, false);
+//        controller.performAction(AlarmController.ACTION.OPEN_WRITE_REPORT, alarm, false);
 //    }
 //
 //

@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule;
-import com.guardswift.core.tasks.alarm.AlarmDownloaderIntentService;
 import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 
 import java.lang.annotation.Documented;
@@ -121,7 +120,7 @@ public class InjectingIntentService extends IntentService implements
 	/**
 	 * The dagger module associated with {@link InjectingIntentService}
 	 */
-	@Module(addsTo = InjectingApplicationModule.class, injects = {AlarmDownloaderIntentService.class, RegisterGeofencesIntentService.class}, library = true)
+	@Module(addsTo = InjectingApplicationModule.class, injects = {RegisterGeofencesIntentService.class}, library = true)
 	public static class InjectingIntentServiceModule {
 		Context mContext;
 		android.app.IntentService mIntentService;

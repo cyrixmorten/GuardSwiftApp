@@ -298,8 +298,8 @@ public class AddEventViewPagerFragment extends InjectingFragment {
         }
 
         // @Override
-        // public CharSequence getPageTitle(int position) {
-        // switch (position) {
+        // public CharSequence getPageTitle(int clientPosition) {
+        // switch (clientPosition) {
         // case 0:
         // return getString(R.string.title_event_type);
         // case 1:

@@ -5,8 +5,8 @@ import android.content.Context;
 import com.google.common.collect.Lists;
 import com.guardswift.dagger.InjectingApplication;
 import com.guardswift.persistence.cache.ParseCache;
-import com.guardswift.persistence.parse.execution.regular.Circuit;
-import com.guardswift.persistence.parse.execution.regular.CircuitStarted;
+import com.guardswift.persistence.parse.execution.task.regular.Circuit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 
 import org.joda.time.DateTime;
 

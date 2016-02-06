@@ -36,7 +36,7 @@ import dk.alexandra.positioning.wifi.WiFiPositionListener;
 import dk.alexandra.positioning.wifi.tools.WiFiPositioning;
 
 /**
- * Service that provides WiFi position updates.
+ * Service that provides WiFi clientPosition updates.
  * <p/>
  * To use this service start it and bind to broadcasts like this:
  * <code>
@@ -128,7 +128,7 @@ public class WiFiPositioningService extends InjectingService implements WiFiPosi
 //
 //                        List<CircuitUnit> arrivedNotEnded = new ArrayList<CircuitUnit>();
 //                        for (CircuitUnit circuitUnit: circuitUnits) {
-//                            if (circuitUnit.isArrived() && !circuitUnit.isFinished() && circuitUnit.hasCheckPoints()) {
+//                            if (circuitUnit.isStarted() && !circuitUnit.isFinished() && circuitUnit.hasCheckPoints()) {
 //                                arrivedNotEnded.addUnique(circuitUnit);
 //                            }
 //                        }

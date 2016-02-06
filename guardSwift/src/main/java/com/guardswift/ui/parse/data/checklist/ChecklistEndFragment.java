@@ -104,7 +104,7 @@
 //	}
 //
 //	@Override
-//	public void onListItemClick(ListView l, View v, int position, long id) {
+//	public void onListItemClick(ListView l, View v, int clientPosition, long id) {
 //		int items = getListView().getCount();
 //		int checked = getListView().getCheckedItemCount();
 //		if (items == checked) {

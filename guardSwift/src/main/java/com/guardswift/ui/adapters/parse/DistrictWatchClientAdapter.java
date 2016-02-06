@@ -134,7 +134,7 @@
 //        timesArrived.setText(getContext().getString(R.string.times_supervised,
 //                districtWatchClient.getTimesArrived(), districtWatchClient.getSupervisions()));
 //
-//        if (only_visited || districtWatchClient.isArrived()) {
+//        if (only_visited || districtWatchClient.isStarted()) {
 //            v.setBackground(getContext().getResources().getDrawable(
 //                    R.drawable.x_highlight_grey));
 //            arrived.setVisibility(View.GONE);
@@ -183,7 +183,7 @@
 ////                DistrictWatchClientCreateEventActivity.class);
 ////        getContext().startActivity(intent);
 //
-//        controller.performAction(TaskController.ACTION.OPEN_ADD_EVENT, districtWatchClient, false);
+//        controller.performAction(TaskController.ACTION.OPEN_WRITE_REPORT, districtWatchClient, false);
 //
 //        Analytics.eventTaskTrend(Analytics.EventAction.CreateEvent, Analytics.EventLabelTask.Overview);
 //

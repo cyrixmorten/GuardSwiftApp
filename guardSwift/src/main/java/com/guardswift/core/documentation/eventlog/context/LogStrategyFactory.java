@@ -13,8 +13,9 @@ public class LogStrategyFactory implements LogContextFactory {
 
     List<LogContextStrategy> logStrategies = Lists.newArrayList();
 
-    public LogStrategyFactory(Context context) {
-        logStrategies.add(new LogCurrentGuardStrategy(context));
+    public LogStrategyFactory() {
+
+        logStrategies.add(new LogCurrentGuardStrategy());
         logStrategies.add(new LogCurrentActivityStrategy());
         logStrategies.add(new LogCurrentLocationStrategy());
         logStrategies.add(new LogDeviceInfoStrategy());

@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.ui.common.UpdateFloatingActionButtonPageChangeListener;
+import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
 import com.guardswift.ui.view.slidingtab.SlidingTabLayout;
 
 import java.util.List;
@@ -80,6 +82,23 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 
         changeListener = new UpdateFloatingActionButtonPageChangeListener(getContext(), mPagerAdapter, floatingActionButton);
         mViewPager.addOnPageChangeListener(changeListener);
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                Fragment fragment = mPagerAdapter.getItem(mViewPager.getCurrentItem());
+                for (Fragment frag : mPagerAdapter.getFragments()) {
+                    if (frag != null && frag instanceof FragmentVisibilityListener) {
+                        if (frag.equals(fragment)) {
+                            Log.w(TAG, "Fragment became visible: " + position);
+                            ((FragmentVisibilityListener)frag).fragmentBecameVisible();
+                        } else {
+                            ((FragmentVisibilityListener)frag).fragmentBecameInvisible();
+                        }
+                    }
+                }
+                super.onPageSelected(position);
+            }
+        });
 
 
         tabs.setDistributeEvenly(true);
@@ -88,7 +107,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 //        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
 //
 //            @Override
-//            public int getIndicatorColor(int position) {
+//            public int getIndicatorColor(int clientPosition) {
 //                return getResources().getColor(R.color.tabsScrollColor);
 //            }
 //        });
@@ -111,6 +130,10 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 
         public TasksPagerAdapter(FragmentManager fm) {
             super(fm);
+        }
+
+        public List<Fragment> getFragments() {
+            return Lists.newArrayList(getTabbedFragments().values());
         }
 
         @Override

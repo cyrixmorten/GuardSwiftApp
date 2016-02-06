@@ -300,7 +300,7 @@
     <string name="add_client_location">Placering hos kunden</string>
     <string name="title_people">Personer</string>
     <string name="title_activity_add_event">AddEventActivity</string>
-    <string name="click_to_add_x">Klik for at tilføje %1$s</string>
+    <string name="click_to_add_x">Klik her for at tilføje %1$s</string>
     <string name="location">placering</string>
     <string name="remarks">bemærkninger</string>
     <string name="people">personer</string>
@@ -318,6 +318,34 @@
     <string name="tip_click_contact_to_call">Tip: klik på kontaktperson for at ringe op</string>
     <string name="clients">Kunder</string>
     <string name="static_guarding">Fast vagt</string>
+    <string name="title_active">Aktive</string>
+    <string name="title_finished">Afsluttede</string>
+    <string name="create_new">Opret ny</string>
+    <string name="new_static_guarding">Opret fastvagt rapport</string>
+    <string name="existing_reports">Rapporter</string>
+    <string name="select_client">Vælg kunde</string>
+    <string name="static_guarding_reports">Fastvagt rapporter</string>
+    <string name="accept">Accepter</string>
+    <string name="creating_report">Opretter rapport</string>
+    <string name="title_pending">Afventer</string>
+    <string name="static_guarding_report">Vagtrapport</string>
+    <string name="begin_static_guarding_at_client">Påbegynd fastvagt hos %1$s</string>
+    <string name="title_finish">Afslut</string>
+    <string name="started">Mødt ind</string>
+    <string name="title_drawer_clients">Kunder</string>
+    <string name="send_report">Afsend rapport</string>
+    <string name="is_sent_to_contacts">Sendes til kontaktpersoner</string>
+    <string name="no_receivers">Ingen modtagere!</string>
+    <string name="report_empty">Rapporten er tom</string>
+    <string name="title_summary">Opsummering</string>
+    <string name="sending_reprt">Afsender rapport...</string>
+    <string name="error">Fejl</string>
+    <string name="question_logout_after_sending_report">Rapporten er nu afsendt til kunden, og vagten er meldt afsluttet.\n\nØnsker du at logge af GuardSwift?</string>
+    <string name="bootstrapping_parseobjects_failed">Der skete en fejl i opstarten af GuardSwift, sandsynligvis fordi enheden ikke kan skabe forbindelse til internettet.\n\nPrøv igen?</string>
+    <string name="new_event">Ny hændelse</string>
+    <string name="view_report">Rapport</string>
+    <string name="title_suggestions">Forslag</string>
+    <string name="report_history">Rapport historik</string>
 
 
 </resources>

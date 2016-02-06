@@ -101,7 +101,7 @@
 //
 ////    private AdapterView.OnItemSelectedListener itemSelectedListener = new AdapterView.OnItemSelectedListener() {
 ////        @Override
-////        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+////        public void onItemSelected(AdapterView<?> parent, View view, int clientPosition, long id) {
 ////
 ////        }
 ////

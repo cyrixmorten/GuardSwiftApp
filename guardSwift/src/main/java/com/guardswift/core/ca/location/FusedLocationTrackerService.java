@@ -243,16 +243,16 @@ public class FusedLocationTrackerService extends InjectingService {
             int radius = task.getGeofenceStrategy().getGeofenceRadius();
 
             if (distance <= radius) {
-                tasksWithinGeofence.add(task.getParseObject().getObjectId());
+                tasksWithinGeofence.add(task.getGeofenceId());
             }
 
             if (tasksCache.isWithinGeofence(task)) {
                 if (distance > radius) {
-                    tasksMovedOutsideGeofence.add(task.getParseObject().getObjectId());
+                    tasksMovedOutsideGeofence.add(task.getGeofenceId());
                 }
             } else {
                 if (distance < radius) {
-                    tasksMovedWithinGeofence.add(task.getParseObject().getObjectId());
+                    tasksMovedWithinGeofence.add(task.getGeofenceId());
                 }
             }
 

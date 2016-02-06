@@ -15,6 +15,7 @@ import com.guardswift.util.FileIO;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.ProgressCallback;
@@ -31,19 +32,20 @@ import bolts.Task;
 @ParseClassName("LocationTracker")
 public class LocationTracker extends ExtendedParseObject {
 
-    public static final String PIN = "LocationTracker";
-
+    private static String TAG = LocationTracker.class.getSimpleName();
+    
     public static final String installation = "installation";
     public static final String circuit = "circuit";
     public static final String guard = "guard";
     public static final String sampleStart = "sampleStart";
     public static final String sampleEnd = "sampleEnd";
     public static final String minutesSampled = "minutesSampled";
-    public static final String position = "position";
+    public static final String position = "clientPosition";
     public static final String clientTimestamp = "clientTimestamp";
 
     public static final String gpsData = "gpsData";
     public static final String gpsFile = "gpsFile";
+    
 
     // Holds in-memory locations until either persisted as local file or uploaded
 //    private JSONArray locations;
@@ -54,8 +56,8 @@ public class LocationTracker extends ExtendedParseObject {
     }
 
     @Override
-    public String getPin() {
-        return PIN;
+    public String getParseClassName() {
+        return LocationTracker.class.getSimpleName();
     }
 
 
@@ -65,7 +67,7 @@ public class LocationTracker extends ExtendedParseObject {
 ////        ParseInstallation installation = ParseInstallation.getCurrentInstallation();
 //
 //        GPSTracker gpsTracker = new GPSTracker();
-//        gpsTracker.put(GPSTracker.position, location);
+//        gpsTracker.put(GPSTracker.clientPosition, location);
 //        gpsTracker.put(GPSTracker.gpsFile, locations);
 //        gpsTracker.put(GPSTracker.gpsData, locations);
 //        if (circuit != null) gpsTracker.put(GPSTracker.circuit, circuit);
@@ -103,7 +105,7 @@ public class LocationTracker extends ExtendedParseObject {
 
 //    private static void get(Guard guard, GetCallback<LocationTracker> callback) {
 //
-//        Log.d(PIN, "get existing");
+//        Log.d(TAG, "get existing");
 //
 //        new LocationTracker.QueryBuilder(true).matching(guard).build().getFirstInBackground(callback);
 //    }
@@ -139,10 +141,10 @@ public class LocationTracker extends ExtendedParseObject {
     }
 
     public static String getLocalFileNameForCurrentGuard(Guard guard) throws IllegalStateException {
-        if (!guard.isDataAvailable()) {
+        if (guard == null || !guard.isDataAvailable()) {
             return "";
         }
-        return PIN + "." + guard.getGuardId() + guard.getName();
+        return TAG + "." + guard.getGuardId() + guard.getName();
     }
 
     public static Task<String> uploadForGuard(final Context context, final Guard guard, final ProgressCallback progressCallback) {
@@ -152,11 +154,11 @@ public class LocationTracker extends ExtendedParseObject {
 
     }
 //    public void restoreLocationsFromFile(Context context) throws JSONException {
-//        Log.d(PIN, "restoreLocationsFromFile");
+//        Log.d(TAG, "restoreLocationsFromFile");
 //        String fileName = getLocalFileNameForCurrentGuard(getGuard());
 //        String locationsStr = FileIO.readFromFile(context, fileName);
 //        locations = new JSONArray(locationsStr);
-//        Log.d(PIN, "restoreLocationsFromFile restored " + locations.length());
+//        Log.d(TAG, "restoreLocationsFromFile restored " + locations.length());
 //    }
 
 //    private JSONArray concatArray(JSONArray... arrs)
@@ -176,18 +178,18 @@ public class LocationTracker extends ExtendedParseObject {
 //            Log.d(TAG, "appendLocationsToFile: " + fileName);
 //            Log.d(TAG, Arrays.toString(context.fileList()));
 //            if (Arrays.asList(context.fileList()).contains(fileName)) {
-//                Log.d(PIN, "Has previous locations file named: " + fileName);
+//                Log.d(TAG, "Has previous locations file named: " + fileName);
 //                String prevLocStr = FileIO.readFromFile(context, fileName);
 //                if (!prevLocStr.isEmpty()) {
 //                    try {
 //                        JSONArray prevLoc = new JSONArray(prevLocStr);
 //                        locations = concatArray(prevLoc, locations);
 //                    } catch (JSONException e) {
-//                        new HandleException(context, PIN, "Get previous GPSTracker locations from file", e);
+//                        new HandleException(context, TAG, "Get previous GPSTracker locations from file", e);
 //                    }
 //                }
 //            } else {
-//                Log.d(PIN, "No locations file found named: " + fileName);
+//                Log.d(TAG, "No locations file found named: " + fileName);
 //            }
 //            FileIO.writeToFile(context, fileName, Context.MODE_PRIVATE, locations.toString());
 //            locations = new JSONArray();
@@ -200,7 +202,7 @@ public class LocationTracker extends ExtendedParseObject {
 
         final Task<String>.TaskCompletionSource taskResult = Task.create();
 
-        Log.d(PIN, "upload");
+        Log.d(TAG, "upload");
 
         try {
             String string = FileIO.readFromFile(context, LocationTracker.getLocalFileNameForCurrentGuard(guard));
@@ -216,23 +218,23 @@ public class LocationTracker extends ExtendedParseObject {
                     @Override
                     public void done(ParseException e) {
                         if (e != null) {
-                            new HandleException(context, PIN, "upload gpsFile", e);
+                            new HandleException(context, TAG, "upload gpsFile", e);
                             taskResult.setError(e);
                         } else {
-                            Log.d(PIN, "Associate gps file and submit GPSTracker");
+                            Log.d(TAG, "Associate gps file and submit GPSTracker");
 
                             put(LocationTracker.gpsFile, file);
 
                             saveInBackground(new SaveCallback() {
                                 @Override
                                 public void done(ParseException e) {
-                                    Log.d(PIN, "Save GPSTracker callback " + e);
+                                    Log.d(TAG, "Save GPSTracker callback " + e);
                                     if (e != null) {
-                                        new HandleException(context, PIN, "saveAsync GPSTracker", e);
+                                        new HandleException(context, TAG, "saveAsync GPSTracker", e);
                                     }
 
                                     boolean successfullyDeleted = getLocalFileForCurrentGuard(guard).delete();
-                                    Log.d(PIN, "Delete local gpsFile - success: " + successfullyDeleted);
+                                    Log.d(TAG, "Delete local gpsFile - success: " + successfullyDeleted);
 
                                 }
                             });
@@ -243,10 +245,10 @@ public class LocationTracker extends ExtendedParseObject {
                 }, progressCallback);
             }
         } catch (IllegalStateException e) {
-            Log.e(PIN, "Get local file name", e);
+            Log.e(TAG, "Get local file name", e);
             taskResult.setError(e);
         } catch (IOException e) {
-            Log.e(PIN, "Read local file", e);
+            Log.e(TAG, "Read local file", e);
             e.printStackTrace();
             taskResult.setError(e);
         }
@@ -293,7 +295,7 @@ public class LocationTracker extends ExtendedParseObject {
     public static class QueryBuilder extends ParseQueryBuilder<LocationTracker> {
 
         public QueryBuilder(boolean fromLocalDatastore) {
-            super(PIN, fromLocalDatastore, ParseQuery.getQuery(LocationTracker.class));
+            super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery.getQuery(LocationTracker.class));
         }
 
         @Override

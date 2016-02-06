@@ -81,6 +81,9 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
     }
 
     private void updateLocations() {
+        if (getActivity() == null || !isAdded() || mAdapter == null) {
+            return;
+        }
 
         locations = mClient.getLocations();
 
@@ -90,10 +93,9 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
         for (ClientLocation clientLocationObject : locations) {
             all_options.add(clientLocationObject.getLocation());
         }
-        if (mAdapter != null) {
-            resetSelections();
-            mAdapter.notifyDataSetInvalidated();
-        }
+
+        resetSelections();
+        mAdapter.notifyDataSetInvalidated();
     }
 
     @Bind(R.id.btn_footer)
@@ -318,7 +320,7 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
 
     @Override
     public void updateFloatingActionButton(Context context, android.support.design.widget.FloatingActionButton
-                                                   floatingActionButton) {
+            floatingActionButton) {
         floatingActionButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_add_location_white_18dp));
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override

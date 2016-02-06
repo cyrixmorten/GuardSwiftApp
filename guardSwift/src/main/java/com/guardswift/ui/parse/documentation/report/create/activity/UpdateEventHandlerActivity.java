@@ -147,7 +147,7 @@ public class UpdateEventHandlerActivity extends InjectingAppCompatActivity imple
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
-    @Bind(R.id.container)
+    @Bind(R.id.content)
     LinearLayout container;
 
     @Bind(R.id.footer)

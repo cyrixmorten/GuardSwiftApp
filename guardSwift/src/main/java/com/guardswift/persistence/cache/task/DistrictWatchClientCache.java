@@ -2,7 +2,7 @@ package com.guardswift.persistence.cache.task;
 
 import android.content.Context;
 
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchClient;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

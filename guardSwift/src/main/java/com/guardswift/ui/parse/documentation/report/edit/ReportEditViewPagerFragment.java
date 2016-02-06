@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.guardswift.R;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 
@@ -41,7 +42,11 @@ public class ReportEditViewPagerFragment extends AbstractTabsViewPagerFragment {
     public void onCreate(Bundle savedInstanceState) {
         fragmentMap = Maps.newLinkedHashMap();
         fragmentMap.put(getString(R.string.title_report), ReportEditListFragment.newInstance(gsTasksCache.getLastSelected()));
-        fragmentMap.put(getString(R.string.title_history), ReportHistoryListFragment.newInstance(gsTasksCache.getLastSelected()));
+        if (gsTasksCache.getLastSelected().getTaskType() == GSTask.TASK_TYPE.STATIC) {
+            fragmentMap.put(getString(R.string.title_summary), ReportSummaryFragment.newInstance((StaticTask) gsTasksCache.getLastSelected()));
+        } else {
+            fragmentMap.put(getString(R.string.title_suggestions), ReportSuggestionsListFragment.newInstance(gsTasksCache.getLastSelected()));
+        }
         super.onCreate(savedInstanceState);
     }
 

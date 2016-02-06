@@ -27,7 +27,6 @@ public class EventType extends ExtendedParseObject {
 //
 //    }
 
-	public static final String PIN = "EventType";
 
 	public static final String name = "name";
 	public static final String client = "client";
@@ -39,8 +38,8 @@ public class EventType extends ExtendedParseObject {
 	public static final String timesUsed = "timesUsed";
 
 	@Override
-	public String getPin() {
-		return PIN;
+	public String getParseClassName() {
+		return EventType.class.getSimpleName();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -62,7 +61,7 @@ public class EventType extends ExtendedParseObject {
 	public static class QueryBuilder extends ParseQueryBuilder<EventType> {
 
 		public QueryBuilder(boolean fromLocalDatastore) {
-			super(PIN, fromLocalDatastore, ParseQuery.getQuery(EventType.class));
+			super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery.getQuery(EventType.class));
 		}
 
 		@Override

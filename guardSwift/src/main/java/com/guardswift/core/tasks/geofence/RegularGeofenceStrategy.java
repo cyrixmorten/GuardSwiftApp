@@ -9,7 +9,7 @@ import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.execution.BaseTask;
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.FindCallback;
 import com.parse.ParseObject;

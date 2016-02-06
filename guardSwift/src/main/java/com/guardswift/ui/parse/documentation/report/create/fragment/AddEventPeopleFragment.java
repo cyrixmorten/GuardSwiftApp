@@ -23,6 +23,7 @@ import com.guardswift.persistence.parse.data.client.Person;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.adapters.SimpleMultichoiceArrayAdapter;
 import com.guardswift.ui.common.UpdateFloatingActionButton;
+import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
 import com.guardswift.util.Device;
 import com.guardswift.util.StringUtil;
@@ -79,6 +80,9 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
     }
 
     private void updateLocations() {
+        if (getActivity() == null || !isAdded() || mAdapter == null) {
+            return;
+        }
 
         people = mClient.getPeople();
 
@@ -88,10 +92,9 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
         for (Person clientLocationObject : people) {
             all_options.add(clientLocationObject.getName());
         }
-        if (mAdapter != null) {
-            resetSelections();
-            mAdapter.notifyDataSetInvalidated();
-        }
+
+        resetSelections();
+        mAdapter.notifyDataSetInvalidated();
     }
 
 
@@ -203,7 +206,7 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
 
     private void saveClient() {
         if (!device.isOnline()) {
-            Toast.makeText(getActivity(), getString(R.string.message_no_internet_connection), Toast.LENGTH_LONG).show();
+            new CommonDialogsBuilder.MaterialDialogs(getActivity()).missingInternetContent().show();
             return;
         }
 

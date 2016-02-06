@@ -27,7 +27,7 @@ public class GuardListFragment extends AbstractParseRecyclerFragment<Guard, Guar
     }
 
     @Override
-    protected ParseQueryAdapter.QueryFactory<Guard> getNetworkQueryFactory() {
+    protected ParseQueryAdapter.QueryFactory<Guard> createNetworkQueryFactory() {
         return new ParseQueryAdapter.QueryFactory<Guard>() {
             @Override
             public ParseQuery<Guard> create() {
@@ -37,8 +37,8 @@ public class GuardListFragment extends AbstractParseRecyclerFragment<Guard, Guar
     }
 
     @Override
-    protected ParseRecyclerQueryAdapter<Guard, GuardRecycleAdapter.GuardViewHolder> getRecycleAdapter() {
-        return new GuardRecycleAdapter(getNetworkQueryFactory());
+    protected ParseRecyclerQueryAdapter<Guard, GuardRecycleAdapter.GuardViewHolder> createRecycleAdapter() {
+        return new GuardRecycleAdapter(createNetworkQueryFactory());
     }
 
     @Override

@@ -93,7 +93,7 @@
                 style="@style/Base.TextAppearance.AppCompat.Body2"
                 android:text="@string/most_recent_activity_colon"/>
 
-            <include layout="@layout/gs_view_event" />
+            <include layout="@layout/gs_view_event_at_client" />
 
         </LinearLayout>
 

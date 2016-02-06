@@ -9,7 +9,7 @@ import com.guardswift.persistence.cache.task.DistrictWatchClientCache;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.event.EventLog.EventCodes;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchClient;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.ui.GuardSwiftApplication;
 
 import javax.inject.Inject;

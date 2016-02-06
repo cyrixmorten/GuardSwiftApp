@@ -18,6 +18,7 @@ import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
+import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventViewPagerFragment;
 import com.guardswift.util.Analytics;
@@ -113,7 +114,7 @@ public abstract class AbstractCreateEventHandlerActivity extends
             eventTypeCache.clearSelected();
         } else {
             eventBundle = savedInstanceState.getBundle(EXTRA_EVENT_BUNDLE);
-            currentPage = savedInstanceState.getInt(STATE_PAGE);
+            currentPage = savedInstanceState.getInt(STATE_PAGE, 0);
 
             fragment = (AddEventViewPagerFragment) getSupportFragmentManager().findFragmentByTag("addEventViewpagerFragmen");
             fragment.setPage(currentPage);
@@ -328,8 +329,9 @@ public abstract class AbstractCreateEventHandlerActivity extends
 
         saveEvent(event_type, amount, people, clientLocation, remarks);
 
+        GSTask task = taskCache.getLastSelected();
         // store remark tokens
-        if (remarks != null && !remarks.isEmpty()) {
+        if (remarks != null && !remarks.isEmpty() && task.getTaskType() != GSTask.TASK_TYPE.STATIC) {
 
             final EventType eventType = eventTypeCache.getSelected();
             final Client client = getClient();

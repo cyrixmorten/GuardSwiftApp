@@ -7,7 +7,7 @@ import android.support.v4.app.Fragment;
 import com.google.common.collect.Maps;
 import com.guardswift.R;
 import com.guardswift.persistence.cache.planning.DistrictWatchStartedCache;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchStarted;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 

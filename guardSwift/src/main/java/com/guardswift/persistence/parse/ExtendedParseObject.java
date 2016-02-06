@@ -3,6 +3,7 @@ package com.guardswift.persistence.parse;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.common.collect.Lists;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.eventbus.EventBusController;
 import com.parse.DeleteCallback;
@@ -20,7 +21,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 public abstract class ExtendedParseObject extends ParseObject {
 
@@ -51,7 +54,10 @@ public abstract class ExtendedParseObject extends ParseObject {
     public abstract void updateFromJSON(Context context, JSONObject jsonObject)
             throws JSONException;
 
-    public abstract String getPin();
+    public abstract String getParseClassName();
+    public String getPin() {
+        return ParseObject.DEFAULT_PIN;
+    };
 
 
 
@@ -89,23 +95,45 @@ public abstract class ExtendedParseObject extends ParseObject {
         });
     }
 
+    public  Task<Object> unpinAllPinnedToClass() {
+        Log.w(TAG, "Unpinning" + getPin());
+        return unpinAllInBackground(getPin())
+//        return getAllNetworkQuery().fromLocalDatastore().findInBackground().continueWithTask(new Continuation<List<ParseObject>, Task<Void>>() {
+//            @Override
+//            public Task<Void> then(Task<List<ParseObject>> task) throws Exception {
+//                Log.w(TAG, "Unpinning from " + getPin() + " objects: " + task.getResult().size());
+//                return ParseObject.unpinAllInBackground(task.getResult());
+//            }
+//        }).
+        .continueWithTask(new Continuation<Void, Task<Integer>>() {
+            @Override
+            public Task<Integer> then(Task<Void> task) throws Exception {
+                Log.w(TAG, "Successfully unpinned " + getPin());
+
+                return new ParseQuery<ParseObject>(getPin()).fromLocalDatastore().countInBackground();
+            }
+        }).continueWith(new Continuation<Integer, Object>() {
+                    @Override
+                    public Object then(Task<Integer> task) throws Exception {
+                        if (task.getError() != null) {
+                            new HandleException(TAG, "unpin class" + getPin(), task.getError());
+                        }
+
+                        int count = task.getResult();
+                        if (count == 0) {
+                            Log.w(TAG, "Unpin for " + getPin() + " completed successfully");
+                        } else {
+                            Log.e(TAG, "Still has objects in LDS after unpinning " + getPin() + ": " + count);
+                        }
+                        return null;
+                    }
+                });
+
+
+    }
+
     public <T extends ParseObject> Task<List<ParseObject>> updateAllAsync() {
-        final Task<List<ParseObject>>.TaskCompletionSource successful = Task.create();
-
-        updateAll(getAllNetworkQuery().setLimit(1000), new DataStoreCallback<ParseObject>() {
-
-            @Override
-            public void success(List<ParseObject> objects) {
-                successful.setResult(objects);
-            }
-
-            @Override
-            public void failed(ParseException e) {
-                successful.setError(e);
-            }
-        });
-
-        return successful.getTask();
+        return updateAll(getAllNetworkQuery(), 1000);
     }
 
     @SuppressWarnings("unchecked")
@@ -113,27 +141,29 @@ public abstract class ExtendedParseObject extends ParseObject {
         updateAll((ParseQuery<T>) getAllNetworkQuery().setLimit(1000), callback);
     }
 
-    public <T extends ParseObject> Task<List<T>> updateAll(ParseQuery<T> query) {
+
+    public <T extends ParseObject> Task<List<T>> updateAll(ParseQuery<T> query, int limit) {
 
         if (query == null) {
             query = getAllNetworkQuery();
         }
 
-        final Task<List<T>>.TaskCompletionSource successful = Task.create();
+        final bolts.TaskCompletionSource promise = new TaskCompletionSource();
 
-        updateAll(query.setLimit(1000), new DataStoreCallback<T>() {
+
+        updateAll(query.setLimit(limit), new DataStoreCallback<T>() {
             @Override
             public void success(List<T> objects) {
-                successful.setResult(objects);
+                promise.setResult(objects);
             }
 
             @Override
             public void failed(ParseException e) {
-
+                promise.setError(e);
             }
         });
 
-        return successful.getTask();
+        return promise.getTask();
     }
 
 
@@ -143,8 +173,10 @@ public abstract class ExtendedParseObject extends ParseObject {
             @Override
             public void done(List<T> objects, ParseException e) {
 //                Log.d(TAG, "Updating " + getPin() + " " + objects.size());
-                unpinThenPinAllUpdates(objects, e,
-                        callback);
+//                unpinThenPinAllUpdates(objects, e,
+//                        callback);
+
+                pinAllUpdates(objects, getPin(), callback);
             }
 
         });
@@ -235,54 +267,58 @@ public abstract class ExtendedParseObject extends ParseObject {
                 });
             }
         });
-
     }
 
-    public <T extends ParseObject> void unpinThenPinAllUpdates(
-            final List<T> objects) {
-
-        unpinThenPinAllUpdates(objects, null, null);
-    }
-    private <T extends ParseObject> void unpinThenPinAllUpdates(
-            final List<T> objects,
-            ParseException fetchFromNetworkException,
-            final DataStoreCallback<T> callback) {
-
-        if (fetchFromNetworkException != null || objects == null) {
-            if (callback != null)
-                callback.failed(fetchFromNetworkException);
-            return;
-        }
-
-        final String pin = getPin();
-
-
+//    public <T extends ParseObject> void unpinThenPinAllUpdates(
+//            final List<T> objects) {
+//
+//        unpinThenPinAllUpdates(objects, null, null);
+//    }
+//    private <T extends ParseObject> void unpinThenPinAllUpdates(
+//            final List<T> objects,
+//            ParseException fetchFromNetworkException,
+//            final DataStoreCallback<T> callback) {
+//
+//        if (fetchFromNetworkException != null || objects == null) {
+//            if (callback != null)
+//                callback.failed(fetchFromNetworkException);
+//            return;
+//        }
+//
+//        final String pin = getPin();
+//
+//
 //        Log.i(TAG, "updateServerDataPin " + pin + " " + objects.size());
 //        Log.i(TAG, "remove existing - unpinning" + pin);
 //
-        ParseObject.unpinAllInBackground(objects, new DeleteCallback() {
-
-            @Override
-            public void done(ParseException e) {
-
-                if (e != null) {
-                    Log.e(TAG, "Pinning failed - unpinAllInBackground");
-                    if (callback != null)
-                        callback.failed(e);
-                    return;
-                }
-
-                Log.i(TAG, "unpin " + pin + " complete");
-                pinAllUpdates(objects, pin, callback);
-
-            }
-
-        });
-
-    }
+//        ParseObject.unpinAllInBackground(objects, new DeleteCallback() {
+//
+//            @Override
+//            public void done(ParseException e) {
+//
+//                if (e != null) {
+//                    Log.e(TAG, "Pinning failed - unpinAllInBackground");
+//                    if (callback != null)
+//                        callback.failed(e);
+//                    return;
+//                }
+//
+//                Log.i(TAG, "unpin " + pin + " complete");
+//                pinAllUpdates(objects, pin, callback);
+//
+//            }
+//
+//        });
+//
+//    }
 
     private <T extends ParseObject> void pinAllUpdates(final List<T> objects,
                                                                 final String pin, final DataStoreCallback<T> callback) {
+
+        if (objects == null) {
+            callback.success(Lists.<T>newArrayList());
+            return;
+        }
 //        Log.i(TAG, "pinning " + pin + "...");
         // ParseObject.pinAllInBackground(objects, objects, new SaveCallback() {
         ParseObject.pinAllInBackground(pin, objects, new SaveCallback() {
@@ -321,6 +357,30 @@ public abstract class ExtendedParseObject extends ParseObject {
         return jsonObject;
     }
 
+    protected ParseObject getLDSFallbackParseObject(String key) {
+        ParseObject object = getParseObject(key);
+        if (object == null)
+                return null;
+
+        if (object.isDataAvailable()) {
+            return object;
+        } else {
+            try {
+                object.fetchFromLocalDatastore();
+            } catch (ParseException e) {
+                new HandleException(TAG, "getLDSFallbackParseObject LDS failed: " + key + " objectId " + object.getObjectId(), e);
+            } finally {
+                if (!object.isDataAvailable()) {
+                    try {
+                        object.fetchIfNeeded(); // as a last resort make a network call
+                    } catch (ParseException e) {
+                        new HandleException(TAG, "getLDSFallbackParseObject NETWORK failed: " + " objectId " + object.getObjectId(), e);
+                    }
+                }
+            }
+            return object;
+        }
+    }
 //    public void pinAndSaveEventually() {
 //        pinAndSaveEventually(null);
 //    }

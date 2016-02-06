@@ -54,9 +54,9 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
      *
      * @return ParseQueryAdapter.QueryFactory
      */
-    protected abstract ParseQueryAdapter.QueryFactory<T> getNetworkQueryFactory();
+    protected abstract ParseQueryAdapter.QueryFactory<T> createNetworkQueryFactory();
 
-    protected abstract ParseRecyclerQueryAdapter<T, U> getRecycleAdapter();
+    protected abstract ParseRecyclerQueryAdapter<T, U> createRecycleAdapter();
 
     /**
      * triggered on UI relevant events, return true if this view should refresh contents based on the event
@@ -68,6 +68,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
     // block multiple loads on LDS
     private boolean mLoading;
+    private boolean mLoadingNetwork;
     private ParseRecyclerQueryAdapter<T, U> mAdapter;
 
     public AbstractParseRecyclerFragment() {
@@ -83,16 +84,21 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
         super.onCreate(savedInstanceState);
     }
 
+
     private void refreshLocalData() {
+        mLoadingNetwork = true;
         mLoading = true;
         if (mAdapter != null) {
+            if (mAdapter.getItems().isEmpty()) {
+                mRecycleView.showProgress();
+            }
+
             mAdapter.loadObjects();
 
             Log.e(TAG, "fetch from network");
-            getObjectInstance().updateAll(getNetworkQueryFactory().create()).onSuccess(new Continuation<List<T>, Object>() {
+            getObjectInstance().updateAll(createNetworkQueryFactory().create(), 100).onSuccess(new Continuation<List<T>, Object>() {
                 @Override
                 public Object then(Task<List<T>> task) throws Exception {
-                    Log.e(TAG, "fetch success");
                     if (mAdapter != null) {
                         mAdapter.loadObjects();
                     }
@@ -102,14 +108,20 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
                 @Override
                 public Object then(Task<Object> task) throws Exception {
                     if (task.isFaulted()) {
-                        new HandleException(TAG, "refreshLocalData", task.getError());
+                        new HandleException(TAG, "refreshLocalDataTask", task.getError());
                     }
+
+                    mLoadingNetwork = false;
+
+
                     return null;
                 }
             });
 
         }
+
     }
+
 
 
     @Override
@@ -136,14 +148,13 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
         ButterKnife.bind(this, rootView);
         // must be after ButterKnife.bind as it may rely on CoordinatorLayout
-        mAdapter = getRecycleAdapter();
+        mAdapter = createRecycleAdapter();
         mAdapter.setFromLocalDataStore(true);
 
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
 
         mRecycleView.setLayoutManager(llm);
-        mRecycleView.setAdapter(mAdapter);
 
         mRecycleView.setRefreshingColorResources(android.R.color.holo_orange_light, android.R.color.holo_blue_light, android.R.color.holo_green_light, android.R.color.holo_red_light);
         mRecycleView.setRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -155,18 +166,18 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
             }
         });
 
-        mRecycleView.showProgress();
-
-        // load freshly updated objects when view is resumed
-        // delay a bit to allow navigation drawer to close before loading
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                refreshLocalData();
-            }
-        }, 1000);
+        // initial load
+        refreshLocalData();
 
         return rootView;
+    }
+
+    protected ParseRecyclerQueryAdapter<T, U> getAdapter() {
+        return mAdapter;
+    }
+
+    protected SuperRecyclerView getRecycleView() {
+        return mRecycleView;
     }
 
 
@@ -192,11 +203,21 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
             if (e != null) {
                 new HandleException(getActivity(), TAG, "recycleQueryListener", e);
             }
-            mLoading = false;
-            if (mRecycleView != null) {
-                mRecycleView.hideProgress();
-                mRecycleView.showRecycler();
+
+            mLoading = mLoadingNetwork;
+
+            if (mRecycleView != null && mRecycleView.getAdapter() == null && objects != null && ((objects.size() > 0) || !mLoading)) {
+                // delay to allow the rycleview to layout
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mRecycleView != null) {
+                            mRecycleView.setAdapter(mAdapter);
+                        }
+                    }
+                }, 500);
             }
+
         }
 
         @Override

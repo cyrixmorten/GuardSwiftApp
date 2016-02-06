@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.guardswift.R;
@@ -22,6 +23,8 @@ import butterknife.ButterKnife;
 
 public class ReportEditActivity extends InjectingAppCompatActivity {
 
+
+    private static final String TAG = ReportEditActivity.class.getSimpleName();
 
     public static void start(Context context, GSTask gsTask) {
 
@@ -48,6 +51,7 @@ public class ReportEditActivity extends InjectingAppCompatActivity {
         setSupportActionBar(toolbar);
 
         GSTask task = gsTasksCache.getLastSelected();
+        Log.e(TAG, "TASK: " + task);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -63,7 +67,6 @@ public class ReportEditActivity extends InjectingAppCompatActivity {
         getSupportFragmentManager().beginTransaction().replace(R.id.content, ReportEditViewPagerFragment.newInstance(task)).commit();
 
     }
-
 
 
     @Override

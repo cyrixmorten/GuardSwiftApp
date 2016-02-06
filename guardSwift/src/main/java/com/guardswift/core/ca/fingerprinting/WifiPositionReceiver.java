@@ -83,7 +83,7 @@ public class WifiPositionReceiver extends InjectingBroadcastReceiver {
 
 
             checkpoint.setChecked(true);
-            checkpoint.pinInBackground(ClientLocation.PIN, new SaveCallback() {
+            checkpoint.pinInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
                     if (e != null) {

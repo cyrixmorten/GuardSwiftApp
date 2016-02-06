@@ -39,13 +39,11 @@ import com.guardswift.eventbus.events.MissingInternetEvent;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseObjectFactory;
-import com.guardswift.persistence.parse.data.AlarmGroup;
 import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Device;
 import com.guardswift.util.ToastHelper;
 import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQueryAdapter;
 import com.parse.ParseUser;
 import com.squareup.picasso.Picasso;
 
@@ -58,9 +56,7 @@ import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
 
@@ -130,8 +126,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     TextView version;
 
 
-    private ParseQueryAdapter<AlarmGroup> mAlarmQueryAdapter;
-
     private DownloadUpdate mDownloadTask;
 
     public static void start(Context context) {
@@ -170,6 +164,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     @OnClick(R.id.sign_in_button)
     public void login(BootstrapButton button) {
+//        parseModule.clearData();
         attemptLogin();
     }
 
@@ -255,7 +250,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
                 for (final Guard guard : guards) {
                     if (guard.getGuardId() == guardId) {
-                        bootstrapParseObjectsLocally().continueWith(new Continuation<Void, Void>() {
+                        GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this).continueWith(new Continuation<Void, Void>() {
 
                             @Override
                             public Void then(Task<Void> result) throws Exception {
@@ -264,8 +259,9 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                                     return null;
                                 }
 
-                                parseModule.login(guard);
                                 showProgress(false);
+                                mGuardIdView.setText("");
+                                parseModule.login(guard);
 
                                 return null;
                             }
@@ -301,72 +297,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
 
 
-    private Task<Void> bootstrapParseObjectsLocally() {
 
-        final AtomicInteger updateClassProgress = new AtomicInteger(0);
-        final AtomicInteger updateClassTotal = new AtomicInteger(0);
-
-        // Prepare dialog showing progress
-        final MaterialDialog updateDialog = new MaterialDialog.Builder(this)
-                .title(R.string.working)
-                .content(R.string.please_wait)
-                .progress(false, 0, true)
-                .show();
-
-        Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
-            @Override
-            public List<ParseObject> then(Task<List<ParseObject>> task) throws Exception {
-                int currentProgress = updateClassProgress.incrementAndGet();
-                int outOfTotal = updateClassTotal.get();
-
-                int percentProgress = (currentProgress/outOfTotal)*100;
-
-                if (updateDialog != null) {
-                    updateDialog.setMaxProgress(outOfTotal);
-                    updateDialog.setProgress(currentProgress);
-                }
-
-                Log.d(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
-
-                return null;
-            }
-        };
-
-
-
-        Task<List<ParseObject>> districtWatchClient = parseObjectFactory
-                .getDistrictWatchClient().updateAllAsync();
-        Task<List<ParseObject>> circuitUnit = parseObjectFactory
-                .getCircuitUnit().updateAllAsync();
-        Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted()
-                .updateAllAsync();
-        Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory
-                .getDistrictWatchStarted().updateAllAsync();
-        Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType()
-                .updateAllAsync();
-
-
-        ArrayList<Task<List<ParseObject>>> tasks = new ArrayList<>();
-        tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
-        tasks.add(circuitUnit.onSuccess(updateClassSuccess));
-        tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
-        tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
-        tasks.add(eventTypes.onSuccess(updateClassSuccess));
-
-        updateClassTotal.set(tasks.size());
-
-
-        return Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task<Void> result) throws Exception {
-                // no matter what happens e.g. success/error, the dialog should be dismissed
-                if (updateDialog!= null) {
-                    updateDialog.dismiss();
-                }
-                return null;
-            }
-        });
-    }
 
     @Override
     public void onBackPressed() {
@@ -390,9 +321,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     @Override
     protected void onResume() {
         new FetchLatestVersion(this).execute();
-
-        if (mAlarmQueryAdapter != null)
-            mAlarmQueryAdapter.loadObjects();
 
         super.onResume();
     }
@@ -599,7 +527,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                     URL url = new URL(UPDATE_DOWNLOAD_URL);
                     c = (HttpURLConnection) url.openConnection();
                     c.setRequestMethod("GET");
-                    c.setDoOutput(true);
+//                    c.setDoOutput(true);
                     c.connect();
 
                     InputStream is = c.getInputStream();
@@ -621,6 +549,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                     fos.close();
                     is.close();
                 } catch (Exception e) {
+                    new HandleException(GuardLoginActivity.this, TAG, "download update", e);
                     toastMsg = context
                             .getString(R.string.title_internet_missing);
                 }

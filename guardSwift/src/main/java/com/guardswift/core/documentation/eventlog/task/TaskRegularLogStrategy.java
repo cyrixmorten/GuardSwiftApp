@@ -1,6 +1,6 @@
 package com.guardswift.core.documentation.eventlog.task;
 
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.parse.ParseObject;
 
@@ -9,7 +9,6 @@ import com.parse.ParseObject;
  */
 public class TaskRegularLogStrategy implements LogTaskStrategy {
 
-    public static final String reportId = "reportId"; // an id generated to uniquely identify relevant report for this log entry
 
     public static final String circuitStarted = "circuitStarted";
     public static final String circuitUnit = "circuitUnit";
@@ -33,7 +32,6 @@ public class TaskRegularLogStrategy implements LogTaskStrategy {
             toParseObject.put(TaskRegularLogStrategy.timeEnd, circuitUnit.getTimeEnd());
             toParseObject.put(TaskRegularLogStrategy.timeEndString, circuitUnit.getTimeEndString());
             toParseObject.put(TaskRegularLogStrategy.circuitStarted, circuitUnit.getCircuitStarted());
-            toParseObject.put(TaskRegularLogStrategy.reportId, circuitUnit.getReportId());
         }
     }
 

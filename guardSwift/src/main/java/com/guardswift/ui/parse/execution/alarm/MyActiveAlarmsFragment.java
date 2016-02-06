@@ -26,7 +26,7 @@
 //	@Override
 //	public ParseQuery<Alarm> getQueryNetwork() {
 //		Guard guard = guardCache.getLoggedIn();
-//		return new Alarm().getQueryBuilder(false).whereNotEnded().matching(guard).sortedByCreateDate()
+//		return new Alarm().getQueryBuilder(false).active().matching(guard).sortedByCreateDate()
 //				.build();
 //	}
 //

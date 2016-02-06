@@ -13,6 +13,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.ProgressBar;
@@ -24,9 +25,11 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.persistence.cache.data.ClientCache;
 import com.guardswift.persistence.cache.data.EventTypeCache;
+import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
+import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
 import com.guardswift.util.StringUtil;
@@ -68,6 +71,8 @@ public class AddEventRemarkFragment extends InjectingFragment implements
     ClientCache clientCache;
     @Inject
     EventTypeCache eventTypeCache;
+    @Inject
+    GSTasksCache tasksCache;
 
     private ParseQueryAdapter<EventRemark> mAdapter;
 
@@ -80,6 +85,8 @@ public class AddEventRemarkFragment extends InjectingFragment implements
     ProgressBar progress;
     @Bind(R.id.list_previous_remarks)
     ListView prevous_remarks_list;
+    @Bind(R.id.btn_clear)
+    ImageView btnClear;
 //    @Bind(R.id.header)
 //    TextView header;
 //	@Bind(R.id.list_empty_previous_remarks) TextView prevous_remarks_list_empty;
@@ -96,6 +103,9 @@ public class AddEventRemarkFragment extends InjectingFragment implements
 //        header.setText(getString(R.string.remark).toUpperCase());
 
         Log.e(TAG, "onCreateView");
+        if (tasksCache.getLastSelected().getTaskType() == GSTask.TASK_TYPE.STATIC) {
+            btnClear.setVisibility(View.GONE);
+        }
 
         remarkEditText.addTextChangedListener(new TextWatcher() {
 
@@ -189,12 +199,14 @@ public class AddEventRemarkFragment extends InjectingFragment implements
     boolean remarkSuggestionsFound;
     private void prepareRemarkSuggestions() {
         Log.e(TAG, "prepareRemarkSuggestions");
+        if (tasksCache.getLastSelected().getTaskType() == GSTask.TASK_TYPE.STATIC) {
+            // do not show suggestions for static tasks
+            return;
+        }
 
         final Client client = clientCache.getSelected();
         final EventType eventType = eventTypeCache.getSelected();
 
-        if (progress != null)
-            progress.setVisibility(View.INVISIBLE);
 
         if (client == null || eventType == null)
             return;
@@ -237,7 +249,7 @@ public class AddEventRemarkFragment extends InjectingFragment implements
                 }
 
                 if (!remarkSuggestionsFound) {
-                    EventRemark.pinAllInBackground(EventRemark.PIN, list);
+                    EventRemark.pinAllInBackground(list);
                 }
 
                 if (getActivity() != null && remarkEditText != null) {

@@ -5,7 +5,6 @@ import android.content.Context;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.guardswift.dagger.InjectingApplication;
-import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.Preferences;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.execution.GSTask;
@@ -60,16 +59,18 @@ public class GSTasksCache extends Preferences {
 
         boolean acceptsTask(GSTask task);
         GSTask getConcreteTask();
+
+        void clear();
     }
 
 
     private List<TaskCache> taskCaches = Lists.newArrayList();
 
     @Inject
-    public GSTasksCache(@InjectingApplication.InjectingApplicationModule.ForApplication Context context, AlarmCache alarmCache, CircuitUnitCache circuitUnitCache, DistrictWatchClientCache districtWatchClientCache) {
+    public GSTasksCache(@InjectingApplication.InjectingApplicationModule.ForApplication Context context, StaticTaskCache staticTaskCache, CircuitUnitCache circuitUnitCache, DistrictWatchClientCache districtWatchClientCache) {
         super(context, "GSTasksCache");
 
-        taskCaches.add(alarmCache);
+        taskCaches.add(staticTaskCache);
         taskCaches.add(circuitUnitCache);
         taskCaches.add(districtWatchClientCache);
     }
@@ -81,6 +82,7 @@ public class GSTasksCache extends Preferences {
                 taskCache.setSelected(task);
 
                 put(LAST_SELECTED_TASK_TYPE, task.getTaskType().toString());
+
                 return;
             }
         }
@@ -90,6 +92,7 @@ public class GSTasksCache extends Preferences {
 
     public GSTask getLastSelected() {
         String lastSelectedTaskType = getString(LAST_SELECTED_TASK_TYPE);
+
         for (GSTask task: new TaskFactory().getTasks()) {
             GSTask.TASK_TYPE type = task.getTaskType();
             if (type.toString().equals(lastSelectedTaskType)) {
@@ -196,10 +199,11 @@ public class GSTasksCache extends Preferences {
         }
     }
 
-    public void clearGeofencedTasks() {
+    public void clear() {
         for (TaskCache taskCache: taskCaches) {
-            taskCache.clearGeofenced();
+            taskCache.clear();
         }
+        super.clear();
     }
 
 
@@ -224,9 +228,9 @@ public class GSTasksCache extends Preferences {
             }
         }
         // notify UI
-        if (movedWithin) {
-            EventBusController.postUIUpdate(task, 1000);
-        }
+//        if (movedWithin) {
+//            EventBusController.postUIUpdate(task, 1000);
+//        }
         return movedWithin;
     }
 
@@ -260,9 +264,9 @@ public class GSTasksCache extends Preferences {
             }
         }
         // notify UI
-        if (movedOutside) {
-            EventBusController.postUIUpdate(task, 1000);
-        }
+//        if (movedOutside) {
+//            EventBusController.postUIUpdate(task, 1000);
+//        }
         return movedOutside;
     }
 

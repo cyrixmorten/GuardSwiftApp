@@ -1,9 +1,10 @@
 package com.guardswift.persistence.parse.execution;
 
 import com.google.common.collect.Lists;
-import com.guardswift.persistence.parse.execution.alarm.Alarm;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchClient;
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
+//import com.guardswift.persistence.parse.execution.task.alarm.Alarm;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 
 import java.util.List;
 
@@ -18,7 +19,8 @@ public class TaskFactory {
 
         tasks = Lists.newArrayList();
 
-        tasks.add(new Alarm());
+//        tasks.add(new Alarm());
+        tasks.add(new StaticTask());
         tasks.add(new CircuitUnit());
         tasks.add(new DistrictWatchClient());
     }

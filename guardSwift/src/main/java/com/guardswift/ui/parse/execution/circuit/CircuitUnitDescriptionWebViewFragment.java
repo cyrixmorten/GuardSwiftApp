@@ -14,7 +14,7 @@ import com.guardswift.R;
 import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.cache.task.CircuitUnitCache;
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 
 import javax.inject.Inject;

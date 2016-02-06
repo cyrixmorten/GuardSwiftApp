@@ -86,13 +86,13 @@
 //    }
 //
 //    @Override
-//	public void onListItemClick(ListView l, View v, int position, long id) {
-//        if (position == 0) {
+//	public void onListItemClick(ListView l, View v, int clientPosition, long id) {
+//        if (clientPosition == 0) {
 //            enterAmount();
 //        } else {
-//            selectAmount(values[position]);
+//            selectAmount(values[clientPosition]);
 //        }
-//		super.onListItemClick(l, v, position, id);
+//		super.onListItemClick(l, v, clientPosition, id);
 //	}
 //
 //    private void preSelectAmount(int amount) {

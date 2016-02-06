@@ -31,7 +31,6 @@ import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.activity.GSTaskCreateReportActivity;
 import com.guardswift.util.Analytics;
-import com.parse.CountCallback;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
@@ -91,18 +90,18 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
         setHasOptionsMenu(true);
 
 
-        mClient = (getTaskPointer() != null) ? getTaskPointer().getClient() : null;
-        if (mClient != null) {
-            new EventLog.QueryBuilder(true).matching(mClient).excludeAutomatic().whereIsReportEntry().build().countInBackground(new CountCallback() {
-                @Override
-                public void done(int count, ParseException e) {
-                    if (count == 0) {
-                        Log.e(TAG, "UPDATING EVENTLOGS");
-                        new EventLog().updateDatastore(getTaskPointer());
-                    }
-                }
-            });
-        }
+//        mClient = (getTaskPointer() != null) ? getTaskPointer().getClient() : null;
+//        if (mClient != null) {
+//            new EventLog.QueryBuilder(true).matching(mClient).excludeAutomatic().whereIsReportEntry().build().countInBackground(new CountCallback() {
+//                @Override
+//                public void done(int count, ParseException e) {
+//                    if (count == 0) {
+//                        Log.e(TAG, "UPDATING EVENTLOGS");
+//                        new EventLog().updateDatastore(getTaskPointer());
+//                    }
+//                }
+//            });
+//        }
 
     }
 

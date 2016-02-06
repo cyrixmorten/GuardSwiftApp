@@ -93,28 +93,28 @@
 //		}
 //
 //		@Override
-//		public Fragment getItem(int position) {
-//			Log.d(TAG, "getItem: " + position);
-//			if (position == POSITION_NEW) {
+//		public Fragment getItem(int clientPosition) {
+//			Log.d(TAG, "getItem: " + clientPosition);
+//			if (clientPosition == POSITION_NEW) {
 //				return AllPendingAlarmsFragment.newInstance();
 //			}
-//			if (position == POSITION_CLOSED) {
+//			if (clientPosition == POSITION_CLOSED) {
 //				return AllClosedAlarmsFragment.newInstance();
 //			}
 //			return null;
 //		}
 //
 //		@Override
-//		public CharSequence getPageTitle(int position) {
-//			Log.d(TAG, "getItem: " + position);
-//			if (position == POSITION_NEW) {
+//		public CharSequence getPageTitle(int clientPosition) {
+//			Log.d(TAG, "getItem: " + clientPosition);
+//			if (clientPosition == POSITION_NEW) {
 //				return getActivity().getString(R.string.title_alarms_new);
 //			}
-//			if (position == POSITION_CLOSED) {
+//			if (clientPosition == POSITION_CLOSED) {
 //				return getActivity().getString(R.string.title_alarms_old);
 //			}
 //
-//			return super.getPageTitle(position);
+//			return super.getPageTitle(clientPosition);
 //		}
 //
 //		@Override

@@ -79,7 +79,7 @@ public class LocationModule {
         return new JSONObject(map);
     }
 
-    // Reverse geocode GPS position
+    // Reverse geocode GPS clientPosition
     public static Task<GeocodedAddress> reverseGeocodedAddress(Context context) {
         final Task<GeocodedAddress>.TaskCompletionSource result = Task.create();
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.parse.ParseClassName;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import org.json.JSONObject;
@@ -12,7 +13,6 @@ import org.json.JSONObject;
 @ParseClassName("Person")
 public class Person extends ExtendedParseObject implements Comparable<Person> {
 
-	public static final String PIN = "Person";
 
 	public static final String name = "name";
 	public static final String desc = "desc";
@@ -25,8 +25,8 @@ public class Person extends ExtendedParseObject implements Comparable<Person> {
 	}
 
 	@Override
-	public String getPin() {
-		return PIN;
+	public String getParseClassName() {
+		return Person.class.getSimpleName();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -53,7 +53,7 @@ public class Person extends ExtendedParseObject implements Comparable<Person> {
 	public static class QueryBuilder extends ParseQueryBuilder<Person> {
 
 		public QueryBuilder(boolean fromLocalDatastore) {
-			super(PIN, fromLocalDatastore, ParseQuery
+			super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery
 					.getQuery(Person.class));
 		}
 

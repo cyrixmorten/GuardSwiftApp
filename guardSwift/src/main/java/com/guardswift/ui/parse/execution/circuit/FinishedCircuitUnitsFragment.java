@@ -8,8 +8,8 @@ import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.regular.CircuitStarted;
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
@@ -45,7 +45,7 @@ public class FinishedCircuitUnitsFragment extends AbstractTasksRecycleFragment<C
     }
 
     @Override
-    public ParseQueryAdapter.QueryFactory<CircuitUnit> getNetworkQueryFactory() {
+    public ParseQueryAdapter.QueryFactory<CircuitUnit> createNetworkQueryFactory() {
         return new ParseQueryAdapter.QueryFactory<CircuitUnit>() {
 
             @Override

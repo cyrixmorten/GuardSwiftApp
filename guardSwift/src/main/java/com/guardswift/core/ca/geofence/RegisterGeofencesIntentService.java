@@ -157,10 +157,10 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
 
         int withinKm = 2;
-        geofencingModule.queryAllGeofenceTasks(withinKm).onSuccess(new Continuation<List<GSTask>, Object>() {
+        geofencingModule.queryAllGeofenceTasks(withinKm).onSuccess(new Continuation<List<BaseTask>, Object>() {
             @Override
-            public Object then(Task<List<GSTask>> task) throws Exception {
-                List<GSTask> tasks = task.getResult();
+            public Object then(Task<List<BaseTask>> task) throws Exception {
+                List<BaseTask> tasks = task.getResult();
                 Log.d(TAG, "Found task scheduled for geofencing: " + tasks.size());
                 if (tasks.size() > 100) {
                     Crashlytics.log("Task size limit reached at for user " + ParseUser.getCurrentUser().getUsername() + " at " + LocationModule.Recent.getLastKnownLocation().toString() + " with " + tasks.size() + " tasks");
@@ -169,10 +169,10 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
                 List<GSTask> geofencedTasks = Lists.newArrayList();
                 List<Geofence> geofences = Lists.newArrayList();
-                for (GSTask geofencedTask : tasks) {
+                for (BaseTask geofencedTask : tasks) {
                     ParseGeoPoint position = geofencedTask.getPosition();
                     float radius = geofencedTask.getGeofenceStrategy().getGeofenceRadius();
-                    Geofence geofence = createGeofence(geofencedTask.getObjectId(), position, radius);
+                    Geofence geofence = createGeofence(geofencedTask.getGeofenceId(), position, radius);
                     geofences.add(geofence);
 
                     geofencedTasks.add(geofencedTask);
@@ -204,9 +204,9 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 //                    List<Geofence> geofences = Lists.newArrayList();
 //                    for (ParseObject parseObject : parseObjects) {
 //                        GSTask geofencedTask = (GSTask) parseObject;
-//                        ParseGeoPoint position = geofencedTask.getPosition();
+//                        ParseGeoPoint clientPosition = geofencedTask.getPosition();
 //                        float radius = geofencedTask.getGeofenceStrategy().getGeofenceRadius();
-//                        Geofence geofence = createGeofence(parseObject.getObjectId(), position, radius);
+//                        Geofence geofence = createGeofence(parseObject.getObjectId(), clientPosition, radius);
 //                        geofences.addUnique(geofence);
 //
 //                        geofencedTasks.addUnique(geofencedTask);

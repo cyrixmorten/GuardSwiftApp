@@ -120,12 +120,38 @@
             android:visibility="gone">
 
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:divider="@drawable/divider_dark"
+                android:showDividers="middle">
+
+                <Button
+                    android:id="@+id/btn_view_report"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="@string/view_report" />
+
+                <Button
+                    android:id="@+id/btn_new_event"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:text="@string/new_event" />
+
+            </LinearLayout>
+
+
             <Button
-                android:id="@+id/btn_write_report"
+                android:id="@+id/btn_report_history"
                 style="?android:attr/borderlessButtonStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/write_report" />
+                android:text="@string/report_history" />
 
             <Button
                 android:id="@+id/btn_task_description"

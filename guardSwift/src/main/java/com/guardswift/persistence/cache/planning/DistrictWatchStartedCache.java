@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.guardswift.dagger.InjectingApplication;
 import com.guardswift.persistence.cache.ParseCache;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchStarted;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

@@ -18,10 +18,9 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 
-import com.guardswift.core.receiver.PluginControlReceiver;
-import com.guardswift.core.tasks.controller.AlarmController;
 import com.guardswift.core.tasks.controller.CircuitUnitController;
 import com.guardswift.core.tasks.controller.DistrictWatchClientController;
+import com.guardswift.core.tasks.controller.StaticTaskController;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.ParseCachePreferences;
 import com.guardswift.persistence.cache.data.ClientCache;
@@ -30,10 +29,10 @@ import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.documentaion.EventLogCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.cache.planning.DistrictWatchStartedCache;
-import com.guardswift.persistence.cache.task.AlarmCache;
 import com.guardswift.persistence.cache.task.CircuitUnitCache;
 import com.guardswift.persistence.cache.task.DistrictWatchClientCache;
 import com.guardswift.persistence.cache.task.GSTasksCache;
+import com.guardswift.persistence.cache.task.StaticTaskCache;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Device;
@@ -127,7 +126,6 @@ public abstract class InjectingApplication extends Application implements
 	 */
 	@Module(injects = {
 			GuardSwiftApplication.class,
-			PluginControlReceiver.class,
 			// - Cache
 			ParseCacheFactory.class,
 			ParseCachePreferences.class,
@@ -136,7 +134,7 @@ public abstract class InjectingApplication extends Application implements
 			DistrictWatchStartedCache.class,
 			// Tasks
 			GSTasksCache.class, // adds extra functionality to task caches
-			AlarmCache.class,
+			StaticTaskCache.class,
 			CircuitUnitCache.class,
 			DistrictWatchClientCache.class,
 			// Data
@@ -165,8 +163,8 @@ public abstract class InjectingApplication extends Application implements
 
 		@Provides
 		@Singleton
-		AlarmController provideAlarmController() {
-			return new AlarmController();
+		StaticTaskController provideStaticTaskController() {
+			return new StaticTaskController();
 		}
 
 		@Provides

@@ -5,22 +5,27 @@ import android.util.Log;
 
 import com.google.android.gms.location.DetectedActivity;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.eventbus.EventBusController;
+import com.guardswift.core.tasks.geofence.NoGeofenceStrategy;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.TaskFactory;
+import com.parse.ParseException;
 import com.parse.ParseQuery;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 import static com.guardswift.dagger.InjectingApplication.InjectingApplicationModule.ForApplication;
 
@@ -83,7 +88,6 @@ public class GeofencingModule {
             return;
 
 
-
 //        synchronized (enterLock) {
 //            Log.d(TAG, "-- !onEnter! " + Arrays.toString(strings));
 
@@ -94,48 +98,19 @@ public class GeofencingModule {
             public Object then(Task<List<GSTask>> listTask) throws Exception {
 
 
-
 //                int moved = 0;
                 for (GSTask task : listTask.getResult()) {
 
-                    Log.e(TAG, "enterGeofence: " + task.getClientName());
-
                     task.getGeofenceStrategy().enterGeofence();
                     if (tasksCache.moveWithinGeofence(task)) {
-                        Log.e(TAG, "moved inside");
-//                        task.getActivityStrategy().handleActivityInsideGeofence(latestDetectedActivity);
-//                        moved++;
+                        Log.e(TAG, "enterGeofence: " + task.getClientName() + " from GPS: " + usingGPS);
                     }
-
-//                    if (!GeofencingModule.Recent.getWithinGeofence().contains(task)) {
-//                        Log.d(TAG, "Adding task " + task.getParseObject().getObjectId());
-//                        GeofencingModule.Recent.addWithinGeofence(task);
-//                        task.getGeofenceStrategy().enterGeofence(context, task, usingGPS);
-//                    }
-
-//                    if (BuildConfig.DEBUG) {
-//                            GSTask.EVENT_TYPE event_type = (usingGPS) ? GSTask.EVENT_TYPE.GEOFENCE_ENTER_GPS : GSTask.EVENT_TYPE.GEOFENCE_ENTER;
-//                            new EventLog.Builder(context)
-//                                    .taskPointer(task, event_type)
-//                                    .event(context.getString(R.string.event_geofence_enter))
-//                                    .automatic(true)
-//                                    .eventCode(EventLog.EventCodes.AUTOMATIC_GEOFENCE_ENTER).saveAsync();
-//                    }
-
-//                    GSTask.getActivityStrategy().handleActivityInsideGeofence(context, ActivityDetectionModule.Recent.getDetectedActivity());
                 }
-
-                if (!listTask.getResult().isEmpty()) {
-                    EventBusController.postUIUpdate();
-                }
-
-//                Log.d(TAG, "-- onEnter " + moved + " " + Arrays.toString(strings));
 
 
                 return null;
             }
         });
-//        }
 
     }
 
@@ -183,9 +158,9 @@ public class GeofencingModule {
 //                    GSTask.getActivityStrategy().handleActivityOutsideGeofence(context, ActivityDetectionModule.Recent.getDetectedActivity());
                 }
 
-                if (!listTask.getResult().isEmpty()) {
-                    EventBusController.postUIUpdate();
-                }
+//                if (!listTask.getResult().isEmpty()) {
+//                    EventBusController.postUIUpdate();
+//                }
 
 //                Log.d(TAG, "-- onExit " + moved + " " + Arrays.toString(strings));
 
@@ -214,13 +189,13 @@ public class GeofencingModule {
 
     }
 
-    public Task<List<GSTask>> queryAllGeofenceTasks(int withinKm) {
+    public Task<List<BaseTask>> queryAllGeofenceTasks(int withinKm) {
 
         Log.d(TAG, "queryAllGeofenceTasks withinKm: " + withinKm);
 
-        final Task<List<GSTask>>.TaskCompletionSource successful = Task.create();
+        final TaskCompletionSource<List<BaseTask>> promise = new TaskCompletionSource<>();
 
-        final List<GSTask> geofenceResults = Lists.newArrayList();
+        final List<BaseTask> geofenceResults = Lists.newArrayList();
 
         ArrayList<Task<List<BaseTask>>> queryGeofenceTasks = new ArrayList<>();
 
@@ -248,42 +223,79 @@ public class GeofencingModule {
             @Override
             public Void then(Task<Void> result) throws Exception {
                 if (result.isCancelled() || result.isFaulted()) {
-                    successful.setError(result.getError());
+                    promise.setError(result.getError());
                     new HandleException(TAG, " queryAllGeofenceTasks", result.getError());
                 } else {
-                    successful.setResult(geofenceResults);
+                    promise.setResult(geofenceResults);
                 }
                 return null;
             }
         });
 
-        return successful.getTask();
+        return promise.getTask();
     }
 
 
     /**
-     * Locates all tasks matching the objectId's passed as param
+     * Locates all tasks matching the geofenceIds passed as param
      *
-     * @param objectIds
+     * @param geofenceIds
      * @return
      */
-    private Task<List<GSTask>> findTasksMatching(String[] objectIds) {
-        final Task<List<GSTask>>.TaskCompletionSource successful = Task.create();
+    private Task<List<GSTask>> findTasksMatching(final String[] geofenceIds) {
+        final TaskCompletionSource<List<GSTask>> promise = new TaskCompletionSource<>();
 
         final List<GSTask> geofenceResults = Lists.newArrayList();
 
         ArrayList<Task<List<BaseTask>>> tasks = new ArrayList<>();
 
         List<BaseTask> allGSTasks = new TaskFactory().getTasks();
+        Map<String, List<String>> objectIdsMap = mapGeofenceIdsToClassName(geofenceIds);
 
-        for (BaseTask gsTask : allGSTasks) {
-            ParseQuery<BaseTask> geofencedQuery = gsTask.getQueryBuilder(true).matchingObjectIds(objectIds).build();
-            Task<List<BaseTask>> geofencedTask = geofencedQuery.findInBackground();
-            geofencedTask.onSuccess(new Continuation<List<BaseTask>, Object>() {
+        for (final BaseTask gsTask : allGSTasks) {
+            if (gsTask.getGeofenceStrategy() instanceof NoGeofenceStrategy) {
+                Log.d(TAG, "Skipping " + gsTask.getParseClassName());
+                continue;
+            }
+
+            List<String> objectIdsList = objectIdsMap.get(gsTask.getParseClassName());
+            if (objectIdsList == null) {
+                Log.w(TAG, "Did not found objectIdList for " + gsTask.getParseClassName());
+                continue;
+            }
+
+            final String[] objectIdsArray = objectIdsList.toArray(new String[objectIdsList.size()]);
+            final ParseQuery<BaseTask> geofencedQueryNetwork = gsTask.getQueryBuilder(false).matchingObjectIds(objectIdsArray).build();
+            ParseQuery<BaseTask> geofencedQueryLDS = new ParseQuery<BaseTask>(geofencedQueryNetwork).fromLocalDatastore();
+            Task<List<BaseTask>> geofencedTask = geofencedQueryLDS.findInBackground();
+            geofencedTask.continueWith(new Continuation<List<BaseTask>, Object>() {
                 @Override
-                public Object then(Task<List<BaseTask>> listTask) throws Exception {
-                    for (BaseTask taskObject : listTask.getResult()) {
-                        geofenceResults.add((GSTask) taskObject);
+                public Object then(Task<List<BaseTask>> task) throws Exception {
+                    if (task.getError() != null) {
+                        new HandleException(TAG, "findTasksMatching", task.getError());
+                        Log.e(TAG, "findTasksMatching failed for " + gsTask.getParseClassName());
+                        Log.e(TAG, Arrays.toString(objectIdsArray));
+
+
+                        if (task.getError() instanceof ParseException && ((ParseException)task.getError()).getCode() == ParseException.OBJECT_NOT_FOUND) {
+                            // attempt to recover
+                            // might be deprecated due to GuardSwiftApplication bootstrapParseObjectsLocally
+                            Log.w(TAG, "Updating failed objectIds in LDS");
+                            gsTask.updateAll(geofencedQueryNetwork, 100).continueWith(new Continuation<List<BaseTask>, Object>() {
+                                @Override
+                                public Object then(Task<List<BaseTask>> task) throws Exception {
+                                    if (task.getError() != null) {
+                                        new HandleException(TAG, "findTasksMatching recover", task.getError());
+                                        return null;
+                                    }
+                                    Log.w(TAG, "Successfully updated LDS for " + gsTask.getParseClassName() + " " + Arrays.toString(objectIdsArray));
+                                    return null;
+                                }
+                            });
+                        }
+
+                    } else if (task.getResult() != null) {
+                        geofenceResults.addAll(task.getResult());
                     }
                     return null;
                 }
@@ -298,16 +310,42 @@ public class GeofencingModule {
             @Override
             public Void then(Task<Void> result) throws Exception {
                 if (result.isCancelled() || result.isFaulted()) {
-                    successful.setError(result.getError());
-                    new HandleException(TAG, " findTasksMatching", result.getError());
+                    promise.setError(result.getError());
                 } else {
-                    successful.setResult(geofenceResults);
+                    promise.setResult(geofenceResults);
                 }
                 return null;
             }
         });
 
-        return successful.getTask();
+        return promise.getTask();
+    }
+
+    private Map<String, List<String>> mapGeofenceIdsToClassName(String[] geofenceIds) {
+        /**
+         * Extract only those objectIds belonging to this task
+         */
+        Map<String, List<String>> objectIdsMap = Maps.newHashMap();
+        for (String geofenceId : geofenceIds) {
+            String[] parts = geofenceId.split(",");
+            String parseClassName = parts[0];
+            String objectId = parts[1];
+
+            if (!objectIdsMap.containsKey(parseClassName)) {
+                objectIdsMap.put(parseClassName, Lists.<String>newArrayList());
+            }
+            List<String> objectIds = objectIdsMap.get(parseClassName);
+            objectIds.add(objectId);
+
+            objectIdsMap.put(parseClassName, objectIds);
+        }
+
+        Log.w(TAG, "mapGeofenceIdsToClassName");
+        for (String parseClassName : objectIdsMap.keySet()) {
+            Log.w(TAG, parseClassName + ": " + Arrays.toString(objectIdsMap.get(parseClassName).toArray()));
+        }
+
+        return objectIdsMap;
     }
 
 

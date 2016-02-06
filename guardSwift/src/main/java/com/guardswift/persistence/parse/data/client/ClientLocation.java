@@ -7,6 +7,7 @@ import com.guardswift.core.ca.FingerprintingModule;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.parse.ParseClassName;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -71,7 +72,6 @@ public class ClientLocation extends ExtendedParseObject implements Comparable<Cl
 //        }
 //    }
     
-    public static final String PIN = "ClientLocation";
 
     private static final String location = "location";
     private static final String isCheckpoint = "isCheckpoint";
@@ -83,8 +83,8 @@ public class ClientLocation extends ExtendedParseObject implements Comparable<Cl
     private static final String isChecked = "isChecked";
 
     @Override
-    public String getPin() {
-        return PIN;
+    public String getParseClassName() {
+        return ClientLocation.class.getSimpleName();
     }
 
     public static ClientLocation create(String location, boolean isCheckpoint) {
@@ -199,7 +199,7 @@ public class ClientLocation extends ExtendedParseObject implements Comparable<Cl
     public static class QueryBuilder extends ParseQueryBuilder<ClientLocation> {
 
         public QueryBuilder(boolean fromLocalDatastore) {
-            super(PIN, fromLocalDatastore, ParseQuery
+            super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery
                     .getQuery(ClientLocation.class));
         }
 

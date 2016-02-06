@@ -1,24 +1,22 @@
 package com.guardswift.persistence.parse;
 
-import com.guardswift.persistence.parse.data.checklist.ChecklistCircuitEnding;
-import com.guardswift.persistence.parse.data.checklist.ChecklistCircuitStarting;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchUnit;
-import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.Guard;
-import com.guardswift.persistence.parse.data.Message;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.data.client.ClientContact;
 import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
+import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
-import com.guardswift.persistence.parse.execution.alarm.Alarm;
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchClient;
-import com.guardswift.persistence.parse.execution.regular.Circuit;
-import com.guardswift.persistence.parse.execution.regular.CircuitStarted;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatch;
-import com.guardswift.persistence.parse.execution.districtwatch.DistrictWatchStarted;
+import com.guardswift.persistence.parse.documentation.report.Report;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
+import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchUnit;
+import com.guardswift.persistence.parse.execution.task.regular.Circuit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,14 +27,15 @@ import javax.inject.Singleton;
 @Singleton
 public class ParseObjectFactory {
 
-	private final Alarm alarm;
-	private final ChecklistCircuitEnding checklistCircuitEnding;
-	private final ChecklistCircuitStarting checklistCircuitStarting;
+//	private final Alarm alarm;
+//	private final ChecklistCircuitEnding checklistCircuitEnding;
+//	private final ChecklistCircuitStarting checklistCircuitStarting;
 	private final Client client;
 	private final Circuit circuit;
 	private final CircuitUnit circuitUnit;
 	private final CircuitStarted circuitStarted;
-	private final Message message;
+	private final StaticTask staticTask;
+//	private final Message message;
 	private final DistrictWatch districtWatch;
 	private final DistrictWatchStarted districtWatchStarted;
 	private final DistrictWatchClient districtWatchClient;
@@ -48,18 +47,20 @@ public class ParseObjectFactory {
     private final ClientContact clientContact;
     private final ClientLocation clientLocation;
     private final LocationTracker locationTracker;
+	private final Report report;
 
 	private final List<ExtendedParseObject> allParseObjects;
 
 
     @Inject
 	public ParseObjectFactory() {
-		alarm = new Alarm();
-		checklistCircuitEnding = new ChecklistCircuitEnding();
-		checklistCircuitStarting = new ChecklistCircuitStarting();
+//		alarm = new Alarm();
+//		checklistCircuitEnding = new ChecklistCircuitEnding();
+//		checklistCircuitStarting = new ChecklistCircuitStarting();
 		circuit = new Circuit();
         circuitStarted = new CircuitStarted();
 		circuitUnit = new CircuitUnit();
+		staticTask = new StaticTask();
         client = new Client();
         clientContact = new ClientContact();
         clientLocation = new ClientLocation();
@@ -71,19 +72,19 @@ public class ParseObjectFactory {
         eventRemark = new EventRemark();
         eventType = new EventType();
         locationTracker = new LocationTracker();
-		message = new Message();
+//		message = new Message();
         guard = new Guard();
-
+		report = new Report();
 
 		allParseObjects = new ArrayList<ExtendedParseObject>();
-		allParseObjects.add(alarm);
-		allParseObjects.add(checklistCircuitEnding);
-		allParseObjects.add(checklistCircuitStarting);
+//		allParseObjects.add(alarm);
+//		allParseObjects.add(checklistCircuitEnding);
+//		allParseObjects.add(checklistCircuitStarting);
 		allParseObjects.add(client);
 		allParseObjects.add(circuit);
 		allParseObjects.add(circuitUnit);
 		allParseObjects.add(circuitStarted);
-		allParseObjects.add(message);
+//		allParseObjects.add(message);
 		allParseObjects.add(districtWatch);
 		allParseObjects.add(districtWatchStarted);
 		allParseObjects.add(districtWatchClient);
@@ -126,9 +127,9 @@ public class ParseObjectFactory {
 		return client;
 	}
 
-	public Alarm getAlarm() {
-		return alarm;
-	}
+//	public Alarm getAlarm() {
+//		return alarm;
+//	}
 
 	public EventRemark getEventRemark() {
 		return eventRemark;
@@ -138,14 +139,14 @@ public class ParseObjectFactory {
 		return circuitUnit;
 	}
 
-
-	public ChecklistCircuitEnding getChecklistCircuitEnding() {
-		return checklistCircuitEnding;
-	}
-
-	public ChecklistCircuitStarting getChecklistCircuitStarting() {
-		return checklistCircuitStarting;
-	}
+//
+//	public ChecklistCircuitEnding getChecklistCircuitEnding() {
+//		return checklistCircuitEnding;
+//	}
+//
+//	public ChecklistCircuitStarting getChecklistCircuitStarting() {
+//		return checklistCircuitStarting;
+//	}
 
 	public Circuit getCircuit() {
 		return circuit;
@@ -155,9 +156,9 @@ public class ParseObjectFactory {
 		return circuitStarted;
 	}
 
-	public Message getMessage() {
-		return message;
-	}
+//	public Message getMessage() {
+//		return message;
+//	}
 
 	public DistrictWatch getDistrictWatch() {
 		return districtWatch;

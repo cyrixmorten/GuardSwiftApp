@@ -7,6 +7,7 @@ import android.widget.TextView;
 
 import com.guardswift.R;
 import com.guardswift.persistence.parse.data.client.Client;
+import com.guardswift.ui.common.RecyclerViewClickListener;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
 import com.parse.ParseQueryAdapter;
@@ -18,11 +19,15 @@ public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapt
 
 	private static final String TAG = ClientAdapter.class.getSimpleName();
 
-	public ClientAdapter(final ParseQueryAdapter.QueryFactory<Client> factory) {
+	private static RecyclerViewClickListener clientClicked;
+
+	public ClientAdapter(final ParseQueryAdapter.QueryFactory<Client> factory, RecyclerViewClickListener clientClicked) {
 		super(factory);
+		this.clientClicked = clientClicked;
 	}
 
-	public static class ClientViewHolder extends PositionedViewHolder {
+
+	public static class ClientViewHolder extends PositionedViewHolder implements View.OnClickListener {
 
 		@Bind(R.id.clientName)
 		TextView clientName;
@@ -37,6 +42,14 @@ public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapt
 			super(itemView);
 
 			ButterKnife.bind(this, itemView);
+
+			itemView.setOnClickListener(this);
+		}
+
+
+		@Override
+		public void onClick(View view) {
+			clientClicked.recyclerViewListClicked(view, this.getAdapterPosition());
 		}
 	}
 
@@ -45,6 +58,8 @@ public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapt
 		View itemView = LayoutInflater.
 				from(parent.getContext()).
 				inflate(R.layout.gs_card_client, parent, false);
+
+
 		return new ClientViewHolder(itemView);
 	}
 

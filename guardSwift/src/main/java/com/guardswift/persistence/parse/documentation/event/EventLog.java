@@ -12,8 +12,8 @@ import com.guardswift.core.ca.FingerprintingModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.documentation.eventlog.context.LogContextStrategy;
 import com.guardswift.core.documentation.eventlog.context.LogStrategyFactory;
-import com.guardswift.core.documentation.eventlog.context.TaskLogStrategyFactory;
 import com.guardswift.core.documentation.eventlog.task.LogTaskStrategy;
+import com.guardswift.core.documentation.eventlog.task.TaskLogStrategyFactory;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.eventbus.EventBusController;
@@ -24,11 +24,11 @@ import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.alarm.Alarm;
-import com.guardswift.persistence.parse.execution.regular.CircuitStarted;
-import com.guardswift.persistence.parse.execution.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.util.GeocodedAddress;
 import com.parse.GetCallback;
+import com.parse.ParseACL;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -52,6 +52,8 @@ import bolts.Continuation;
 import bolts.Task;
 import dk.alexandra.positioning.wifi.AccessPoint;
 
+//import com.guardswift.persistence.parse.execution.task.alarm.Alarm;
+
 @ParseClassName("EventLog")
 public class EventLog extends ExtendedParseObject {
 
@@ -69,7 +71,6 @@ public class EventLog extends ExtendedParseObject {
 
     }
 
-    public static final String PIN = "EventLog";
 
 
     public static class EventCodes {
@@ -99,6 +100,10 @@ public class EventLog extends ExtendedParseObject {
         public static final int ALARM_OTHER = 124;
         public static final int ALARM_OTHER_REPORT = 125;
         public static final int ALARM_FORWARDED = 126;
+        public static final int STATIC_ARRIVED = 131;
+        public static final int STATIC_FINISHED = 132;
+        public static final int STATIC_ABORT = 133;
+        public static final int STATIC_OTHER = 134;
         public static final int GUARD_LOGIN = 200;
         public static final int GUARD_LOGOUT = 201;
         public static final int TASK_GPS_SUMMARY = 180;
@@ -146,7 +151,7 @@ public class EventLog extends ExtendedParseObject {
         }
 
         private void applyDefaultLogValues() {
-            List<LogContextStrategy> logStrategies = new LogStrategyFactory(context).getStrategies();
+            List<LogContextStrategy> logStrategies = new LogStrategyFactory().getStrategies();
 
             for (LogContextStrategy logStrategy : logStrategies) {
                 logStrategy.log(this.eventLog);
@@ -331,7 +336,7 @@ public class EventLog extends ExtendedParseObject {
 
 //        private Builder circuitUnit(CircuitUnit circuitUnit) {
 //            eventLog.setCircuitUnit(circuitUnit);
-//            if (circuitUnit.isArrived()) {
+//            if (circuitUnit.isStarted()) {
 //                try {
 //                    // Query locally for the newest circuitStarted
 //                    circuitStarted(CircuitStarted.Query.findFrom(circuitUnit.getCircuit()));
@@ -362,8 +367,14 @@ public class EventLog extends ExtendedParseObject {
 
         public void saveAsync(final GetCallback<EventLog> pinnedCallback) {
 
-            Log.e(TAG, "Save event " + eventLog.getEvent());
+            ParseACL acl = new ParseACL();
+            acl.setReadAccess(ParseUser.getCurrentUser(), true);
+            acl.setWriteAccess(ParseUser.getCurrentUser(), true);
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(false);
+            eventLog.setACL(acl);
 
+            Log.e(TAG, "Save event " + eventLog.getEvent());
 
             Log.w(TAG, "1) Geocode start");
             LocationModule.reverseGeocodedAddress(context).continueWith(new Continuation<GeocodedAddress, Object>() {
@@ -514,7 +525,6 @@ public class EventLog extends ExtendedParseObject {
 
 
     // pointers
-
     public static final String client = "client";
     public static final String districtWatchStarted = "districtWatchStarted";
     public static final String districtWatchClient = "districtWatchClient";
@@ -523,6 +533,7 @@ public class EventLog extends ExtendedParseObject {
     public static final String circuitUnit = "circuitUnit";
     public static final String districtWatchUnit = "districtWatchUnit";
     public static final String alarm = "alarm";
+    public static final String staticTask = "staticTask";
     // task
     public static final String taskId = "taskId";
     public static final String reportId = "reportId";
@@ -543,7 +554,7 @@ public class EventLog extends ExtendedParseObject {
     public static final String timeEnd = "timeEnd";
     public static final String timeEndString = "timeEndString";
     // event description
-    public static final String task_type = "task_type";
+    public static final String task_type = "task_type"; // not task specific , e.g. ARRIVE, OTHER, etc.
     public static final String task_event = "task_event";
     public static final String type = "type";
     public static final String eventType = "eventType";
@@ -594,8 +605,8 @@ public class EventLog extends ExtendedParseObject {
 
 
     @Override
-    public String getPin() {
-        return PIN;
+    public String getParseClassName() {
+        return EventLog.class.getSimpleName();
     }
 
     @SuppressWarnings("unchecked")
@@ -617,12 +628,11 @@ public class EventLog extends ExtendedParseObject {
     public static class QueryBuilder extends ParseQueryBuilder<EventLog> {
 
         public QueryBuilder(boolean fromLocalDatastore) {
-            super(PIN, fromLocalDatastore, ParseQuery.getQuery(EventLog.class));
+            super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery.getQuery(EventLog.class));
         }
 
         @Override
         public ParseQuery<EventLog> build() {
-            query.orderByDescending(EventLog.deviceTimestamp);
             return super.build();
         }
 
@@ -652,10 +662,10 @@ public class EventLog extends ExtendedParseObject {
             return this;
         }
 
-        public QueryBuilder matching(Alarm alarm) {
-            query.whereEqualTo(EventLog.alarm, alarm);
-            return this;
-        }
+//        public QueryBuilder matching(Alarm alarm) {
+//            query.whereEqualTo(EventLog.alarm, alarm);
+//            return this;
+//        }
 
         public QueryBuilder eventCode(int eventCode) {
             query.whereEqualTo(EventLog.eventCode, eventCode);
@@ -700,16 +710,7 @@ public class EventLog extends ExtendedParseObject {
          */
         public QueryBuilder whereIsReportEntry() {
 
-            query.whereContainedIn(eventCode, Arrays.asList(EventCodes.ALARM_OTHER, EventCodes.CIRCUITUNIT_OTHER, EventCodes.DISTRICTWATCH_OTHER));
-
-//            ParseQuery<EventLog> alarmEvents = ParseQuery.getQuery(EventLog.class);
-//            alarmEvents.whereEqualTo(eventCode, EventCodes.ALARM_OTHER);
-//            ParseQuery<EventLog> circuitUnitEvents = ParseQuery.getQuery(EventLog.class);
-//            circuitUnitEvents.whereEqualTo(eventCode, EventCodes.CIRCUITUNIT_OTHER);
-//            ParseQuery<EventLog> districtWatchEvents = ParseQuery.getQuery(EventLog.class);
-//            districtWatchEvents.whereEqualTo(eventCode, EventCodes.DISTRICTWATCH_OTHER);
-//
-//            appendQueries(alarmEvents, circuitUnitEvents, districtWatchEvents);
+            query.whereContainedIn(eventCode, Arrays.asList(EventCodes.STATIC_OTHER, EventCodes.ALARM_OTHER, EventCodes.CIRCUITUNIT_OTHER, EventCodes.DISTRICTWATCH_OTHER));
 
             return this;
         }
@@ -722,6 +723,16 @@ public class EventLog extends ExtendedParseObject {
 
         public QueryBuilder notMatchingReportId(String reportId) {
             query.whereNotEqualTo(EventLog.reportId, reportId);
+            return this;
+        }
+
+        public QueryBuilder orderByDescendingTimestamp() {
+            query.orderByDescending(EventLog.deviceTimestamp);
+            return this;
+        }
+
+        public QueryBuilder orderByAscendingTimestamp() {
+            query.orderByAscending(EventLog.deviceTimestamp);
             return this;
         }
     }
@@ -1066,8 +1077,8 @@ public class EventLog extends ExtendedParseObject {
         return (has(remarks)) ? getString(remarks) : "";
     }
 
-//    private void setPosition(ParseGeoPoint position) {
-//        put(EventLog.position, position);
+//    private void setPosition(ParseGeoPoint clientPosition) {
+//        put(EventLog.clientPosition, clientPosition);
 //    }
 
     public ParseGeoPoint getPosition() {
@@ -1097,32 +1108,48 @@ public class EventLog extends ExtendedParseObject {
         put(EventLog.amount, amount);
     }
 
+    public GSTask.TASK_TYPE getTaskType() {
+        if (has(EventLog.alarm)) {
+            return GSTask.TASK_TYPE.ALARM;
+        }
+        if (has(EventLog.circuitUnit)) {
+            return GSTask.TASK_TYPE.REGULAR;
+        }
+        if (has(EventLog.districtWatchClient)) {
+            return GSTask.TASK_TYPE.DISTRICTWATCH;
+        }
+        if (has(EventLog.staticTask)) {
+            return GSTask.TASK_TYPE.STATIC;
+        }
+        return null;
+    }
+
     /**
      * Fetches EventLog matching the given task and pin them to the datastore
      *
      * @param task
      */
-    public void updateDatastore(GSTask task) {
-        EventLog.QueryBuilder builder = EventLog.getQueryBuilder(false);
-        builder.matching(task.getClient());
-        builder.excludeAutomatic();
-        builder.whereIsReportEntry();
-        updateAll(builder.build(), new ExtendedParseObject.DataStoreCallback<EventLog>() {
-            @Override
-            public void success(List<EventLog> objects) {
-                // yay
-                EventBusController.postUIUpdate(objects);
-            }
-
-            @Override
-            public void failed(ParseException e) {
-                if (e != null) {
-                    new HandleException(TAG, "updateDatastore", e);
-                }
-//                Crashlytics.log(ParseUser.getCurrentUser().getUsername() + " failed to update EventLog data for client " + getClient().getName());
-            }
-        });
-    }
+//    public void updateDatastore(GSTask task) {
+//        EventLog.QueryBuilder builder = EventLog.getQueryBuilder(false);
+//        builder.matching(task.getClient());
+//        builder.excludeAutomatic();
+//        builder.whereIsReportEntry();
+//        updateAll(builder.build(), new ExtendedParseObject.DataStoreCallback<EventLog>() {
+//            @Override
+//            public void success(List<EventLog> objects) {
+//                // yay
+//                EventBusController.postUIUpdate(objects);
+//            }
+//
+//            @Override
+//            public void failed(ParseException e) {
+//                if (e != null) {
+//                    new HandleException(TAG, "updateDatastore", e);
+//                }
+////                Crashlytics.log(ParseUser.getCurrentUser().getUsername() + " failed to update EventLog data for client " + getClient().getName());
+//            }
+//        });
+//    }
 
 
 }

@@ -28,9 +28,6 @@
 
 package com.guardswift.dagger;
 
-import android.content.BroadcastReceiver;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.support.annotation.CallSuper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -39,10 +36,8 @@ import android.support.v7.app.AppCompatActivity;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
-import com.guardswift.core.receiver.ScreenReceiver;
 import com.guardswift.eventbus.events.MissingInternetEvent;
 import com.guardswift.persistence.cache.data.GuardCache;
-import com.guardswift.persistence.cache.task.AlarmCache;
 import com.guardswift.util.Analytics;
 import com.parse.ParseAnalytics;
 
@@ -70,8 +65,6 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     EventBus eventBus;
     @Inject
     GuardCache guardCache;
-    @Inject
-    AlarmCache alarmCache;
 
     private ObjectGraph mObjectGraph;
 
@@ -132,17 +125,11 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     }
 
 
-    BroadcastReceiver mScreenReceiver = new ScreenReceiver();
 
     private void registerReceivers() {
-        // SCREEN ON/OFF
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        registerReceiver(mScreenReceiver, filter);
     }
 
     private void unregisterReceivers() {
-        unregisterReceiver(mScreenReceiver);
     }
 
     @Override

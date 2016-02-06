@@ -16,14 +16,14 @@ public abstract class AbstractTasksRecycleFragment<T extends BaseTask> extends A
 
 
     public abstract BaseTask getObjectInstance();
-    public abstract ParseQueryAdapter.QueryFactory<T> getNetworkQueryFactory();
+    public abstract ParseQueryAdapter.QueryFactory<T> createNetworkQueryFactory();
 
     public AbstractTasksRecycleFragment() {
     }
 
     @Override
-    protected ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> getRecycleAdapter() {
-        ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> adapter = new TaskRecycleAdapter<>(getContext(), getNetworkQueryFactory());
+    protected ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> createRecycleAdapter() {
+        ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> adapter = new TaskRecycleAdapter<>(getContext(), createNetworkQueryFactory());
         adapter.setFromLocalDataStore(true);
         return adapter;
     }
