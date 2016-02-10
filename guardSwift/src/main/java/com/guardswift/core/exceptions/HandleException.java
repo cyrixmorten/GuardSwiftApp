@@ -2,6 +2,8 @@ package com.guardswift.core.exceptions;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,7 +22,7 @@ public class HandleException {
         this(null, tag, message, e);
     }
 
-    public HandleException(Context context, String tag, String message, Throwable e) {
+    public HandleException(final Context context, String tag, String message, final Throwable e) {
 
         EventBusController.postUIUpdate(e);
 
@@ -30,7 +32,12 @@ public class HandleException {
         Crashlytics.log(Log.ERROR, tag, message + " error: " + e.getMessage());
 
         if (context != null && context instanceof Activity && BuildConfig.DEBUG) {
-            Toast.makeText(context, context.getString(R.string.error_an_error_occured) + " " + e.getMessage(), Toast.LENGTH_LONG).show();
+            new Handler(context.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(context, context.getString(R.string.error_an_error_occured) + " " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
         }
     }
 }

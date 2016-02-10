@@ -13,7 +13,7 @@ buildscript {
         classpath 'com.parse.tools:gradle:1.1'
 //        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.16.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-        classpath 'io.fabric.tools:gradle:1.+'
+        classpath 'io.fabric.tools:gradle:1.21.2'
     }
 }
 
@@ -30,8 +30,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 23
-        versionCode 310
-        versionName "3.1.0"
+        versionCode 311
+        versionName "3.1.1"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -158,7 +158,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'com.google.android.gms:play-services-analytics:8.4.0'
     // Utils
-    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'com.google.code.gson:gson:2.4'
     compile 'net.danlew:android.joda:2.5.1'
     compile 'com.google.guava:guava:18.0'
     // Multidex

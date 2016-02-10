@@ -5,86 +5,114 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true">
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/cardview"
-        style="@style/CardView.Light"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        card_view:cardCornerRadius="@dimen/mini_padding"
-        card_view:cardElevation="@dimen/mini_padding"
-        card_view:cardUseCompatPadding="true"
-        card_view:contentPadding="@dimen/small_padding"
-        >
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <android.support.v7.widget.CardView
+            android:id="@+id/cardview"
+            style="@style/CardView.Light"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            card_view:cardCornerRadius="@dimen/mini_padding"
+            card_view:cardElevation="@dimen/mini_padding"
+            card_view:cardUseCompatPadding="true"
+            card_view:contentPadding="@dimen/small_padding">
 
             <LinearLayout
-                android:id="@+id/layout_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingBottom="@dimen/mini_padding">
-
-                <TextView
-                    android:id="@+id/tv_title"
-                    style="@style/Base.TextAppearance.AppCompat.Title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:paddingBottom="@dimen/mini_padding"
-                    android:text="Kundens navn" />
-
-                <TextView
-                    android:id="@+id/tv_date"
-                    style="@style/Base.TextAppearance.AppCompat.Body1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:paddingBottom="@dimen/mini_padding"
-                    android:text="21/2/2015" />
-
-            </LinearLayout>
-
-
-            <LinearLayout
-                android:id="@+id/layout_guard_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingBottom="@dimen/mini_padding">
-
-                <TextView
-                    android:id="@+id/tv_guard_name"
-                    style="@style/Base.TextAppearance.AppCompat.Body2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="vægternavn" />
-
-                <TextView
-                    android:id="@+id/tv_guard_id"
-                    style="@style/Base.TextAppearance.AppCompat.Body1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="@dimen/small_padding"
-                    android:text="vægterid" />
-
-            </LinearLayout>
-
-            <android.support.v7.widget.CardView
-                style="@style/CardView.Light"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                card_view:cardCornerRadius="@dimen/mini_padding"
-                card_view:cardElevation="@dimen/mini_padding"
-                card_view:cardUseCompatPadding="true"
-                card_view:contentPadding="@dimen/small_padding">
+                android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/layout_timed_remarks"
+                    android:id="@+id/layout_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="@dimen/mini_padding">
+
+                    <TextView
+                        android:id="@+id/tv_title"
+                        style="@style/Base.TextAppearance.AppCompat.Title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:paddingBottom="@dimen/mini_padding"
+                        android:text="Kundens navn" />
+
+                    <TextView
+                        android:id="@+id/tv_date"
+                        style="@style/Base.TextAppearance.AppCompat.Body1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:paddingBottom="@dimen/mini_padding"
+                        android:text="21/2/2015" />
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/layout_guard_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingBottom="@dimen/mini_padding">
+
+                    <TextView
+                        android:id="@+id/tv_guard_name"
+                        style="@style/Base.TextAppearance.AppCompat.Body2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="vægternavn" />
+
+                    <TextView
+                        android:id="@+id/tv_guard_id"
+                        style="@style/Base.TextAppearance.AppCompat.Body1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="@dimen/small_padding"
+                        android:text="vægterid" />
+
+                </LinearLayout>
+
+                <android.support.v7.widget.CardView
+                    style="@style/CardView.Light"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    card_view:cardCornerRadius="@dimen/mini_padding"
+                    card_view:cardElevation="@dimen/mini_padding"
+                    card_view:cardUseCompatPadding="true"
+                    card_view:contentPadding="@dimen/small_padding">
+
+                    <LinearLayout
+                        android:id="@+id/layout_timed_remarks"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/Base.TextAppearance.AppCompat.Body2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/report_empty"
+                            android:textColor="@color/bootstrap_brand_warning" />
+
+                    </LinearLayout>
+
+
+                </android.support.v7.widget.CardView>
+
+                <TextView
+                    style="@style/Base.TextAppearance.AppCompat.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/small_padding"
+                    android:text="@string/is_sent_to_contacts" />
+
+                <LinearLayout
+                    android:id="@+id/layout_client_receivers"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
@@ -93,68 +121,44 @@
                         style="@style/Base.TextAppearance.AppCompat.Body2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/report_empty"
-                        android:textColor="@color/bootstrap_brand_warning" />
+                        android:text="@string/no_receivers"
+                        android:textColor="@color/bootstrap_brand_danger" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_send"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_send_report"
+                        style="?android:attr/borderlessButtonStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/send_report"
+                        android:textColor="@color/bootstrap_brand_success" />
 
                 </LinearLayout>
 
 
-            </android.support.v7.widget.CardView>
-
-            <TextView
-                style="@style/Base.TextAppearance.AppCompat.Caption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="@dimen/small_padding"
-                android:text="@string/is_sent_to_contacts" />
-
-            <LinearLayout
-                android:id="@+id/layout_client_receivers"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/Base.TextAppearance.AppCompat.Body2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/no_receivers"
-                    android:textColor="@color/bootstrap_brand_danger" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_send"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btn_send_report"
-                    style="?android:attr/borderlessButtonStyle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/send_report"
-                    android:textColor="@color/bootstrap_brand_success" />
-
             </LinearLayout>
 
 
-        </LinearLayout>
-
-
-    </android.support.v7.widget.CardView>
+        </android.support.v7.widget.CardView>
+    </ScrollView>
 
     <RelativeLayout
         android:id="@+id/progress_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <ProgressBar
+            style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="?android:attr/progressBarStyle"
-            android:layout_centerInParent="true"
-            />
+            android:layout_centerInParent="true" />
     </RelativeLayout>
 
 </FrameLayout>

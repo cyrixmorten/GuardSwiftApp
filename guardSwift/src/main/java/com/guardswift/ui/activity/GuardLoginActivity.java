@@ -4,8 +4,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
@@ -103,7 +107,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 //    Spinner mAlarmGroupResponsible;
 
 
-
     @Bind(R.id.imageView)
     ImageView bannerImageView;
 
@@ -146,6 +149,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
 
         hasGooglePlayServices();
+//        registerUpdateDownloadedReceiver();
 
         version.setText(device.getVersionName());
         loadBanner();
@@ -156,6 +160,81 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         }
 
     }
+//
+//    public MaterialDialog updateDownloadingProgress;
+//    private long enqueue;
+//    private DownloadManager dm;
+//    private BroadcastReceiver updateDownloadReceiver;
+//
+//    private void registerUpdateDownloadedReceiver() {
+//        updateDownloadReceiver = new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                String action = intent.getAction();
+//                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+////                    long downloadId = intent.getLongExtra(
+////                            DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+//                    DownloadManager.Query query = new DownloadManager.Query();
+//                    query.setFilterById(enqueue);
+//                    Cursor c = dm.query(query);
+//                    if (c.moveToFirst()) {
+//                        Log.d(TAG, "DownloadMsg: " + statusMessage(c));
+//                        int columnIndex = c
+//                                .getColumnIndex(DownloadManager.COLUMN_STATUS);
+//                        if (DownloadManager.STATUS_SUCCESSFUL == c
+//                                .getInt(columnIndex)) {
+//
+//                            String uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+//                            Log.d(TAG, "Downloaded: " + uriString);
+//
+//                            launchInstaller(new File(uriString));
+//
+//                            if (updateDownloadingProgress != null) {
+//                                updateDownloadingProgress.cancel();
+//                                updateDownloadingProgress = null;
+//                            }
+//
+//                        }
+//                    }
+//                }
+//            }
+//        };
+//
+//        registerReceiver(updateDownloadReceiver, new IntentFilter(
+//                DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+//    }
+//
+//    private String statusMessage(Cursor c) {
+//        String msg = "???";
+//
+//        switch (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
+//            case DownloadManager.STATUS_FAILED:
+//                msg = "Download failed!";
+//                break;
+//
+//            case DownloadManager.STATUS_PAUSED:
+//                msg = "Download paused!";
+//                break;
+//
+//            case DownloadManager.STATUS_PENDING:
+//                msg = "Download pending!";
+//                break;
+//
+//            case DownloadManager.STATUS_RUNNING:
+//                msg = "Download in progress!";
+//                break;
+//
+//            case DownloadManager.STATUS_SUCCESSFUL:
+//                msg = "Download complete!";
+//                break;
+//
+//            default:
+//                msg = "Download is nowhere in sight";
+//                break;
+//        }
+//
+//        return (msg);
+//    }
 
     private void loadBanner() {
         String logo = ParseUser.getCurrentUser().getString("logoUrl");
@@ -284,7 +363,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-
     private boolean hasGooglePlayServices() {
         int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if (result != ConnectionResult.SUCCESS) {
@@ -296,19 +374,16 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-
-
-
     @Override
     public void onBackPressed() {
 //        if (Guard.Recent.getSelected() != null) {
 //            showProgress(false);
 //        } else {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_HOME);
-            // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            super.onBackPressed();
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        super.onBackPressed();
 //        }
     }
 
@@ -345,6 +420,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     @Override
     protected void onDestroy() {
+//        unregisterReceiver(updateDownloadReceiver);
         if (mDownloadTask != null) {
             MaterialDialog dialog = mDownloadTask.working_dialog;
             if (dialog != null) {
@@ -468,15 +544,93 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-//    @OnClick(R.id.button_download)
+    //    @OnClick(R.id.button_download)
     public void update(Button button) {
         if (mDownloadTask != null
                 && mDownloadTask.getStatus() == Status.RUNNING) {
             mDownloadTask.cancel(true);
         }
+
         mDownloadTask = new DownloadUpdate();
         mDownloadTask.execute();
+
+//        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+//        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(UPDATE_DOWNLOAD_URL));
+//        enqueue = dm.enqueue(request);
+
+//        showDownloadProgress();
+//        monitorDownloadProgress();
     }
+
+
+//    private void showDownloadProgress() {
+//        updateDownloadingProgress = new MaterialDialog.Builder(GuardLoginActivity.this)
+//                .title(R.string.downloading_update)
+//                .content(R.string.please_wait)
+//                .progress(false, 0)
+//                .cancelable(false)
+//                .negativeText(android.R.string.cancel)
+//                .callback(new MaterialDialog.ButtonCallback() {
+//                    @Override
+//                    public void onNegative(MaterialDialog dialog) {
+//                        dm.remove(enqueue);
+//                        Toast.makeText(getApplicationContext(), getString(R.string.download_canceled), Toast.LENGTH_LONG).show();
+//                    }
+//                })
+//                .show();
+//    }
+
+//    private void monitorDownloadProgress() {
+//        new Thread(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//
+//                boolean downloading = true;
+//
+//                while (downloading) {
+//
+//                    DownloadManager.Query q = new DownloadManager.Query();
+//                    q.setFilterById(enqueue);
+//
+//                    Cursor cursor = dm.query(q);
+//                    cursor.moveToFirst();
+//                    int bytes_downloaded = cursor.getInt(cursor
+//                            .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+//                    int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+//
+//                    if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
+//
+//                        String uriString = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+//                        launchInstaller(new File(uriString));
+//
+//                        if (updateDownloadingProgress != null) {
+//                            updateDownloadingProgress.cancel();
+//                            updateDownloadingProgress = null;
+//                        }
+//
+//                        downloading = false;
+//                    }
+//
+//                    final int dl_progress = (int) ((bytes_downloaded * 100l) / bytes_total);
+//                    Log.d(TAG, "Progress: " + dl_progress);
+//
+//                    runOnUiThread(new Runnable() {
+//
+//                        @Override
+//                        public void run() {
+//
+//                            updateDownloadingProgress.setProgress(dl_progress);
+//
+//                        }
+//                    });
+//
+//                    cursor.close();
+//                }
+//
+//            }
+//        }).start();
+//    }
 
     private class DownloadUpdate extends AsyncTask<Void, Integer, File> {
 
@@ -489,7 +643,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
             working_dialog = new MaterialDialog.Builder(GuardLoginActivity.this)
                     .title(R.string.downloading_update)
                     .content(R.string.please_wait)
-                    .progress(false, 100)
+                    .progress(true, 0)
                     .cancelable(false)
                     .negativeText(android.R.string.cancel)
                     .callback(new MaterialDialog.ButtonCallback() {
@@ -511,7 +665,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
             File myFilesDir = new File(Environment
                     .getExternalStorageDirectory().getAbsolutePath()
                     + "/Download");
-
+//            File file = new File(context.getFilesDir(), "update.apk");
             File file = new File(myFilesDir, filename);
 
             if (file.exists()) {
@@ -531,6 +685,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                     c.connect();
 
                     InputStream is = c.getInputStream();
+//                    FileOutputStream fos = openFileOutput("update.apk", Context.MODE_PRIVATE);
                     FileOutputStream fos = new FileOutputStream(myFilesDir
                             + "/" + filename);
 
@@ -542,7 +697,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                         total += len1;
                         int progress = (int) (total * 100 / length);
                         publishProgress(progress);
-//                        Log.d(TAG, "progress: " + progress + "/" + total);
+                        Log.d(TAG, "progress: " + progress + "/" + total);
 
                         fos.write(buffer, 0, len1);
                     }
@@ -561,7 +716,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
-            if (working_dialog != null) {
+            if (working_dialog != null && !working_dialog.isIndeterminateProgress()) {
                 working_dialog.setProgress(values[0]);
             }
         }
@@ -595,14 +750,14 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         startActivityForResult(intent, 0);
     }
 
-    private MaterialDialog missingLocatiosDialog;
+    private MaterialDialog missingLocationsDialog;
 
     private void showMissingLocationsDialog() {
 
-        if (missingLocatiosDialog != null)
+        if (missingLocationsDialog != null)
             return;
 
-        missingLocatiosDialog = new MaterialDialog.Builder(GuardLoginActivity.this)
+        missingLocationsDialog = new MaterialDialog.Builder(GuardLoginActivity.this)
                 .title(R.string.gps_settings)
                 .positiveText(R.string.open_settings)
                 .content(R.string.gps_network_location_unavailable)
@@ -613,7 +768,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                                           Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                                   GuardLoginActivity.this.startActivity(intent);
 
-                                  missingLocatiosDialog = null;
+                                  missingLocationsDialog = null;
                               }
                           }
                 ).show();
