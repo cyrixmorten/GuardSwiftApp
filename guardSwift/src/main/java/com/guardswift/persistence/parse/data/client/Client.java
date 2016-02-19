@@ -81,7 +81,7 @@ public class Client extends ExtendedParseObject implements Positioned {
     public static final String number = "number";
     public static final String position = "position";
 
-    public static final String messages = "messages";
+//    public static final String messages = "messages";
     public static final String roomLocations = "roomLocations";
     public static final String people = "people";
     public static final String contacts = "contacts";
@@ -223,8 +223,7 @@ public class Client extends ExtendedParseObject implements Positioned {
         @Override
         public ParseQuery<Client> build() {
             query.setLimit(1000);
-            query.include(messages);
-            query.include(contacts);
+//            query.include(contacts);
             query.include(roomLocations);
             query.include(people);
             return super.build();
@@ -295,14 +294,14 @@ public class Client extends ExtendedParseObject implements Positioned {
 //        return false;
 //    }
 
-    public List<Message> getMessages() {
-        if (has(messages)) return getList(messages);
-        return new ArrayList<Message>();
-    }
-
-    public void addMessage(Message message) {
-        add(Client.messages, message);
-    }
+//    public List<Message> getMessages() {
+//        if (has(messages)) return getList(messages);
+//        return new ArrayList<Message>();
+//    }
+//
+//    public void addMessage(Message message) {
+//        add(Client.messages, message);
+//    }
 
 
     public List<Person> getPeople() {
