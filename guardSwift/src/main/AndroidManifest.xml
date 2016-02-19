@@ -100,8 +100,7 @@
             android:name=".ui.activity.MainActivity"
             android:configChanges="keyboardHidden"
             android:label="@string/app_name"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait" >
+            android:launchMode="singleTask">
             <!--<intent-filter>-->
                 <!--<action android:name="android.intent.action.MAIN" />-->
 
@@ -131,7 +130,6 @@
         <activity
             android:name=".ui.activity.GuardLoginActivity"
             android:label="@string/title_guard_login"
-            android:screenOrientation="portrait"
             android:excludeFromRecents="true"
             android:taskAffinity=".activity.GuardLoginActivity" >
 
@@ -186,7 +184,7 @@
         <activity
             android:name=".ui.parse.documentation.report.edit.ReportEditActivity"
             android:parentActivityName=".ui.activity.MainActivity"
-            android:screenOrientation="portrait" >
+            >
         </activity>
         <activity
             android:name=".ui.parse.documentation.report.create.activity.CircuitUnitCreateEventHandlerActivity"
@@ -205,6 +203,10 @@
             android:label="@string/title_event_add"
             android:parentActivityName=".ui.activity.MainActivity"
             android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name=".ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity"
+            android:label="@string/title_activity_add_event" >
         </activity>
         <!--
         <activity
@@ -352,10 +354,7 @@
             android:name="com.crashlytics.ApiKey"
             android:value="1d3137a16e5b81623a1376cbae7962314b9c8d6a" />
 
-        <activity
-            android:name=".ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity"
-            android:label="@string/title_activity_add_event" >
-        </activity>
+
         <activity android:name=".ui.parse.execution.circuit.TaskDescriptionActivity" >
         </activity>
         <activity

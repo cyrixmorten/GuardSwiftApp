@@ -141,17 +141,17 @@ public class GuardSwiftApplication extends InjectingApplication {
 
 		Parse.enableLocalDatastore(this);
 
-//		if (BuildConfig.DEBUG) {
-//			Log.d(TAG, "DEVELOPMENT");
-//			Parse.setLogLevel(Parse.LOG_LEVEL_VERBOSE);
-//			Parse.initialize(this, ParseModule.DEVApplicationID,
-//					ParseModule.DEVClientKey);
-//		} else {
+		if (BuildConfig.DEBUG) {
+			Log.d(TAG, "DEVELOPMENT");
+			Parse.setLogLevel(Parse.LOG_LEVEL_VERBOSE);
+			Parse.initialize(this, ParseModule.DEVApplicationID,
+					ParseModule.DEVClientKey);
+		} else {
 			Log.d(TAG, "RELEASE");
 			Parse.initialize(this, ParseModule.ApplicationID,
 					ParseModule.ClientKey);
 			Log.d(TAG, "Parse initialized");
-//		}
+		}
 
 		ParseACL defaultACL = new ParseACL();
 		defaultACL.setPublicWriteAccess(false);

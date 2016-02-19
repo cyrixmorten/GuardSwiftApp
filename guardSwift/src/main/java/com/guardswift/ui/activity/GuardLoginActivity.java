@@ -328,6 +328,9 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                 Log.d(TAG, "loginGuard " + guardId);
 
                 for (final Guard guard : guards) {
+
+                    Log.d(TAG, "guard " + guard.getGuardId());
+
                     if (guard.getGuardId() == guardId) {
                         GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this).continueWith(new Continuation<Void, Void>() {
 
