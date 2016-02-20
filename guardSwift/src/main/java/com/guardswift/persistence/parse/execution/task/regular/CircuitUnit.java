@@ -197,7 +197,7 @@ public class CircuitUnit extends BaseTask  {
 
     @Override
     public String getReportId() {
-        return getCircuitStarted().getObjectId() + getObjectId();
+        return (getCircuitStarted() != null) ? getCircuitStarted().getObjectId() + getObjectId() : "";
     }
 
 //    @Override

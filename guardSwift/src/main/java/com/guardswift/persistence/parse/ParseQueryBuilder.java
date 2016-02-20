@@ -59,14 +59,13 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
 
 	public ParseQuery<T> build() {
 		query.whereEqualTo("owner", ParseUser.getCurrentUser());
+		query.whereDoesNotExist("archive");
 		setFromLocalDatastore();
 		return query;
 	};
 
     public ParseQuery<ParseObject> buildAsParseObject() {
-        query.whereEqualTo("owner", ParseUser.getCurrentUser());
-        setFromLocalDatastore();
-		return (ParseQuery<ParseObject>)query;
+		return (ParseQuery<ParseObject>)build();
     };
 
 	// public ParseQuery<T> build(boolean withOwner) {
