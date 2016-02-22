@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_marginLeft="@dimen/default_padding"
+    android:layout_marginRight="@dimen/default_padding"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <!--android:background="@drawable/demo_item_selector"-->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:minHeight="48dp">
+
+        <TextView
+            android:id="@+id/event_timestamp"
+            style="@style/Base.TextAppearance.AppCompat.Body2"
+            android:layout_height="wrap_content"
+            android:layout_width="50dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            tools:text="19:37"
+            />
+
+
+        <TextView
+            android:id="@+id/event_type"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/event_timestamp"
+            android:layout_alignParentTop="true"
+            android:textColor="@android:color/holo_blue_dark"
+            android:singleLine="true"
+            tools:text="Person antruffet lalalallalalalalalallalalalalalalalallalala"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@+id/event_timestamp"
+            android:layout_toEndOf="@+id/event_timestamp"
+            >
+            <TextView
+                android:id="@+id/event_people"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                tools:text="Personer"
+                android:singleLine="true"
+                />
+
+            <TextView
+                android:id="@+id/event_locations"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:singleLine="true"
+                tools:text="Placering"
+                />
+            <TextView
+                android:id="@+id/event_remarks"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:maxLines="2"
+                tools:text="Placering"
+                />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+
+
+
+</LinearLayout>

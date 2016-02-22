@@ -144,7 +144,7 @@ dependencies {
 //    compile 'com.android.support:appcompat-v7:23.1.0'
     //CardsLib
     //Core card library
-//    compile 'com.github.gabrielemariotti.cards:cardslib-core:2.1.0'
+    compile 'com.github.gabrielemariotti.cards:cardslib-core:2.1.0'
     //Optional for built-in cards
 //    compile 'com.github.gabrielemariotti.cards:cardslib-cards:2.1.0'
     //Optional for RecyclerView
