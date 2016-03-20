@@ -100,28 +100,38 @@ public class ParseModule {
             guard.setOnline(false);
             guard.pinThenSaveEventually();
 
-            LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
-                @Override
-                public Object then(Task<String> task) throws Exception {
-                    if (task.isFaulted()) {
-                        new HandleException(context, TAG, "upload guard locations", task.getError());
-                        saveCallback.done((ParseException) task.getError());
-                    } else {
-                        Log.w(TAG, "Location url: " + task.getResult());
-                        new EventLog.Builder(context)
-                                .event(context.getString(R.string.logout))
-                                .locationTrackerUrl(task.getResult())
-                                .eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
-                            @Override
-                            public void done(EventLog object, ParseException e) {
-                                saveCallback.done(e);
-                            }
-                        });
-                    }
-
-                    return null;
-                }
+            // todo temporarily disabled GPS tracking
+            new EventLog.Builder(context)
+            .event(context.getString(R.string.logout))
+                    .eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
+                        @Override
+                        public void done(EventLog object, ParseException e) {
+                            saveCallback.done(e);
+                        }
             });
+
+//            LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
+//                @Override
+//                public Object then(Task<String> task) throws Exception {
+//                    if (task.isFaulted()) {
+//                        new HandleException(context, TAG, "upload guard locations", task.getError());
+//                        saveCallback.done((ParseException) task.getError());
+//                    } else {
+//                        Log.w(TAG, "Location url: " + task.getResult());
+//                        new EventLog.Builder(context)
+//                                .event(context.getString(R.string.logout))
+//                                .locationTrackerUrl(task.getResult())
+//                                .eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
+//                            @Override
+//                            public void done(EventLog object, ParseException e) {
+//                                saveCallback.done(e);
+//                            }
+//                        });
+//                    }
+//
+//                    return null;
+//                }
+//            });
         } else {
             saveCallback.done(null);
         }
