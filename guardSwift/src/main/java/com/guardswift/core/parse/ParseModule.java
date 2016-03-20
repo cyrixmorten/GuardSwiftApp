@@ -186,7 +186,8 @@ public class ParseModule {
         final MaterialDialog updateDialog = new MaterialDialog.Builder(activity)
                 .title(R.string.working)
                 .content(R.string.please_wait)
-                .progress(false, 0, true)
+                .progress(true, 0)
+//                .progress(false, 0, true)
                 .show();
 
         updateDialog.setMaxProgress(100);
@@ -197,8 +198,6 @@ public class ParseModule {
         logout(new SaveCallback() {
             @Override
             public void done(ParseException e) {
-
-                updateDialog.dismiss();
 
                 Log.d(TAG, "Logout completed! " + e);
                 if (e != null) {
@@ -217,7 +216,7 @@ public class ParseModule {
 
                 activity.finish();
 
-                return;
+//                updateDialog.dismiss();
             }
         }, new ProgressCallback() {
             @Override
