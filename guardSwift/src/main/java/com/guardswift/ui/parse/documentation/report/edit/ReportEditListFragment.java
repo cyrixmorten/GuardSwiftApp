@@ -2,6 +2,7 @@ package com.guardswift.ui.parse.documentation.report.edit;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.View;
@@ -22,10 +23,15 @@ import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
+import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandler;
+import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
+import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventRemarkFragment;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -47,6 +53,8 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     @Inject
     GSTasksCache gsTasksCache;
 
+    private FloatingActionButton fab;
+    private boolean loading;
 
     @Override
     protected ExtendedParseObject getObjectInstance() {
@@ -67,7 +75,22 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     @Override
     protected ParseRecyclerQueryAdapter<EventLog, ReportEditRecycleAdapter.ReportViewHolder> createRecycleAdapter() {
         Client client = gsTasksCache.getLastSelected().getClient();
-        return new ReportEditRecycleAdapter(getActivity(), client, createNetworkQueryFactory());
+        ReportEditRecycleAdapter adaper = new ReportEditRecycleAdapter(getActivity(), client, createNetworkQueryFactory());
+
+        loading = true;
+        adaper.addOnQueryLoadListener(new ParseRecyclerQueryAdapter.OnQueryLoadListener<EventLog>() {
+            @Override
+            public void onLoaded(List<EventLog> objects, Exception e) {
+                showFloadingActionButton();
+                loading = false;
+            }
+
+            @Override
+            public void onLoading() {
+                loading = true;
+            }
+        });
+        return adaper;
     }
 
     @Override
@@ -77,21 +100,28 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     }
 
 
+
     @Override
     public void updateFloatingActionButton(final Context context, FloatingActionButton floatingActionButton) {
-        floatingActionButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_note_add_white_18dp));
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+        this.fab = floatingActionButton;
+
+        fab.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_note_add_white_18dp));
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 GSTask task = gsTasksCache.getLastSelected();
                 if (task instanceof StaticTask) {
                     final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).intermediateProgress().show();
-                    ((StaticTask)task).addReportEntry(context, "", new GetCallback<EventLog>() {
+                    ((StaticTask) task).addReportEntry(context, "", new GetCallback<EventLog>() {
                         @Override
-                        public void done(EventLog object, ParseException e) {
+                        public void done(EventLog eventLog, ParseException e) {
                             if (e != null) {
                                 new HandleException(TAG, "create new static report entry", e);
                             }
+
+//                          Does not work as intended, not updating list entry when returning
+//                          UpdateEventHandlerActivity.newInstance(getContext(), eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS);
+
                             dialog.dismiss();
                         }
                     });
@@ -100,6 +130,18 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
                 }
             }
         });
-        floatingActionButton.show();
+        showFloadingActionButton();
+    }
+
+    private void showFloadingActionButton() {
+        if (fab != null && !loading) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    fab.show();
+                }
+            }, 1000);
+
+        }
     }
 }

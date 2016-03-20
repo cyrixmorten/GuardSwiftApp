@@ -332,7 +332,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                     Log.d(TAG, "guard " + guard.getGuardId());
 
                     if (guard.getGuardId() == guardId) {
-                        GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this).continueWith(new Continuation<Void, Void>() {
+                        GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard).continueWith(new Continuation<Void, Void>() {
 
                             @Override
                             public Void then(Task<Void> result) throws Exception {

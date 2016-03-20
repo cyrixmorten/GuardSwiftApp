@@ -96,6 +96,11 @@ public class Guard extends ExtendedParseObject implements Positioned {
     private static String position = "position";
     private static String isOnline = "isOnline";
 
+    // access rights
+    private static String accessRegular = "accessRegular";
+    private static String accessDistrict = "accessDistrict";
+    private static String accessStatic = "accessStatic";
+
     @Override
     public String getParseClassName() {
         return Guard.class.getSimpleName();
@@ -206,6 +211,18 @@ public class Guard extends ExtendedParseObject implements Positioned {
 
     public ParseGeoPoint getPosition() {
         return getParseGeoPoint(position);
+    }
+
+    public boolean canAccessRegularTasks() {
+        return getBoolean(accessRegular);
+    }
+
+    public boolean canAccessDistrictTasks() {
+        return getBoolean(accessDistrict);
+    }
+
+    public boolean canAccessStaticTasks() {
+        return getBoolean(accessStatic);
     }
 
 }

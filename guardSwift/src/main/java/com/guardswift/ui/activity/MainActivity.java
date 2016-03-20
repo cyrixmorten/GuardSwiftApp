@@ -63,7 +63,7 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
             navigationDrawer.initNavigationDrawer(this, toolbar, this);
 
             // bootstrap parseObjects if it has not been done during this session
-            GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, true);
+            GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn(), true);
         }
 
     }
