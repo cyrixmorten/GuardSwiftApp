@@ -190,7 +190,7 @@ public class ParseModule {
 //                .progress(false, 0, true)
                 .show();
 
-        updateDialog.setMaxProgress(100);
+//        updateDialog.setMaxProgress(100);
         updateDialog.setCancelable(false);
 
 
