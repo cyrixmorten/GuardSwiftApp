@@ -54,6 +54,8 @@ public class ParseModule {
     public static final String ApplicationID = "gejAg1OFJrBwepcORHB3U7V7fawoDjlymRe8grHJ";
     public static final String ClientKey = "ZOZ7GGeu2tfOQXGRcMSOtDMg1qTGVZaxjO8gl89p";
 
+    public static final String FUNCTION_SEND_REPORT = "sendReport";
+
     private final Context context;
     private final GSTasksCache tasksCache;
     private final GuardCache guardCache;
