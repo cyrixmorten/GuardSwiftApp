@@ -95,19 +95,24 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.static_guarding_report, context.getString(R.string.begin_static_guarding_at_client, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                            Guard guard = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().getLoggedIn();
-                            task.setStartedBy(guard);
-                            task.pinThenSaveEventually(new SaveCallback() {
-                                @Override
-                                public void done(ParseException e) {
-                                    task.addReportEntry(context, context.getString(R.string.started), new GetCallback<EventLog>() {
-                                        @Override
-                                        public void done(EventLog object, ParseException e) {
-                                            ReportEditActivity.start(context, task);
-                                        }
-                                    });
-                                }
-                            });
+                        // show indeterminate progress
+                        final MaterialDialog loadingDialog = new CommonDialogsBuilder.MaterialDialogs(context).indeterminate(R.string.report_creating).show();
+
+                        Guard guard = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().getLoggedIn();
+                        task.setStartedBy(guard);
+                        task.pinThenSaveEventually(new SaveCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                task.addReportEntry(context, context.getString(R.string.started), new GetCallback<EventLog>() {
+                                    @Override
+                                    public void done(EventLog object, ParseException e) {
+                                        ReportEditActivity.start(context, task);
+
+                                        loadingDialog.cancel();
+                                    }
+                                });
+                            }
+                        });
                     }
                 }).show();
             } else {
@@ -464,7 +469,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             GSTask.TASK_STATE state = task.getTaskState();
             int color = getTaskStateColor(context, state);
             updateTaskStateButtons(context, state);
-            for (View border: this.vColorBorders) {
+            for (View border : this.vColorBorders) {
                 tintBackgroundColor(border, color, 100);
             }
             tintBackgroundColor(this.cardview, color, 50);
@@ -668,8 +673,8 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             holder.vContentFooter.setVisibility(View.GONE);
             holder.vContentHeader.setVisibility(View.GONE);
             if (holder instanceof StaticTaskViewHolder) {
-                StaticTaskViewHolder staticTaskViewHolder = (StaticTaskViewHolder)holder;
-                Date timeStarted = ((StaticTask)task).getTimeArrived();
+                StaticTaskViewHolder staticTaskViewHolder = (StaticTaskViewHolder) holder;
+                Date timeStarted = ((StaticTask) task).getTimeArrived();
                 if (timeStarted != null) {
                     staticTaskViewHolder.vTimeStart.setText(DateFormat.getLongDateFormat(context).format(timeStarted));
                     staticTaskViewHolder.vTimeEnd.setVisibility(View.GONE);
@@ -761,7 +766,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         LinearLayout contentBody = ButterKnife.findById(itemView, R.id.content_body);
 
-        if (viewType == GSTask.TASK_TYPE.STATIC .ordinal()) {
+        if (viewType == GSTask.TASK_TYPE.STATIC.ordinal()) {
 
             View taskPlannedTimesView = LayoutInflater.
                     from(parent.getContext()).

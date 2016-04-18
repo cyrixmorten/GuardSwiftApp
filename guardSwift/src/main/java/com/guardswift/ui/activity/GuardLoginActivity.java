@@ -4,20 +4,19 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.AsyncTask.Status;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -28,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.crashlytics.android.Crashlytics;
@@ -44,8 +44,10 @@ import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.rest.GuardSwift;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Device;
+import com.guardswift.util.GSIntents;
 import com.guardswift.util.ToastHelper;
 import com.parse.ParseException;
 import com.parse.ParseUser;
@@ -70,6 +72,11 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 
 public class GuardLoginActivity extends InjectingAppCompatActivity {
@@ -129,7 +136,12 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     TextView version;
 
 
-    private DownloadUpdate mDownloadTask;
+//    private DownloadUpdate mDownloadTask;
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     public static void start(Context context) {
         Log.w(TAG, "START");
@@ -398,10 +410,54 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     @Override
     protected void onResume() {
-        new FetchLatestVersion(this).execute();
+
+        checkForNewUpdate(new VersionCheckCallback() {
+            @Override
+            public void newVersionAvailable(boolean newUpdate) {
+                if (newUpdate) {
+                    showDownloadOption();
+                }
+            }
+        });
+
+
+//        new FetchLatestVersion(this).execute();
 
         super.onResume();
     }
+
+    private interface VersionCheckCallback {
+        void newVersionAvailable(boolean result);
+    }
+
+    private void checkForNewUpdate(final VersionCheckCallback callback) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(GuardSwift.API_URL)
+                .build();
+
+        GuardSwift.API guardSwift = retrofit.create(GuardSwift.API.class);
+
+        guardSwift.version().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    String latestversion = response.body().string();
+
+                    callback.newVersionAvailable(Integer.parseInt(latestversion) > device.getVersionCode());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e(TAG, "versioncheck", t);
+                callback.newVersionAvailable(false);
+            }
+        });
+    }
+
 
     @Override
     protected void onPostResume() {
@@ -417,6 +473,11 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
     @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
     }
@@ -424,12 +485,12 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     @Override
     protected void onDestroy() {
 //        unregisterReceiver(updateDownloadReceiver);
-        if (mDownloadTask != null) {
-            MaterialDialog dialog = mDownloadTask.working_dialog;
-            if (dialog != null) {
-                dialog.cancel();
-            }
-        }
+//        if (mDownloadTask != null) {
+//            MaterialDialog dialog = mDownloadTask.working_dialog;
+//            if (dialog != null) {
+//                dialog.cancel();
+//            }
+//        }
         super.onDestroy();
     }
 
@@ -478,92 +539,94 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         }
     }
 
-    private class FetchLatestVersion extends AsyncTask<Void, Void, Integer> {
+//    private class FetchLatestVersion extends AsyncTask<Void, Void, Integer> {
+//
+//        private WeakReference<Activity> mActRef;
+//
+//        public FetchLatestVersion(Activity activity) {
+//            mActRef = new WeakReference<Activity>(activity);
+//        }
+//
+//        @Override
+//        protected Integer doInBackground(Void... param) {
+//
+//            String inputLine = "-1";
+//            BufferedReader in = null;
+//            try {
+//                URL update_url = new URL(UPDATE_VERSIONCHECK_URL);
+//                in = new BufferedReader(new InputStreamReader(
+//                        update_url.openStream()));
+//
+//                if ((inputLine = in.readLine()) != null) {
+//                    return Integer.parseInt(inputLine);
+//                }
+//
+//            } catch (Exception e) {
+//                new HandleException(TAG, "Version check" + e.getMessage(), e);
+//            } finally {
+//                try {
+//                    if (in != null) {
+//                        in.close();
+//                    }
+//                } catch (IOException e) {
+//                    new HandleException(TAG, "Version check: " + e.getMessage(), e);
+//                }
+//            }
+//            return -1;
+//
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Integer result) {
+//            if (result > device.getVersionCode()) {
+//                showDownloadOption();
+//            }
+//
+//            Log.d(TAG, "versioncheck complete. latest: " + result + " current: " + device.getVersionCode());
+//        }
+//
+//
+//    }
 
-        private WeakReference<Activity> mActRef;
-
-        public FetchLatestVersion(Activity activity) {
-            mActRef = new WeakReference<Activity>(activity);
-        }
-
-        @Override
-        protected Integer doInBackground(Void... param) {
-
-            String inputLine = "-1";
-            BufferedReader in = null;
-            try {
-                URL update_url = new URL(UPDATE_VERSIONCHECK_URL);
-                in = new BufferedReader(new InputStreamReader(
-                        update_url.openStream()));
-
-                if ((inputLine = in.readLine()) != null) {
-                    return Integer.parseInt(inputLine);
-                }
-
-            } catch (Exception e) {
-                new HandleException(TAG, "Version check" + e.getMessage(), e);
-            } finally {
-                try {
-                    if (in != null) {
-                        in.close();
-                    }
-                } catch (IOException e) {
-                    new HandleException(TAG, "Version check: " + e.getMessage(), e);
-                }
-            }
-            return -1;
-
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (result > device.getVersionCode()) {
-                showDownloadOption();
-            }
-
-            Log.d(TAG, "versioncheck complete. latest: " + result + " current: " + device.getVersionCode());
-        }
-
-        private void showDownloadOption() {
+    private void showDownloadOption() {
 
 //            findViewById(R.id.new_update).setVisibility(View.VISIBLE);
 
-            if (isFinishing())
-                return;
+        if (isFinishing())
+            return;
 
-            new MaterialDialog.Builder(GuardLoginActivity.this)
-                    .title(R.string.update)
-                    .positiveText(android.R.string.ok)
-                    .negativeText(android.R.string.cancel)
-                    .content(R.string.new_update_available)
-                    .callback(new MaterialDialog.ButtonCallback() {
-                                  @Override
-                                  public void onPositive(MaterialDialog dialog) {
-                                      update(null);
-                                  }
-                              }
-                    ).show();
-        }
+        new MaterialDialog.Builder(GuardLoginActivity.this)
+                .title(R.string.update)
+                .positiveText(android.R.string.ok)
+                .negativeText(android.R.string.cancel)
+                .content(R.string.new_update_available)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        GSIntents.openGmail(GuardLoginActivity.this);
+                    }
+                })
+                .show();
     }
 
 
-    //    @OnClick(R.id.button_download)
-    public void update(Button button) {
-        if (mDownloadTask != null
-                && mDownloadTask.getStatus() == Status.RUNNING) {
-            mDownloadTask.cancel(true);
-        }
-
-        mDownloadTask = new DownloadUpdate();
-        mDownloadTask.execute();
-
-//        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-//        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(UPDATE_DOWNLOAD_URL));
-//        enqueue = dm.enqueue(request);
-
-//        showDownloadProgress();
-//        monitorDownloadProgress();
-    }
+//    //    @OnClick(R.id.button_download)
+//    public void update(Button button) {
+//        if (mDownloadTask != null
+//                && mDownloadTask.getStatus() == Status.RUNNING) {
+//            mDownloadTask.cancel(true);
+//        }
+//
+//        mDownloadTask = new DownloadUpdate();
+//        mDownloadTask.execute();
+//
+////        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+////        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(UPDATE_DOWNLOAD_URL));
+////        enqueue = dm.enqueue(request);
+//
+////        showDownloadProgress();
+////        monitorDownloadProgress();
+//    }
 
 
 //    private void showDownloadProgress() {
@@ -635,123 +698,123 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 //        }).start();
 //    }
 
-    private class DownloadUpdate extends AsyncTask<Void, Integer, File> {
-
-        public MaterialDialog working_dialog;
-
-        private String toastMsg = "";
-
-        @Override
-        protected void onPreExecute() {
-            working_dialog = new MaterialDialog.Builder(GuardLoginActivity.this)
-                    .title(R.string.downloading_update)
-                    .content(R.string.please_wait)
-                    .progress(true, 0)
-                    .cancelable(false)
-                    .negativeText(android.R.string.cancel)
-                    .callback(new MaterialDialog.ButtonCallback() {
-                        @Override
-                        public void onNegative(MaterialDialog dialog) {
-                            DownloadUpdate.this.cancel(true);
-                            Toast.makeText(getApplicationContext(), getString(R.string.download_canceled), Toast.LENGTH_LONG).show();
-                        }
-                    })
-                    .show();
-        }
-
-        @Override
-        protected File doInBackground(Void... param) {
-
-            String filename = "guardswift.apk";
-
-
-            File myFilesDir = new File(Environment
-                    .getExternalStorageDirectory().getAbsolutePath()
-                    + "/Download");
-//            File file = new File(context.getFilesDir(), "update.apk");
-            File file = new File(myFilesDir, filename);
-
-            if (file.exists()) {
-                file.delete();
-            }
-
-            if ((myFilesDir.mkdirs() || myFilesDir.isDirectory())) {
-
-                HttpURLConnection c = null;
-
-                try {
-
-                    URL url = new URL(UPDATE_DOWNLOAD_URL);
-                    c = (HttpURLConnection) url.openConnection();
-                    c.setRequestMethod("GET");
-//                    c.setDoOutput(true);
-                    c.connect();
-
-                    InputStream is = c.getInputStream();
-//                    FileOutputStream fos = openFileOutput("update.apk", Context.MODE_PRIVATE);
-                    FileOutputStream fos = new FileOutputStream(myFilesDir
-                            + "/" + filename);
-
-                    byte[] buffer = new byte[1024];
-                    int len1 = 0;
-                    int total = 0;
-                    int length = c.getContentLength();
-                    while ((len1 = is.read(buffer)) != -1) {
-                        total += len1;
-                        int progress = (int) (total * 100 / length);
-                        publishProgress(progress);
-                        Log.d(TAG, "progress: " + progress + "/" + total);
-
-                        fos.write(buffer, 0, len1);
-                    }
-                    fos.close();
-                    is.close();
-                } catch (Exception e) {
-                    new HandleException(GuardLoginActivity.this, TAG, "download update", e);
-                    toastMsg = context
-                            .getString(R.string.title_internet_missing);
-                }
-            }
-
-            return file;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            super.onProgressUpdate(values);
-            if (working_dialog != null && !working_dialog.isIndeterminateProgress()) {
-                working_dialog.setProgress(values[0]);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(File file) {
-
-            if (!toastMsg.isEmpty() && context != null) {
-                Toast.makeText(context, toastMsg, Toast.LENGTH_LONG).show();
-            } else {
-                launchInstaller(file);
-            }
-
-            removeWorkingDialog();
-        }
-
-        private void removeWorkingDialog() {
-            if (working_dialog != null && working_dialog.isShowing()) {
-                working_dialog.dismiss();
-                working_dialog = null;
-            }
-        }
-
-    }
-
-    public void launchInstaller(File apkFile) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(apkFile),
-                "application/vnd.android.package-archive");
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivityForResult(intent, 0);
-    }
+//    private class DownloadUpdate extends AsyncTask<Void, Integer, File> {
+//
+//        public MaterialDialog working_dialog;
+//
+//        private String toastMsg = "";
+//
+//        @Override
+//        protected void onPreExecute() {
+//            working_dialog = new MaterialDialog.Builder(GuardLoginActivity.this)
+//                    .title(R.string.downloading_update)
+//                    .content(R.string.please_wait)
+//                    .progress(true, 0)
+//                    .cancelable(false)
+//                    .negativeText(android.R.string.cancel)
+//                    .callback(new MaterialDialog.ButtonCallback() {
+//                        @Override
+//                        public void onNegative(MaterialDialog dialog) {
+//                            DownloadUpdate.this.cancel(true);
+//                            Toast.makeText(getApplicationContext(), getString(R.string.download_canceled), Toast.LENGTH_LONG).show();
+//                        }
+//                    })
+//                    .show();
+//        }
+//
+//        @Override
+//        protected File doInBackground(Void... param) {
+//
+//            String filename = "guardswift.apk";
+//
+//
+//            File myFilesDir = new File(Environment
+//                    .getExternalStorageDirectory().getAbsolutePath()
+//                    + "/Download");
+////            File file = new File(context.getFilesDir(), "update.apk");
+//            File file = new File(myFilesDir, filename);
+//
+//            if (file.exists()) {
+//                file.delete();
+//            }
+//
+//            if ((myFilesDir.mkdirs() || myFilesDir.isDirectory())) {
+//
+//                HttpURLConnection c = null;
+//
+//                try {
+//
+//                    URL url = new URL(UPDATE_DOWNLOAD_URL);
+//                    c = (HttpURLConnection) url.openConnection();
+//                    c.setRequestMethod("GET");
+////                    c.setDoOutput(true);
+//                    c.connect();
+//
+//                    InputStream is = c.getInputStream();
+////                    FileOutputStream fos = openFileOutput("update.apk", Context.MODE_PRIVATE);
+//                    FileOutputStream fos = new FileOutputStream(myFilesDir
+//                            + "/" + filename);
+//
+//                    byte[] buffer = new byte[1024];
+//                    int len1 = 0;
+//                    int total = 0;
+//                    int length = c.getContentLength();
+//                    while ((len1 = is.read(buffer)) != -1) {
+//                        total += len1;
+//                        int progress = (int) (total * 100 / length);
+//                        publishProgress(progress);
+//                        Log.d(TAG, "progress: " + progress + "/" + total);
+//
+//                        fos.write(buffer, 0, len1);
+//                    }
+//                    fos.close();
+//                    is.close();
+//                } catch (Exception e) {
+//                    new HandleException(GuardLoginActivity.this, TAG, "download update", e);
+//                    toastMsg = context
+//                            .getString(R.string.title_internet_missing);
+//                }
+//            }
+//
+//            return file;
+//        }
+//
+//        @Override
+//        protected void onProgressUpdate(Integer... values) {
+//            super.onProgressUpdate(values);
+//            if (working_dialog != null && !working_dialog.isIndeterminateProgress()) {
+//                working_dialog.setProgress(values[0]);
+//            }
+//        }
+//
+//        @Override
+//        protected void onPostExecute(File file) {
+//
+//            if (!toastMsg.isEmpty() && context != null) {
+//                Toast.makeText(context, toastMsg, Toast.LENGTH_LONG).show();
+//            } else {
+//                launchInstaller(file);
+//            }
+//
+//            removeWorkingDialog();
+//        }
+//
+//        private void removeWorkingDialog() {
+//            if (working_dialog != null && working_dialog.isShowing()) {
+//                working_dialog.dismiss();
+//                working_dialog = null;
+//            }
+//        }
+//
+//    }
+//
+//    public void launchInstaller(File apkFile) {
+//        Intent intent = new Intent(Intent.ACTION_VIEW);
+//        intent.setDataAndType(Uri.fromFile(apkFile),
+//                "application/vnd.android.package-archive");
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivityForResult(intent, 0);
+//    }
 
     private MaterialDialog missingLocationsDialog;
 

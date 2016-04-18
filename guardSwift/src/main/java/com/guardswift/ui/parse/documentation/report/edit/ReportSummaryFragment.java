@@ -36,10 +36,8 @@ import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
 import com.parse.FindCallback;
 import com.parse.FunctionCallback;
-import com.parse.GetCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
-import com.parse.ParseUser;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -172,7 +170,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
     @OnClick(R.id.btn_send_report)
     public void sendReport(Button button) {
         btnSendReport.setEnabled(false);
-        sendReportDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).intermediateProgress(R.string.working, R.string.sending_reprt).show();
+        sendReportDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate(R.string.working, R.string.sending_reprt).show();
 
         final HashMap<String, Object> params = new HashMap<String, Object>();
         params.put("reportId", report.getObjectId());

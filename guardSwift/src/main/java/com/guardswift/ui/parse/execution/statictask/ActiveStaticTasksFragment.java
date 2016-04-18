@@ -34,6 +34,7 @@ public class ActiveStaticTasksFragment extends AbstractTasksRecycleFragment<Stat
             public ParseQuery<StaticTask> create() {
                 return new StaticTask.QueryBuilder(false).
                         active().
+                        daysBack(7).
                         sortedByCreated().
                         build();
             }

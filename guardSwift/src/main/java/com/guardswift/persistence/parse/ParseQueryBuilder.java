@@ -24,13 +24,6 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
 	}
 
 
-//    public ParseQueryBuilder(ParseQueryBuilder<T> fromQueryBuilder) {
-//        pin = fromQueryBuilder.pin;
-//        fromLocalDatastore = fromQueryBuilder.fromLocalDatastore;
-//        this.query = fromQueryBuilder.build();
-//    }
-
-
     public ParseQueryBuilder<T> matchingObjectId(String objectId) {
         query.whereEqualTo("objectId", objectId);
         return this;
@@ -68,17 +61,6 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
 		return (ParseQuery<ParseObject>)build();
     };
 
-	// public ParseQuery<T> build(boolean withOwner) {
-	// if (withOwner)
-	// query.whereEqualTo("owner", ParseUser.getCurrentUser());
-	// setFromLocalDatastore();
-	// return query;
-	// };
-
-//	protected ParseQuery<T> build() {
-//		setFromLocalDatastore();
-//		return query;
-//	};
 
 	private void setFromLocalDatastore() {
 		if (fromLocalDatastore) {

@@ -32,6 +32,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 
+import org.joda.time.DateTime;
 import org.json.JSONObject;
 
 import java.util.Date;
@@ -237,10 +238,18 @@ public class StaticTask extends BaseTask {
             return this;
         }
 
+        public QueryBuilder daysBack(int days) {
+            Date oneWeekAgo = new DateTime().minusDays(days).toDate();
+            query.whereGreaterThan(StaticTask.createdAt, oneWeekAgo);
+
+            return this;
+        }
+
         public QueryBuilder active() {
 
             query.whereExists(StaticTask.timeStarted);
             query.whereDoesNotExist(StaticTask.timeEnded);
+
 
             return this;
         }

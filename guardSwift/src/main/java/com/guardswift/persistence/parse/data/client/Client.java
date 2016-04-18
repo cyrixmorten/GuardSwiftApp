@@ -1,7 +1,6 @@
 package com.guardswift.persistence.parse.data.client;
 
 import android.content.Context;
-import android.os.Message;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,7 +15,7 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.Positioned;
-import com.guardswift.util.Intents;
+import com.guardswift.util.GSIntents;
 import com.parse.ParseClassName;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
@@ -197,7 +196,7 @@ public class Client extends ExtendedParseObject implements Positioned {
             contactView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intents.dialPhoneNumber(context, phoneNumber);
+                    GSIntents.dialPhoneNumber(context, phoneNumber);
                 }
             });
             layout.addView(contactView);

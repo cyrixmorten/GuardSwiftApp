@@ -23,9 +23,6 @@ import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
-import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandler;
-import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
-import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventRemarkFragment;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
@@ -111,7 +108,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
             public void onClick(View view) {
                 GSTask task = gsTasksCache.getLastSelected();
                 if (task instanceof StaticTask) {
-                    final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).intermediateProgress().show();
+                    final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
                     ((StaticTask) task).addReportEntry(context, "", new GetCallback<EventLog>() {
                         @Override
                         public void done(EventLog eventLog, ParseException e) {

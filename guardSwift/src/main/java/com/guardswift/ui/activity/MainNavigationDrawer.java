@@ -249,7 +249,7 @@ public class MainNavigationDrawer {
     }
 
     private void createReport(final Client client) {
-        final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(context).intermediateProgress(client.getName(), R.string.creating_report).show();
+        final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(context).indeterminate(client.getName(), R.string.creating_report).show();
         // fake a bit of delay to ensure that the dialog is shown/readable
         new Handler().postDelayed(new Runnable() {
             @Override

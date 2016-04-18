@@ -192,12 +192,14 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
         showLogoutDialog();
     }
 
+    // delay a bit to allow navigation drawer to close before loading
     private void replaceFragment(final Fragment fragment) {
-        // delay a bit to allow navigation drawer to close before loading
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                fm.beginTransaction().replace(R.id.content, fragment).commit();
+                if (!isFinishing()) {
+                    fm.beginTransaction().replace(R.id.content, fragment).commit();
+                }
             }
         }, 500);
     }

@@ -34,6 +34,7 @@ public class PendingStaticTasksFragment extends AbstractTasksRecycleFragment<Sta
             public ParseQuery<StaticTask> create() {
                 return new StaticTask.QueryBuilder(false).
                         pending().
+                        daysBack(7).
                         sortedByCreated().
                         build();
             }

@@ -107,23 +107,23 @@ public class CommonDialogsBuilder {
             return infoDialog(R.string.message_no_internet_connection, "");
         }
 
-        public MaterialDialog.Builder intermediateProgress() {
-            return intermediateProgress(context.getString(R.string.working), context.getString(R.string.please_wait));
+        public MaterialDialog.Builder indeterminate() {
+            return indeterminate(context.getString(R.string.working), context.getString(R.string.please_wait));
         }
 
-        public MaterialDialog.Builder intermediateProgress(int content) {
-            return intermediateProgress(context.getString(R.string.working), context.getString(content));
+        public MaterialDialog.Builder indeterminate(int content) {
+            return indeterminate(context.getString(R.string.working), context.getString(content));
         }
 
-        public MaterialDialog.Builder intermediateProgress(int title, int content) {
-            return intermediateProgress(context.getString(title), context.getString(content));
+        public MaterialDialog.Builder indeterminate(int title, int content) {
+            return indeterminate(context.getString(title), context.getString(content));
         }
 
-        public MaterialDialog.Builder intermediateProgress(String title, int content) {
-            return intermediateProgress(title, context.getString(content));
+        public MaterialDialog.Builder indeterminate(String title, int content) {
+            return indeterminate(title, context.getString(content));
         }
 
-        public MaterialDialog.Builder intermediateProgress(String title, String content) {
+        public MaterialDialog.Builder indeterminate(String title, String content) {
             return new MaterialDialog.Builder(context)
                     .title(title)
                     .content(content)
