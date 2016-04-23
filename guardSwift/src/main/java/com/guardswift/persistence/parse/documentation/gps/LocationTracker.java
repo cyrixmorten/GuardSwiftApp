@@ -275,13 +275,14 @@ public class LocationTracker extends ExtendedParseObject {
             }
         }
 
-        JSONObject jsonLocation = LocationModule.locationToJSONObject(location);
-        try {
-            FileIO.writeToFile(context, getLocalFileNameForCurrentGuard(guard), Context.MODE_APPEND, jsonLocation.toString());
-            FileIO.writeToFile(context, getLocalFileNameForCurrentGuard(guard), Context.MODE_APPEND, ",");
-        } catch (IOException e) {
-            new HandleException(context, TAG, "appendLocation to file", e);
-        }
+        // todo temporarily disabled GPS tracker
+//        JSONObject jsonLocation = LocationModule.locationToJSONObject(location);
+//        try {
+//            FileIO.writeToFile(context, getLocalFileNameForCurrentGuard(guard), Context.MODE_APPEND, jsonLocation.toString());
+//            FileIO.writeToFile(context, getLocalFileNameForCurrentGuard(guard), Context.MODE_APPEND, ",");
+//        } catch (IOException e) {
+//            new HandleException(context, TAG, "appendLocation to file", e);
+//        }
 
     }
 

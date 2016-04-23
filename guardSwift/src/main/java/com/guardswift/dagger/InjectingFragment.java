@@ -29,8 +29,10 @@
 package com.guardswift.dagger;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.v4.app.Fragment;
 
+import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.util.Analytics;
 
@@ -47,6 +49,9 @@ import de.greenrobot.event.EventBus;
  * extending the hosting Activity's graph with Fragment-specific module(s).
  */
 public class InjectingFragment extends Fragment implements Injector {
+
+	private static final String TAG = InjectingFragment.class.getSimpleName();
+
 	private ObjectGraph mObjectGraph;
 	private boolean mFirstAttach = true;
 
@@ -59,22 +64,28 @@ public class InjectingFragment extends Fragment implements Injector {
 	 * {@link #getModules()}, then injects this Fragment with the created graph.
 	 */
 	@Override
-	public void onAttach(final Activity activity) {
-		super.onAttach(activity);
+	public void onAttach(final Context context) {
+		super.onAttach(context);
 
 		// expand the aOonctivity graph with the fragment-specific module(s)
-		ObjectGraph appGraph = ((Injector) activity).getObjectGraph();
+		ObjectGraph appGraph = ((Injector) context).getObjectGraph();
 		List<Object> fragmentModules = getModules();
-		mObjectGraph = appGraph.plus(fragmentModules.toArray());
+		if (appGraph != null) {
+			mObjectGraph = appGraph.plus(fragmentModules.toArray());
 
-		// make sure it's the first time through; we don't want to re-inject a
-		// retained fragment that is going
-		// through a detach/attach sequence.
-		if (mFirstAttach) {
-			inject(this);
-			mFirstAttach = false;
+            // make sure it's the first time through; we don't want to re-inject a
+            // retained fragment that is going
+            // through a detach/attach sequence.
+            if (mFirstAttach) {
+                inject(this);
+                mFirstAttach = false;
+            }
+
+		} else {
+			new HandleException(TAG, "app graph was null", new IllegalStateException("Unable to get Activity objectGraph"));
 		}
-		eventBus.register(this);
+
+        eventBus.register(this);
 	}
 
 	// subclasses create their own method if needed

@@ -136,10 +136,18 @@ public class MainNavigationDrawer {
                 })
                 .build();
 
+        if (guardCache.getLoggedIn().canAccessRegularTasks()) {
+            navigationDrawer.addItems(getActiveCircuitDrawerItems());
+        }
 
-        navigationDrawer.addItems(getStaticGuardingItems());
-        navigationDrawer.addItems(getActiveCircuitDrawerItems());
-        navigationDrawer.addItems(getActiveDistrictWatchDrawerItems());
+        if (guardCache.getLoggedIn().canAccessDistrictTasks()) {
+            navigationDrawer.addItems(getActiveDistrictWatchDrawerItems());
+        }
+
+        if (guardCache.getLoggedIn().canAccessStaticTasks()) {
+            navigationDrawer.addItems(getStaticGuardingItems());
+        }
+
         navigationDrawer.addItems(getDataDrawerItems());
         navigationDrawer.addStickyFooterItem(getLogoutDrawerItem());
 
@@ -153,7 +161,7 @@ public class MainNavigationDrawer {
         // Determine initial selection
         CircuitStarted selectedCircuitStarted = circuitStartedCache.getSelected();
         IDrawerItem selected = null;
-        if (selectedCircuitStarted  != null) {
+        if (selectedCircuitStarted  != null && circuitItems != null) {
             for (IDrawerItem item: circuitItems) {
                 CircuitStarted circuitStarted = (CircuitStarted) item.getTag();
                 if (circuitStarted != null && selectedCircuitStarted.getObjectId().equals(circuitStarted.getObjectId())) {
@@ -232,11 +240,16 @@ public class MainNavigationDrawer {
             new HandleException(context, TAG, "getActiveCircuitDrawerItems", e);
         }
 
+        // don't leave header if there is no task groups
+        if (circuitItems.size() == 1) {
+            circuitItems.clear();
+        }
+
         return circuitItems.toArray(new IDrawerItem[circuitItems.size()]);
     }
 
     private void createReport(final Client client) {
-        final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(context).intermediateProgress(client.getName(), R.string.creating_report).show();
+        final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(context).indeterminate(client.getName(), R.string.creating_report).show();
         // fake a bit of delay to ensure that the dialog is shown/readable
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -290,6 +303,12 @@ public class MainNavigationDrawer {
         } catch (ParseException e) {
             new HandleException(context, TAG, "getActiveCircuitDrawerItems", e);
         }
+
+        // don't leave header if there is no task groups
+        if (districtWatchItems.size() == 1) {
+            districtWatchItems.clear();
+        }
+
         return districtWatchItems.toArray(new IDrawerItem[districtWatchItems.size()]);
     }
 

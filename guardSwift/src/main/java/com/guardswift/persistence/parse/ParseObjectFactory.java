@@ -27,15 +27,11 @@ import javax.inject.Singleton;
 @Singleton
 public class ParseObjectFactory {
 
-//	private final Alarm alarm;
-//	private final ChecklistCircuitEnding checklistCircuitEnding;
-//	private final ChecklistCircuitStarting checklistCircuitStarting;
 	private final Client client;
 	private final Circuit circuit;
 	private final CircuitUnit circuitUnit;
 	private final CircuitStarted circuitStarted;
 	private final StaticTask staticTask;
-//	private final Message message;
 	private final DistrictWatch districtWatch;
 	private final DistrictWatchStarted districtWatchStarted;
 	private final DistrictWatchClient districtWatchClient;
@@ -54,9 +50,6 @@ public class ParseObjectFactory {
 
     @Inject
 	public ParseObjectFactory() {
-//		alarm = new Alarm();
-//		checklistCircuitEnding = new ChecklistCircuitEnding();
-//		checklistCircuitStarting = new ChecklistCircuitStarting();
 		circuit = new Circuit();
         circuitStarted = new CircuitStarted();
 		circuitUnit = new CircuitUnit();
@@ -77,14 +70,10 @@ public class ParseObjectFactory {
 		report = new Report();
 
 		allParseObjects = new ArrayList<ExtendedParseObject>();
-//		allParseObjects.add(alarm);
-//		allParseObjects.add(checklistCircuitEnding);
-//		allParseObjects.add(checklistCircuitStarting);
 		allParseObjects.add(client);
 		allParseObjects.add(circuit);
 		allParseObjects.add(circuitUnit);
 		allParseObjects.add(circuitStarted);
-//		allParseObjects.add(message);
 		allParseObjects.add(districtWatch);
 		allParseObjects.add(districtWatchStarted);
 		allParseObjects.add(districtWatchClient);
@@ -102,34 +91,11 @@ public class ParseObjectFactory {
 		return allParseObjects;
 	}
 
-	/**
-	 * Returns all ParseObjects that should fill local database prior to usage
-	 * 
-	 * @return List<ExtendedParseObject>
-	 */
-	// public List<ExtendedParseObject> getAllPreloadable() {
-	// List<ExtendedParseObject> preloadable = new
-	// ArrayList<ExtendedParseObject>();
-	// preloadable.addUnique(checklistCircuitEnding);
-	// preloadable.addUnique(checklistCircuitStarting);
-	// preloadable.addUnique(circuit);
-	// preloadable.addUnique(circuitUnit);
-	// preloadable.addUnique(circuitStarted);
-	// preloadable.addUnique(districtWatch);
-	// preloadable.addUnique(districtWatchClient);
-	// preloadable.addUnique(districtWatchUnit);
-	// preloadable.addUnique(eventType);
-	// preloadable.addUnique(guard);
-	// return preloadable;
-	// }
 
 	public Client getClient() {
 		return client;
 	}
 
-//	public Alarm getAlarm() {
-//		return alarm;
-//	}
 
 	public EventRemark getEventRemark() {
 		return eventRemark;
@@ -139,14 +105,6 @@ public class ParseObjectFactory {
 		return circuitUnit;
 	}
 
-//
-//	public ChecklistCircuitEnding getChecklistCircuitEnding() {
-//		return checklistCircuitEnding;
-//	}
-//
-//	public ChecklistCircuitStarting getChecklistCircuitStarting() {
-//		return checklistCircuitStarting;
-//	}
 
 	public Circuit getCircuit() {
 		return circuit;
@@ -156,9 +114,6 @@ public class ParseObjectFactory {
 		return circuitStarted;
 	}
 
-//	public Message getMessage() {
-//		return message;
-//	}
 
 	public DistrictWatch getDistrictWatch() {
 		return districtWatch;

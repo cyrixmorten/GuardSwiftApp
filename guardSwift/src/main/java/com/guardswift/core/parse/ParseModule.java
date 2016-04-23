@@ -54,6 +54,8 @@ public class ParseModule {
     public static final String ApplicationID = "gejAg1OFJrBwepcORHB3U7V7fawoDjlymRe8grHJ";
     public static final String ClientKey = "ZOZ7GGeu2tfOQXGRcMSOtDMg1qTGVZaxjO8gl89p";
 
+    public static final String FUNCTION_SEND_REPORT = "sendReport";
+
     private final Context context;
     private final GSTasksCache tasksCache;
     private final GuardCache guardCache;
@@ -100,28 +102,38 @@ public class ParseModule {
             guard.setOnline(false);
             guard.pinThenSaveEventually();
 
-            LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
-                @Override
-                public Object then(Task<String> task) throws Exception {
-                    if (task.isFaulted()) {
-                        new HandleException(context, TAG, "upload guard locations", task.getError());
-                        saveCallback.done((ParseException) task.getError());
-                    } else {
-                        Log.w(TAG, "Location url: " + task.getResult());
-                        new EventLog.Builder(context)
-                                .event(context.getString(R.string.logout))
-                                .locationTrackerUrl(task.getResult())
-                                .eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
-                            @Override
-                            public void done(EventLog object, ParseException e) {
-                                saveCallback.done(e);
-                            }
-                        });
-                    }
-
-                    return null;
-                }
+            // todo temporarily disabled GPS tracking
+            new EventLog.Builder(context)
+            .event(context.getString(R.string.logout))
+                    .eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
+                        @Override
+                        public void done(EventLog object, ParseException e) {
+                            saveCallback.done(e);
+                        }
             });
+
+//            LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
+//                @Override
+//                public Object then(Task<String> task) throws Exception {
+//                    if (task.isFaulted()) {
+//                        new HandleException(context, TAG, "upload guard locations", task.getError());
+//                        saveCallback.done((ParseException) task.getError());
+//                    } else {
+//                        Log.w(TAG, "Location url: " + task.getResult());
+//                        new EventLog.Builder(context)
+//                                .event(context.getString(R.string.logout))
+//                                .locationTrackerUrl(task.getResult())
+//                                .eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
+//                            @Override
+//                            public void done(EventLog object, ParseException e) {
+//                                saveCallback.done(e);
+//                            }
+//                        });
+//                    }
+//
+//                    return null;
+//                }
+//            });
         } else {
             saveCallback.done(null);
         }
@@ -176,10 +188,11 @@ public class ParseModule {
         final MaterialDialog updateDialog = new MaterialDialog.Builder(activity)
                 .title(R.string.working)
                 .content(R.string.please_wait)
-                .progress(false, 0, true)
+                .progress(true, 0)
+//                .progress(false, 0, true)
                 .show();
 
-        updateDialog.setMaxProgress(100);
+//        updateDialog.setMaxProgress(100);
         updateDialog.setCancelable(false);
 
 
@@ -187,8 +200,6 @@ public class ParseModule {
         logout(new SaveCallback() {
             @Override
             public void done(ParseException e) {
-
-                updateDialog.dismiss();
 
                 Log.d(TAG, "Logout completed! " + e);
                 if (e != null) {
@@ -207,7 +218,7 @@ public class ParseModule {
 
                 activity.finish();
 
-                return;
+//                updateDialog.dismiss();
             }
         }, new ProgressCallback() {
             @Override

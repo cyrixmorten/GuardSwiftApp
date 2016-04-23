@@ -36,17 +36,12 @@ import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
 import com.parse.FindCallback;
 import com.parse.FunctionCallback;
-import com.parse.GetCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseUser;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -175,74 +170,24 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
     @OnClick(R.id.btn_send_report)
     public void sendReport(Button button) {
         btnSendReport.setEnabled(false);
-        sendReportDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).intermediateProgress(R.string.working, R.string.sending_reprt).show();
-        // update user
-        ParseUser.getCurrentUser().fetchInBackground(new GetCallback<ParseUser>() {
+        sendReportDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate(R.string.working, R.string.sending_reprt).show();
+
+        final HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("reportId", report.getObjectId());
+        ParseCloud.callFunctionInBackground(ParseModule.FUNCTION_SEND_REPORT, params, new FunctionCallback<Object>() {
             @Override
-            public void done(final ParseUser user, ParseException e) {
+            public void done(Object object, ParseException e) {
                 if (e != null) {
                     sendReportFailedWithError(e);
                     return;
                 }
 
-                // get staticReportSettings
-                user.getParseObject("staticReportSettings").fetchInBackground(new GetCallback<ParseObject>() {
-                    @Override
-                    public void done(ParseObject object, ParseException e) {
-                        if (e != null) {
-                            sendReportFailedWithError(e);
-                            return;
-                        }
-
-                        String subject = "Vagtrapport " + DateUtils.formatDateTime(getContext(), report.getCreatedAt().getTime(), DateUtils.FORMAT_SHOW_DATE);
-                        String replyTo = object.getString("replytoEmail");
-                        List<String> bcc = object.getList("bccEmails");
-
-                        String reportLink = "http://www.guardswift.com/#/report/view/" + staticTask.getReportId();
-                        String html = "Åben linket nedenfor for at se rapporten <br><br>";
-                        html += String.format(Locale.getDefault(), "<a href='%s' target='_blank'>%s<a>", reportLink, reportLink);
-
-                        Log.w(TAG, "replyTo: " + replyTo);
-                        Log.w(TAG, "bcc: " + bcc);
-                        Log.w(TAG, "Receivers: " + Arrays.toString(client.getContactsRequestingReportEmails().toArray()));
-
-                        List<String> receivers = client.getContactsRequestingReportEmails();
-                        if (receivers.isEmpty()) {
-                            receivers.add(user.getEmail());
-
-                            String newSubject = "OBS MANGLER MODTAGERE " + subject;
-                            subject = newSubject;
-                            html += "<br><br><em>Denne rapport har ingen modtagere hos kunden!</em>";
-                        }
-                        if (bcc != null && !bcc.isEmpty()) {
-                            bcc.remove(user.getEmail());
-                            receivers.addAll(bcc);
-                        }
-
-                        final HashMap<String, Object> params = new HashMap<String, Object>();
-                        params.put("to", receivers);
-                        params.put("replyTo", replyTo);
-                        params.put("subject", subject);
-                        params.put("html", html);
-                        params.put("bcc", bcc);
-                        ParseCloud.callFunctionInBackground("sendHTMLmail", params, new FunctionCallback<Object>() {
-                            @Override
-                            public void done(Object object, ParseException e) {
-                                if (e != null) {
-                                    sendReportFailedWithError(e);
-                                    return;
-                                }
-
-                                sendReportSuccess();
-
-                            }
-                        });
-
-                    }
-                });
+                sendReportSuccess();
 
             }
         });
+
+
     }
 
     private void dismissSendReportDialog() {

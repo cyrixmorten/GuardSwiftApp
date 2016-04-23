@@ -204,11 +204,11 @@ public class GuardSwiftApplication extends InjectingApplication {
 		return parseCacheFactory;
 	}
 
-	public Task<Void> bootstrapParseObjectsLocally(final Activity activity) {
-		return bootstrapParseObjectsLocally(activity, false);
+	public Task<Void> bootstrapParseObjectsLocally(final Activity activity, Guard guard) {
+		return bootstrapParseObjectsLocally(activity, guard, false);
 	}
 
-	public Task<Void> bootstrapParseObjectsLocally(final Activity activity, boolean performInBackground) {
+	public Task<Void> bootstrapParseObjectsLocally(final Activity activity, final Guard guard, boolean performInBackground) {
 
 		if (parseObjectsBootstrapped) {
 			return Task.forResult(null);
@@ -250,27 +250,35 @@ public class GuardSwiftApplication extends InjectingApplication {
 
 
 
-		Task<List<ParseObject>> districtWatchClient = parseObjectFactory
-				.getDistrictWatchClient().updateAllAsync();
-		Task<List<ParseObject>> circuitUnit = parseObjectFactory
-				.getCircuitUnit().updateAllAsync();
-		Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted()
-				.updateAllAsync();
-		Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory
-				.getDistrictWatchStarted().updateAllAsync();
-		Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType()
-				.updateAllAsync();
-
 
 		ArrayList<Task<List<ParseObject>>> tasks = new ArrayList<>();
-		tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
-		tasks.add(circuitUnit.onSuccess(updateClassSuccess));
-		tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
-		tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
+
+
+		Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType()
+				.updateAllAsync();
 		tasks.add(eventTypes.onSuccess(updateClassSuccess));
 
-		updateClassTotal.set(tasks.size());
+		if (guard.canAccessRegularTasks()) {
+			Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted()
+					.updateAllAsync();
+			Task<List<ParseObject>> circuitUnit = parseObjectFactory
+					.getCircuitUnit().updateAllAsync();
 
+			tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
+			tasks.add(circuitUnit.onSuccess(updateClassSuccess));
+		}
+
+		if (guard.canAccessDistrictTasks()) {
+			Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory
+					.getDistrictWatchStarted().updateAllAsync();
+			Task<List<ParseObject>> districtWatchClient = parseObjectFactory
+					.getDistrictWatchClient().updateAllAsync();
+
+			tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
+			tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
+		}
+
+		updateClassTotal.set(tasks.size());
 
 		return Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
 			@Override
@@ -287,7 +295,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 					new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {
 						@Override
 						public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
-							bootstrapParseObjectsLocally(activity);
+							bootstrapParseObjectsLocally(activity, guard);
 						}
 					}).cancelable(false).show();
 				}

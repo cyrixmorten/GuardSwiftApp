@@ -34,6 +34,7 @@ public class FinishedStaticTasksFragment extends AbstractTasksRecycleFragment<St
             public ParseQuery<StaticTask> create() {
                 return new StaticTask.QueryBuilder(false).
                         finished().
+                        daysBack(7).
                         sortedByTimeEnded().
                         build();
             }
