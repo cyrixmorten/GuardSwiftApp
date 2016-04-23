@@ -214,8 +214,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 }
             });
 
-            // todo implement
-            vBtnReportHistory.setVisibility(View.GONE);
+            vBtnReportHistory.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    CreateEventHandlerActivity.start(context, task);
+                }
+            });
 
             vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
                 @Override

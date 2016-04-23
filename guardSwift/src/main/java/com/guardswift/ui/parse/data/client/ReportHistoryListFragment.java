@@ -1,8 +1,6 @@
-package com.guardswift.ui.parse.documentation.report.edit;
+package com.guardswift.ui.parse.data.client;
 
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
-import android.util.Log;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.cache.task.GSTasksCache;
@@ -12,8 +10,8 @@ import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
-import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
+import com.guardswift.ui.parse.documentation.report.edit.ReportSuggestionsAdapter;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
@@ -47,7 +45,6 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
         return new ParseQueryAdapter.QueryFactory<Report>() {
             @Override
             public ParseQuery<Report> create() {
-                GSTask task = gsTasksCache.getLastSelected();
                 return new Report.QueryBuilder(false).build();
             }
         };
@@ -55,8 +52,7 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
 
     @Override
     protected ParseRecyclerQueryAdapter<Report, ReportSuggestionsAdapter.ReportViewHolder> createRecycleAdapter() {
-        CoordinatorLayout coordinatorLayout = ((AbstractTabsViewPagerFragment) getParentFragment()).getCoordinatorLayout();
-        return new ReportSuggestionsAdapter(getActivity(), gsTasksCache.getLastSelected(), coordinatorLayout, createNetworkQueryFactory());
+        return null;
     }
 
     @Override

@@ -25,6 +25,8 @@ public class Report extends ExtendedParseObject implements GSReport {
     public static final String reportEntries = "reportEntries";
     public static final String eventLogs = "eventLogs";
 
+    public static final String guardName = "guardName";
+
     public static final String extraTimeSpent = "extraTimeSpent";
     public static final String eventCount = "eventCount";
 
@@ -100,8 +102,10 @@ public class Report extends ExtendedParseObject implements GSReport {
             return this;
         }
 
-        ;
+    }
 
+    public String getGuardName() {
+        return getString(guardName);
     }
 
 

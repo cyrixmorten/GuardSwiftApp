@@ -1,18 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card="http://schemas.android.com/apk/res-auto"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    style="@style/CardView.Light"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:clickable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    card_view:cardCornerRadius="@dimen/mini_padding"
+    card_view:cardElevation="@dimen/mini_padding"
+    card_view:cardUseCompatPadding="true"
+    card_view:contentPadding="@dimen/small_padding">
 
-    <it.gmariotti.cardslib.library.view.CardViewNative
-        android:id="@+id/carddemo"
-        style="@style/card_external"
-        card:card_layout_resourceID="@layout/native_cardwithlist_layout"
+
+    <LinearLayout
+        android:id="@+id/layout_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-</LinearLayout>
+        <LinearLayout
+            android:id="@+id/layout_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/small_padding"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_guard_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Morten Rasmussen"
+                />
+
+            <TextView
+                android:id="@+id/tv_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="30-06-1987"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_events"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
 
+            <include layout="@layout/gs_view_report_entry"></include>
 
+            <include layout="@layout/gs_view_report_entry"></include>
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+</android.support.v7.widget.CardView>
