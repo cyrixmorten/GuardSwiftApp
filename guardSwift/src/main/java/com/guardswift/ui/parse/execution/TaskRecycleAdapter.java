@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.text.format.DateFormat;
 import android.util.SparseBooleanArray;
@@ -33,12 +34,15 @@ import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWat
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
 import com.guardswift.ui.parse.data.checkpoint.CheckpointActivity;
+import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.edit.ReportEditActivity;
+import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 import com.guardswift.ui.parse.execution.circuit.TaskDescriptionActivity;
 import com.guardswift.util.AnimationHelper;
 import com.parse.GetCallback;
@@ -222,7 +226,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             vBtnReportHistory.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    CreateEventHandlerActivity.start(context, task);
+                    Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient());
+                    GenericToolbarActivity.start(
+                            context,
+                            context.getString(R.string.reports),
+                            task.getClient().getFullAddress(),
+                            fragment);
                 }
             });
 

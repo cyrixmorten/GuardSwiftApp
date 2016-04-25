@@ -24,6 +24,7 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
 	}
 
 
+
     public ParseQueryBuilder<T> matchingObjectId(String objectId) {
         query.whereEqualTo("objectId", objectId);
         return this;

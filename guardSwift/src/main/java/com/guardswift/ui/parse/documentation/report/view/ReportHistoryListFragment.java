@@ -8,6 +8,7 @@ import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
+import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
@@ -20,6 +21,10 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
 
 
     public static ReportHistoryListFragment newInstance(Client client) {
+        return newInstance(client, null);
+    }
+
+    public static ReportHistoryListFragment newInstance(Client client, GSTask.TASK_TYPE task_type) {
 
         GuardSwiftApplication.getInstance()
                 .getCacheFactory()
@@ -27,6 +32,7 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
 
         ReportHistoryListFragment fragment = new ReportHistoryListFragment();
         Bundle args = new Bundle();
+            args.putSerializable("task_type", task_type);
         fragment.setArguments(args);
         return fragment;
     }
@@ -44,7 +50,8 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
         return new ParseQueryAdapter.QueryFactory<Report>() {
             @Override
             public ParseQuery<Report> create() {
-                return new Report.QueryBuilder(false).matching(clientCache.getSelected()).build();
+                GSTask.TASK_TYPE task_type = (GSTask.TASK_TYPE) getArguments().getSerializable("task_type");
+                return new Report.QueryBuilder(false).matching(clientCache.getSelected()).matching(task_type).build().addDescendingOrder("createdAt");
             }
         };
     }

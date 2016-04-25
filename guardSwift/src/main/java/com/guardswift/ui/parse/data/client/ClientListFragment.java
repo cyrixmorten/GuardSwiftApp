@@ -2,19 +2,19 @@ package com.guardswift.ui.parse.data.client;
 
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.View;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.cache.data.ClientCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.data.client.Client;
+import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.common.RecyclerViewClickListener;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
+import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
-
-import javax.inject.Inject;
 
 public class ClientListFragment extends AbstractParseRecyclerFragment<Client, ClientAdapter.ClientViewHolder> {
 
@@ -31,8 +31,6 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
         return fragment;
     }
 
-    @Inject
-    ClientCache clientCache;
 
     private OnClientSelectedListener onClientSelectedListener;
 
@@ -57,16 +55,23 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
 
     @Override
     protected ParseRecyclerQueryAdapter<Client, ClientAdapter.ClientViewHolder> createRecycleAdapter() {
-        final ClientAdapter adapter = new ClientAdapter(createNetworkQueryFactory(), new RecyclerViewClickListener() {
+        return new ClientAdapter(createNetworkQueryFactory(), new RecyclerViewClickListener() {
             @Override
             public void recyclerViewListClicked(View v, int position) {
+                Client client = getAdapter().getItem(position);
+
                 if (onClientSelectedListener != null) {
-                    onClientSelectedListener.clientSelected(getAdapter().getItem(position));
+                    // creating static report
+                    onClientSelectedListener.clientSelected(client);
+                } else {
+                    // show report history
+                    Fragment fragment = ReportHistoryListFragment.newInstance(client);
+                    String title = "Rapporter";
+                    String subtitle = client.getFullAddress();
+                    GenericToolbarActivity.start(getContext(), title, subtitle, fragment);
                 }
             }
         });
-
-        return adapter;
     }
 
     @Override

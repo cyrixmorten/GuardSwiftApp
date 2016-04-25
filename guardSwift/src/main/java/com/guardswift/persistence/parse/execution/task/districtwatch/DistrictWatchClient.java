@@ -398,7 +398,7 @@ public class DistrictWatchClient extends BaseTask {
     }
 
     public DistrictWatchUnit getDistrictWatchUnit() {
-        return (DistrictWatchUnit)getLDSFallbackParseObject(districtWatch);
+        return (DistrictWatchUnit)getLDSFallbackParseObject(districtWatchUnit);
     }
 
     public int getTimesArrived() {

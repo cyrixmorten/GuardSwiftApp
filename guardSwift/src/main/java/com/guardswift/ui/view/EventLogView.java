@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.google.common.collect.Lists;
 import com.guardswift.R;
+import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.util.ToastHelper;
 
@@ -45,7 +46,7 @@ public class EventLogView extends LinearLayout {
     TextView tvRemarks;
 
 
-    public EventLog(Context context, EventLog eventLog) {
+    public EventLogView(Context context, EventLog eventLog) {
         super(context, null);
 
         setOrientation(LinearLayout.VERTICAL);
@@ -57,7 +58,12 @@ public class EventLogView extends LinearLayout {
 
         ButterKnife.bind(v);
 
-        setText(this.tvEventtype, eventLog.getEve);
+        setText(this.tvEventtype, eventLog.getEvent());
+        setText(this.tvTimetamp, DateUtils.formatDateTime(getContext(), eventLog.getDeviceTimestamp().getTime(), DateUtils.FORMAT_SHOW_TIME));
+        setText(this.tvAmount, String.valueOf(eventLog.getAmount()));
+        setText(this.tvPeople, eventLog.getPeople());
+        setText(this.tvLocations, eventLog.getLocations());
+        setText(this.tvRemarks, eventLog.getRemarks());
 
     }
 
@@ -74,5 +80,3 @@ public class EventLogView extends LinearLayout {
 
 
 
-
-}

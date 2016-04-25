@@ -1,6 +1,8 @@
 package com.guardswift.ui.web;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +10,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.guardswift.R;
@@ -22,17 +25,15 @@ import javax.inject.Inject;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class WebViewFragment extends InjectingFragment {
+public class WebViewFragment extends Fragment {
 
     protected static final String TAG = WebViewFragment.class
             .getSimpleName();
 
-    public static WebViewFragment newInstance(CircuitUnit circuitUnit) {
-
-        GuardSwiftApplication.getInstance().getCacheFactory().getCircuitUnitCache().setSelected(circuitUnit);
-
+    public static WebViewFragment newInstance(String url) {
         WebViewFragment fragment = new WebViewFragment();
         Bundle args = new Bundle();
+        args.putString("url", url);
         fragment.setArguments(args);
         return fragment;
     }
@@ -40,44 +41,50 @@ public class WebViewFragment extends InjectingFragment {
     public WebViewFragment() {
     }
 
-    @Inject
-    CircuitUnitCache circuitUnitCache;
 
-    private CircuitUnit mCircuitUnit;
-
-    @Bind(R.id.webView) WebView webView;
+    @Bind(R.id.webView)
+    WebView webView;
+    @Bind(R.id.progress)
+    ProgressBar progress;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mCircuitUnit = circuitUnitCache.getSelected();
     }
-
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.webview,
-                container, false);
+        View rootView = inflater.inflate(R.layout.webview, container, false);
 
         ButterKnife.bind(this, rootView);
 
         WebSettings settings = webView.getSettings();
-        settings.setDefaultTextEncodingName("utf-8");
-//        settings.setJavaScriptEnabled(true);
-//        settings.setLoadWithOverviewMode(true);
-//        settings.setUseWideViewPort(true);
+        settings.setJavaScriptEnabled(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(true);
-//        settings.setSupportZoom(true);
+        settings.setDisplayZoomControls(false);
 
-        webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         webView.setWebChromeClient(new WebChromeClient() {
 
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 super.onProgressChanged(view, newProgress);
+                if (progress == null) {
+                    return;
+                }
+
+                if (newProgress != 100) {
+                    if (progress.getVisibility() == View.GONE) {
+                        progress.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    progress.setVisibility(View.GONE);
+                }
             }
 
         });
@@ -88,20 +95,11 @@ public class WebViewFragment extends InjectingFragment {
             }
         });
 
-        webView.clearCache(true);
+        webView.loadUrl(getArguments().getString("url"));
 
-        String description = mCircuitUnit.getDescription();
-        if (description == null) {
-            description = getString(R.string.no_desc_regular_html);
-        }
-        webView.loadDataWithBaseURL("", description, "text/html", "utf-8", null);
+        Log.d(TAG, "Loading " + getArguments().getString("url"));
 
         return rootView;
-    }
-
-
-    public void onEventMainThread(UpdateUIEvent ev) {
-        // ignore
     }
 
 

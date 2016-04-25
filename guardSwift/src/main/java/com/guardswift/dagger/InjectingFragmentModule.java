@@ -31,6 +31,7 @@ package com.guardswift.dagger;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
+import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
 import com.guardswift.ui.parse.documentation.eventlog.AbstractEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.CircuitUnitEventFragment;
@@ -115,7 +116,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		ReportEditViewPagerFragment.class,
 		ReportEditListFragment.class,
 		ReportSuggestionsListFragment.class,
-		ReportSummaryFragment.class
+		ReportSummaryFragment.class,
+		ReportHistoryListFragment.class
 		}, library = true)
 public class InjectingFragmentModule {
 	private final android.support.v4.app.Fragment mFragment;

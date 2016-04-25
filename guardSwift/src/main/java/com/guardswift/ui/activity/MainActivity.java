@@ -145,9 +145,10 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
 
 
 
+    private SweetAlertDialog logoutDialog;
 
     private void showLogoutDialog() {
-        new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
+        logoutDialog = new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
                 .setTitleText(getString(R.string.logout))
                 .setContentText(getString(R.string.logout_confirm))
                 .setConfirmText(getString(android.R.string.yes))
@@ -155,11 +156,16 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
                 .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                     @Override
                     public void onClick(final SweetAlertDialog sDialog) {
+
+                        logoutDialog.cancel();
+
                         parseModule.logout(MainActivity.this);
 
+
                     }
-                })
-                .show();
+                });
+
+        logoutDialog.show();
     }
 
 

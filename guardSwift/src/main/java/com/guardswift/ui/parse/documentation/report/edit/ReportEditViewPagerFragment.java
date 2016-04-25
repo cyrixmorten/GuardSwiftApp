@@ -10,6 +10,7 @@ import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
+import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 
 import java.util.Map;
 
@@ -41,12 +42,15 @@ public class ReportEditViewPagerFragment extends AbstractTabsViewPagerFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         fragmentMap = Maps.newLinkedHashMap();
-        fragmentMap.put(getString(R.string.title_report), ReportEditListFragment.newInstance(gsTasksCache.getLastSelected()));
-        if (gsTasksCache.getLastSelected().getTaskType() == GSTask.TASK_TYPE.STATIC) {
-            fragmentMap.put(getString(R.string.title_summary), ReportSummaryFragment.newInstance((StaticTask) gsTasksCache.getLastSelected()));
+        GSTask task = gsTasksCache.getLastSelected();
+        fragmentMap.put(getString(R.string.title_report), ReportEditListFragment.newInstance(task));
+        if (task.getTaskType() == GSTask.TASK_TYPE.STATIC) {
+            fragmentMap.put(getString(R.string.title_send), ReportSummaryFragment.newInstance((StaticTask) task));
         } else {
-            fragmentMap.put(getString(R.string.title_suggestions), ReportSuggestionsListFragment.newInstance(gsTasksCache.getLastSelected()));
+            fragmentMap.put(getString(R.string.title_suggestions), ReportSuggestionsListFragment.newInstance(task));
         }
+        fragmentMap.put(getString(R.string.title_history), ReportHistoryListFragment.newInstance(task.getClient(), task.getTaskType()));
+
         super.onCreate(savedInstanceState);
     }
 

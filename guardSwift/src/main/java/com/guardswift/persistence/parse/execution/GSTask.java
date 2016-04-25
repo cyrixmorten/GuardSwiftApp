@@ -25,7 +25,6 @@ public interface GSTask<T extends BaseTask> extends Positioned {
     enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER}
 
     TASK_TYPE getTaskType();
-
     TASK_STATE getTaskState();
 
 //    public boolean equals(Object o1);

@@ -216,9 +216,9 @@ public class ParseModule {
                 GuardLoginActivity.start(activity);
                 clearData();
 
+                updateDialog.cancel();
                 activity.finish();
 
-//                updateDialog.dismiss();
             }
         }, new ProgressCallback() {
             @Override

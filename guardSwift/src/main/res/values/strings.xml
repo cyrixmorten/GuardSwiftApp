@@ -93,7 +93,7 @@
     <string name="no_data_found">Ingen data fundet</string>
     <string name="internal_information">Intern information</string>
     <string name="successfully_added_var">Tilføjede %1$s</string>
-    <string name="working">Arbejder...</string>
+    <string name="working">Arbejder…</string>
     <string name="new_update">Ny opdatering</string>
     <string name="download_now">Hent nu</string>
     <string name="retry">Prøv igen</string>
@@ -162,7 +162,7 @@
     <string name="title_alarm">Alarm</string>
     <string name="update">Opdatering</string>
     <string name="new_update_available">Der findes en ny opdatering.\n\nÅben GMail for at hente nu?</string>
-    <string name="downloading_update">Henter opdatering...</string>
+    <string name="downloading_update">Henter opdatering…</string>
     <string name="download_canceled">Download afbrudt</string>
     <string name="error_loading">Fejl under indlæsning</string>
     <string name="action">Handling</string>
@@ -179,7 +179,7 @@
     <string name="login_to_respond_to_alarm">Log ind for at reagere på alarmen</string>
     <string name="receive_alarms">Modtag alarmer</string>
     <string name="unassigned_alarms_msg">Der er %1$d utildelte alarmer\n\nGå til \'Alle alarmer\' for at se dem</string>
-    <string name="saving">Gemmer...</string>
+    <string name="saving">Gemmer…</string>
     <string name="error_an_error_occured">Der opstod en fejl</string>
     <string name="missing_data">Mangler data</string>
     <string name="collect_fingerprints_message_new">GuardSwift har endnu ikke lært dette checkpoint at kende.\n Det tager 30 sekunder at indsamle informationer.\n\nStart data indsamling nu?</string>
@@ -197,7 +197,7 @@
     <string name="gps_settings">GPS indstillinger</string>
     <string name="open_settings">Åben indstillinger</string>
     <string name="gps_network_location_unavailable">GPS og netværks lokation er ikke slået til.</string>
-    <string name="please_wait">Vent venligst...</string>
+    <string name="please_wait">Vent venligst…</string>
     <string name="logout_confirm">Log af GuardSwift?</string>
     <string name="logout_success">Du er nu logget af!</string>
     <string name="success">Success</string>
@@ -337,16 +337,20 @@
     <string name="is_sent_to_contacts">Sendes til kontaktpersoner</string>
     <string name="no_receivers">Ingen modtagere!</string>
     <string name="report_empty">Rapporten er tom</string>
-    <string name="title_summary">Opsummering</string>
-    <string name="sending_reprt">Afsender rapport...</string>
+    <string name="title_send">Afsend</string>
+    <string name="sending_reprt">Afsender rapport…</string>
     <string name="error">Fejl</string>
     <string name="question_logout_after_sending_report">Rapporten er nu afsendt til kunden, og vagten er meldt afsluttet.\n\nØnsker du at logge af GuardSwift?</string>
     <string name="bootstrapping_parseobjects_failed">Der skete en fejl i opstarten af GuardSwift, sandsynligvis fordi enheden ikke kan skabe forbindelse til internettet.\n\nPrøv igen?</string>
     <string name="new_event">Ny hændelse</string>
     <string name="view_report">Rapport</string>
     <string name="title_suggestions">Forslag</string>
-    <string name="report_history">Rapport historik</string>
+    <string name="previous_reports">Tidligere rapporter</string>
     <string name="report_creating">Opretter rapport</string>
+    <string name="fetching_report">Henter rapport</string>
+    <string name="written_by">Skrevet af</string>
+    <string name="task_static">Fastvagt</string>
+    <string name="reports">Rapporter</string>
 
 
 </resources>

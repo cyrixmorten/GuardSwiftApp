@@ -7,10 +7,12 @@ import android.support.v4.app.Fragment;
 public class GenericToolbarActivity extends AbstractToolbarActivity {
 
     private static String title;
+    private static String subtitle;
     private static Fragment fragment;
 
-    public static void start(Context context, String title, Fragment fragment) {
+    public static void start(Context context, String title, String subtitle, Fragment fragment) {
         GenericToolbarActivity.title = title;
+        GenericToolbarActivity.subtitle = subtitle;
         GenericToolbarActivity.fragment = fragment;
         context.startActivity(new Intent(context, GenericToolbarActivity.class));
     }
@@ -27,7 +29,7 @@ public class GenericToolbarActivity extends AbstractToolbarActivity {
 
     @Override
     protected String getToolbarSubTitle() {
-        return null;
+        return subtitle;
     }
 
 }

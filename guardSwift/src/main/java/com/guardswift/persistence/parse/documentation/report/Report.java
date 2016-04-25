@@ -2,12 +2,15 @@ package com.guardswift.persistence.parse.documentation.report;
 
 import android.content.Context;
 
+import com.google.common.collect.Lists;
 import com.guardswift.core.documentation.eventlog.context.LogContextFactory;
 import com.guardswift.core.documentation.eventlog.context.LogContextStrategy;
 import com.guardswift.core.documentation.eventlog.task.LogTaskFactory;
 import com.guardswift.core.documentation.eventlog.task.LogTaskStrategy;
+import com.guardswift.core.documentation.eventlog.task.TaskTypeLogStrategy;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
+import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.parse.ParseClassName;
@@ -17,6 +20,8 @@ import com.parse.ParseUser;
 
 import org.json.JSONObject;
 
+import java.util.List;
+
 @ParseClassName("Report")
 public class Report extends ExtendedParseObject implements GSReport {
 
@@ -24,8 +29,6 @@ public class Report extends ExtendedParseObject implements GSReport {
     public static final String reportId = "reportId";
     public static final String reportEntries = "reportEntries";
     public static final String eventLogs = "eventLogs";
-
-    public static final String guardName = "guardName";
 
     public static final String extraTimeSpent = "extraTimeSpent";
     public static final String eventCount = "eventCount";
@@ -47,6 +50,11 @@ public class Report extends ExtendedParseObject implements GSReport {
         }
 
         return report;
+    }
+
+    public List<EventLog> getEventLogs() {
+        List<EventLog> logs = getList(eventLogs);
+        return (logs != null) ? logs : Lists.<EventLog>newArrayList();
     }
 
 
@@ -97,15 +105,35 @@ public class Report extends ExtendedParseObject implements GSReport {
             super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery.getQuery(Report.class));
         }
 
+        public QueryBuilder include(String... includes) {
+            for (String include: includes) {
+                query.include(include);
+            }
+            return this;
+        }
+
         public QueryBuilder matching(GSTask task) {
             query.whereEqualTo(reportId, task.getReportId());
+            return this;
+        }
+
+        public QueryBuilder matching(Client client) {
+            query.whereEqualTo(EventLog.client, client);
+            return this;
+        }
+
+        public QueryBuilder matching(GSTask.TASK_TYPE task_type) {
+            if (task_type == null) {
+                return this;
+            }
+            query.whereEqualTo(TaskTypeLogStrategy.taskTypeName, task_type.toString());
             return this;
         }
 
     }
 
     public String getGuardName() {
-        return getString(guardName);
+        return getString(EventLog.guardName);
     }
 
 

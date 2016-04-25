@@ -54,9 +54,13 @@ public class MainNavigationDrawer {
 
     public interface MainNavigationDrawerCallback {
         void selectItem(Fragment fragment);
+
         void selectItem(Fragment fragment, String title);
+
         void selectItem(Fragment fragment, String title, String subtitle);
+
         void selectItem(Fragment fragment, int titleResource);
+
         void logout();
     }
 
@@ -110,13 +114,14 @@ public class MainNavigationDrawer {
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        if (drawerItem == null)
+                        if (drawerItem == null) {
                             return false;
+                        }
 
-                        switch (drawerItem.getIdentifier()) {
-                            case DRAWER_LOGOUT:
-                                drawerCallback.logout();
-                                return true;
+                        long id = drawerItem.getIdentifier();
+                        if (id == DRAWER_LOGOUT) {
+                            drawerCallback.logout();
+                            return true;
                         }
 
                         if (drawerItem.getTag() instanceof CircuitStarted) {
@@ -161,8 +166,8 @@ public class MainNavigationDrawer {
         // Determine initial selection
         CircuitStarted selectedCircuitStarted = circuitStartedCache.getSelected();
         IDrawerItem selected = null;
-        if (selectedCircuitStarted  != null && circuitItems != null) {
-            for (IDrawerItem item: circuitItems) {
+        if (selectedCircuitStarted != null && circuitItems != null) {
+            for (IDrawerItem item : circuitItems) {
                 CircuitStarted circuitStarted = (CircuitStarted) item.getTag();
                 if (circuitStarted != null && selectedCircuitStarted.getObjectId().equals(circuitStarted.getObjectId())) {
                     Log.w(TAG, "Initial: " + circuitStarted.getName() + " " + item);
@@ -178,7 +183,7 @@ public class MainNavigationDrawer {
 //        }
         if (selected != null) {
             int position = navigationDrawer.getPosition(selected);
-            Log.w(TAG, "Selected: " + ((CircuitStarted)selected.getTag()).getName());
+            Log.w(TAG, "Selected: " + ((CircuitStarted) selected.getTag()).getName());
             Log.w(TAG, "Position: " + position);
             navigationDrawer.setSelection(selected, true);
         } else {
@@ -223,6 +228,7 @@ public class MainNavigationDrawer {
     }
 
     private List<IDrawerItem> circuitItems;
+
     private IDrawerItem[] getActiveCircuitDrawerItems() {
         circuitItems = Lists.newArrayList();
         IDrawerItem circuitHeader = new SectionDrawerItem().withName(R.string.title_drawer_circuits);
@@ -332,7 +338,6 @@ public class MainNavigationDrawer {
         }));
         return dataItems.toArray(new IDrawerItem[dataItems.size()]);
     }
-
 
 
     private IDrawerItem getLogoutDrawerItem() {

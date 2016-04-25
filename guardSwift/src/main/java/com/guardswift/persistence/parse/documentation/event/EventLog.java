@@ -779,6 +779,11 @@ public class EventLog extends ExtendedParseObject {
 //        setOwner(ParseUser.getCurrentUser());
 //    }
 
+
+    public String getTaskTypeName() {
+        return getString(task_type);
+    }
+
     private void setAutomatic(boolean automatic) {
         put(EventLog.automatic, automatic);
     }
@@ -1097,7 +1102,11 @@ public class EventLog extends ExtendedParseObject {
     }
 
     public Date getDeviceTimestamp() {
-        return getDate(deviceTimestamp);
+        Date date = getDate(deviceTimestamp);
+        if (date == null) {
+            date = getCreatedAt();
+        }
+        return (date != null) ? date : new Date();
     }
 
     public void setDeviceTimestamp(Date date) {

@@ -361,7 +361,7 @@
             android:name=".ui.parse.data.checkpoint.CheckpointActivity"
             android:label="@string/title_activity_checkpoint" >
         </activity>
-        <activity android:name=".ui.parse.data.client.ClientListActivity" >
+        <activity android:name=".ui.activity.GenericToolbarActivity" >
         </activity>
     </application>
 

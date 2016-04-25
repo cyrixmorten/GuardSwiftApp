@@ -24,14 +24,14 @@ apply plugin: 'com.neenbedankt.android-apt'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "21.1.2"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "com.guardswift"
-        minSdkVersion 19
+        minSdkVersion 21
         targetSdkVersion 23
-        versionCode 315
-        versionName "3.1.5"
+        versionCode 316
+        versionName "3.1.6"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -124,7 +124,7 @@ dependencies {
     compile 'com.mikepenz:fontawesome-typeface:4.4.0.1@aar'
     // Material
     compile 'com.beardedhen:androidbootstrap:2.0.0'
-    compile('com.mikepenz:materialdrawer:4.3.8@aar') {
+    compile('com.mikepenz:materialdrawer:5.2.1@aar') {
         transitive = true
     }
 
@@ -138,11 +138,11 @@ dependencies {
 //    compile 'com.cocosw:bottomsheet:1.2.0@aar'
     // Android support libraries
     //    compile "com.android.support:support-v4:22.1.1"
-    compile 'com.malinskiy:superrecyclerview:1.1.1'
+    compile 'com.malinskiy:superrecyclerview:1.1.4'
     compile 'com.android.support:cardview-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
 //    compile 'com.android.support:recyclerview-v7:23.1.0'
-//    compile 'com.android.support:appcompat-v7:23.1.0'
+    compile 'com.android.support:appcompat-v7:23.3.0'
     //CardsLib
     //Core card library
 //    compile 'com.github.gabrielemariotti.cards:cardslib-core:2.1.0'

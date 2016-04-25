@@ -59,7 +59,7 @@ public class CircuitUnitDescriptionWebViewFragment extends InjectingFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_circuitunit_details,
+        View rootView = inflater.inflate(R.layout.webview,
                 container, false);
 
         ButterKnife.bind(this, rootView);

@@ -25,13 +25,13 @@ import android.view.MenuInflater;
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule;
 import com.guardswift.ui.activity.AbstractToolbarActivity;
 import com.guardswift.ui.activity.GSTaskCreateReportActivity;
+import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.activity.ParseLoginActivity;
 import com.guardswift.ui.dialog.activity.AbstractDialogActivity;
 import com.guardswift.ui.dialog.activity.CheckpointsDialogActivity;
 import com.guardswift.ui.parse.data.checkpoint.CheckpointActivity;
-import com.guardswift.ui.parse.data.client.ClientListActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.AbstractCreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.CircuitUnitCreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
@@ -68,7 +68,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
         // Main
         MainActivity.class,
         // Data
-        ClientListActivity.class,
+        GenericToolbarActivity.class,
         // Task
         CheckpointActivity.class,
         TaskDescriptionActivity.class,
