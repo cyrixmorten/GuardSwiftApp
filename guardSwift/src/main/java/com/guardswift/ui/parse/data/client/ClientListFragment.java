@@ -65,10 +65,10 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
                     onClientSelectedListener.clientSelected(client);
                 } else {
                     // show report history
-                    Fragment fragment = ReportHistoryListFragment.newInstance(client);
-                    String title = "Rapporter";
-                    String subtitle = client.getFullAddress();
-                    GenericToolbarActivity.start(getContext(), title, subtitle, fragment);
+//                    Fragment fragment = ReportHistoryListFragment.newInstance(client);
+//                    String title = "Rapporter";
+//                    String subtitle = client.getFullAddress();
+//                    GenericToolbarActivity.start(getContext(), title, subtitle, fragment);
                 }
             }
         });
