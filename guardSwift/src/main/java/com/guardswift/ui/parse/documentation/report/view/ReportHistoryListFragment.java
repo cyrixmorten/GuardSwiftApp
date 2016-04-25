@@ -51,7 +51,7 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
             @Override
             public ParseQuery<Report> create() {
                 GSTask.TASK_TYPE task_type = (GSTask.TASK_TYPE) getArguments().getSerializable("task_type");
-                return new Report.QueryBuilder(false).matching(clientCache.getSelected()).matching(task_type).build().addDescendingOrder("createdAt");
+                return new Report.QueryBuilder(false).matching(clientCache.getSelected()).matching(task_type).build().setLimit(30).addDescendingOrder("createdAt");
             }
         };
     }
