@@ -1,4 +1,4 @@
-package com.guardswift.ui.map;
+package com.guardswift.ui.web;
 
 import android.app.Activity;
 import android.os.Bundle;

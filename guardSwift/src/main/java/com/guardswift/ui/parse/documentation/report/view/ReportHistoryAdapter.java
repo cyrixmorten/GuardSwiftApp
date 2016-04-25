@@ -1,4 +1,4 @@
-package com.guardswift.ui.parse.data.client;
+package com.guardswift.ui.parse.documentation.report.view;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -6,9 +6,8 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import com.guardswift.persistence.parse.documentation.report.Report;
-import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
-import com.guardswift.ui.view.card.EventLogCard;
+import com.guardswift.ui.view.card.ReportCard;
 import com.parse.ParseQueryAdapter;
 
 /**
@@ -21,42 +20,38 @@ public class ReportHistoryAdapter extends ParseRecyclerQueryAdapter<Report, Repo
 
     public static class ReportViewHolder extends RecyclerView.ViewHolder {
 
-        public EventLogCard eventLogCard;
+        public ReportCard reportCard;
 
-        public ReportViewHolder(EventLogCard eventLogCard) {
-            super(eventLogCard);
+        public ReportViewHolder(ReportCard reportCard) {
+            super(reportCard);
 
-            this.eventLogCard = eventLogCard;
+            this.reportCard = reportCard;
+
         }
 
     }
 
 
     private Context context;
-    private GSTask task;
 
-    public ReportHistoryAdapter(Context context, GSTask task, ParseQueryAdapter.QueryFactory<Report> queryFactory) {
+    public ReportHistoryAdapter(Context context, ParseQueryAdapter.QueryFactory<Report> queryFactory) {
         super(queryFactory);
         this.context = context;
-        this.task = task;
 
     }
 
     @Override
     public ReportViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        EventLogCard eventLogCard = new EventLogCard(context);
-        eventLogCard.setEditable(false);
-        eventLogCard.setDeletable(false);
-        eventLogCard.setTimestamped(false);
-        eventLogCard.setCopyToReportEnabled(false);
-        return new ReportViewHolder(eventLogCard);
+        ReportCard reportCard = new ReportCard(context);
+        return new ReportViewHolder(reportCard);
     }
 
     @Override
     public void onBindViewHolder(ReportViewHolder holder, int position) {
-        final Report eventLog = getItem(position);
-        Log.d(TAG, "onBindViewHolder: " + eventLog);
+        final Report report = getItem(position);
+        Log.d(TAG, "onBindViewHolder: " + report);
 
+        holder.reportCard.setReport(report);
 
     }
 }

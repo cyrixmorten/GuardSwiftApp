@@ -1,30 +1,29 @@
-package com.guardswift.ui.parse.data.client;
+package com.guardswift.ui.parse.documentation.report.view;
 
 import android.os.Bundle;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.cache.task.GSTasksCache;
+import com.guardswift.persistence.cache.data.ClientCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
+import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
-import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
-import com.guardswift.ui.parse.documentation.report.edit.ReportSuggestionsAdapter;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
 import javax.inject.Inject;
 
-public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Report, ReportSuggestionsAdapter.ReportViewHolder> {
+public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Report, ReportHistoryAdapter.ReportViewHolder> {
 
 
-    public static ReportHistoryListFragment newInstance(GSTask task) {
+    public static ReportHistoryListFragment newInstance(Client client) {
 
         GuardSwiftApplication.getInstance()
                 .getCacheFactory()
-                .getTasksCache().setSelected(task);
+                .getClientCache().setSelected(client);
 
         ReportHistoryListFragment fragment = new ReportHistoryListFragment();
         Bundle args = new Bundle();
@@ -33,7 +32,7 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
     }
 
     @Inject
-    GSTasksCache gsTasksCache;
+    ClientCache clientCache;
 
     @Override
     protected ExtendedParseObject getObjectInstance() {
@@ -45,14 +44,14 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
         return new ParseQueryAdapter.QueryFactory<Report>() {
             @Override
             public ParseQuery<Report> create() {
-                return new Report.QueryBuilder(false).build();
+                return new Report.QueryBuilder(false).matching(clientCache.getSelected()).build();
             }
         };
     }
 
     @Override
-    protected ParseRecyclerQueryAdapter<Report, ReportSuggestionsAdapter.ReportViewHolder> createRecycleAdapter() {
-        return null;
+    protected ParseRecyclerQueryAdapter<Report, ReportHistoryAdapter.ReportViewHolder> createRecycleAdapter() {
+        return new ReportHistoryAdapter(getContext(), createNetworkQueryFactory());
     }
 
     @Override
