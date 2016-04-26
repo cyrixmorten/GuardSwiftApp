@@ -28,10 +28,10 @@ android {
 
     defaultConfig {
         applicationId "com.guardswift"
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion 23
-        versionCode 316
-        versionName "3.1.6"
+        versionCode 317
+        versionName "3.1.7"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -40,6 +40,12 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    dexOptions {
+        incremental = true;
+        preDexLibraries = false
+        javaMaxHeapSize "4g" // 2g should be also OK
     }
 
     buildTypes {
