@@ -11,9 +11,18 @@ import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.FingerprintingModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.documentation.eventlog.context.LogContextStrategy;
+import com.guardswift.core.documentation.eventlog.context.LogCurrentActivityStrategy;
+import com.guardswift.core.documentation.eventlog.context.LogCurrentGuardStrategy;
 import com.guardswift.core.documentation.eventlog.context.LogStrategyFactory;
+import com.guardswift.core.documentation.eventlog.context.LogTimestampStrategy;
 import com.guardswift.core.documentation.eventlog.task.LogTaskStrategy;
+import com.guardswift.core.documentation.eventlog.task.TaskClientLogStrategy;
+import com.guardswift.core.documentation.eventlog.task.TaskDistrictWatchLogStrategy;
+import com.guardswift.core.documentation.eventlog.task.TaskIdLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskLogStrategyFactory;
+import com.guardswift.core.documentation.eventlog.task.TaskRegularLogStrategy;
+import com.guardswift.core.documentation.eventlog.task.TaskReportIdLogStrategy;
+import com.guardswift.core.documentation.eventlog.task.TaskStaticLogStrategy;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.eventbus.EventBusController;
@@ -127,7 +136,6 @@ public class EventLog extends ExtendedParseObject {
             this.eventLog = new EventLog();
 
             applyDefaultLogValues();
-            clientProximity();
 
             eventLog.setOwner(ParseUser.getCurrentUser());
         }
@@ -285,16 +293,7 @@ public class EventLog extends ExtendedParseObject {
         }
 
 
-        private Builder clientProximity() {
-            Location location = LocationModule.Recent.getLastKnownLocation();
-            if (eventLog.getClient() != null && location != null) {
-                ParseGeoPoint clientPosition = eventLog.getClient().getPosition();
-//                double distanceKm = ParseModule.distanceBetweenKilomiters(location, clientPosition);
-                float distanceMeters = ParseModule.distanceBetweenMeters(location, clientPosition);
-                eventLog.addClientProximity(distanceMeters);
-            }
-            return this;
-        }
+
 
 //        private Builder detectedActivity() {
 //            DetectedActivity activity = ActivityDetectionModule.Recent.getDetectedActivity();
@@ -367,12 +366,12 @@ public class EventLog extends ExtendedParseObject {
 
         public void saveAsync(final GetCallback<EventLog> pinnedCallback) {
 
-            ParseACL acl = new ParseACL();
-            acl.setReadAccess(ParseUser.getCurrentUser(), true);
-            acl.setWriteAccess(ParseUser.getCurrentUser(), true);
-            acl.setPublicReadAccess(true);
-            acl.setPublicWriteAccess(false);
-            eventLog.setACL(acl);
+//            ParseACL acl = new ParseACL();
+//            acl.setReadAccess(ParseUser.getCurrentUser(), true);
+//            acl.setWriteAccess(ParseUser.getCurrentUser(), true);
+//            acl.setPublicReadAccess(true);
+//            acl.setPublicWriteAccess(false);
+//            eventLog.setACL(acl);
 
             Log.e(TAG, "Save event " + eventLog.getEvent());
 
@@ -451,10 +450,10 @@ public class EventLog extends ExtendedParseObject {
             return this;
         }
 
-        public Builder summary(String columnName, JSONArray summary, Date timeStarted, Date timeEnded) {
-            eventLog.setSummary(columnName, summary, timeStarted, timeEnded);
-            return this;
-        }
+//        public Builder summary(String columnName, JSONArray summary, Date timeStarted, Date timeEnded) {
+//            eventLog.setSummary(columnName, summary, timeStarted, timeEnded);
+//            return this;
+//        }
 
 //        public Builder eventSummary(JSONArray summaryEntries) {
 //            eventLog.put(eventSummary, summaryEntries);
@@ -517,42 +516,41 @@ public class EventLog extends ExtendedParseObject {
         }
 
 
-        public Builder locationTrackerUrl(String result) {
-            eventLog.put("locationTrackerUrl", result);
-            return this;
-        }
+//        public Builder locationTrackerUrl(String result) {
+//            eventLog.put("locationTrackerUrl", result);
+//            return this;
+//        }
     }
 
 
     // pointers
-    public static final String client = "client";
-    public static final String districtWatchStarted = "districtWatchStarted";
-    public static final String districtWatchClient = "districtWatchClient";
-    public static final String contactClient = "contactClient";
-    public static final String circuitStarted = "circuitStarted";
-    public static final String circuitUnit = "circuitUnit";
-    public static final String districtWatchUnit = "districtWatchUnit";
-    public static final String alarm = "alarm";
-    public static final String staticTask = "staticTask";
+    public static final String client = TaskClientLogStrategy.client;
+    public static final String districtWatchStarted = TaskDistrictWatchLogStrategy.districtWatchStarted;
+    public static final String districtWatchUnit = TaskDistrictWatchLogStrategy.districtWatchUnit;
+    public static final String districtWatchClient = TaskDistrictWatchLogStrategy.districtWatchClient;
+    public static final String circuitStarted = TaskRegularLogStrategy.circuitStarted;
+    public static final String circuitUnit = TaskRegularLogStrategy.circuitUnit;
+
+    public static final String staticTask = TaskStaticLogStrategy.staticTask;
     // task
-    public static final String taskId = "taskId";
-    public static final String reportId = "reportId";
+    public static final String taskId = TaskIdLogStrategy.taskId;
+    public static final String reportId = TaskReportIdLogStrategy.reportId;
     // strings
-    public static final String clientName = "clientName";
-    public static final String clientCity = "clientCity";
-    public static final String clientZipcode = "clientZipcode";
-    public static final String clientAddress = "clientAddress";
-    public static final String clientAddressNumber = "clientAddressNumber";
-    public static final String clientFullAddress = "clientFullAddress";
+    public static final String clientName = TaskClientLogStrategy.clientName;
+    public static final String clientCity = TaskClientLogStrategy.clientCity;
+    public static final String clientZipcode = TaskClientLogStrategy.clientZipcode;
+    public static final String clientAddress = TaskClientLogStrategy.clientAddress;
+    public static final String clientAddressNumber = TaskClientLogStrategy.clientAddressNumber;
+    public static final String clientFullAddress = TaskClientLogStrategy.clientFullAddress;
     //
-    public static final String guard = "guard";
-    public static final String guardId = "guardId";
-    public static final String guardName = "guardName";
+    public static final String guard = LogCurrentGuardStrategy.guard;
+    public static final String guardId = LogCurrentGuardStrategy.guardId;
+    public static final String guardName = LogCurrentGuardStrategy.guardName;
     // planned times
-    public static final String timeStart = "timeStart";
-    public static final String timeStartString = "timeStartString";
-    public static final String timeEnd = "timeEnd";
-    public static final String timeEndString = "timeEndString";
+    public static final String timeStart = TaskRegularLogStrategy.timeStart;
+    public static final String timeStartString = TaskRegularLogStrategy.timeStartString;
+    public static final String timeEnd = TaskRegularLogStrategy.timeEnd;
+    public static final String timeEndString = TaskRegularLogStrategy.timeEndString;
     // event description
     public static final String task_type = "task_type"; // not task specific , e.g. ARRIVE, OTHER, etc.
     public static final String task_event = "task_event";
@@ -565,7 +563,7 @@ public class EventLog extends ExtendedParseObject {
     public static final String remarks = "remarks";
     public static final String isExtra = "isExtra";
     // gps
-    public static final String clientDistanceMeters = "clientDistanceMeters";
+    public static final String clientDistanceMeters = TaskClientLogStrategy.clientDistanceMeters;
     public static final String provider = "provider";
     public static final String position = "position";
     public static final String accuracy = "accuracy";
@@ -574,9 +572,9 @@ public class EventLog extends ExtendedParseObject {
     public static final String speed = "speed";
     public static final String geocodedAddress = "geocodedAddress";
     // activity
-    public static final String activityType = "activityType";
-    public static final String activityConfidence = "activityConfidence";
-    public static final String activityName = "activityName";
+    public static final String activityType = LogCurrentActivityStrategy.activityType;
+    public static final String activityConfidence = LogCurrentActivityStrategy.activityConfidence;
+    public static final String activityName = LogCurrentActivityStrategy.activityName;
     // eventCode
     public static final String eventCode = "eventCode";
     // locations
@@ -587,15 +585,15 @@ public class EventLog extends ExtendedParseObject {
     public static final String checkpoint_distance = "checkpoint_distance";
     public static final String checkpoint_probability = "checkpoint_probability";
 
-    public static final String checkpoint_guess = "checkpoint_guess";
-    public static final String checkpoint_guess_name = "checkpoint_guess_name";
-    public static final String checkpoint_guess_distance = "checkpoint_guess_distance";
-    public static final String checkpoint_guess_probability = "checkpoint_guess_probability";
+//    public static final String checkpoint_guess = "checkpoint_guess";
+//    public static final String checkpoint_guess_name = "checkpoint_guess_name";
+//    public static final String checkpoint_guess_distance = "checkpoint_guess_distance";
+//    public static final String checkpoint_guess_probability = "checkpoint_guess_probability";
 
     public static final String checkpoint_wifi_sample = "checkpoint_wifi_sample";
     // misc
-    public static final String deviceTimestamp = "deviceTimestamp";
-    public static final String clientTimestamp = "clientTimestamp"; // TODO deprecate in favor of deviceTimeStamp
+    public static final String deviceTimestamp = LogTimestampStrategy.deviceTimestamp;
+//    public static final String clientTimestamp = "clientTimestamp"; // TODO deprecate in favor of deviceTimeStamp
     public static final String automatic = "automatic";
     public static final String correctGuess = "correctGuess";
 
@@ -747,9 +745,9 @@ public class EventLog extends ExtendedParseObject {
         return getInt(eventCode);
     }
 
-    public void addClientProximity(float distanceMeters) {
-        put(clientDistanceMeters, distanceMeters);
-    }
+//    public void addClientProximity(float distanceMeters) {
+//        put(clientDistanceMeters, distanceMeters);
+//    }
 
 
 //    private void setContactClient(Client contactClient) {
@@ -1118,9 +1116,9 @@ public class EventLog extends ExtendedParseObject {
     }
 
     public GSTask.TASK_TYPE getTaskType() {
-        if (has(EventLog.alarm)) {
-            return GSTask.TASK_TYPE.ALARM;
-        }
+//        if (has(EventLog.alarm)) {
+//            return GSTask.TASK_TYPE.ALARM;
+//        }
         if (has(EventLog.circuitUnit)) {
             return GSTask.TASK_TYPE.REGULAR;
         }

@@ -14,9 +14,10 @@ import com.parse.ParseObject;
  */
 public class TaskIdLogStrategy implements LogTaskStrategy {
 
+    public static final String taskId = "taskId";
 
     @Override
     public void log(GSTask task, ParseObject toParseObject) {
-        toParseObject.put(EventLog.taskId, task.getObjectId());
+        toParseObject.put(TaskIdLogStrategy.taskId, task.getObjectId());
     }
 }
