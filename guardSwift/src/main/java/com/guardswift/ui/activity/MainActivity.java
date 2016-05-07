@@ -68,6 +68,8 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
 
     }
 
+
+
     private void setActionBarTitle(final String title, final String subtitle) {
         new Handler().post(new Runnable() {
             @Override
@@ -203,8 +205,12 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (!isFinishing()) {
-                    fm.beginTransaction().replace(R.id.content, fragment).commit();
+                if (!MainActivity.this.isFinishing()) {
+                    // commitAllowingStateLoss is a bit brutal
+                    // but as state loss errors are happening very rarely plus we are not
+                    // storing state on any of the fragments it is assumed
+                    // to be ok to do here.
+                    fm.beginTransaction().replace(R.id.content, fragment).commitAllowingStateLoss();
                 }
             }
         }, 500);
