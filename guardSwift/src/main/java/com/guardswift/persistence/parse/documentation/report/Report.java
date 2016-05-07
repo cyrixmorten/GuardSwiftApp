@@ -20,6 +20,8 @@ import com.parse.ParseUser;
 
 import org.json.JSONObject;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @ParseClassName("Report")
@@ -97,6 +99,10 @@ public class Report extends ExtendedParseObject implements GSReport {
 
     public static QueryBuilder getQueryBuilder(boolean fromLocalDatastore) {
         return new QueryBuilder(fromLocalDatastore);
+    }
+
+    public Date getDeviceTimestamp() {
+        return getDate(EventLog.deviceTimestamp);
     }
 
     public static class QueryBuilder extends ParseQueryBuilder<Report> {

@@ -26,8 +26,6 @@ public class HandleException {
 
         EventBusController.postUIUpdate(e);
 
-        Log.e(tag, message, e);
-
         Crashlytics.logException(e);
         Crashlytics.log(Log.ERROR, tag, message + " error: " + e.getMessage());
 

@@ -107,7 +107,7 @@ public class ReportCard extends LinearLayout {
         tvGuardName.setText(report.getGuardName());
         tvDate.setText(DateUtils.formatDateTime(
                 getContext(),
-                report.getCreatedAt().getTime(),
+                report.getDeviceTimestamp().getTime(),
                 DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR));
 
 

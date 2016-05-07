@@ -213,12 +213,13 @@ public class ParseModule {
                     return;
                 }
 
-                GuardLoginActivity.start(activity);
+                GuardLoginActivity.start(activity.getApplicationContext());
                 clearData();
 
-                updateDialog.cancel();
-                activity.finish();
-
+                if (!activity.isDestroyed()) {
+                    updateDialog.cancel();
+                    activity.finish();
+                }
             }
         }, new ProgressCallback() {
             @Override
