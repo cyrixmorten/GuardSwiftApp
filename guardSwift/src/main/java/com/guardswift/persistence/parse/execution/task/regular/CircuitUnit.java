@@ -7,6 +7,7 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.guardswift.core.documentation.report.StandardTaskReportingStrategy;
 import com.guardswift.core.documentation.report.TaskReportingStrategy;
+import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.activity.ArriveWhenNotInVehicleStrategy;
 import com.guardswift.core.tasks.activity.NoActivityStrategy;
@@ -211,20 +212,22 @@ public class CircuitUnit extends BaseTask  {
         return getParseGeoPoint(CircuitUnit.clientPosition);
     }
 
-//    private CircuitStarted cachedCircuitStarted;
+    
     public CircuitStarted getCircuitStarted() {
         Circuit circuit = getCircuit();
-//        if (cachedCircuitStarted != null) {
-//            return cachedCircuitStarted;
-//        }
-//        try {
-//            Log.e(TAG, "LDS");
-            return GuardSwiftApplication.getInstance().getCacheFactory().getCircuitStartedCache().matching(circuit);
-//            return cachedCircuitStarted = CircuitStarted.Query.findFrom(circuit);
-//        } catch (ParseException e) {
-//            new HandleException(TAG, "getCircuitStarted()", e);
-//        }
-//        return null;
+        CircuitStarted cachedCircuitStarted = GuardSwiftApplication.getInstance().getCacheFactory().getCircuitStartedCache().matching(circuit);
+        if (cachedCircuitStarted != null) {
+            return cachedCircuitStarted;
+        }
+        try {
+            CircuitStarted ldsCircuitStarted = CircuitStarted.Query.findFrom(circuit);
+            // add to cache to prevent LDS on next get
+            GuardSwiftApplication.getInstance().getCacheFactory().getCircuitStartedCache().addActive(ldsCircuitStarted);
+            return ldsCircuitStarted;
+        } catch (ParseException e) {
+            new HandleException(TAG, "getCircuitStarted() LDS fallback", e);
+        }
+        return null;
     }
 
     @Override
