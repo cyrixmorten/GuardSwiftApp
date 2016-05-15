@@ -87,8 +87,9 @@ public class StandardTaskReportingStrategy<T extends BaseTask> implements TaskRe
                     @Override
                     public void done(ParseException e) {
                         Log.w(TAG, "Pinned " + e);
+                        saveCallback.done(e);
                     }
-                }, saveCallback);
+                });
 
                 return null;
             }

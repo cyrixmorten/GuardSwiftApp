@@ -81,7 +81,6 @@ public class EventLog extends ExtendedParseObject {
     }
 
 
-
     public static class EventCodes {
         public static final int CIRCUITUNIT_ARRIVED = 101;
         public static final int CIRCUITUNIT_FINISHED = 102;
@@ -293,8 +292,6 @@ public class EventLog extends ExtendedParseObject {
         }
 
 
-
-
 //        private Builder detectedActivity() {
 //            DetectedActivity activity = ActivityDetectionModule.Recent.getDetectedActivity();
 //            if (activity != null) {
@@ -361,17 +358,14 @@ public class EventLog extends ExtendedParseObject {
          * before calling saveeventually and broadcast a UI init
          */
         public void saveAsync() {
-            saveAsync(null);
+            saveAsync(null, null);
         }
 
         public void saveAsync(final GetCallback<EventLog> pinnedCallback) {
+            saveAsync(pinnedCallback, null);
+        }
 
-//            ParseACL acl = new ParseACL();
-//            acl.setReadAccess(ParseUser.getCurrentUser(), true);
-//            acl.setWriteAccess(ParseUser.getCurrentUser(), true);
-//            acl.setPublicReadAccess(true);
-//            acl.setPublicWriteAccess(false);
-//            eventLog.setACL(acl);
+        public void saveAsync(final GetCallback<EventLog> pinnedCallback, final GetCallback<EventLog> savedCallback) {
 
             Log.e(TAG, "Save event " + eventLog.getEvent());
 
@@ -406,20 +400,10 @@ public class EventLog extends ExtendedParseObject {
                         public void done(ParseException e) {
                             Log.w(TAG, "5) Save event - saved");
 
-                            if (gsTask != null) {
-                                Log.w(TAG, "Report strategy: " + gsTask.getTaskReportingStrategy());
-                                gsTask.getTaskReportingStrategy().addUnique(context, eventLog, new SaveCallback() {
-                                    @Override
-                                    public void done(ParseException e) {
-                                        if (e != null) {
-                                            new HandleException(context, TAG, "Save report online", e);
-                                        }
-                                        updateGuardInfo(geocodedAddress.get());
-                                    }
-                                });
-                            } else {
-                                Log.w(TAG, "Not for task");
-                                updateGuardInfo(geocodedAddress.get());
+                            updateGuardInfo(geocodedAddress.get());
+
+                            if (savedCallback != null) {
+                                savedCallback.done(eventLog, e);
                             }
                         }
                     });
@@ -593,7 +577,7 @@ public class EventLog extends ExtendedParseObject {
     public static final String checkpoint_wifi_sample = "checkpoint_wifi_sample";
     // misc
     public static final String deviceTimestamp = LogTimestampStrategy.deviceTimestamp;
-//    public static final String clientTimestamp = "clientTimestamp"; // TODO deprecate in favor of deviceTimeStamp
+    //    public static final String clientTimestamp = "clientTimestamp"; // TODO deprecate in favor of deviceTimeStamp
     public static final String automatic = "automatic";
     public static final String correctGuess = "correctGuess";
 

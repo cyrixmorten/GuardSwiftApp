@@ -3,6 +3,7 @@ package com.guardswift.persistence.parse.execution.task.statictask;
 import android.content.Context;
 import android.location.Location;
 
+import com.guardswift.core.documentation.report.NoTaskReportingStrategy;
 import com.guardswift.core.documentation.report.StandardTaskReportingStrategy;
 import com.guardswift.core.documentation.report.TaskReportingStrategy;
 import com.guardswift.core.parse.ParseModule;
@@ -81,7 +82,7 @@ public class StaticTask extends BaseTask {
 
     public StaticTask() {
         this.controller =  new StaticTaskController();
-        this.taskReportingStrategy = new StandardTaskReportingStrategy<>(this);
+        this.taskReportingStrategy = new NoTaskReportingStrategy<>(this); // StandardTaskReportingStrategy<>(this);
         this.automationStrategy = new NoAutomationStrategy<>();
         this.geofenceStrategy = new NoGeofenceStrategy<>(this);
         this.activityStrategy = new NoActivityStrategy<>();
@@ -190,11 +191,14 @@ public class StaticTask extends BaseTask {
     }
 
     public void addReportEntry(Context context, String remarks, GetCallback<EventLog> pinned) {
+        addReportEntry(context, remarks, pinned, null);
+    }
+    public void addReportEntry(Context context, String remarks, GetCallback<EventLog> pinned, GetCallback<EventLog> saved) {
         new EventLog.Builder(context)
                 .taskPointer(this, GSTask.EVENT_TYPE.OTHER)
                 .remarks(remarks)
                 .eventCode(this.getEventCode())
-                .saveAsync(pinned);
+                .saveAsync(pinned, saved);
     }
 
 

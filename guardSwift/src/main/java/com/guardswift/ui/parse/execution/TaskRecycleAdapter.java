@@ -24,6 +24,7 @@ import com.beardedhen.androidbootstrap.AwesomeTextView;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapSize;
 import com.guardswift.R;
+import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
@@ -53,6 +54,7 @@ import com.parse.SaveCallback;
 import java.util.Date;
 import java.util.List;
 
+import bolts.Continuation;
 import bolts.Task;
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -104,10 +106,20 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
                         Guard guard = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().getLoggedIn();
                         task.setStartedBy(guard);
-                        task.pinThenSaveEventually(new SaveCallback() {
+
+                        task.saveInBackground().continueWith(new Continuation<Void, Object>() {
                             @Override
-                            public void done(ParseException e) {
-                                task.addReportEntry(context, context.getString(R.string.started), new GetCallback<EventLog>() {
+                            public Object then(Task<Void> taskResult) throws Exception {
+                                Exception error = taskResult.getError();
+                                if (error != null) {
+                                    loadingDialog.cancel();
+                                    new CommonDialogsBuilder.MaterialDialogs(context).missingInternetContent().show();
+
+                                    new HandleException(context, TAG, "Failed to create static task", error);
+                                    return null;
+                                }
+
+                                task.addReportEntry(context, context.getString(R.string.started), null, new GetCallback<EventLog>() {
                                     @Override
                                     public void done(EventLog object, ParseException e) {
                                         ReportEditActivity.start(context, task);
@@ -115,6 +127,9 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                                         loadingDialog.cancel();
                                     }
                                 });
+
+                                return null;
+
                             }
                         });
                     }

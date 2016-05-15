@@ -46,7 +46,7 @@ public class DistrictWatchClient extends BaseTask {
 
     public DistrictWatchClient() {
         controller = new DistrictWatchClientController();
-        taskReportingStrategy = new NoTaskReportingStrategy<>();
+        taskReportingStrategy = new NoTaskReportingStrategy<>(this);
         automationStrategy = new DistrictWatchAutomationStrategy<>(this);
         geofenceStrategy = new DistrictWatchGeofenceStrategy<>(this);
         activityStrategy = new NoActivityStrategy<>();

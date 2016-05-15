@@ -5,6 +5,7 @@ import android.location.Location;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.guardswift.core.documentation.report.NoTaskReportingStrategy;
 import com.guardswift.core.documentation.report.StandardTaskReportingStrategy;
 import com.guardswift.core.documentation.report.TaskReportingStrategy;
 import com.guardswift.core.exceptions.HandleException;
@@ -59,19 +60,18 @@ public class CircuitUnit extends BaseTask  {
 
     public CircuitUnit() {
         this.controller = new CircuitUnitController();
-        taskReportingStrategy = new StandardTaskReportingStrategy<>(this);
+        taskReportingStrategy = new NoTaskReportingStrategy<>(this);
         automationStrategy = new StandardTaskAutomationStrategy<>(this);
     }
 
 
     @Override
     public TaskGeofenceStrategy getGeofenceStrategy() {
-//        if (geofenceStrategy == null) {
         TaskGeofenceStrategy<CircuitUnit> geofenceStrategy = new RegularGeofenceStrategy<>(this);
         if (isRaid()) {
             geofenceStrategy = new DistrictWatchGeofenceStrategy<>(this);
         }
-//        }
+
         return geofenceStrategy;
     }
 
@@ -212,7 +212,7 @@ public class CircuitUnit extends BaseTask  {
         return getParseGeoPoint(CircuitUnit.clientPosition);
     }
 
-    
+
     public CircuitStarted getCircuitStarted() {
         Circuit circuit = getCircuit();
         CircuitStarted cachedCircuitStarted = GuardSwiftApplication.getInstance().getCacheFactory().getCircuitStartedCache().matching(circuit);
