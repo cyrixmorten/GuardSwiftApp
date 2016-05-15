@@ -22,6 +22,7 @@ import com.guardswift.ui.common.UpdateFloatingActionButton;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
+import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -32,7 +33,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventLog, ReportEditRecycleAdapter.ReportViewHolder> implements UpdateFloatingActionButton {
+public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventLog, ReportEditRecycleAdapter.ReportViewHolder> implements UpdateFloatingActionButton, FragmentVisibilityListener {
 
 
     public static ReportEditListFragment newInstance(GSTask task) {
@@ -131,14 +132,25 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     }
 
     private void showFloadingActionButton() {
-        if (fab != null && !loading) {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    fab.show();
+                    if (fab != null && fragmentVisible) {
+                        fab.show();
+                    }
                 }
             }, 1000);
+    }
 
-        }
+    private boolean fragmentVisible = false;
+
+    @Override
+    public void fragmentBecameVisible() {
+        fragmentVisible = true;
+    }
+
+    @Override
+    public void fragmentBecameInvisible() {
+        fragmentVisible = false;
     }
 }
