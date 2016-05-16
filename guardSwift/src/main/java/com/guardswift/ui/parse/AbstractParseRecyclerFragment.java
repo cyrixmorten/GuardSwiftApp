@@ -185,7 +185,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
     public void onResume() {
         if (mAdapter != null) {
             mAdapter.addOnQueryLoadListener(recycleQueryListener);
-            refreshLocalData();
+            mAdapter.loadObjects(); // refresh to sort by query
         }
 
         super.onResume();
