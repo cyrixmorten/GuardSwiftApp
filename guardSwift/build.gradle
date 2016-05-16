@@ -157,9 +157,9 @@ dependencies {
     //Optional for RecyclerView
     //compile 'com.github.gabrielemariotti.cards:cardslib-recyclerview:2.1.0'
     // Reactive
-    compile 'pl.charmas.android:android-reactive-location:0.8@aar'
-    compile 'io.reactivex:rxjava:1.0.14'
-    compile 'io.reactivex:rxandroid:0.25.0'
+    compile 'pl.charmas.android:android-reactive-location:0.9@aar'
+    compile 'io.reactivex:rxandroid:1.2.0'
+    compile 'io.reactivex:rxjava:1.1.5'
     // Google Play Services
     compile 'com.google.code.findbugs:jsr305:2.0.2'
     compile 'com.google.android.gms:play-services-location:8.4.0'
