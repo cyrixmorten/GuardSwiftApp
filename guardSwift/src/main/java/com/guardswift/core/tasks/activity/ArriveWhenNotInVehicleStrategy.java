@@ -1,6 +1,8 @@
 package com.guardswift.core.tasks.activity;
 
 import com.google.android.gms.location.DetectedActivity;
+import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.execution.BaseTask;
 
 /**
@@ -23,13 +25,16 @@ public class ArriveWhenNotInVehicleStrategy<T extends BaseTask> implements TaskA
         arriveOnStillTimer.stop();
 
         if (activity.getType() != DetectedActivity.IN_VEHICLE) {
-            if (activity.getType() == DetectedActivity.STILL) {
+            if (activity.getType() == DetectedActivity.STILL || activity.getType() == DetectedActivity.TILTING) {
                 // We want to ensure that the guard is not just waiting for a red light or crossroads inside vehicle, delaying arrival
                 arriveOnStillTimer.start();
                 return;
             }
 
-            task.getAutomationStrategy().automaticArrival();
+            float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getClient());
+            if (distanceToClient < 100) {
+                task.getAutomationStrategy().automaticArrival();
+            }
         }
     }
 

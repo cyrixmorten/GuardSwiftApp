@@ -17,8 +17,10 @@ import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
+import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.activity.MainActivity;
@@ -300,6 +302,13 @@ public class ParseModule {
         }
     }
 
+    public static float distanceBetweenMeters(Location deviceLocation, Client client) {
+        if (deviceLocation == null || client == null) {
+            return Float.MAX_VALUE;
+        }
+
+        return distanceBetweenMeters(deviceLocation, client.getPosition());
+    }
     public static float distanceBetweenMeters(Location deviceLocation,
                                               ParseGeoPoint targetGeoPoint) {
         if (deviceLocation == null || targetGeoPoint == null) {

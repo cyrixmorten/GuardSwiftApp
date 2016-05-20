@@ -29,7 +29,6 @@ public class RegularGeofenceStrategy<T extends BaseTask> extends BaseGeofenceStr
     private static final String TAG = RegularGeofenceStrategy.class.getSimpleName();
 
 
-
     public RegularGeofenceStrategy(T task) {
         super(task);
     }
@@ -39,12 +38,12 @@ public class RegularGeofenceStrategy<T extends BaseTask> extends BaseGeofenceStr
         super.exitGeofence();
 
         DetectedActivity activity = ActivityDetectionModule.Recent.getDetectedActivity();
-//        if (activity.getType() == DetectedActivity.IN_VEHICLE) {
-            Location locationWithSpeed = LocationModule.Recent.getLastKnownLocationWithSpeed();
+        if (activity.getType() == DetectedActivity.IN_VEHICLE) {
+//            Location locationWithSpeed = LocationModule.Recent.getLastKnownLocationWithSpeed();
 //            if (locationWithSpeed != null && locationWithSpeed.getSpeed() > 1.4f) {
-                task.getAutomationStrategy().automaticDeparture();
+            task.getAutomationStrategy().automaticDeparture();
 //            }
-//        }
+        }
 
 //        Log.e(TAG, "exitGeofence: " + ActivityDetectionModule.getNameFromType(activity.getType()) + " speed: " + locationWithSpeed.getSpeed());
     }
@@ -56,7 +55,7 @@ public class RegularGeofenceStrategy<T extends BaseTask> extends BaseGeofenceStr
 
     @Override
     public int getGeofenceRadius() {
-        return 300;
+        return 200;
     }
 
     @Override
@@ -102,7 +101,7 @@ public class RegularGeofenceStrategy<T extends BaseTask> extends BaseGeofenceStr
     }
 
     private ParseQuery<ParseObject> geofenceQuery(int withinKm, Location fromLocation) {
-        return                         new CircuitUnit.QueryBuilder(true)
+        return new CircuitUnit.QueryBuilder(true)
                 .isRunToday()
                 .within(withinKm, fromLocation)
                 .buildAsParseObject();
