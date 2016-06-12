@@ -2,6 +2,7 @@ package com.guardswift.core.tasks.controller;
 
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.ui.GuardSwiftApplication;
 
 /**
  * Created by cyrix on 10/28/15.
@@ -15,8 +16,7 @@ public abstract class BaseTaskController<T extends BaseTask> implements TaskCont
         return performAction(action, task, false);
     }
 
-    @Override
-    public boolean canPerformAction(ACTION action, T task) {
+    private boolean actionAllowedByTaskState(ACTION action, T task) {
         switch (task.getTaskState()) {
             case PENDING:
                 return action != ACTION.RESET && action != ACTION.ABORT;
@@ -29,7 +29,16 @@ public abstract class BaseTaskController<T extends BaseTask> implements TaskCont
             case FINSIHED:
                 return action != ACTION.FINISH;
         }
-        return true;
+
+        return false;
+    }
+
+    @Override
+    public boolean canPerformAction(ACTION action, T task) {
+
+        boolean guardLoggedIn = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().isLoggedIn();
+
+        return guardLoggedIn && actionAllowedByTaskState(action, task);
     }
 
     
