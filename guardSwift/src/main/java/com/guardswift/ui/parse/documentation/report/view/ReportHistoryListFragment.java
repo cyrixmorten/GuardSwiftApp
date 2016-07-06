@@ -12,6 +12,7 @@ import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
+import com.guardswift.util.ToastHelper;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
@@ -51,6 +52,7 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
             @Override
             public ParseQuery<Report> create() {
                 GSTask.TASK_TYPE task_type = (GSTask.TASK_TYPE) getArguments().getSerializable("task_type");
+                ToastHelper.toast(getContext(), String.valueOf(task_type));
                 return new Report.QueryBuilder(false).matching(clientCache.getSelected()).matching(task_type).build().setLimit(30).addDescendingOrder("createdAt");
             }
         };

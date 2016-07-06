@@ -241,7 +241,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             vBtnReportHistory.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient());
+                    Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient(), GSTask.TASK_TYPE.REGULAR);
                     GenericToolbarActivity.start(
                             context,
                             context.getString(R.string.reports),
