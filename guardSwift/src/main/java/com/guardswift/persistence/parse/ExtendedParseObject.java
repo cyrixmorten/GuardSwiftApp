@@ -223,11 +223,9 @@ public abstract class ExtendedParseObject extends ParseObject {
                         if (e != null) {
                             new HandleException(TAG, "pinThenSaveEventually " + getPin() + " fallback to saveEventually", e);
                             ExtendedParseObject.this.saveEventually(saved);
-                            if (saved != null) {
-                                saved.done(e);
-                            }
                             return;
                         }
+
                         if (saved != null) {
                             saved.done(null);
                         }

@@ -24,6 +24,7 @@ import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
+import com.guardswift.util.ToastHelper;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
@@ -75,11 +76,10 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         Client client = gsTasksCache.getLastSelected().getClient();
         ReportEditRecycleAdapter adaper = new ReportEditRecycleAdapter(getActivity(), client, createNetworkQueryFactory());
 
-        loading = true;
         adaper.addOnQueryLoadListener(new ParseRecyclerQueryAdapter.OnQueryLoadListener<EventLog>() {
             @Override
             public void onLoaded(List<EventLog> objects, Exception e) {
-                showFloadingActionButton();
+                showFloadingActionButton(1000);
                 loading = false;
             }
 
@@ -98,7 +98,6 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     }
 
 
-
     @Override
     public void updateFloatingActionButton(final Context context, FloatingActionButton floatingActionButton) {
         this.fab = floatingActionButton;
@@ -108,6 +107,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
             @Override
             public void onClick(View view) {
                 GSTask task = gsTasksCache.getLastSelected();
+
                 if (task instanceof StaticTask) {
                     final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
                     ((StaticTask) task).addReportEntry(context, "", new GetCallback<EventLog>() {
@@ -124,28 +124,30 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
                         }
                     });
                 } else {
-                    CreateEventHandlerActivity.start(getContext(), gsTasksCache.getLastSelected());
+                    CreateEventHandlerActivity.start(getContext(), task);
                 }
             }
         });
-        showFloadingActionButton();
     }
 
-    private void showFloadingActionButton() {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (fab != null && fragmentVisible) {
-                        fab.show();
-                    }
+    private void showFloadingActionButton(long delay) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (fab != null && fragmentVisible) {
+                    fab.show();
                 }
-            }, 1000);
+            }
+        }, delay);
     }
 
-    private boolean fragmentVisible = false;
+    private boolean fragmentVisible = true;
 
     @Override
     public void fragmentBecameVisible() {
+        if (!loading) {
+            showFloadingActionButton(1000);
+        }
         fragmentVisible = true;
     }
 

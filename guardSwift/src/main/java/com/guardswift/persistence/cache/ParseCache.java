@@ -70,6 +70,11 @@ public abstract class ParseCache<T extends ParseObject> extends Preferences{
 
     @SuppressWarnings("unchecked")
     protected T get(String name) {
+
+        if (name.isEmpty()) {
+            Log.w(TAG, "ParseCache LDS lookup empty name");
+            return null;
+        }
         String key = getPreferenceKey(name);
         String objectId = super.getString(key);
 
@@ -91,7 +96,7 @@ public abstract class ParseCache<T extends ParseObject> extends Preferences{
 
             return parseObject;
         } catch (ParseException e) {
-//            new HandleException(TAG, subClass.getSimpleName() + " ParseCache get " + objectId, e);
+            new HandleException(TAG, subClass.getSimpleName() + " ParseCache get " + objectId, e);
         }
 
         return null;

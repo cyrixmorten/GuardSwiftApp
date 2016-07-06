@@ -31,8 +31,8 @@ public class ArriveWhenNotInVehicleStrategy<T extends BaseTask> implements TaskA
                 return;
             }
 
-            float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getClient());
-            if (distanceToClient < 100) {
+            float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getClient().getPosition());
+            if (distanceToClient < 50) {
                 task.getAutomationStrategy().automaticArrival();
             }
         }
