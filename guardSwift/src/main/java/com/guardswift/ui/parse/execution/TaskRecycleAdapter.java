@@ -291,15 +291,23 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @Override
-        public void onActionArrive(Context context, DistrictWatchClient task) {
-            super.onActionArrive(context, task);
+        public void onActionArrive(final Context context, final DistrictWatchClient task) {
+            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
 
-            int newTimesArrived = task.getTimesArrived() + 1;
-            vTimesVisited_actual.setText(String.valueOf(newTimesArrived));
+                    int newTimesArrived = task.getTimesArrived() + 1;
+                    vTimesVisited_actual.setText(String.valueOf(newTimesArrived));
 
-            if (newTimesArrived == task.getSupervisions()) {
-                removeItemCallback.removeAt(getAdapterPosition());
-            }
+                    if (newTimesArrived == task.getSupervisions()) {
+                        removeItemCallback.removeAt(getAdapterPosition());
+                    }
+
+                    performTaskAction(context, task, ACTION.ARRIVE);
+                }
+            }).show();
+
+
         }
 
     }

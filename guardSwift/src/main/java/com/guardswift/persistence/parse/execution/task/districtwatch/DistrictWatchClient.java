@@ -141,7 +141,7 @@ public class DistrictWatchClient extends BaseTask {
     @Override
     public String getReportId() {
         try {
-            return DistrictWatchStarted.Query.findFrom(getDistrictWatch()).getObjectId() + getObjectId();
+            return DistrictWatchStarted.Query.findFrom(getDistrictWatch()).getObjectId();
         } catch (ParseException e) {
             return "";
         }
