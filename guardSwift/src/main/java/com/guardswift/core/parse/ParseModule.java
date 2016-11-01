@@ -31,6 +31,7 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseSession;
 import com.parse.ProgressCallback;
 import com.parse.SaveCallback;
 
@@ -79,14 +80,28 @@ public class ParseModule {
 //	}
 
 
-    public void login(Guard guard) {
+    public void login(final Guard guard) {
         guard.setOnline(true);
 
         guardCache.setLoggedIn(guard);
 
+        // Save login EventLog
         new EventLog.Builder(context)
                 .event(context.getString(R.string.login))
                 .eventCode(EventLog.EventCodes.GUARD_LOGIN).saveAsync();
+
+        // Write guard to Session
+//        ParseSession.getCurrentSessionInBackground().onSuccess(new Continuation<ParseSession, Object>() {
+//            @Override
+//            public Object then(Task<ParseSession> task) throws Exception {
+//
+//                ParseSession session = task.getResult();
+//
+//                session.put("guard", guard);
+//
+//                return session.saveInBackground();
+//            }
+//        });
 
         GuardSwiftApplication.getInstance().startServices();
 
@@ -104,7 +119,7 @@ public class ParseModule {
             guard.setOnline(false);
             guard.pinThenSaveEventually();
 
-            // todo temporarily disabled GPS tracking
+            // write logout EventLog
             new EventLog.Builder(context)
             .event(context.getString(R.string.logout))
                     .eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
@@ -114,6 +129,20 @@ public class ParseModule {
                         }
             });
 
+            // Remove guard from Session
+//            ParseSession.getCurrentSessionInBackground().onSuccess(new Continuation<ParseSession, Object>() {
+//                @Override
+//                public Object then(Task<ParseSession> task) throws Exception {
+//
+//                    ParseSession session = task.getResult();
+//
+//                    session.remove("guard");
+//
+//                    return session.saveInBackground();
+//                }
+//            });
+
+            // todo temporarily disabled GPS tracking
 //            LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
 //                @Override
 //                public Object then(Task<String> task) throws Exception {
@@ -142,7 +171,7 @@ public class ParseModule {
 
     }
 
-    private void clearData() {
+    public void clearData() {
 
         guardCache.removeLoggedIn();
         tasksCache.clear();

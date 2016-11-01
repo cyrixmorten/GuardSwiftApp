@@ -3,6 +3,8 @@ package com.guardswift.ui.parse.execution.circuit;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
 import com.guardswift.core.tasks.controller.CircuitUnitController;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
@@ -10,9 +12,14 @@ import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
+import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
+
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -32,12 +39,27 @@ public class ActiveCircuitUnitsFragment extends AbstractTasksRecycleFragment<Cir
 	}
 
 	public ActiveCircuitUnitsFragment() {
+
 	}
 
     @Inject
     CircuitStartedCache circuitStartedCache;
     @Inject
     CircuitUnitController controller;
+
+
+    @Override
+    public PostProcessAdapterResults<CircuitUnit> createPostProcess() {
+        return new PostProcessAdapterResults<CircuitUnit>() {
+            @Override
+            public List<CircuitUnit> postProcess(List<CircuitUnit> queriedItems) {
+                if (queriedItems != null) {
+                    Collections.sort(queriedItems);
+                }
+                return queriedItems;
+            }
+        };
+    }
 
     @Override
     public BaseTask getObjectInstance() {
@@ -46,6 +68,8 @@ public class ActiveCircuitUnitsFragment extends AbstractTasksRecycleFragment<Cir
 
     @Override
     public ParseQueryAdapter.QueryFactory<CircuitUnit> createNetworkQueryFactory() {
+
+
         return new ParseQueryAdapter.QueryFactory<CircuitUnit>() {
 
             @Override
@@ -53,7 +77,7 @@ public class ActiveCircuitUnitsFragment extends AbstractTasksRecycleFragment<Cir
                 return new CircuitUnit.QueryBuilder().
                         matchingNotEnded(circuitStartedCache.getSelected()).
                         isRunToday().
-                        sortBy(CircuitUnit.SORTBY_NEAREST).
+//                        sortBy(CircuitUnit.SORTBY_ID).
                         build();
             }
         };

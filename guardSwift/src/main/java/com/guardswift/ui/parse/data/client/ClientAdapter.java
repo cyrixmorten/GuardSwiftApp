@@ -68,10 +68,10 @@ public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapt
 		final Client client = getItem(position);
 
 		holder.clientName.setText(client.getName());
-		holder.clientNumber.setText(String.valueOf(client.getNumber()));
+		holder.clientNumber.setText(client.getId());
 		holder.clientAddress.setText(client.getFullAddress());
 
-		holder.clientNumber.setVisibility((client.getNumber() != 0) ? View.VISIBLE : View.GONE);
+		holder.clientNumber.setVisibility(client.getId().isEmpty() ? View.VISIBLE : View.GONE);
 
 		new PositionedViewHolder.CalcDistanceAsync(client, holder).execute();
 	}

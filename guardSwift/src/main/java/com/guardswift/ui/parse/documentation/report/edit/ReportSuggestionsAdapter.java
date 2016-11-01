@@ -44,18 +44,6 @@ public class ReportSuggestionsAdapter extends ParseRecyclerQueryAdapter<EventLog
 
     }
 
-    @Override
-    protected List<EventLog> postProcessResults(List<EventLog> queriedItems) {
-        Map<String, EventLog> uniqueEvents = Maps.newHashMap();
-
-        for (EventLog eventLog: queriedItems) {
-            if (!eventLog.getEvent().isEmpty()) {
-                uniqueEvents.put(eventLog.getEvent(), eventLog);
-            }
-        }
-
-        return Lists.newArrayList(uniqueEvents.values());
-    }
 
     private Context context;
     private GSTask task;

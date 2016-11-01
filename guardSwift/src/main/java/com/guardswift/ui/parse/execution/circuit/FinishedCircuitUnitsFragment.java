@@ -11,6 +11,7 @@ import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
@@ -40,6 +41,11 @@ public class FinishedCircuitUnitsFragment extends AbstractTasksRecycleFragment<C
 	}
 
     @Override
+    public PostProcessAdapterResults<CircuitUnit> createPostProcess() {
+        return null;
+    }
+
+    @Override
     public BaseTask getObjectInstance() {
         return new CircuitUnit();
     }
@@ -54,7 +60,7 @@ public class FinishedCircuitUnitsFragment extends AbstractTasksRecycleFragment<C
                         new CircuitUnit.QueryBuilder().
                         matchingEnded(circuitStartedCache.getSelected()).
                         isRunToday().
-                        sortBy(CircuitUnit.SORTBY_TIME_END).
+                        sortBy(CircuitUnit.SORTBY_ID).
                         build();
             }
         };

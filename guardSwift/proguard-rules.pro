@@ -1,3 +1,5 @@
+-dontobfuscate
+
 # Needed by google-api-client to keep generic types and @Key annotations accessed via reflection
 -keepclassmembers class * {
   @com.google.api.client.util.Key <fields>;
@@ -26,18 +28,20 @@
 -dontwarn com.google.android.gms.**
 
 # Dagger
+
 -dontwarn dagger.internal.codegen.**
+
 -keepclassmembers,allowobfuscation class * {
     @javax.inject.* *;
     @dagger.* *;
     <init>();
 }
--keep class dagger.* { *; }
--keep class javax.lang.** { *; }
--keep class javax.inject.* { *; }
--keep class * extends dagger.internal.Binding
--keep class * extends dagger.internal.ModuleAdapter
--keep class * extends dagger.internal.StaticInjection
+
+-keep class javax.inject.** { *; }
+-keep class **$$ModuleAdapter
+-keep class **$$InjectAdapter
+-keep class **$$StaticInjection
+-keep class dagger.** { *; }
 
 # EVENTBUS
 -keepclassmembers class ** {

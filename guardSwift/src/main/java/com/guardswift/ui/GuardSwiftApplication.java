@@ -34,7 +34,6 @@ import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
-import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchUnit;
 import com.guardswift.persistence.parse.execution.task.regular.Circuit;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
@@ -62,128 +61,141 @@ import rx.plugins.RxJavaPlugins;
 
 public class GuardSwiftApplication extends InjectingApplication {
 
-	private static final String TAG = GuardSwiftApplication.class.getSimpleName();
+    private static final String TAG = GuardSwiftApplication.class.getSimpleName();
 
-	@Inject
-	ParseCacheFactory parseCacheFactory;
+    @Inject
+    ParseCacheFactory parseCacheFactory;
 
 
-	private static GuardSwiftApplication instance;
+    private static GuardSwiftApplication instance;
 
-	public static GuardSwiftApplication getInstance() {
-		return instance;
-	}
+    public static GuardSwiftApplication getInstance() {
+        return instance;
+    }
 
-	private boolean parseObjectsBootstrapped;
+    private boolean parseObjectsBootstrapped;
 
-	@Override
-	protected void attachBaseContext(Context base) {
-		super.attachBaseContext(base);
-		MultiDex.install(this);
-	}
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
-		instance = this;
+        instance = this;
 
-		EventBus.builder().logNoSubscriberMessages(false).throwSubscriberException(BuildConfig.DEBUG).installDefaultEventBus();
+        EventBus.builder().logNoSubscriberMessages(false).throwSubscriberException(BuildConfig.DEBUG).installDefaultEventBus();
 
-		// Android-Bootstrap https://github.com/Bearded-Hen/Android-Bootstrap
-		TypefaceProvider.registerDefaultIconSets();
+        // Android-Bootstrap https://github.com/Bearded-Hen/Android-Bootstrap
+        TypefaceProvider.registerDefaultIconSets();
 
         JodaTimeAndroid.init(this);
 
-		setupParse();
-		setupFabric();
+        setupParse();
+        setupFabric();
 
-		RxJavaPlugins.getInstance().registerErrorHandler(new RxJavaErrorHandler() {
-			@Override
-			public void handleError(Throwable e) {
-				Log.w("Error", e);
-				Crashlytics.log("RxJavaError: " + e.getMessage());
-				Crashlytics.logException(e);
-			}
-		});
-
-
-		if (parseCacheFactory.getGuardCache().isLoggedIn()) {
-			startServices();
-		}
-	}
+        RxJavaPlugins.getInstance().registerErrorHandler(new RxJavaErrorHandler() {
+            @Override
+            public void handleError(Throwable e) {
+                Log.w("Error", e);
+                Crashlytics.log("RxJavaError: " + e.getMessage());
+                Crashlytics.logException(e);
+            }
+        });
 
 
-	private void setupParse() {
-		ParseObject.registerSubclass(Report.class);
-		ParseObject.registerSubclass(StaticTask.class);
-//		ParseObject.registerSubclass(Alarm.class);
-//		ParseObject.registerSubclass(AlarmGroup.class);
-		ParseObject.registerSubclass(Circuit.class);
-		ParseObject.registerSubclass(Client.class);
-		ParseObject.registerSubclass(Person.class);
-		ParseObject.registerSubclass(ClientContact.class);
-//		ParseObject.registerSubclass(Message.class);
-		ParseObject.registerSubclass(ClientLocation.class);
-		ParseObject.registerSubclass(CircuitUnit.class);
-		ParseObject.registerSubclass(CircuitStarted.class);
-		ParseObject.registerSubclass(DistrictWatch.class);
-		ParseObject.registerSubclass(DistrictWatchStarted.class);
-		ParseObject.registerSubclass(DistrictWatchUnit.class);
-		ParseObject.registerSubclass(DistrictWatchClient.class);
-		ParseObject.registerSubclass(EventLog.class);
-		ParseObject.registerSubclass(EventType.class);
-		ParseObject.registerSubclass(EventRemark.class);
-		ParseObject.registerSubclass(Guard.class);
-
-		ParseObject.registerSubclass(LocationTracker.class);
+        if (parseCacheFactory.getGuardCache().isLoggedIn()) {
+            startServices();
+        }
+    }
 
 
-		Parse.enableLocalDatastore(this);
+    private void setupParse() {
+        ParseObject.registerSubclass(Report.class);
+        ParseObject.registerSubclass(StaticTask.class);
+        ParseObject.registerSubclass(Circuit.class);
+        ParseObject.registerSubclass(Client.class);
+        ParseObject.registerSubclass(Person.class);
+        ParseObject.registerSubclass(ClientContact.class);
+        ParseObject.registerSubclass(ClientLocation.class);
+        ParseObject.registerSubclass(CircuitUnit.class);
+        ParseObject.registerSubclass(CircuitStarted.class);
+        ParseObject.registerSubclass(DistrictWatch.class);
+        ParseObject.registerSubclass(DistrictWatchStarted.class);
+        ParseObject.registerSubclass(DistrictWatchClient.class);
+        ParseObject.registerSubclass(EventLog.class);
+        ParseObject.registerSubclass(EventType.class);
+        ParseObject.registerSubclass(EventRemark.class);
+        ParseObject.registerSubclass(Guard.class);
 
-		if (BuildConfig.DEBUG) {
-			Log.d(TAG, "DEVELOPMENT");
-			Parse.setLogLevel(Parse.LOG_LEVEL_VERBOSE);
-			Parse.initialize(this, ParseModule.DEVApplicationID,
-					ParseModule.DEVClientKey);
-		} else {
-			Log.d(TAG, "RELEASE");
-			Parse.initialize(this, ParseModule.ApplicationID,
-					ParseModule.ClientKey);
-			Log.d(TAG, "Parse initialized");
-		}
+        ParseObject.registerSubclass(LocationTracker.class);
 
-		ParseACL defaultACL = new ParseACL();
-		defaultACL.setPublicWriteAccess(false);
-		defaultACL.setPublicReadAccess(false);
-		ParseACL.setDefaultACL(defaultACL, true);
-	}
 
-	private void setupFabric() {
-		Fabric.with(this, new Crashlytics());
-		logUser();
-	}
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "DEVELOPMENT");
+            Parse.setLogLevel(Parse.LOG_LEVEL_VERBOSE);
 
-	private void logUser() {
-		ParseUser user = ParseUser.getCurrentUser();
-		if (user != null) {
-			Crashlytics.setUserIdentifier(user.getObjectId());
-			Crashlytics.setUserEmail(user.getEmail());
-			Crashlytics.setUserName(user.getUsername());
-		}
-	}
+            String applicationId = "guardswift";
+            String parseUrl = "https://gsdev-server.herokuapp.com/parse/";
+            // todo setup ngrok for local development
 
-	public void startServices() {
-		ActivityRecognitionService.start(this);
-		FusedLocationTrackerService.start(this);
-		WiFiPositioningService.start(this);
-	}
+            Parse.initialize(new Parse.Configuration.Builder(this)
+                    .applicationId(applicationId)
+                    .clientKey(null)
+                    .server(parseUrl)
+                    .enableLocalDataStore()
+                    .build()
+            );
+        } else {
+            Log.d(TAG, "RELEASE");
+            String applicationId = "gejAg1OFJrBwepcORHB3U7V7fawoDjlymRe8grHJ";
+            String clientKey = "ZOZ7GGeu2tfOQXGRcMSOtDMg1qTGVZaxjO8gl89p";
 
-	public void stopServices() {
-		ActivityRecognitionService.stop(this);
-		FusedLocationTrackerService.stop(this);
-		WiFiPositioningService.stop(this);
-	}
+            Parse.initialize(new Parse.Configuration.Builder(this)
+                    .applicationId(applicationId)
+                    .clientKey(clientKey)
+                    .enableLocalDataStore()
+                    .build()
+            );
+        }
+
+
+        ParseUser.enableRevocableSessionInBackground();
+
+        ParseACL defaultACL = new ParseACL();
+        defaultACL.setPublicWriteAccess(false);
+        defaultACL.setPublicReadAccess(false);
+        ParseACL.setDefaultACL(defaultACL, true);
+    }
+
+    private void setupFabric() {
+        Fabric.with(this, new Crashlytics());
+        logUser();
+    }
+
+    private void logUser() {
+        ParseUser user = ParseUser.getCurrentUser();
+        if (user != null) {
+            Crashlytics.setUserIdentifier(user.getObjectId());
+            Crashlytics.setUserEmail(user.getEmail());
+            Crashlytics.setUserName(user.getUsername());
+        }
+    }
+
+    public void startServices() {
+        ActivityRecognitionService.start(this);
+        FusedLocationTrackerService.start(this);
+        WiFiPositioningService.start(this);
+    }
+
+    public void stopServices() {
+        ActivityRecognitionService.stop(this);
+        FusedLocationTrackerService.stop(this);
+        WiFiPositioningService.stop(this);
+    }
 
     private Tracker tracker;
 
@@ -200,113 +212,111 @@ public class GuardSwiftApplication extends InjectingApplication {
         return tracker;
     }
 
-	public ParseCacheFactory getCacheFactory() {
-		return parseCacheFactory;
-	}
+    public ParseCacheFactory getCacheFactory() {
+        return parseCacheFactory;
+    }
 
-	public Task<Void> bootstrapParseObjectsLocally(final Activity activity, Guard guard) {
-		return bootstrapParseObjectsLocally(activity, guard, false);
-	}
+    public Task<Void> bootstrapParseObjectsLocally(final Activity activity, Guard guard) {
+        return bootstrapParseObjectsLocally(activity, guard, false);
+    }
 
-	public Task<Void> bootstrapParseObjectsLocally(final Activity activity, final Guard guard, boolean performInBackground) {
+    public Task<Void> bootstrapParseObjectsLocally(final Activity activity, final Guard guard, boolean performInBackground) {
 
-		if (parseObjectsBootstrapped) {
-			return Task.forResult(null);
-		}
+        if (parseObjectsBootstrapped) {
+            return Task.forResult(null);
+        }
 
-		ParseObjectFactory parseObjectFactory = new ParseObjectFactory();
+        ParseObjectFactory parseObjectFactory = new ParseObjectFactory();
 
-		final AtomicInteger updateClassProgress = new AtomicInteger(0);
-		final AtomicInteger updateClassTotal = new AtomicInteger(0);
+        final AtomicInteger updateClassProgress = new AtomicInteger(0);
+        final AtomicInteger updateClassTotal = new AtomicInteger(0);
 
-		// Prepare dialog showing progress
-		final MaterialDialog updateDialog = new MaterialDialog.Builder(activity)
-				.title(R.string.working)
-				.content(R.string.please_wait)
-				.progress(false, 0, true).build();
+        // Prepare dialog showing progress
+        final MaterialDialog updateDialog = new MaterialDialog.Builder(activity)
+                .title(R.string.working)
+                .content(R.string.please_wait)
+                .progress(false, 0, true).build();
 
-		if (!performInBackground) {
-			updateDialog.show();
-		}
+        if (!performInBackground) {
+            updateDialog.show();
+        }
 
-		Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
-			@Override
-			public List<ParseObject> then(Task<List<ParseObject>> task) throws Exception {
-				int currentProgress = updateClassProgress.incrementAndGet();
-				int outOfTotal = updateClassTotal.get();
+        Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
+            @Override
+            public List<ParseObject> then(Task<List<ParseObject>> task) throws Exception {
+                int currentProgress = updateClassProgress.incrementAndGet();
+                int outOfTotal = updateClassTotal.get();
 
-				int percentProgress = (currentProgress/outOfTotal)*100;
+                int percentProgress = (currentProgress / outOfTotal) * 100;
 
-				if (updateDialog != null) {
-					updateDialog.setMaxProgress(outOfTotal);
-					updateDialog.setProgress(currentProgress);
-				}
+                if (updateDialog != null) {
+                    updateDialog.setMaxProgress(outOfTotal);
+                    updateDialog.setProgress(currentProgress);
+                }
 
-				Log.d(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
+                Log.d(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
 
-				return null;
-			}
-		};
-
-
+                return null;
+            }
+        };
 
 
-		ArrayList<Task<List<ParseObject>>> tasks = new ArrayList<>();
+        ArrayList<Task<List<ParseObject>>> tasks = new ArrayList<>();
 
 
-		Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType()
-				.updateAllAsync();
-		tasks.add(eventTypes.onSuccess(updateClassSuccess));
+        Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType()
+                .updateAllAsync();
+        tasks.add(eventTypes.onSuccess(updateClassSuccess));
 
-		if (guard.canAccessRegularTasks()) {
-			Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted()
-					.updateAllAsync();
-			Task<List<ParseObject>> circuitUnit = parseObjectFactory
-					.getCircuitUnit().updateAllAsync();
+        if (guard.canAccessRegularTasks()) {
+            Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted()
+                    .updateAllAsync();
+            Task<List<ParseObject>> circuitUnit = parseObjectFactory
+                    .getCircuitUnit().updateAllAsync();
 
-			tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
-			tasks.add(circuitUnit.onSuccess(updateClassSuccess));
-		}
+            tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
+            tasks.add(circuitUnit.onSuccess(updateClassSuccess));
+        }
 
-		if (guard.canAccessDistrictTasks()) {
-			Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory
-					.getDistrictWatchStarted().updateAllAsync();
-			Task<List<ParseObject>> districtWatchClient = parseObjectFactory
-					.getDistrictWatchClient().updateAllAsync();
+        if (guard.canAccessDistrictTasks()) {
+            Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory
+                    .getDistrictWatchStarted().updateAllAsync();
+            Task<List<ParseObject>> districtWatchClient = parseObjectFactory
+                    .getDistrictWatchClient().updateAllAsync();
 
-			tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
-			tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
-		}
+            tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
+            tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
+        }
 
-		updateClassTotal.set(tasks.size());
+        updateClassTotal.set(tasks.size());
 
-		return Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
-			@Override
-			public Void then(Task<Void> result) throws Exception {
-				// no matter what happens e.g. success/error, the dialog should be dismissed
-				if (updateDialog!= null) {
-					updateDialog.dismiss();
-				}
+        return Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
+            @Override
+            public Void then(Task<Void> result) throws Exception {
+                // no matter what happens e.g. success/error, the dialog should be dismissed
+                if (updateDialog != null) {
+                    updateDialog.dismiss();
+                }
 
-				if (result.getError() == null) {
-					parseObjectsBootstrapped = true;
-				} else {
-					new HandleException(TAG, "bootstrapParseObjectsLocally", result.getError());
-					new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {
-						@Override
-						public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
-							bootstrapParseObjectsLocally(activity, guard);
-						}
-					}).cancelable(false).show();
-				}
+                if (result.getError() == null) {
+                    parseObjectsBootstrapped = true;
+                } else {
+                    new HandleException(TAG, "bootstrapParseObjectsLocally", result.getError());
+                    new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
+                            bootstrapParseObjectsLocally(activity, guard);
+                        }
+                    }).cancelable(false).show();
+                }
 
-				return null;
-			}
-		});
-	}
+                return null;
+            }
+        });
+    }
 
-	public void teardownParseObjectsLocally() {
-		// todo move last part of logout process here
-		parseObjectsBootstrapped = false;
-	}
+    public void teardownParseObjectsLocally() {
+        // todo move last part of logout process here
+        parseObjectsBootstrapped = false;
+    }
 }
