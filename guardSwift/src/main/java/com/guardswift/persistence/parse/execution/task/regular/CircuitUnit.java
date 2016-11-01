@@ -2,11 +2,11 @@ package com.guardswift.persistence.parse.execution.task.regular;
 
 import android.content.Context;
 import android.location.Location;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.guardswift.core.documentation.report.NoTaskReportingStrategy;
-import com.guardswift.core.documentation.report.StandardTaskReportingStrategy;
 import com.guardswift.core.documentation.report.TaskReportingStrategy;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
@@ -49,7 +49,7 @@ import java.util.List;
 //import de.keyboardsurfer.android.widget.crouton.Style;
 
 @ParseClassName("CircuitUnit")
-public class CircuitUnit extends BaseTask  {
+public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
 
 
     private static final String TAG = CircuitUnit.class.getSimpleName();
@@ -123,12 +123,6 @@ public class CircuitUnit extends BaseTask  {
         clearCheckpoints();
     }
 
-    public String getClientName() {
-        if (getClient() != null) {
-            return getClient().getName();
-        }
-        return "";
-    }
 
 //    public static class Recent {
 //        private static CircuitUnit selected;
@@ -277,12 +271,14 @@ public class CircuitUnit extends BaseTask  {
 
 
     public static final int SORTBY_NEAREST = 1;
-    public static final int SORTBY_TIME_END = 2;
+    public static final int SORTBY_ID = 2;
 
     // predefined
     public static final String objectName = "CircuitUnit";
     public static final String name = "name";
     public static final String client = "client";
+    public static final String clientId = "clientId";
+    public static final String clientName = "clientName";
     public static final String circuit = "circuit";
 //    public static final String circuitStarted = "circuitStarted";
 
@@ -563,6 +559,24 @@ public class CircuitUnit extends BaseTask  {
         return new QueryBuilder(fromLocalDatastore);
     }
 
+    @Override
+    public int compareTo(@NonNull CircuitUnit another) {
+        // another has clientId and this does not
+        if (this.getClientId().isEmpty() && !another.getClientId().isEmpty()) {
+            return -1;
+        }
+        // this has clientId and another does not
+        if (!this.getClientId().isEmpty() && another.getClientId().isEmpty()) {
+            return 1;
+        }
+        // both has clientId
+        if (!this.getClientId().isEmpty() && !another.getClientId().isEmpty()) {
+            return this.getClientId().compareTo(another.getClientId());
+        }
+        // neither contains clientId
+        return this.getClientName().compareTo(another.getClientName());
+    }
+
 
     public static class QueryBuilder extends TaskQueryBuilder<CircuitUnit> {
 
@@ -649,8 +663,8 @@ public class CircuitUnit extends BaseTask  {
                     ParseModule.sortNearest(query,
                             CircuitUnit.clientPosition);
                     break;
-                case CircuitUnit.SORTBY_TIME_END:
-                    query.orderByDescending(CircuitUnit.timeEnded);
+                case CircuitUnit.SORTBY_ID:
+                    query.orderByAscending(CircuitUnit.clientId);
                     break;
             }
 
@@ -916,6 +930,19 @@ public class CircuitUnit extends BaseTask  {
         remove(guardName);
     }
 
+    public String getClientId() {
+        if (getClient() != null) {
+            return getClient().getId();
+        }
+        return (has(clientId)) ? getString(clientId) : "";
+    }
+
+    public String getClientName() {
+        if (getClient() != null) {
+            return getClient().getName();
+        }
+        return (has(clientName)) ? getString(clientName) : "";
+    }
 
     public Client getClient() {
         Client client = (Client) getParseObject(CircuitUnit.client);

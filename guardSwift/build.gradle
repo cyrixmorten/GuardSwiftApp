@@ -13,14 +13,14 @@ buildscript {
         classpath 'com.parse.tools:gradle:1.1'
 //        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.16.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-        classpath 'io.fabric.tools:gradle:1.21.2'
+        classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 
 apply plugin: 'com.parse'
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
 apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 23
@@ -29,9 +29,9 @@ android {
     defaultConfig {
         applicationId "com.guardswift"
         minSdkVersion 19
-        targetSdkVersion 23
-        versionCode 322
-        versionName "3.2.2"
+        targetSdkVersion 22 // 23 require runtime permissions!!
+        versionCode 350
+        versionName "3.5.0"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -62,7 +62,7 @@ android {
 //            ext.enableCrashlytics = true
             // enable after Dagger 2 migration
 //            minifyEnabled true
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro', 'dagger-proguard-keepnames.cfg'
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     packagingOptions {
@@ -171,7 +171,7 @@ dependencies {
     // Multidex
     compile 'com.android.support:multidex:1.0.1'
     // Crashlytics
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
         transitive = true;
     }
 }

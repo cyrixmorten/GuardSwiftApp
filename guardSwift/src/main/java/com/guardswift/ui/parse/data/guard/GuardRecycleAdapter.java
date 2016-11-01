@@ -18,10 +18,13 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
 import com.guardswift.util.GeocodedAddress;
+import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 
 import java.util.Date;
 
+import bolts.Continuation;
+import bolts.Task;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -88,7 +91,7 @@ public class GuardRecycleAdapter extends ParseRecyclerQueryAdapter<Guard, GuardR
     }
 
     @Override
-    public void onBindViewHolder(GuardViewHolder holder, int position) {
+    public void onBindViewHolder(final GuardViewHolder holder, int position) {
         Guard guard = getItem(position);
         holder.name.setText(guard.getName());
         if (guard.isOnline()) {
@@ -138,15 +141,20 @@ public class GuardRecycleAdapter extends ParseRecyclerQueryAdapter<Guard, GuardR
         if (lastEvent != null) {
             holder.vEvent.setText(lastEvent.getEvent());
 
-            Client client = lastEvent.getClient();
-            if (client != null) {
+            lastEvent.getClientInBackground().onSuccess(new Continuation<Client, Object>() {
+                @Override
+                public Object then(Task<Client> task) throws Exception {
 
-                holder.vClientName.setText(client.getName());
-                holder.vClientAddress.setText(client.getFullAddress());
+                    Client client = task.getResult();
+                    holder.vClientName.setText(client.getIdAndName());
+                    holder.vClientAddress.setText(client.getFullAddress());
 
-                holder.vClientName.setVisibility(View.VISIBLE);
-                holder.vClientAddress.setVisibility(View.VISIBLE);
-            }
+                    holder.vClientName.setVisibility(View.VISIBLE);
+                    holder.vClientAddress.setVisibility(View.VISIBLE);
+
+                    return null;
+                }
+            });
         } else {
             holder.vNoActivity.setVisibility(View.VISIBLE);
         }

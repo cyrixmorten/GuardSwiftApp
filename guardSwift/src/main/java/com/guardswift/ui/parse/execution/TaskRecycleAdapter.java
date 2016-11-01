@@ -65,6 +65,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     private static final String TAG = TaskRecycleAdapter.class.getSimpleName();
 
+
     public interface TaskActionCallback<T extends BaseTask> {
         void onActionOpen(Context context, T task);
 
@@ -272,6 +273,8 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             });
         }
     }
+
+
 
     public static class DistrictWatchTaskViewHolder extends TaskViewHolder<DistrictWatchClient> {
 
@@ -698,7 +701,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         Client client = task.getClient();
         if (client != null) {
-            holder.vClientNumber.setText((client.getNumber() != 0) ? String.valueOf(client.getNumber()) : "");
+            holder.vClientNumber.setText(client.getId());
             holder.vName.setText(client.getName());
             holder.vAddress.setText(client.getFullAddress());
             holder.vBtnCheckpoints.setVisibility((client.hasCheckPoints()) ? View.VISIBLE : View.GONE);

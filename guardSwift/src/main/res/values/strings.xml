@@ -351,6 +351,8 @@
     <string name="written_by">Skrevet af</string>
     <string name="task_static">Fastvagt</string>
     <string name="reports">Rapporter</string>
+    <string name="session_expired">Session udløbet</string>
+    <string name="session_expired_message">Genskab sessionen ved at logge ind igen med brugernavn og kodeord</string>
 
 
 </resources>

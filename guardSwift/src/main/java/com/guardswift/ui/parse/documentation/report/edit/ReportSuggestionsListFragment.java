@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.util.Log;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
@@ -13,8 +15,12 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
+import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
+
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -43,6 +49,7 @@ public class ReportSuggestionsListFragment extends AbstractParseRecyclerFragment
 
     @Override
     protected ParseQueryAdapter.QueryFactory<EventLog> createNetworkQueryFactory() {
+
         return new ParseQueryAdapter.QueryFactory<EventLog>() {
             @Override
             public ParseQuery<EventLog> create() {
@@ -60,7 +67,23 @@ public class ReportSuggestionsListFragment extends AbstractParseRecyclerFragment
     @Override
     protected ParseRecyclerQueryAdapter<EventLog, ReportSuggestionsAdapter.ReportViewHolder> createRecycleAdapter() {
         CoordinatorLayout coordinatorLayout = ((AbstractTabsViewPagerFragment) getParentFragment()).getCoordinatorLayout();
-        return new ReportSuggestionsAdapter(getActivity(), gsTasksCache.getLastSelected(), coordinatorLayout, createNetworkQueryFactory());
+        ParseRecyclerQueryAdapter<EventLog, ReportSuggestionsAdapter.ReportViewHolder> adapter = new ReportSuggestionsAdapter(getActivity(), gsTasksCache.getLastSelected(), coordinatorLayout, createNetworkQueryFactory());
+        adapter.setPostProcessor(new PostProcessAdapterResults<EventLog>() {
+            @Override
+            public List<EventLog> postProcess(List<EventLog> queriedItems) {
+                Map<String, EventLog> uniqueEvents = Maps.newHashMap();
+
+                for (EventLog eventLog: queriedItems) {
+                    if (!eventLog.getEvent().isEmpty()) {
+                        uniqueEvents.put(eventLog.getEvent(), eventLog);
+                    }
+                }
+
+                return Lists.newArrayList(uniqueEvents.values());
+            }
+        });
+
+        return adapter;
     }
 
     @Override

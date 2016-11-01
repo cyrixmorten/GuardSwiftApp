@@ -12,7 +12,6 @@ import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
-import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchUnit;
 import com.guardswift.persistence.parse.execution.task.regular.Circuit;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
@@ -35,7 +34,6 @@ public class ParseObjectFactory {
 	private final DistrictWatch districtWatch;
 	private final DistrictWatchStarted districtWatchStarted;
 	private final DistrictWatchClient districtWatchClient;
-	private final DistrictWatchUnit districtWatchUnit;
 	private final EventLog eventLog;
 	private final EventType eventType;
 	private final EventRemark eventRemark;
@@ -60,7 +58,6 @@ public class ParseObjectFactory {
         districtWatch = new DistrictWatch();
         districtWatchClient = new DistrictWatchClient();
         districtWatchStarted = new DistrictWatchStarted();
-        districtWatchUnit = new DistrictWatchUnit();
         eventLog = new EventLog();
         eventRemark = new EventRemark();
         eventType = new EventType();
@@ -77,7 +74,6 @@ public class ParseObjectFactory {
 		allParseObjects.add(districtWatch);
 		allParseObjects.add(districtWatchStarted);
 		allParseObjects.add(districtWatchClient);
-		allParseObjects.add(districtWatchUnit);
 		allParseObjects.add(eventLog);
 		allParseObjects.add(eventType);
 		allParseObjects.add(eventRemark);
@@ -123,9 +119,6 @@ public class ParseObjectFactory {
 		return districtWatchClient;
 	}
 
-	public DistrictWatchUnit getDistrictWatchUnit() {
-		return districtWatchUnit;
-	}
 
 	public DistrictWatchStarted getDistrictWatchStarted() {
 		return districtWatchStarted;
