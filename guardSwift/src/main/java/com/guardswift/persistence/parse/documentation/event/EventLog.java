@@ -510,6 +510,7 @@ public class EventLog extends ExtendedParseObject {
     // pointers
     public static final String client = TaskClientLogStrategy.client;
     public static final String districtWatchStarted = TaskDistrictWatchLogStrategy.districtWatchStarted;
+    public static final String districtWatchUnit = TaskDistrictWatchLogStrategy.districtWatchUnit;
     public static final String districtWatchClient = TaskDistrictWatchLogStrategy.districtWatchClient;
     public static final String circuitStarted = TaskRegularLogStrategy.circuitStarted;
     public static final String circuitUnit = TaskRegularLogStrategy.circuitUnit;
@@ -961,14 +962,6 @@ public class EventLog extends ExtendedParseObject {
             }
         }
         return client;
-    }
-
-    public Task<Client> getClientInBackground() {
-        Client client = getClient();
-        if (client != null) {
-            return client.fetchIfNeededInBackground();
-        }
-        return Task.forError(new ParseException(ParseException.OBJECT_NOT_FOUND, "Client not found"));
     }
 
 //    private void setGuard(Guard guard) {

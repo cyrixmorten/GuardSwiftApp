@@ -69,7 +69,6 @@ public class Client extends ExtendedParseObject implements Positioned {
 
 //    public static final String PIN = "Client";
 
-    public static final String clientId = "clientId";
     public static final String name = "name";
     public static final String addressName = "addressName";
     public static final String addressName2 = "addressName2";
@@ -78,7 +77,7 @@ public class Client extends ExtendedParseObject implements Positioned {
     public static final String cityName = "cityName";
     public static final String zipcode = "zipcode";
     public static final String email = "email";
-//    public static final String number = "number";
+    public static final String number = "number";
     public static final String position = "position";
 
 //    public static final String messages = "messages";
@@ -249,13 +248,6 @@ public class Client extends ExtendedParseObject implements Positioned {
         return getString(name);
     }
 
-    public String getIdAndName() {
-        if (getId() == null) {
-            return getId() + " " + getName();
-        }
-        return getName();
-    }
-
     public String getAddressName() {
         return getString(addressName);
     }
@@ -284,9 +276,12 @@ public class Client extends ExtendedParseObject implements Positioned {
         return getString(email);
     }
 
+    public String getNumberString() {
+        return (getNumber() != 0) ? String.valueOf(getNumber()) : "";
+    }
 
-    public String getId() {
-        return (has(clientId)) ? getString(clientId) : "";
+    public int getNumber() {
+        return getInt(number);
     }
 
 //    public boolean hasUnreadMessagesFor(Guard guard) {

@@ -7,10 +7,7 @@ import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
-import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.parse.ParseQueryAdapter;
-
-import java.util.List;
 
 public abstract class AbstractTasksRecycleFragment<T extends BaseTask> extends AbstractParseRecyclerFragment<T, TaskRecycleAdapter.TaskViewHolder> {
 
@@ -18,7 +15,6 @@ public abstract class AbstractTasksRecycleFragment<T extends BaseTask> extends A
             .getSimpleName();
 
 
-    public abstract PostProcessAdapterResults<T> createPostProcess();
     public abstract BaseTask getObjectInstance();
     public abstract ParseQueryAdapter.QueryFactory<T> createNetworkQueryFactory();
 
@@ -29,17 +25,8 @@ public abstract class AbstractTasksRecycleFragment<T extends BaseTask> extends A
     protected ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> createRecycleAdapter() {
         ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> adapter = new TaskRecycleAdapter<>(getContext(), createNetworkQueryFactory());
         adapter.setFromLocalDataStore(true);
-
-        PostProcessAdapterResults<T> postProcess = createPostProcess();
-        if (postProcess != null) {
-            adapter.setPostProcessor(postProcess);
-        }
-
         return adapter;
     }
-
-
-
 
     @Override
     public boolean isRelevantUIEvent(UpdateUIEvent ev) {

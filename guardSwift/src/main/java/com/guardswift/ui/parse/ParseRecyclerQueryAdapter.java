@@ -56,7 +56,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
      * START My own tweaks
      */
 
-    // may be null if not attached to activity or fragment
+    // may be null if not attatched to activity or fragment
     protected Context context;
     protected boolean fromLocalDataStore;
 
@@ -75,21 +75,15 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
         return fromLocalDataStore;
     }
 
-    private PostProcessAdapterResults<T> postProcessor;
-
-    public void setPostProcessor(PostProcessAdapterResults<T> postProcessor) {
-        this.postProcessor = postProcessor;
-    }
-
     /**
-     * Enables an implementation to change/sort/order incoming results before being passed to the recycler adapter
+     * Enables an implementation to change/sort/order incomming results before being passed to the recycler adapter
      *
      * @param queriedItems
      * @return result after postprocessing
      */
-//    protected List<T>  postProcessResults(List<T> queriedItems) {
-//        return queriedItems;
-//    };
+    protected List<T>  postProcessResults(List<T> queriedItems) {
+        return queriedItems;
+    };
 
     /**
      * END
@@ -185,9 +179,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
                     List<T> queriedItems,
                     @Nullable ParseException e) {
 
-                if (postProcessor != null) {
-                    queriedItems = postProcessor.postProcess(queriedItems);
-                }
+                queriedItems = postProcessResults(queriedItems);
 
                 if (e == null) {
                     mItems.clear();

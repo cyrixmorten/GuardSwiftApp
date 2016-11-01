@@ -13,6 +13,7 @@ public class TaskDistrictWatchLogStrategy implements LogTaskStrategy {
 
 
     public static final String districtWatchStarted = "districtWatchStarted";
+    public static final String districtWatchUnit = "districtWatchUnit";
     public static final String districtWatchClient = "districtWatchClient";
     public static final String timeStart = "timeStart";
     public static final String timeStartString = "timeStartString";
@@ -27,6 +28,9 @@ public class TaskDistrictWatchLogStrategy implements LogTaskStrategy {
             DistrictWatchClient districtWatchClient = (DistrictWatchClient)task;
 
             toParseObject.put(TaskDistrictWatchLogStrategy.districtWatchClient, districtWatchClient);
+            if (districtWatchClient.getDistrictWatchUnit() != null) {
+                toParseObject.put(TaskDistrictWatchLogStrategy.districtWatchUnit, districtWatchClient.getDistrictWatchUnit());
+            }
 
             DistrictWatchStarted  districtWatchStarted = districtWatchClient.getDistrictWatchStarted();
 

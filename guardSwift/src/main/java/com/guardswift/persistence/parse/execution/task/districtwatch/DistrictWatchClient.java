@@ -215,6 +215,7 @@ public class DistrictWatchClient extends BaseTask {
     public static final String zipcode = "zipcode";
     public static final String position = "position";
     public static final String districtWatch = "districtWatch";
+    public static final String districtWatchUnit = "districtWatchUnit";
     public static final String districtWatchType = "districtWatchType";
 
     public static final String completed = "completed"; // timesArrived == supervisions
@@ -265,6 +266,7 @@ public class DistrictWatchClient extends BaseTask {
         public ParseQuery<DistrictWatchClient> build() {
             query.include(client);
             query.include(districtWatch);
+            query.include(districtWatchUnit);
             query.setLimit(1000);
             return super.build();
         }
@@ -346,7 +348,7 @@ public class DistrictWatchClient extends BaseTask {
     }
 
     public String getClientName() {
-        return (getClient() != null) ? getClient().getName() : "N/A";
+        return getClient().getName();
     }
 
     public String getAddressName() {
@@ -395,6 +397,9 @@ public class DistrictWatchClient extends BaseTask {
         return (DistrictWatch)getLDSFallbackParseObject(districtWatch);
     }
 
+    public DistrictWatchUnit getDistrictWatchUnit() {
+        return (DistrictWatchUnit)getLDSFallbackParseObject(districtWatchUnit);
+    }
 
     public int getTimesArrived() {
         if (has(timesArrived)) {

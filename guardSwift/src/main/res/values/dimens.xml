@@ -8,9 +8,6 @@
     <dimen name="micro_padding">2dp</dimen>
     <dimen name="mini_padding">4dp</dimen>
     <dimen name="small_padding">8dp</dimen>
-    <dimen name="medium_padding">12dp</dimen>
-    <dimen name="large_padding">24dp</dimen>
-
     <dimen name="default_padding">16dp</dimen>
 
     <dimen name="micro_padding_inverse">-2dp</dimen>

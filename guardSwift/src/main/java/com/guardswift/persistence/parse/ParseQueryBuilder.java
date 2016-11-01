@@ -53,7 +53,7 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
 
 	public ParseQuery<T> build() {
 		query.whereEqualTo("owner", ParseUser.getCurrentUser());
-		query.whereNotEqualTo("archive", true);
+		query.whereDoesNotExist("archive");
 		setFromLocalDatastore();
 		return query;
 	};

@@ -440,24 +440,19 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         guardSwift.version().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        String latestversion = response.body().string();
+                try {
+                    String latestversion = response.body().string();
 
-                        boolean higherVersion = Integer.parseInt(latestversion) > device.getVersionCode();
+                    callback.newVersionAvailable(Integer.parseInt(latestversion) > device.getVersionCode());
 
-                        callback.newVersionAvailable(higherVersion);
-
-                    } catch (IOException e) {
-                        new HandleException(TAG, "Version check response", e);
-                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                new HandleException(TAG, "Error at version check", t);
-
+                Log.e(TAG, "versioncheck", t);
                 callback.newVersionAvailable(false);
             }
         });

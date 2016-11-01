@@ -4,7 +4,6 @@ import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
-import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
@@ -21,11 +20,6 @@ public class FinishedStaticTasksFragment extends AbstractTasksRecycleFragment<St
 	public FinishedStaticTasksFragment() {
 	}
 
-
-    @Override
-    public PostProcessAdapterResults<StaticTask> createPostProcess() {
-        return null;
-    }
 
     @Override
     public BaseTask getObjectInstance() {

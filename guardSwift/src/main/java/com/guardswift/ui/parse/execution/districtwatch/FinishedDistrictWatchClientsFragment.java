@@ -7,7 +7,6 @@ import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
@@ -29,11 +28,6 @@ public class FinishedDistrictWatchClientsFragment extends AbstractTasksRecycleFr
 
     @Inject
     DistrictWatchStartedCache districtWatchStartedCache;
-
-    @Override
-    public PostProcessAdapterResults<DistrictWatchClient> createPostProcess() {
-        return null;
-    }
 
     @Override
     public BaseTask getObjectInstance() {
