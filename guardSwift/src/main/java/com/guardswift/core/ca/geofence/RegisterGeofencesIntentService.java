@@ -104,7 +104,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                 AsyncExecutor.create().execute(new AsyncExecutor.RunnableEx() {
                     @Override
                     public void run() throws Exception {
-                        validateTaskState(deviceLocation);
+//                        validateTaskState(deviceLocation);
                         rebuildGeofenceForTasks();
                     }
                 });
@@ -114,39 +114,39 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
     }
 
 
-    /**
-     * If the device has been moved while guardswift has been shut down or
-     * the guard has been logged out, then it may happen that tasks are left 'hanging'
-     * in an arrived state
-     */
-    private void validateTaskState(final Location deviceLocation) {
-        List<BaseTask> tasks = new TaskFactory().getTasks();
-        for (final BaseTask task: tasks) {
-                task.getQueryBuilder(true).buildNoIncludes().findInBackground(new FindCallback<BaseTask>() {
-                    @Override
-                    public void done(List<BaseTask> tasks, ParseException e) {
-                        if (e != null) {
-                            new HandleException(TAG, "validateTaskState", e);
-                            return;
-                        }
-                        for (BaseTask task : tasks) {
-                            double distanceMeters = ParseModule.distanceBetweenMeters(deviceLocation, task.getPosition());
-                            int geofenceRadius = task.getGeofenceStrategy().getGeofenceRadius();
-                            switch (task.getTaskState()) {
-                                case ARRIVED:
-                                    // abort if outside radius
-                                    if (distanceMeters > geofenceRadius) {
-                                        task.getAutomationStrategy().automaticDeparture();
-                                        Log.w(TAG, "validateTaskState: ARRIVED -> Departure " + task.getTaskType() + " " + task.getClientName());
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-
-                });
-        }
-    }
+//    /**
+//     * If the device has been moved while guardswift has been shut down or
+//     * the guard has been logged out, then it may happen that tasks are left 'hanging'
+//     * in an arrived state
+//     */
+//    private void validateTaskState(final Location deviceLocation) {
+//        List<BaseTask> tasks = new TaskFactory().getTasks();
+//        for (final BaseTask task: tasks) {
+//                task.getQueryBuilder(true).buildNoIncludes().findInBackground(new FindCallback<BaseTask>() {
+//                    @Override
+//                    public void done(List<BaseTask> tasks, ParseException e) {
+//                        if (e != null) {
+//                            new HandleException(TAG, "validateTaskState", e);
+//                            return;
+//                        }
+//                        for (BaseTask task : tasks) {
+//                            double distanceMeters = ParseModule.distanceBetweenMeters(deviceLocation, task.getPosition());
+//                            int geofenceRadius = task.getGeofenceStrategy().getGeofenceRadius();
+//                            switch (task.getTaskState()) {
+//                                case ARRIVED:
+//                                    // abort if outside radius
+//                                    if (distanceMeters > geofenceRadius) {
+//                                        task.getAutomationStrategy().automaticDeparture();
+//                                        Log.w(TAG, "validateTaskState: ARRIVED -> Departure " + task.getTaskType() + " " + task.getClientName());
+//                                    }
+//                                    break;
+//                            }
+//                        }
+//                    }
+//
+//                });
+//        }
+//    }
 
     /**
      * Handle action Foo in the provided background thread with the provided

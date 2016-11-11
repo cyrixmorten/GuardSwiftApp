@@ -53,9 +53,9 @@ public class ActivityRecognitionService extends InjectingService {
     private Subscription filteredActivitySubscription;
     private Subscription loggingActivitySubscription;
 
-    private LinkedHashMap<Date, JSONArray> savedJSONActivities;
-    private LinkedHashMap<Date, JSONObject> savedJSONMostProbableActivities;
-    private LinkedHashMap<Date, List<DetectedActivity>> savedMostProbableActivities;
+//    private LinkedHashMap<Date, JSONArray> savedJSONActivities;
+//    private LinkedHashMap<Date, JSONObject> savedJSONMostProbableActivities;
+//    private LinkedHashMap<Date, List<DetectedActivity>> savedMostProbableActivities;
 
 //    private Preferences preferences;
 
@@ -101,9 +101,6 @@ public class ActivityRecognitionService extends InjectingService {
         unsubscribeActivityUpdates();
 
         if (hasGooglePlayServices()) {
-            savedJSONActivities = new LinkedHashMap<>();
-            savedJSONMostProbableActivities = new LinkedHashMap<>();
-            savedMostProbableActivities = new LinkedHashMap<>();
 
             mIsRunning = true;
 
@@ -136,7 +133,7 @@ public class ActivityRecognitionService extends InjectingService {
 
     public void speakText(String toSpeak) {
         Log.d(TAG, "Speak: " + toSpeak);
-//        ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
+        ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
 
     }
 
@@ -148,12 +145,6 @@ public class ActivityRecognitionService extends InjectingService {
 
         releaseTextToSpeech();
         unsubscribeActivityUpdates();
-//        uploadResults();
-
-        savedJSONActivities = null;
-        savedJSONMostProbableActivities = null;
-        savedMostProbableActivities = null;
-//        preferences = null;
 
         super.onDestroy();
     }
@@ -196,11 +187,11 @@ public class ActivityRecognitionService extends InjectingService {
                         float walkingSpeed = 1.4f;
 
                         int requiredConfidence = 75;
-                        boolean acceptableSpeed = true;
+//                        boolean acceptableSpeed = true;
                         if (detectedActivity.getType() == DetectedActivity.IN_VEHICLE) {
                             // driving has reduced confidence requirement but needs a trustworthy GPS speed estimate
                             requiredConfidence = 50;
-                            acceptableSpeed = (!hasSpeed) || locationWithSpeed.getSpeed() > walkingSpeed;
+//                            acceptableSpeed = (!hasSpeed) || locationWithSpeed.getSpeed() > walkingSpeed;
                         }
                         if (detectedActivity.getType() == DetectedActivity.STILL) {
                             requiredConfidence = 100;
@@ -228,7 +219,7 @@ public class ActivityRecognitionService extends InjectingService {
 //                            Log.w(TAG, "acceptableSpeed: " + acceptableSpeed);
 //                        }
 
-                        return mJustStarted || (isNewActivity && highConfidence && notUnknown && acceptableSpeed);
+                        return mJustStarted || (isNewActivity && highConfidence && notUnknown);
                     }
                 }).subscribe(new Action1<ActivityRecognitionResult>() {
                     @Override
@@ -290,80 +281,7 @@ public class ActivityRecognitionService extends InjectingService {
         }
     }
 
-
-    private void requestLoggingActivityUpdates() {
-        Log.d(TAG, "requestLoggingActivityUpdates");
-
-        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(getApplicationContext());
-
-        loggingActivitySubscription = locationProvider.getDetectedActivity(0).doOnError(new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                String message = "Error on activitySubscription: " + throwable.getMessage();
-                Log.e(TAG, message, throwable);
-            }
-        }).doOnError(new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                Crashlytics.logException(throwable);
-            }
-        }).onErrorReturn(new Func1<Throwable, ActivityRecognitionResult>() {
-            @Override
-            public ActivityRecognitionResult call(Throwable throwable) {
-                List<DetectedActivity> list = new ArrayList<DetectedActivity>();
-                list.add(new DetectedActivity(DetectedActivity.UNKNOWN, 0));
-                return new ActivityRecognitionResult(list, System.currentTimeMillis(), 0);
-            }
-        }).subscribe(new Action1<ActivityRecognitionResult>() {
-            @Override
-            public void call(ActivityRecognitionResult activityRecognitionResult) {
-
-                if (activityRecognitionResult == null || activityRecognitionResult.getMostProbableActivity() == null)
-                    return;
-
-                if (savedMostProbableActivities == null || savedJSONActivities == null || savedJSONMostProbableActivities == null)
-                    return;
-
-                DetectedActivity mostProbableActivity = activityRecognitionResult.getMostProbableActivity();
-
-                Date now = new Date();
-
-                savedMostProbableActivities.put(now, activityRecognitionResult.getProbableActivities());
-                savedJSONActivities.put(now, activityResultAsJSONArray(activityRecognitionResult));
-                savedJSONMostProbableActivities.put(now, detectedActivityResultAsJSON(mostProbableActivity));
-
-
-            }
-        });
-    }
-
-    private JSONArray activityResultAsJSONArray(ActivityRecognitionResult activityResult) {
-        JSONArray jsonArray = new JSONArray();
-        List<DetectedActivity> activityOptions = activityResult.getProbableActivities();
-        for (DetectedActivity activity : activityOptions) {
-            jsonArray.put(detectedActivityResultAsJSON(activity));
-        }
-        return jsonArray;
-    }
-
-    private JSONObject detectedActivityResultAsJSON(DetectedActivity detectedActivity) {
-
-        int type = detectedActivity.getType();
-        int confidence = detectedActivity.getConfidence();
-        String name = ActivityRecognitionService.getNameFromType(detectedActivity.getType());
-
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("activityType", type);
-        map.put("activityConfidence", confidence);
-        map.put("activityName", name);
-
-
-        JSONObject jsonObject = new JSONObject(map);
-
-        return jsonObject;
-    }
-
-        /**
+    /**
      * Map detected activity types to strings
      *
      * @param activityType The detected activity type
@@ -389,187 +307,6 @@ public class ActivityRecognitionService extends InjectingService {
                 return "running";
         }
         return "unknown";
-    }
-
-
-//    private void uploadResults() {
-//
-////        EventBus.getDefault().post(new Status("Uploading results"));
-//
-//        if (timeStart == null) {
-////            EventBus.getDefault().post(new Status("No results to upload"));
-//            return;
-//        }
-//
-////        String sessionName = preferences.getString(Session.NAME, "N/A");
-//
-//        List<Long> time_in_seconds = new ArrayList<>();
-//        //DetectedActivity.UNKNOWN
-//        List<Integer> activity_unknown = new ArrayList<>();
-//        //DetectedActivity.TILTING
-//        List<Integer> activity_tilting = new ArrayList<>();
-//        //DetectedActivity.STILL
-//        List<Integer> activity_still = new ArrayList<>();
-//        //DetectedActivity.ON_FOOT
-//        List<Integer> activity_on_foot = new ArrayList<>();
-//        //DetectedActivity.WALKING
-//        List<Integer> activity_walking = new ArrayList<>();
-//        //DetectedActivity.RUNNING
-//        List<Integer> activity_running = new ArrayList<>();
-//        //DetectedActivity.ON_BICYCLE
-//        List<Integer> activity_on_bicycle = new ArrayList<>();
-//        //DetectedActivity.IN_VEHICLE
-//        List<Integer> activity_in_vehicle = new ArrayList<>();
-//
-//        JSONArray finalArray = new JSONArray();
-//        int index = 0;
-//        int count = 1;
-//        for (Date timeStamp : savedJSONActivities.keySet()) {
-//
-//
-//            JSONArray activitiesJSON = savedJSONActivities.get(timeStamp);
-//            JSONObject mostProbableActivityJSON = savedJSONMostProbableActivities.get(timeStamp);
-//
-//            long diffMilliseconds = timeStamp.getTime() - timeStart.getTime();
-//            long diffSeconds = diffMilliseconds / 1000;
-//            JSONObject finalObject = new JSONObject();
-//            try {
-//                finalObject.put("count", count);
-//                finalObject.put("timeStamp", timeStamp.getTime());
-//                finalObject.put("timeStampRelativeMilliseconds", diffMilliseconds);
-//                finalObject.put("timeStampRelativeSeconds", diffSeconds);
-//                finalObject.put("activities", activitiesJSON);
-//                finalObject.put("mostProbableActivity", mostProbableActivityJSON);
-//                finalArray.put(finalObject);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//                Log.e(TAG, "uploadResults", e);
-//            }
-//
-//            time_in_seconds.addUnique(index, diffSeconds);
-//            List<DetectedActivity> activities = savedMostProbableActivities.get(timeStamp);
-//            addActivitiesToLists(activities, index, activity_unknown, activity_tilting, activity_still, activity_on_foot, activity_walking, activity_running, activity_on_bicycle, activity_in_vehicle);
-//
-//
-//            index++;
-//            count++;
-//        }
-//
-//        final int resultsCount = savedJSONActivities.keySet().size();
-//
-//
-//        long durationMs = System.currentTimeMillis() - timeStart.getTime();
-//        long durationSeconds = durationMs / 1000;
-//
-//
-//        ParseObject activityEntry = new ParseObject("ActivityResult");
-//
-////        if (circuitUnit != null) {
-////            activityEntry.put("circuitUnit", circuitUnit);
-////            activityEntry.put("client", circuitUnit.getClient());
-////        }
-//        if (Guard.Recent.getSelected() != null) {
-//            activityEntry.put("guard", Guard.Recent.getSelected());
-//        }
-//        activityEntry.put("deviceModel", Build.MODEL);
-//        activityEntry.put("deviceManufacturer", Build.MANUFACTURER);
-//        activityEntry.put("deviceStarted", timeStart);
-////        activityEntry.put("sessionName", sessionName);
-//        activityEntry.put("sessionActivities", finalArray);
-//        activityEntry.put("sessionDurationSeconds", durationSeconds);
-//        activityEntry.put("sessionDurationMilliseconds", durationMs);
-//        activityEntry.put("totalActivities", count);
-//        activityEntry.put("times_in_seconds", time_in_seconds);
-//        activityEntry.put("activity_unknown", activity_unknown);
-//        activityEntry.put("activity_still", activity_still);
-//        activityEntry.put("activity_tilting", activity_tilting);
-//        activityEntry.put("activity_on_foot", activity_on_foot);
-//        activityEntry.put("activity_walking", activity_walking);
-//        activityEntry.put("activity_running", activity_running);
-//        activityEntry.put("activity_on_bicycle", activity_on_bicycle);
-//        activityEntry.put("activity_in_vehicle", activity_in_vehicle);
-//
-//        StringBuilder b = new StringBuilder();
-//        b.append("#\tt\\s\tunkn\tstill\ttilt\tfoot\twalk\trunn\tbicycle\tvehicle");
-//        for (int i = 0; i < time_in_seconds.size(); i++) {
-//            b.append(System.getProperty("line.separator"));
-//
-//            // the independent variable
-//
-//            b.append("\t");
-//            b.append(time_in_seconds.get(i));
-//
-//            // the dependent variables
-//
-//            b.append("\t");
-//            b.append(activity_unknown.get(i));
-//
-//            b.append("\t");
-//            b.append(activity_still.get(i));
-//
-//            b.append("\t");
-//            b.append(activity_tilting.get(i));
-//
-//            b.append("\t");
-//            b.append(activity_on_foot.get(i));
-//
-//            b.append("\t");
-//            b.append(activity_walking.get(i));
-//
-//            b.append("\t");
-//            b.append(activity_running.get(i));
-//
-//            b.append("\t");
-//            b.append(activity_on_bicycle.get(i));
-//
-//            b.append("\t");
-//            b.append(activity_in_vehicle.get(i));
-//        }
-//
-//        activityEntry.put("activity_all", b.toString());
-//        activityEntry.saveInBackground();
-//    }
-
-    private void addActivitiesToLists(List<DetectedActivity> activities, int index, List<Integer> unknown, List<Integer> tilting, List<Integer> still, List<Integer> on_foot, List<Integer> walking, List<Integer> running, List<Integer> on_bicycle, List<Integer> in_vehicle) {
-        // first addUnique 0 confidence to all lists
-        unknown.add(index, 0);
-        tilting.add(index, 0);
-        still.add(index, 0);
-        on_foot.add(index, 0);
-        walking.add(index, 0);
-        running.add(index, 0);
-        on_bicycle.add(index, 0);
-        in_vehicle.add(index, 0);
-
-        // next addUnique based on activities
-        for (DetectedActivity activity : activities) {
-            switch (activity.getType()) {
-                case DetectedActivity.WALKING:
-                    walking.set(index, activity.getConfidence());
-                    break;
-                case DetectedActivity.IN_VEHICLE:
-                    in_vehicle.set(index, activity.getConfidence());
-                    break;
-                case DetectedActivity.ON_BICYCLE:
-                    on_bicycle.set(index, activity.getConfidence());
-                    break;
-                case DetectedActivity.ON_FOOT:
-                    on_foot.set(index, activity.getConfidence());
-                    break;
-                case DetectedActivity.STILL:
-                    still.set(index, activity.getConfidence());
-                    break;
-                case DetectedActivity.UNKNOWN:
-                    unknown.set(index, activity.getConfidence());
-                    break;
-                case DetectedActivity.TILTING:
-                    tilting.set(index, activity.getConfidence());
-                    break;
-                case DetectedActivity.RUNNING:
-                    running.set(index, activity.getConfidence());
-                    break;
-            }
-        }
     }
 
 
