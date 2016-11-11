@@ -68,7 +68,6 @@ public class MainNavigationDrawer {
     private static final int DRAWER_CIRCUITSTARTED_LIST = 1;
 
     private final Context context;
-    private final ParseCacheFactory parseCacheFactory;
     private final GuardCache guardCache;
     private final CircuitStartedCache circuitStartedCache;
 
@@ -79,7 +78,6 @@ public class MainNavigationDrawer {
     public MainNavigationDrawer(@InjectingActivityModule.ForActivity Context context, ParseCacheFactory parseCacheFactory) {
         this.context = context;
 
-        this.parseCacheFactory = parseCacheFactory;
         this.guardCache = parseCacheFactory.getGuardCache();
         this.circuitStartedCache = parseCacheFactory.getCircuitStartedCache();
 
