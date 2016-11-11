@@ -157,9 +157,9 @@ public class DistrictWatchGeofenceStrategy<T extends BaseTask> extends BaseGeofe
     public void exitGeofence() {
         super.exitGeofence();
 
-//        if (task.getAutomationStrategy() != null) {
-//            task.getAutomationStrategy().automaticDeparture();
-//        }
+        if (task.getAutomationStrategy() != null) {
+            task.getAutomationStrategy().automaticDeparture();
+        }
     }
 
     @Override

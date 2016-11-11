@@ -133,35 +133,24 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         ParseObject.registerSubclass(LocationTracker.class);
 
+        String applicationId = "guardswift";
+        String parseUrl = "https://gsdev-server.herokuapp.com/parse/";
 
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "DEVELOPMENT");
             Parse.setLogLevel(Parse.LOG_LEVEL_VERBOSE);
-
-            String applicationId = "guardswift";
-            String parseUrl = "https://gsdev-server.herokuapp.com/parse/";
-            // todo setup ngrok for local development
-
-            Parse.initialize(new Parse.Configuration.Builder(this)
-                    .applicationId(applicationId)
-                    .clientKey(null)
-                    .server(parseUrl)
-                    .enableLocalDataStore()
-                    .build()
-            );
         } else {
             Log.d(TAG, "RELEASE");
-            String applicationId = "gejAg1OFJrBwepcORHB3U7V7fawoDjlymRe8grHJ";
-            String clientKey = "ZOZ7GGeu2tfOQXGRcMSOtDMg1qTGVZaxjO8gl89p";
-
-            Parse.initialize(new Parse.Configuration.Builder(this)
-                    .applicationId(applicationId)
-                    .clientKey(clientKey)
-                    .enableLocalDataStore()
-                    .build()
-            );
+            parseUrl = "https://guardswift-server.herokuapp.com/parse/";
         }
 
+        Parse.initialize(new Parse.Configuration.Builder(this)
+                .applicationId(applicationId)
+                .clientKey(null)
+                .server(parseUrl)
+                .enableLocalDataStore()
+                .build()
+        );
 
         ParseUser.enableRevocableSessionInBackground();
 
