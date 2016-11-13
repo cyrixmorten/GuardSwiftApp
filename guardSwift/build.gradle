@@ -29,8 +29,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 22 // 23 require runtime permissions!!
-        versionCode 400
-        versionName "4.0.0"
+        versionCode 401
+        versionName "4.0.1"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -45,6 +45,9 @@ android {
     }
     buildTypes {
         debug {
+            buildConfigField "String", "PARSE_SERVER_URL", '"https://gsdev-server.herokuapp.com/parse/"'
+            buildConfigField "String", "SERVER_API_URL", '"https://gsdev-server.herokuapp.com/api/"'
+            buildConfigField "String", "WEB_API_URL", '"http://www.guardswift.com/api/"'
 //            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
 //            buildConfigField "boolean", "AUTOMATION_ENABLED", "false"
 //            ext.enableCrashlytics = false
@@ -52,6 +55,9 @@ android {
 //            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro', 'dagger-proguard-keepnames.cfg'
         }
         release {
+            buildConfigField "String", "PARSE_SERVER_URL", '"https://guardswift-server.herokuapp.com/parse/"'
+            buildConfigField "String", "SERVER_API_URL", '"https://guardswift-server.herokuapp.com/api/"'
+            buildConfigField "String", "WEB_API_URL", '"http://www.guardswift.com/api/"'
 //            buildConfigField "boolean", "USE_CRASHLYTICS", "true"
 //            buildConfigField "boolean", "AUTOMATION_ENABLED", "false"
 //            ext.enableCrashlytics = true

@@ -22,6 +22,10 @@ public class ArriveWhenNotInVehicleStrategy<T extends BaseTask> implements TaskA
 
     @Override
     public void handleActivityInsideGeofence(DetectedActivity activity) {
+        if (task.isStarted()) {
+            return;
+        }
+
         arriveOnStillTimer.stop();
 
         if (activity.getType() != DetectedActivity.IN_VEHICLE) {
@@ -41,6 +45,10 @@ public class ArriveWhenNotInVehicleStrategy<T extends BaseTask> implements TaskA
 
     @Override
     public void handleActivityOutsideGeofence(DetectedActivity activity) {
+        if (task.isAborted()) {
+            return;
+        }
+
         if (activity.getType() == DetectedActivity.IN_VEHICLE) {
             task.getAutomationStrategy().automaticDeparture();
         }

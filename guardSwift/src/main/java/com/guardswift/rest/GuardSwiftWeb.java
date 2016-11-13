@@ -1,17 +1,17 @@
 package com.guardswift.rest;
 
+import com.guardswift.BuildConfig;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Streaming;
 
-/**
- * Created by cyrixmorten on 17/04/16.
- */
-public final class GuardSwift {
+public final class GuardSwiftWeb {
 
 
-    public static final String API_URL = "http://www.guardswift.com/api/";
+    public static final String API_URL = BuildConfig.WEB_API_URL;
 
     public interface API {
 
@@ -20,6 +20,7 @@ public final class GuardSwift {
 
         @GET("download")
         Call<ResponseBody> download();
+
     }
 
 

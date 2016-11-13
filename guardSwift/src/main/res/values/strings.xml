@@ -353,6 +353,7 @@
     <string name="reports">Rapporter</string>
     <string name="session_expired">Session udløbet</string>
     <string name="session_expired_message">Genskab sessionen ved at logge ind igen med brugernavn og kodeord</string>
+    <string name="error_downloading_file">Kunne ikke hente filen</string>
 
 
 </resources>

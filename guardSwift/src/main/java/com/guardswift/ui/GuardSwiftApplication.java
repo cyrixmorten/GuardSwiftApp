@@ -134,20 +134,18 @@ public class GuardSwiftApplication extends InjectingApplication {
         ParseObject.registerSubclass(LocationTracker.class);
 
         String applicationId = "guardswift";
-        String parseUrl = "https://gsdev-server.herokuapp.com/parse/";
 
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "DEVELOPMENT");
             Parse.setLogLevel(Parse.LOG_LEVEL_VERBOSE);
         } else {
             Log.d(TAG, "RELEASE");
-            parseUrl = "https://guardswift-server.herokuapp.com/parse/";
         }
 
         Parse.initialize(new Parse.Configuration.Builder(this)
                 .applicationId(applicationId)
                 .clientKey(null)
-                .server(parseUrl)
+                .server(BuildConfig.PARSE_SERVER_URL)
                 .enableLocalDataStore()
                 .build()
         );

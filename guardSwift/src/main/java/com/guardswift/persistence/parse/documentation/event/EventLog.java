@@ -724,6 +724,16 @@ public class EventLog extends ExtendedParseObject {
     }
 
 
+    public boolean isReportEvent() {
+        int eventCode = getEventCode();
+        switch (eventCode) {
+            case EventCodes.CIRCUITUNIT_OTHER: return true;
+            case EventCodes.DISTRICTWATCH_OTHER: return true;
+            case EventCodes.STATIC_OTHER: return true;
+            default: return false;
+        }
+    }
+
     public int getEventCode() {
         return getInt(eventCode);
     }

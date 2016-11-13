@@ -239,7 +239,7 @@
         <!-- android:name=".activity.dialog.NearCheckpointDialogActivity" -->
         <!-- android:launchMode="singleTask" -->
         <!-- android:showOnLockScreen="true" -->
-        <!-- android:theme="@style/Theme.GuardSwift.Light.Dialog" > -->
+        <!-- android:theme="@style/Theme.GuardSwiftWeb.Light.Dialog" > -->
         <!-- </activity> -->
 
 

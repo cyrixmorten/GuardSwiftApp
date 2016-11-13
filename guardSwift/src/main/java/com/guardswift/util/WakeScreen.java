@@ -59,7 +59,7 @@ public class WakeScreen {
 			// if (!pm.isScreenOn()) {
 			if (wl == null) {
 				wl = pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP
-						| PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "GuardSwift");
+						| PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "GuardSwiftWeb");
 			}
 			if (!wl.isHeld()) {
 				wl.acquire();

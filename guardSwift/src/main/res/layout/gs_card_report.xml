@@ -34,20 +34,20 @@
 
         </RelativeLayout>
 
-        <TextView
-            android:id="@+id/tv_taskType"
-            style="@style/Base.TextAppearance.AppCompat.Medium"
+        <LinearLayout
+            android:id="@+id/layout_events"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingBottom="@dimen/small_padding"
-            android:text="Fastvagt" />
+            android:orientation="vertical">
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingBottom="@dimen/small_padding">
+            android:paddingBottom="@dimen/small_padding"
+            android:paddingTop="@dimen/small_padding">
 
             <TextView
                 android:layout_width="wrap_content"

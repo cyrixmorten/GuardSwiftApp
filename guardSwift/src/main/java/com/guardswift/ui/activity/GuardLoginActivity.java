@@ -3,29 +3,20 @@ package com.guardswift.ui.activity;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.AsyncTask.Status;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -44,7 +35,7 @@ import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.Guard;
-import com.guardswift.rest.GuardSwift;
+import com.guardswift.rest.GuardSwiftWeb;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Device;
 import com.guardswift.util.GSIntents;
@@ -53,15 +44,7 @@ import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.squareup.picasso.Picasso;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -432,10 +415,10 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     private void checkForNewUpdate(final VersionCheckCallback callback) {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(GuardSwift.API_URL)
+                .baseUrl(GuardSwiftWeb.API_URL)
                 .build();
 
-        GuardSwift.API guardSwift = retrofit.create(GuardSwift.API.class);
+        GuardSwiftWeb.API guardSwift = retrofit.create(GuardSwiftWeb.API.class);
 
         guardSwift.version().enqueue(new Callback<ResponseBody>() {
             @Override

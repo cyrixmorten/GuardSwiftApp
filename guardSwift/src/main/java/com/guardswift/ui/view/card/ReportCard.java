@@ -1,37 +1,27 @@
 package com.guardswift.ui.view.card;
 
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
-import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.ui.activity.GenericToolbarActivity;
-import com.guardswift.ui.dialog.CommonDialogsBuilder;
-import com.guardswift.ui.view.EventLogView;
-import com.guardswift.ui.web.WebViewFragment;
+import com.guardswift.ui.parse.documentation.report.view.DownloadReport;
 import com.guardswift.util.ToastHelper;
-import com.parse.FunctionCallback;
-import com.parse.GetCallback;
-import com.parse.ParseCloud;
-import com.parse.ParseException;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.io.File;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -42,8 +32,8 @@ import butterknife.ButterKnife;
 public class ReportCard extends LinearLayout {
 
 
-    @Bind(R.id.tv_taskType)
-    TextView tvTaskType;
+    @Bind(R.id.layout_events)
+    LinearLayout layoutEvents;
 
     @Bind(R.id.tv_date)
     TextView tvDate;
@@ -91,17 +81,27 @@ public class ReportCard extends LinearLayout {
             return;
         }
 
-        if (report.has("circuitUnit")) {
-            tvTaskType.setText(R.string.task_circuit);
-        }
-        if (report.has("staticTask")) {
-            tvTaskType.setText(R.string.task_static);
-        }
-        if (report.has("districtWatch")) {
-            tvTaskType.setText(R.string.task_districtwatch);
-        }
-        if (report.has("alarm")) {
-            tvTaskType.setText(R.string.task_alarm);
+        layoutEvents.removeAllViews();
+        for (EventLog eventLog : report.getEventLogs()) {
+            if (!eventLog.isReportEvent()) {
+                continue;
+            }
+
+            TextView tv = new TextView(getContext());
+
+            if (eventLog.getEventCode() == EventLog.EventCodes.STATIC_OTHER) {
+                tv.setText(eventLog.getRemarks());
+            } else {
+                tv.setText(
+                        eventLog.getEvent() + " " +
+                                eventLog.getAmount() + " " +
+                                eventLog.getPeople() + " " +
+                                eventLog.getLocations() + " " +
+                                eventLog.getRemarks()
+                );
+            }
+            layoutEvents.addView(tv);
+
         }
 
         tvGuardName.setText(report.getGuardName());
@@ -115,68 +115,43 @@ public class ReportCard extends LinearLayout {
             @Override
             public void onClick(View v) {
 
-                if (report.has("pdf")) {
-                    String pdfUrl = report.getParseFile("pdf").getUrl();
-                    viewReport(report, pdfUrl);
-                } else {
-                    final Dialog dialog = new CommonDialogsBuilder.MaterialDialogs(getContext()).indeterminate(R.string.fetching_report).show();
+                final Dialog dialog = new MaterialDialog.Builder(getContext())
+                        .title(R.string.working)
+                        .content(R.string.fetching_report)
+                        .progress(true, 0)
+                        .build();
 
-                    createPdf(report, new ReportCreatedCallback() {
-                        @Override
-                        public void done(String pdfUrl) {
-                            viewReport(report, pdfUrl);
+                dialog.show();
+
+                new DownloadReport(report, new DownloadReport.CompletedCallback() {
+                    @Override
+                    public void done(File file, Error e) {
+
+                        dialog.dismiss();
+
+                        if (getContext() == null) {
+                            return;
                         }
 
-                        @Override
-                        public void fail(ParseException e) {
-                            new HandleException(ReportCard.class.getSimpleName(), "Create PDF failed", e);
-                            ToastHelper.toast(getContext(), "Beklager, kunne ikke hente rapporten");
+                        if (e != null) {
+                            ToastHelper.toast(getContext(), getContext().getString(R.string.error_downloading_file));
                         }
+                        Intent target = new Intent(Intent.ACTION_VIEW);
+                        target.setDataAndType(Uri.fromFile(file), "application/pdf");
+                        target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
-                        @Override
-                        public void any() {
-                            if (dialog != null) {
-                                dialog.cancel();
-                            }
+                        Intent intent = Intent.createChooser(target, "Open File");
+                        try {
+                            getContext().startActivity(intent);
+                        } catch (ActivityNotFoundException e1) {
+                            // Instruct the user to install a PDF reader here, or something
+                            ToastHelper.toast(getContext(), "Please install a PDF viewer app");
                         }
-
-
-                    });
-                }
+                    }
+                }).execute();
             }
         });
 
-    }
-
-    private interface ReportCreatedCallback {
-        void done(String pdfUrl);
-        void fail(ParseException e);
-        void any();
-    }
-    private void createPdf(final Report report, final ReportCreatedCallback callback) {
-        Map<String, String> params = Maps.newHashMap();
-        params.put("reportId", report.getObjectId());
-        ParseCloud.callFunctionInBackground("reportToPDF", params, new FunctionCallback<Map<String, Object>>() {
-            @Override
-            public void done(Map<String, Object> response, ParseException e) {
-                if (e == null) {
-                    callback.done(response.get("pdfUrl").toString());
-                    callback.any();
-                } else {
-                    callback.fail(e);
-                    callback.any();
-                }
-            }
-        });
-    }
-
-    private void viewReport(Report report, String pdfUrl) {
-        String googleDocServiceUrl = "http://docs.google.com/gview?embedded=true&url=";
-        GenericToolbarActivity.start(
-                getContext(),
-                "Rapport",
-                report.getString("clientFullAddress"),
-                WebViewFragment.newInstance(googleDocServiceUrl+pdfUrl));
     }
 
 

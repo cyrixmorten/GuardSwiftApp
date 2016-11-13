@@ -111,7 +111,7 @@ public class ActivityRecognitionService extends InjectingService {
                         public void onInit(int status) {
                             if (status != TextToSpeech.ERROR) {
                                 ttobj.setLanguage(Locale.UK);
-//                                speakText("GuardSwift ready");
+//                                speakText("GuardSwiftWeb ready");
                             }
                         }
                     });
