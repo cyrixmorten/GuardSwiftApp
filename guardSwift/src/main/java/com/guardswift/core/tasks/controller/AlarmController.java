@@ -108,7 +108,7 @@ public class AlarmController extends BaseTaskController {
                 break;
 
             default:
-                new HandleException(TAG, "Missing action", new MaterialDialog.NotImplementedException("Missing action: " + action));
+                new HandleException(TAG, "Missing action", new IllegalArgumentException("Missing action: " + action));
                 return alarm;
 
 
