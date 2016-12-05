@@ -6,7 +6,6 @@ import android.util.Log;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.GSTaskList;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
@@ -18,7 +17,7 @@ import org.json.JSONObject;
 import bolts.Task;
 
 @ParseClassName("DistrictWatchStarted")
-public class DistrictWatchStarted extends ExtendedParseObject implements GSTaskList {
+public class DistrictWatchStarted extends ExtendedParseObject {
 
 //    public static class Recent {
 //
@@ -74,7 +73,7 @@ public class DistrictWatchStarted extends ExtendedParseObject implements GSTaskL
 
     public static class Query {
 
-        private static String TAG = "DistrictWatchStarted.Query";
+        private static String TAG = "DistrictWatch.Query";
 
         /*
  * Get newest circuitStarted based on circuit
@@ -177,7 +176,6 @@ public class DistrictWatchStarted extends ExtendedParseObject implements GSTaskL
 
 	}
 
-	@Override
 	public GSTask.TASK_TYPE getTaskType() {
 		return GSTask.TASK_TYPE.DISTRICTWATCH;
 	}

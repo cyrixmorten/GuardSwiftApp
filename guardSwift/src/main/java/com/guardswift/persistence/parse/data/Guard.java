@@ -225,4 +225,8 @@ public class Guard extends ExtendedParseObject implements Positioned {
         return getBoolean(accessStatic);
     }
 
+    public boolean canAccessAlarms() {
+        return getBoolean(accessRegular); // todo temporary
+    }
+
 }

@@ -149,12 +149,12 @@
 //    @Override
 //    public TASK_STATE getTaskState() {
 //        if (isFinished()) {
-//            return TASK_STATE.FINSIHED;
+//            return TASK_STATE.FINISHED;
 //        }
 //        if (isAborted()) {
 //            return TASK_STATE.ABORTED;
 //        }
-//        if (isStarted()) {
+//        if (isArrived()) {
 //            return TASK_STATE.ARRIVED;
 //        }
 //        if (isAccepted()) {
@@ -524,7 +524,7 @@
 ////            if (alarm.isClosed()) {
 ////                style = Style.CONFIRM;
 ////                eventText += "afsluttet";
-////            } else if (alarm.isStarted()) {
+////            } else if (alarm.isArrived()) {
 ////                style = Style.INFO;
 ////                eventText += "ankommet";
 ////            } else if (alarm.isAccepted()) {
@@ -554,7 +554,7 @@
 //        return getParseObject(central).getString("name");
 //    }
 //
-//    public boolean isStarted() {
+//    public boolean isArrived() {
 //        return has(Alarm.timeStarted);
 //    }
 //
@@ -662,7 +662,7 @@
 //
 //    public boolean arrivedByAnotherGuard(Guard guard) {
 //
-//        return takenByAnotherGuard(guard) && isStarted();
+//        return takenByAnotherGuard(guard) && isArrived();
 //    }
 //
 //    public boolean finishedByAnotherGuard(Guard guard) {

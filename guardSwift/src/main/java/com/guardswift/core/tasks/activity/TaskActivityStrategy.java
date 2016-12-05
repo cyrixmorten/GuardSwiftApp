@@ -1,12 +1,9 @@
 package com.guardswift.core.tasks.activity;
 
 import com.google.android.gms.location.DetectedActivity;
-import com.guardswift.persistence.parse.execution.BaseTask;
 
-/**
- * Created by cyrix on 6/7/15.
- */
-public interface TaskActivityStrategy<T extends BaseTask> {
+
+public interface TaskActivityStrategy {
 
 
     /*

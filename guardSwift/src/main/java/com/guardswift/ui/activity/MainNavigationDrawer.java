@@ -23,6 +23,7 @@ import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
+import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.ui.parse.execution.circuit.CircuitViewPagerFragment;
 import com.guardswift.ui.parse.execution.districtwatch.DistrictwatchViewPagerFragment;
 import com.guardswift.ui.parse.execution.statictask.StaticTaskViewPagerFragment;
@@ -151,6 +152,10 @@ public class MainNavigationDrawer {
             navigationDrawer.addItems(getStaticGuardingItems());
         }
 
+        if (guardCache.getLoggedIn().canAccessAlarms()) {
+            navigationDrawer.addItems(getAlarmsDrawerItems());
+        }
+
         navigationDrawer.addItems(getDataDrawerItems());
         navigationDrawer.addStickyFooterItem(getLogoutDrawerItem());
 
@@ -250,6 +255,25 @@ public class MainNavigationDrawer {
         }
 
         return circuitItems.toArray(new IDrawerItem[circuitItems.size()]);
+    }
+
+    private List<IDrawerItem> alarmItems;
+
+    private IDrawerItem[] getAlarmsDrawerItems() {
+        alarmItems = Lists.newArrayList();
+        IDrawerItem alarmHeader = new SectionDrawerItem().withName(R.string.title_drawer_alarms);
+
+        alarmItems.add(alarmHeader);
+        IDrawerItem alarmItem = new PrimaryDrawerItem().withName(R.string.title_drawer_all_alarms).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                drawerCallback.selectItem(AlarmsViewPagerFragment.newInstance(), R.string.title_drawer_alarms);
+                return false;
+            }
+        });
+        alarmItems.add(alarmItem);
+
+        return alarmItems.toArray(new IDrawerItem[alarmItems.size()]);
     }
 
     private void createReport(final Client client) {

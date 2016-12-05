@@ -27,7 +27,7 @@ public abstract class AbstractTasksRecycleFragment<T extends BaseTask> extends A
 
     @Override
     protected ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> createRecycleAdapter() {
-        ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> adapter = new TaskRecycleAdapter<>(getContext(), createNetworkQueryFactory());
+        ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> adapter = new TaskRecycleAdapter<>(getContext(), getFragmentManager(), createNetworkQueryFactory());
         adapter.setFromLocalDataStore(true);
 
         PostProcessAdapterResults<T> postProcess = createPostProcess();

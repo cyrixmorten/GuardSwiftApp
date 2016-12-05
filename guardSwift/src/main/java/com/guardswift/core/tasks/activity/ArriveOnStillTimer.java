@@ -3,6 +3,7 @@ package com.guardswift.core.tasks.activity;
 import android.util.Log;
 
 import com.guardswift.persistence.parse.execution.BaseTask;
+import com.guardswift.persistence.parse.execution.GSTask;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,9 +19,9 @@ class ArriveOnStillTimer {
     private static final int TRIGGER_AFTER_MINUTES = 1;
 
     private Timer mTimer;
-    private BaseTask task;
+    private GSTask task;
 
-    public ArriveOnStillTimer(BaseTask task) {
+    public ArriveOnStillTimer(GSTask task) {
         this.task = task;
     }
 

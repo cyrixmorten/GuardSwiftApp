@@ -15,7 +15,7 @@
 //import com.guardswift.core.parse.ParseModule;
 //import com.guardswift.dagger.InjectingDialogFragment;
 //import com.guardswift.persistence.parse.data.client.Client;
-//import com.guardswift.persistence.parse.execution.task.alarm.Alarm;
+//import com.guardswift.persistence.parse.execution.ParseTask;
 //
 //import butterknife.Bind;
 //import butterknife.ButterKnife;
@@ -36,7 +36,7 @@
 //	}
 //
 //	private AlarmDialogCallback responseCallback;
-//	private Alarm mAlarm;
+//	private ParseTask mAlarm;
 //    private ParseModule.DistanceStrings distanceStrings;
 //
 //    private int quedAlarms;
@@ -44,7 +44,7 @@
 //    private static final String ARG_GUARD_LOGGED_IN = "guardLoggedIn";
 //
 //	public static AlarmDialogFragment newInstance(boolean guardLoggedIn,
-//                                                  Alarm alarm, int qued,
+//                                                  ParseTask alarm, int qued,
 //                                                  ParseModule.DistanceStrings distanceStrings, AlarmDialogCallback responseCallback) {
 //
 //
@@ -116,11 +116,7 @@
 //
 //        Bundle bundle = getArguments();
 //
-//        queMsg.setVisibility(View.GONE);
-//        if (quedAlarms > 0) {
-//            queMsg.setVisibility(View.VISIBLE);
-//            queMsg.setText(getString(R.string.alarm_que_msg, quedAlarms));
-//        }
+//
 //
 //
 //		fillData();
@@ -202,24 +198,24 @@
 //        String clientAddressString = client.getCityName() + " " + client.getAddressName()
 //                + " " + client.getAddressNumber();
 //
-//		securityLevel.setText(getString(R.string.security_level_val, mAlarm.getSecurityLevelString()));
-//        zone.setText(mAlarm.getZone());
+////		securityLevel.setText(getString(R.string.security_level_val, mAlarm.getSecurityLevelString()));
+////        zone.setText(mAlarm.getZone());
 //
 //		clientAddress.setText(clientAddressString);
 //		clientName.setText(client.getName());
 //
-//		String clientAddress2String = client.getAddressName2();
-//		if (!clientAddress2String.isEmpty()) {
-//			clientAddress2.setVisibility(View.VISIBLE);
-//			clientAddress2.setText(clientAddress2String);
-//		} else {
-//			clientAddress2.setVisibility(View.GONE);
-//		}
+////		String clientAddress2String = client.getAddressName2();
+////		if (!clientAddress2String.isEmpty()) {
+////			clientAddress2.setVisibility(View.VISIBLE);
+////			clientAddress2.setText(clientAddress2String);
+////		} else {
+////			clientAddress2.setVisibility(View.GONE);
+////		}
 //
 //		alarmType.setText(mAlarm.getType());
 //
-//		alarmDate.setText(DateFormat.getDateFormat(getActivity()).format(mAlarm.getAlarmTime()));
-//		alarmTime.setText(DateFormat.getTimeFormat(getActivity()).format(mAlarm.getAlarmTime()));
+////		alarmDate.setText(DateFormat.getDateFormat(getActivity()).format(mAlarm.getAlarmTime()));
+////		alarmTime.setText(DateFormat.getTimeFormat(getActivity()).format(mAlarm.getAlarmTime()));
 //
 //		distanceType.setText(distanceStrings.distanceType);
 //		distanceValue.setText(distanceStrings.distanceValue);

@@ -22,6 +22,7 @@ import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.guardswift.R;
@@ -204,7 +205,14 @@ public class ClientDetailsFragment extends InjectingFragment implements
         if (mapFragment != null) {
             Log.e(TAG, "reusing map");
             fm.beginTransaction().attach(mapFragment).commit();
-            onMapReady(mapFragment.getMap());
+
+            mapFragment.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap googleMap) {
+                    onMapReady(googleMap);
+                }
+            });
+
         } else {
             Log.e(TAG, "new map");
             new Handler().postDelayed(new Runnable() {

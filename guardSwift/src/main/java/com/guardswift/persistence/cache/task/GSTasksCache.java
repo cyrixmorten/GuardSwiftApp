@@ -1,7 +1,6 @@
 package com.guardswift.persistence.cache.task;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -17,9 +16,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-/**
- * Created by cyrix on 10/21/15.
- */
+
 @Singleton
 public class GSTasksCache extends Preferences {
 
@@ -27,7 +24,7 @@ public class GSTasksCache extends Preferences {
 
     private static final String LAST_SELECTED_TASK_TYPE = "LAST_SELECTED_TASK_TYPE";
 
-    public interface TaskCache {
+    public interface GenericTaskCache {
 
         String SELECTED = "selected";
         String ARRIVED = "arrived";
@@ -65,12 +62,13 @@ public class GSTasksCache extends Preferences {
     }
 
 
-    private List<TaskCache> taskCaches = Lists.newArrayList();
+    private List<GenericTaskCache> taskCaches = Lists.newArrayList();
 
     @Inject
-    public GSTasksCache(@InjectingApplication.InjectingApplicationModule.ForApplication Context context, StaticTaskCache staticTaskCache, CircuitUnitCache circuitUnitCache, DistrictWatchClientCache districtWatchClientCache) {
+    public GSTasksCache(@InjectingApplication.InjectingApplicationModule.ForApplication Context context, TaskCache taskCache, StaticTaskCache staticTaskCache, CircuitUnitCache circuitUnitCache, DistrictWatchClientCache districtWatchClientCache) {
         super(context, "GSTasksCache");
 
+        taskCaches.add(taskCache);
         taskCaches.add(staticTaskCache);
         taskCaches.add(circuitUnitCache);
         taskCaches.add(districtWatchClientCache);
@@ -78,7 +76,7 @@ public class GSTasksCache extends Preferences {
 
 
     public void setSelected(GSTask task) {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             if (taskCache.acceptsTask(task)) {
                 taskCache.setSelected(task);
 
@@ -105,7 +103,7 @@ public class GSTasksCache extends Preferences {
     }
 
     public void addArrived(GSTask task) {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             if (taskCache.acceptsTask(task)) {
                 taskCache.addArrived(task);
                 return;
@@ -116,7 +114,7 @@ public class GSTasksCache extends Preferences {
     }
 
     public boolean isArrived(GSTask task) {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             if (taskCache.acceptsTask(task)) {
                 return taskCache.isArrived(task);
             }
@@ -126,7 +124,7 @@ public class GSTasksCache extends Preferences {
     }
 
     public void removeArrived(GSTask task) {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             if (taskCache.acceptsTask(task)) {
                 taskCache.removeArrived(task);
                 return;
@@ -137,7 +135,7 @@ public class GSTasksCache extends Preferences {
     }
 
     public Set<GSTask> getArrived(GSTask.TASK_TYPE task_type) {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             if (taskCache.getConcreteTask().getTaskType() == task_type) {
                 return taskCache.getArrived();
             }
@@ -171,13 +169,13 @@ public class GSTasksCache extends Preferences {
 
     public void setAllGeofencedTasks(List<GSTask> tasks) {
         removeAllGeofencedTasks();
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             taskCache.addGeofencedTasks(tasks);
         }
     }
 
     public boolean isGeofenced(GSTask task) {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             for (GSTask taskGeofenced: taskCache.getAllGeofencedTasks()) {
                 if (task.getObjectId().equals(taskGeofenced.getObjectId()))
                     return true;
@@ -188,20 +186,20 @@ public class GSTasksCache extends Preferences {
 
     public Set<GSTask> getAllGeofencedTasks() {
         Set<GSTask> tasks = Sets.newConcurrentHashSet();
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             tasks.addAll(taskCache.getAllGeofencedTasks());
         }
         return tasks;
     }
 
     public void removeAllGeofencedTasks() {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             taskCache.removeAllGeofencedTasks();
         }
     }
 
     public void clear() {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             taskCache.clear();
         }
         super.clear();
@@ -212,7 +210,7 @@ public class GSTasksCache extends Preferences {
 
 
     public void removeGeofence(GSTask task) {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             if (taskCache.acceptsTask(task)) {
                 taskCache.removeGeofence(task);
             }
@@ -222,7 +220,7 @@ public class GSTasksCache extends Preferences {
 
     public boolean moveWithinGeofence(GSTask task) {
         boolean movedWithin = false;
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             if (taskCache.acceptsTask(task) && taskCache.moveWithinGeofence(task)) {
 //                task.getGeofenceStrategy().enterGeofence(context, task);
                 movedWithin = true;
@@ -236,7 +234,7 @@ public class GSTasksCache extends Preferences {
     }
 
     public boolean isWithinGeofence(GSTask task) {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             if (!taskCache.getConcreteTask().getClass().equals(task.getClass())) {
 //                Log.d(TAG, "isWithinGeofence skipping taskCache " + taskCache.getConcreteTask().getClass() + " != " + task.getClass());
                 continue;
@@ -250,7 +248,7 @@ public class GSTasksCache extends Preferences {
     }
     public Set<GSTask> getWithinGeofence() {
         Set<GSTask> tasks = Sets.newConcurrentHashSet();
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             tasks.addAll(taskCache.getWithinGeofence());
         }
         return tasks;
@@ -258,7 +256,7 @@ public class GSTasksCache extends Preferences {
 
     public boolean moveOutsideGeofence(GSTask task) {
         boolean movedOutside = false;
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             if (taskCache.acceptsTask(task) && taskCache.moveOutsideGeofence(task)) {
 //                task.getGeofenceStrategy().exitGeofence(context, task);
                 movedOutside = true;
@@ -272,7 +270,7 @@ public class GSTasksCache extends Preferences {
     }
 
     public boolean isMovedOutsideGeofence(GSTask task) {
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             if (!taskCache.getConcreteTask().getClass().equals(task.getClass())) {
 //                Log.d(TAG, "isMovedOutsideGeofence skipping taskCache " + taskCache.getConcreteTask().getClass() + " != " + task.getClass());
                 continue;
@@ -284,9 +282,11 @@ public class GSTasksCache extends Preferences {
         }
         return false;
     }
+
+
     public Set<GSTask> getOutsideGeofence() {
         Set<GSTask> tasks = Sets.newConcurrentHashSet();
-        for (TaskCache taskCache: taskCaches) {
+        for (GenericTaskCache taskCache: taskCaches) {
             tasks.addAll(taskCache.getOutsideGeofence());
         }
         return tasks;

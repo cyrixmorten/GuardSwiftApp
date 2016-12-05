@@ -76,7 +76,7 @@ public class FinishedCircuitUnitsFragment extends AbstractTasksRecycleFragment<C
             boolean isSameTaskType = ((GSTask) obj).getTaskType() == ((GSTask)getObjectInstance()).getTaskType();
             if (isSameTaskType) {
                 GSTask.TASK_STATE state = ((GSTask) obj).getTaskState();
-                if (state == GSTask.TASK_STATE.FINSIHED) {
+                if (state == GSTask.TASK_STATE.FINISHED) {
                     isRelevant = true;
                 }
             }

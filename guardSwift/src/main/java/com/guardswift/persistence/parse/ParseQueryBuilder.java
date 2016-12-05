@@ -56,11 +56,11 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
 		query.whereNotEqualTo("archive", true);
 		setFromLocalDatastore();
 		return query;
-	};
+	}
 
     public ParseQuery<ParseObject> buildAsParseObject() {
 		return (ParseQuery<ParseObject>)build();
-    };
+    }
 
 
 	private void setFromLocalDatastore() {

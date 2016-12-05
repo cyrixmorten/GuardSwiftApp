@@ -231,7 +231,7 @@ public class CircuitUnitCheckpointsFragment extends InjectingListFragment {
     }
 
     private void enabledIfArrived() {
-        boolean arrived = mCircuitUnit.isStarted();
+        boolean arrived = mCircuitUnit.isArrived();
         boolean finished = mCircuitUnit.isFinished();
         getListView().setEnabled(arrived && !finished);
     }

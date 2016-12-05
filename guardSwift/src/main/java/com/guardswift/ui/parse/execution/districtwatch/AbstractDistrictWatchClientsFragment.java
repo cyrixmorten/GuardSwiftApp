@@ -313,7 +313,7 @@
 //                            final List<DistrictWatchClient> saveList = Lists.newArrayList();
 //
 //							for (DistrictWatchClient districtWatchClient : objects) {
-//                                if (districtWatchClient.isStarted())
+//                                if (districtWatchClient.isArrived())
 //                                    saveList.addUnique(districtWatchClient);
 //
 //								districtWatchClient.reset();

@@ -6,7 +6,6 @@ import android.util.Log;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.GSTaskList;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -19,7 +18,7 @@ import java.util.Date;
 import bolts.Task;
 
 @ParseClassName("CircuitStarted")
-public class CircuitStarted extends ExtendedParseObject implements GSTaskList {
+public class CircuitStarted extends ExtendedParseObject {
 
 //    public static class Recent {
 //
@@ -229,7 +228,6 @@ public class CircuitStarted extends ExtendedParseObject implements GSTaskList {
     // put(CircuitStarted.name, name);
     // }
 
-    @Override
     public GSTask.TASK_TYPE getTaskType() {
         return GSTask.TASK_TYPE.REGULAR;
     }

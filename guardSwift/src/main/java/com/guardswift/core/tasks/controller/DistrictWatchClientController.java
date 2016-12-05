@@ -18,7 +18,7 @@ import com.parse.SaveCallback;
 /**
  * Created by cyrix on 2/26/15.
  */
-public class DistrictWatchClientController extends BaseTaskController<DistrictWatchClient> {
+public class DistrictWatchClientController extends BaseTaskController {
 
 
     private static final String TAG = DistrictWatchClientController.class.getSimpleName();
@@ -35,14 +35,10 @@ public class DistrictWatchClientController extends BaseTaskController<DistrictWa
 
 
 
-
-//    private void performAction(ACTION action, GSTask task, boolean automatic, boolean verify) {
-//        performAction(action, task, automatic, false, null);
-//    }
+    public GSTask performAction(TaskController.ACTION action, final GSTask task, final boolean automatic) {
 
 
-    public DistrictWatchClient performAction(ACTION action, final DistrictWatchClient districtWatchClient, final boolean automatic) {
-
+        final DistrictWatchClient districtWatchClient = (DistrictWatchClient)task;
 
         switch (action) {
             case OPEN:

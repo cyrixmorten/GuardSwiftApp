@@ -30,6 +30,7 @@ import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.activity.ParseLoginActivity;
 import com.guardswift.ui.dialog.activity.AbstractDialogActivity;
+import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
 import com.guardswift.ui.dialog.activity.CheckpointsDialogActivity;
 import com.guardswift.ui.parse.data.checkpoint.CheckpointActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.AbstractCreateEventHandlerActivity;
@@ -67,9 +68,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
         GuardLoginActivity.class,
         // Main
         MainActivity.class,
+        // Alarm
+        AlarmDialogActivity.class,
         // Data
         GenericToolbarActivity.class,
-        // Task
+        // ParseTask
         CheckpointActivity.class,
         TaskDescriptionActivity.class,
         // Dialog Activities

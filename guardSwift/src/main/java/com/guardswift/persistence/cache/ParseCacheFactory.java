@@ -10,6 +10,7 @@ import com.guardswift.persistence.cache.task.CircuitUnitCache;
 import com.guardswift.persistence.cache.task.DistrictWatchClientCache;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.cache.task.StaticTaskCache;
+import com.guardswift.persistence.cache.task.TaskCache;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,6 +28,7 @@ public class ParseCacheFactory {
 
     // Tasks
     private GSTasksCache tasksCache; // adds extra functionality to task caches
+    private final TaskCache taskCache;
     private final StaticTaskCache staticTaskCache;
     private final CircuitUnitCache circuitUnitCache;
     private final DistrictWatchClientCache districtWatchClientCache;
@@ -39,11 +41,23 @@ public class ParseCacheFactory {
 
 
     @Inject
-    public ParseCacheFactory(GuardCache guardCache, CircuitStartedCache circuitStartedCache, DistrictWatchStartedCache districtWatchStartedCache, GSTasksCache tasksCache, StaticTaskCache staticTaskCache, CircuitUnitCache circuitUnitCache, DistrictWatchClientCache districtWatchClientCache, ClientCache clientCache, EventTypeCache eventTypeCache, EventLogCache eventLogCache) {
+    public ParseCacheFactory(GuardCache guardCache,
+                             CircuitStartedCache circuitStartedCache,
+                             DistrictWatchStartedCache districtWatchStartedCache,
+                             GSTasksCache tasksCache,
+                             TaskCache taskCache,
+                             StaticTaskCache staticTaskCache,
+                             CircuitUnitCache circuitUnitCache,
+                             DistrictWatchClientCache districtWatchClientCache,
+                             ClientCache clientCache,
+                             EventTypeCache eventTypeCache,
+                             EventLogCache eventLogCache) {
+
         this.guardCache = guardCache;
         this.circuitStartedCache = circuitStartedCache;
         this.districtWatchStartedCache = districtWatchStartedCache;
         this.tasksCache = tasksCache;
+        this.taskCache = taskCache;
         this.staticTaskCache = staticTaskCache;
         this.circuitUnitCache = circuitUnitCache;
         this.districtWatchClientCache = districtWatchClientCache;
@@ -54,7 +68,7 @@ public class ParseCacheFactory {
     }
 
 
-    // Task groups
+    // ParseTask groups
     public CircuitStartedCache getCircuitStartedCache() {
         return circuitStartedCache;
     }
@@ -63,6 +77,10 @@ public class ParseCacheFactory {
     }
 
     // Tasks
+    public TaskCache getTaskCache() {
+        return taskCache;
+    }
+
     public StaticTaskCache getStaticTaskCache() {
         return staticTaskCache;
     }

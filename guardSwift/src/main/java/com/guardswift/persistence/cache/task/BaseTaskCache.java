@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * Created by cyrix on 10/21/15.
  */
-public abstract class BaseTaskCache<T extends ParseObject & GSTask> extends ParseCache<T> implements GSTasksCache.TaskCache {
+public abstract class BaseTaskCache<T extends ParseObject & GSTask> extends ParseCache<T> implements GSTasksCache.GenericTaskCache {
 
 
     private final Class<T> type;

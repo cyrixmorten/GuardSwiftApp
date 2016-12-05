@@ -93,7 +93,7 @@ public class ParseModule {
         // Write guard to Session
 //        ParseSession.getCurrentSessionInBackground().onSuccess(new Continuation<ParseSession, Object>() {
 //            @Override
-//            public Object then(Task<ParseSession> task) throws Exception {
+//            public Object then(ParseTask<ParseSession> task) throws Exception {
 //
 //                ParseSession session = task.getResult();
 //
@@ -132,7 +132,7 @@ public class ParseModule {
             // Remove guard from Session
 //            ParseSession.getCurrentSessionInBackground().onSuccess(new Continuation<ParseSession, Object>() {
 //                @Override
-//                public Object then(Task<ParseSession> task) throws Exception {
+//                public Object then(ParseTask<ParseSession> task) throws Exception {
 //
 //                    ParseSession session = task.getResult();
 //
@@ -145,7 +145,7 @@ public class ParseModule {
             // todo temporarily disabled GPS tracking
 //            LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
 //                @Override
-//                public Object then(Task<String> task) throws Exception {
+//                public Object then(ParseTask<String> task) throws Exception {
 //                    if (task.isFaulted()) {
 //                        new HandleException(context, TAG, "upload guard locations", task.getError());
 //                        saveCallback.done((ParseException) task.getError());

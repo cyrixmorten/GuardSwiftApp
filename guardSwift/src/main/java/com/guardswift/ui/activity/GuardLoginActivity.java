@@ -601,7 +601,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 //    //    @OnClick(R.id.button_download)
 //    public void update(Button button) {
 //        if (mDownloadTask != null
-//                && mDownloadTask.getStatus() == Status.RUNNING) {
+//                && mDownloadTask.getStatus() == STATUS.RUNNING) {
 //            mDownloadTask.cancel(true);
 //        }
 //

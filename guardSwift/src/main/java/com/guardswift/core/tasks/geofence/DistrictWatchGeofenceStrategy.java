@@ -25,7 +25,7 @@ import rx.functions.Func1;
 /**
  * Created by cyrix on 6/7/15.
  */
-public class DistrictWatchGeofenceStrategy<T extends BaseTask> extends BaseGeofenceStrategy<T> {
+public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
 
 
     private static final String TAG = DistrictWatchGeofenceStrategy.class.getSimpleName();

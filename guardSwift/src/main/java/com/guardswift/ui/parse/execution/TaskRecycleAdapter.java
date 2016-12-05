@@ -7,8 +7,10 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.CardView;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +25,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.AwesomeTextView;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapSize;
+import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.tasks.controller.TaskController;
@@ -31,6 +34,7 @@ import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
@@ -40,7 +44,6 @@ import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
 import com.guardswift.ui.parse.data.checkpoint.CheckpointActivity;
-import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.edit.ReportEditActivity;
 import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
@@ -49,13 +52,16 @@ import com.guardswift.util.AnimationHelper;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQueryAdapter;
-import com.parse.SaveCallback;
 
+import org.joda.time.DateTime;
+
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -152,6 +158,100 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
     }
 
+    public static class AlarmTaskViewHolder extends TaskViewHolder<ParseTask> {
+
+        @Bind(R.id.timeStart)
+        TextView vTimeStart;
+        @Bind(R.id.timeEnd)
+        TextView vTimeEnd;
+
+
+
+        public AlarmTaskViewHolder(View v, RemoveItemCallback removeItemCallback) {
+            super(v, removeItemCallback);
+        }
+
+
+        @Override
+        public void onActionOpen(Context context, ParseTask task) {
+            super.onActionOpen(context, task);
+
+//            boolean inverseSelection = !selectedItems.get(getAdapterPosition(), false);
+            boolean inverseSelection = vContentFooter.getVisibility() == View.GONE;
+
+            // Save the selected positions to the SparseBooleanArray
+            if (task.isArrived() || inverseSelection) {
+                expandFooter();
+            } else {
+                collapseFooter();
+            }
+
+        }
+
+        @Override
+        public void onActionAbort(Context context, ParseTask task) {
+            super.onActionAbort(context, task);
+            collapseFooter();
+        }
+
+        @Override
+        public void onActionFinish(final Context context, final ParseTask task) {
+            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_finished), new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                    AlarmTaskViewHolder.super.onActionFinish(context, task);
+                }
+            }).show();
+        }
+
+
+
+        @Override
+        protected void setupTaskActionButtons(final Context context, final ParseTask task) {
+            super.setupTaskActionButtons(context, task);
+
+            vBtnViewReport.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ReportEditActivity.start(context, task);
+                }
+            });
+
+            vBtnAddNewEvent.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    CreateEventHandlerActivity.start(context, task);
+                }
+            });
+
+            vBtnReportHistory.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient(), GSTask.TASK_TYPE.ALARM);
+                    GenericToolbarActivity.start(
+                            context,
+                            context.getString(R.string.reports),
+                            task.getClient().getFullAddress(),
+                            fragment);
+                }
+            });
+
+            vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+//                    TaskDescriptionActivity.start(context, task);
+                }
+            });
+
+
+            vBtnClientContacts.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new CommonDialogsBuilder.MaterialDialogs(context).clientContacts(task.getClient()).show();
+                }
+            });
+        }
+    }
 
     public static class RegularTaskViewHolder extends TaskViewHolder<CircuitUnit> {
 
@@ -160,9 +260,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         @Bind(R.id.timeEnd)
         TextView vTimeEnd;
 
+        private FragmentManager fragmentManager;
 
-        public RegularTaskViewHolder(View v, RemoveItemCallback removeItemCallback) {
+        public RegularTaskViewHolder(View v, RemoveItemCallback removeItemCallback, FragmentManager fragmentManager) {
             super(v, removeItemCallback);
+
+            this.fragmentManager = fragmentManager;
         }
 
 
@@ -174,7 +277,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             boolean inverseSelection = vContentFooter.getVisibility() == View.GONE;
 
             // Save the selected positions to the SparseBooleanArray
-            if (task.isStarted() || inverseSelection) {
+            if (task.isArrived() || inverseSelection) {
                 expandFooter();
             } else {
                 collapseFooter();
@@ -190,6 +293,62 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         @Override
         public void onActionFinish(final Context context, final CircuitUnit task) {
+
+            if (!task.isArrived()) {
+                if (fragmentManager != null) {
+                    missingArrivalTimestampDialog(context, new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            arrivalTimeDialog(context, new RadialTimePickerDialogFragment.OnTimeSetListener() {
+                                @Override
+                                public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+                                    final Calendar cal = Calendar.getInstance();
+                                    cal.setTime(new Date());
+                                    cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                    cal.set(Calendar.MINUTE, minute);
+
+                                    new EventLog.Builder(context)
+                                            .taskPointer(task, GSTask.EVENT_TYPE.ARRIVE)
+                                            .event(context.getString(R.string.event_arrived))
+                                            .automatic(false)
+                                            .deviceTimeStamp(cal.getTime())
+                                            .eventCode(EventLog.EventCodes.CIRCUITUNIT_ARRIVED).saveAsync();
+
+
+                                    extraTimeDialog(context, task);
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    Log.e(TAG, "Should show missing arrival dialog but had no fragment manager");
+                    extraTimeDialog(context, task);
+                }
+            } else {
+                extraTimeDialog(context, task);
+            }
+
+        }
+
+        private void arrivalTimeDialog(Context context, RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener) {
+            final DateTime timestamp = new DateTime();
+            RadialTimePickerDialogFragment timePickerDialog = RadialTimePickerDialogFragment
+                    .newInstance(onTimeSetListener, timestamp.getHourOfDay(), timestamp.getMinuteOfHour(),
+                            DateFormat.is24HourFormat(context));
+            timePickerDialog.show(fragmentManager, "FRAG_TAG_ARRIVAL_TIME_PICKER");
+        }
+
+        private void missingArrivalTimestampDialog(final Context context, MaterialDialog.SingleButtonCallback callback) {
+            new CommonDialogsBuilder.MaterialDialogs(context).ok(
+                    R.string.missing_arrival_time,
+                    R.string.please_enter_arrival_time,
+                    callback)
+                .canceledOnTouchOutside(false)
+                .show();
+        }
+
+        private void extraTimeDialog(final Context context, final CircuitUnit task) {
             new MaterialDialog.Builder(context)
                     .title(R.string.extra_time_spend)
                     .items(R.array.extra_time_minutes_strings)
@@ -218,7 +377,6 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     .positiveText(android.R.string.ok)
                     .negativeText(android.R.string.cancel)
                     .show();
-
         }
 
         @Override
@@ -468,14 +626,14 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @SuppressWarnings("unchecked")
-        protected <T extends BaseTask> Task<T> performTaskAction(final Context context, final T task, final ACTION action) {
+        protected Task<GSTask> performTaskAction(final Context context, final GSTask task, final ACTION action) {
 
-            final Task<T>.TaskCompletionSource result = Task.create();
+            final TaskCompletionSource result = new TaskCompletionSource<>();
 
             final GSTask.TASK_STATE previousTaskState = task.getTaskState();
             final TaskController taskController = task.getController();
             if (taskController.canPerformAction(action, task)) {
-                new AsyncTask<Void, Void, T>() {
+                new AsyncTask<Void, Void, GSTask>() {
 
                     @Override
                     protected void onPreExecute() {
@@ -485,13 +643,13 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     }
 
                     @Override
-                    protected T doInBackground(Void... voids) {
+                    protected GSTask doInBackground(Void... voids) {
                         // might contain LDS lookup
-                        return (T) taskController.performAction(action, task);
+                        return  taskController.performAction(action, task);
                     }
 
                     @Override
-                    protected void onPostExecute(T updatedTask) {
+                    protected void onPostExecute(GSTask updatedTask) {
                         super.onPostExecute(updatedTask);
                         result.setResult(updatedTask);
                     }
@@ -515,7 +673,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         public void updateTaskState(Context context, GSTask.TASK_STATE fromState, GSTask.TASK_STATE toState) {
-            if (toState == GSTask.TASK_STATE.FINSIHED) {
+            if (toState == GSTask.TASK_STATE.FINISHED) {
                 if (removeItemCallback != null) {
                     removeItemCallback.removeAt(getAdapterPosition());
                 }
@@ -542,7 +700,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 case ABORTED:
                     bootstrapActionButtonSelect(context, this.vBtnAborted, colorRes);
                     break;
-                case FINSIHED:
+                case FINISHED:
                     bootstrapActionButtonSelect(context, this.vBtnFinished, colorRes);
                     bootstrapActionDisableAll();
                     break;
@@ -608,14 +766,14 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 case ABORTED:
                     color = R.color.bootstrap_brand_danger;
                     break;
-                case FINSIHED:
+                case FINISHED:
                     color = R.color.bootstrap_gray_light;
                     break;
             }
             return color;
         }
 
-        private <T extends View> void tintBackgroundColor(List<T> views, int colorFrom, int colorTo, final int alpha, int duration) {
+        private <V extends View> void tintBackgroundColor(List<V> views, int colorFrom, int colorTo, final int alpha, int duration) {
             for (View view : views) {
                 tintBackgroundColor(view, colorFrom, colorTo, alpha, duration);
             }
@@ -677,6 +835,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         this.context = context;
     }
 
+    public TaskRecycleAdapter(Context context, FragmentManager fragmentManager, ParseQueryAdapter.QueryFactory<T> factory) {
+        super(factory, false);
+        this.context = context;
+        this.fragmentManager = fragmentManager;
+    }
+
 
     private boolean isNewlyDisplayed(int position) {
         if (position > lastPosition) {
@@ -697,7 +861,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         boolean isNew = isNewlyDisplayed(position);
 
-        final T task = getItem(position);
+        final GSTask task = getItem(position);
 
         Client client = task.getClient();
         if (client != null) {
@@ -706,6 +870,33 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             holder.vAddress.setText(client.getFullAddress());
             holder.vBtnCheckpoints.setVisibility((client.hasCheckPoints()) ? View.VISIBLE : View.GONE);
             holder.vBtnClientContacts.setVisibility((!client.getContactsWithNames().isEmpty()) ? View.VISIBLE : View.GONE);
+        }
+
+        if (task instanceof ParseTask) {
+            holder.vContentFooter.setVisibility((task.isArrived() || selectedItems.get(position, false)) ? View.VISIBLE : View.GONE);
+            holder.vBtnAborted.setVisibility(View.GONE);
+
+            ParseTask alarmTask = (ParseTask)task;
+            if (holder instanceof AlarmTaskViewHolder) {
+//                holder.vBtnTaskdescription.setVisibility((!circuitUnit.getDescription().isEmpty()) ? View.VISIBLE : View.GONE);
+
+                AlarmTaskViewHolder alarmTaskViewHolder = (AlarmTaskViewHolder) holder;
+
+                String description = context.getText(R.string.security_level) + ": " + alarmTask.getPriority() + "\n" +
+                        context.getText(R.string.keybox) + ": " + alarmTask.getKeybox() + "\n" +
+                        context.getText(R.string.remarks) + ": " + alarmTask.getRemarks();
+
+                if (alarmTask.getGuard() != null) {
+                    description += "\n\n";
+                    description += context.getString(R.string.guard) + ": " + alarmTask.getGuard().getName();
+                }
+
+                alarmTaskViewHolder.vTaskDesc.setText(description);
+                alarmTaskViewHolder.vTimeStart.setText(alarmTask.getTimeStartString());
+                alarmTaskViewHolder.vTimeEnd.setText(alarmTask.getTimeEndString());
+
+                alarmTaskViewHolder.setupTaskActionButtons(context, alarmTask);
+            }
         }
 
         if (task instanceof StaticTask) {
@@ -729,7 +920,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         if (task instanceof CircuitUnit) {
-            holder.vContentFooter.setVisibility((task.isStarted() || selectedItems.get(position, false)) ? View.VISIBLE : View.GONE);
+            holder.vContentFooter.setVisibility((task.isArrived() || selectedItems.get(position, false)) ? View.VISIBLE : View.GONE);
             CircuitUnit circuitUnit = (CircuitUnit) task;
             if (holder instanceof RegularTaskViewHolder) {
                 holder.vBtnTaskdescription.setVisibility((!circuitUnit.getDescription().isEmpty()) ? View.VISIBLE : View.GONE);
@@ -816,6 +1007,18 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             return new StaticTaskViewHolder(itemView);
         }
 
+        if (viewType == GSTask.TASK_TYPE.ALARM.ordinal()) {
+
+            View taskPlannedTimesView = LayoutInflater.
+                    from(parent.getContext()).
+                    inflate(R.layout.gs_view_task_planned_times, parent, false);
+
+            contentBody.addView(taskPlannedTimesView, 0);
+
+
+            return new AlarmTaskViewHolder(itemView, defaultRemoveItemCallback);
+        }
+
         if (viewType == GSTask.TASK_TYPE.REGULAR.ordinal()) {
 
             View taskPlannedTimesView = LayoutInflater.
@@ -824,7 +1027,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
             contentBody.addView(taskPlannedTimesView, 0);
 
-            return new RegularTaskViewHolder(itemView, defaultRemoveItemCallback);
+            return new RegularTaskViewHolder(itemView, defaultRemoveItemCallback, fragmentManager);
         }
 
         if (viewType == GSTask.TASK_TYPE.DISTRICTWATCH.ordinal()) {

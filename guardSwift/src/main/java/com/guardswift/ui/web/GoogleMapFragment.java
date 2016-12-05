@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 
 public class GoogleMapFragment extends SupportMapFragment {
@@ -79,7 +80,13 @@ public class GoogleMapFragment extends SupportMapFragment {
 			Bundle savedInstanceState) {
 		View view = super.onCreateView(inflater, container, savedInstanceState);
 		if (mCallback != null) {
-			mCallback.onMapReady(getMap());
+			getMapAsync(new OnMapReadyCallback() {
+				@Override
+				public void onMapReady(GoogleMap googleMap) {
+					mCallback.onMapReady(googleMap);
+				}
+			});
+
 		}
 
 		return view;

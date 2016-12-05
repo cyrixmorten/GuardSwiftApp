@@ -354,6 +354,15 @@
     <string name="session_expired">Session udløbet</string>
     <string name="session_expired_message">Genskab sessionen ved at logge ind igen med brugernavn og kodeord</string>
     <string name="error_downloading_file">Kunne ikke hente filen</string>
+    <string name="missing_arrival_time">Mangler ankomst tidspunkt</string>
+    <string name="please_enter_arrival_time">Der er ikke meldt ankommet for denne opgave, indtast venligst tidspunkt for ankomst.</string>
+    <string name="fetch_pdf">Hent PDF</string>
+    <string name="copy">kopier</string>
+    <string name="copy_report">Kopier rapport</string>
+    <string name="confirm_copy_report">Dette vil kopiere alle hændelserne til dagens rapport?</string>
+    <string name="copy_failed">Kopieringen fejlede</string>
+    <string name="successfully_copied_report_events">Kopierede %1$d hændelser til rapport</string>
+    <string name="guard">Vægter</string>
 
 
 </resources>

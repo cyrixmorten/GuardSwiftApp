@@ -38,18 +38,16 @@ import java.util.Date;
 @ParseClassName("DistrictWatchClient")
 public class DistrictWatchClient extends BaseTask {
 
-    DistrictWatchClientController controller;
-    TaskReportingStrategy<DistrictWatchClient> taskReportingStrategy;
-    TaskGeofenceStrategy<DistrictWatchClient> geofenceStrategy;
-    TaskActivityStrategy<DistrictWatchClient> activityStrategy;
-    TaskAutomationStrategy<DistrictWatchClient> automationStrategy;
+    private TaskReportingStrategy taskReportingStrategy;
+    private TaskGeofenceStrategy geofenceStrategy;
+    private TaskActivityStrategy activityStrategy;
+    private TaskAutomationStrategy automationStrategy;
 
     public DistrictWatchClient() {
-        controller = new DistrictWatchClientController();
-        taskReportingStrategy = new NoTaskReportingStrategy<>(this);
-        automationStrategy = new DistrictWatchAutomationStrategy<>(this);
-        geofenceStrategy = new DistrictWatchGeofenceStrategy<>(this);
-        activityStrategy = new NoActivityStrategy<>();
+        taskReportingStrategy = new NoTaskReportingStrategy(this);
+        automationStrategy = new DistrictWatchAutomationStrategy(this);
+        geofenceStrategy = new DistrictWatchGeofenceStrategy(this);
+        activityStrategy = new NoActivityStrategy();
     }
 
     @Override
@@ -58,27 +56,48 @@ public class DistrictWatchClient extends BaseTask {
     }
 
     @Override
-    public TaskGeofenceStrategy<DistrictWatchClient> getGeofenceStrategy() {
+    public void setPending() {
+
+    }
+
+    @Override
+    public void setAccepted() {
+
+    }
+
+    @Override
+    public void setArrived() {
+
+    }
+
+    @Override
+    public void setAborted() {
+
+    }
+
+    @Override
+    public void setFinished() {
+
+    }
+
+    @Override
+    public TaskGeofenceStrategy getGeofenceStrategy() {
         return geofenceStrategy;
     }
 
     @Override
-    public TaskActivityStrategy<DistrictWatchClient> getActivityStrategy() {
+    public TaskActivityStrategy getActivityStrategy() {
         return activityStrategy;
     }
 
     @Override
-    public TaskAutomationStrategy<DistrictWatchClient> getAutomationStrategy() {
+    public TaskAutomationStrategy getAutomationStrategy() {
         return automationStrategy;
     }
 
-    @Override
-    public TaskReportingStrategy<DistrictWatchClient> getTaskReportingStrategy() {
-        return taskReportingStrategy ;
-    }
 
     @Override
-    public TaskController<DistrictWatchClient> getController() {
+    public TaskController getController() {
         return new DistrictWatchClientController();
     }
 
@@ -122,12 +141,12 @@ public class DistrictWatchClient extends BaseTask {
     @Override
     public TASK_STATE getTaskState() {
         if (isFinished()) {
-            return TASK_STATE.FINSIHED;
+            return TASK_STATE.FINISHED;
         }
         if (isAborted()) {
             return TASK_STATE.ABORTED;
         }
-        if (isStarted()) {
+        if (isArrived()) {
             return TASK_STATE.ARRIVED;
         }
         return TASK_STATE.PENDING;
@@ -155,50 +174,14 @@ public class DistrictWatchClient extends BaseTask {
     }
 
     @Override
-    public boolean isWithinScheduledTime() {
-
-//        if (BuildConfig.DEBUG)
-//            return true;
-
-        Log.d(TAG, "isWithinScheduledTime ");
-
-        return true;
-
-//        DateTime timeStartOrg = new DateTime(getDistrictWatch().getTimeStart());
-//        DateTime timeEndOrg = new DateTime(getDistrictWatch().getTimeEnd());
-//
-//        DistrictWatchStarted districtWatchStarted = DistrictWatchStarted.Recent.getSelected();
-//
-//        MutableDateTime timeStart = new MutableDateTime(districtWatchStarted.getCreatedAt());
-//        int startHour = timeStartOrg.getHourOfDay();
-//        timeStart.setHourOfDay(startHour);
-//        timeStart.setMinuteOfHour(timeStartOrg.getMinuteOfHour());
-//
-//        MutableDateTime timeEnd = new MutableDateTime(districtWatchStarted.getCreatedAt());
-//        int endHour = timeEndOrg.getHourOfDay();
-//        if (endHour < startHour)
-//            timeEnd.addDays(1);
-//
-//        timeEnd.setHourOfDay(endHour);
-//        timeEnd.setMinuteOfHour(timeEndOrg.getMinuteOfHour());
-//
-//        DateTime now = DateTime.now(DateTimeZone.getDefault());
-//
-////        Log.d(TAG, "-- timeStart: " + timeStart.getHourOfDay() + ":" + timeStart.getMinuteOfHour());
-////        Log.d(TAG, "-- timeEnd: " + timeEnd.getHourOfDay() + ":" + timeEnd.getMinuteOfHour());
-////        Log.d(TAG, "-- now: " + now.getHourOfDay() + ":" + now.getMinuteOfHour());
-//
-//        boolean afterTimeStart = now.isAfter(timeStart);
-//        boolean beforeTimeEnd = now.isBefore(timeEnd);
-//
-////        Log.d(TAG, "  -- afterTimeStart: " + afterTimeStart);
-////        Log.d(TAG, "  -- beforeTimeEnd: " + beforeTimeEnd);
-//
-//        return afterTimeStart && beforeTimeEnd;
+    public boolean isPending() {
+        return false;
     }
 
-
-
+    @Override
+    public boolean isAccepted() {
+        return false;
+    }
 
 
     public static final int SORTBY_NEAREST = 1;
@@ -437,7 +420,7 @@ public class DistrictWatchClient extends BaseTask {
         return (Guard)getLDSFallbackParseObject(guard);
     }
 
-    public boolean isStarted() {
+    public boolean isArrived() {
         return getBoolean(arrived);
     }
 

@@ -13,10 +13,8 @@ import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GSTaskCreateReportActivity;
 
-/**
- * Created by cyrix on 2/26/15.
- */
-public class StaticTaskController extends BaseTaskController<StaticTask> {
+
+public class StaticTaskController extends BaseTaskController {
 
 
     private static final String TAG = StaticTaskController.class.getSimpleName();
@@ -32,7 +30,9 @@ public class StaticTaskController extends BaseTaskController<StaticTask> {
         this.guardCache =  GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache();
     }
 
-    public StaticTask performAction(ACTION action, StaticTask staticTask, boolean automatic) {
+    public GSTask performAction(ACTION action, GSTask task, boolean automatic) {
+
+        StaticTask staticTask = (StaticTask)task;
 
         final Guard guard = guardCache.getLoggedIn();
 

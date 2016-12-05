@@ -14,6 +14,7 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.documentation.eventlog.AbstractEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.CircuitUnitEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.DistrictWatchClientEventFragment;
+import com.guardswift.ui.parse.documentation.eventlog.TaskEventFragment;
 
 import javax.inject.Inject;
 
@@ -58,6 +59,10 @@ public class GSTaskCreateReportActivity extends InjectingAppCompatActivity {
             GSTask.TASK_TYPE frag_type = (GSTask.TASK_TYPE) getIntent().getSerializableExtra(TASK_TYPE);
 
             switch (frag_type) {
+                case ALARM:
+                    fragment = TaskEventFragment.newInstance(parseCacheFactory.getTaskCache().getSelected());
+                    break;
+
                 case REGULAR:
                     fragment = CircuitUnitEventFragment.newInstance(this, parseCacheFactory.getCircuitUnitCache().getSelected());
                     break;

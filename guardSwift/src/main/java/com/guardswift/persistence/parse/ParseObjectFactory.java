@@ -9,6 +9,7 @@ import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
 import com.guardswift.persistence.parse.documentation.report.Report;
+import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
@@ -28,6 +29,7 @@ public class ParseObjectFactory {
 
 	private final Client client;
 	private final Circuit circuit;
+	private final ParseTask task;
 	private final CircuitUnit circuitUnit;
 	private final CircuitStarted circuitStarted;
 	private final StaticTask staticTask;
@@ -50,6 +52,7 @@ public class ParseObjectFactory {
 	public ParseObjectFactory() {
 		circuit = new Circuit();
         circuitStarted = new CircuitStarted();
+		task = new ParseTask();
 		circuitUnit = new CircuitUnit();
 		staticTask = new StaticTask();
         client = new Client();
@@ -66,9 +69,10 @@ public class ParseObjectFactory {
         guard = new Guard();
 		report = new Report();
 
-		allParseObjects = new ArrayList<ExtendedParseObject>();
+		allParseObjects = new ArrayList<>();
 		allParseObjects.add(client);
 		allParseObjects.add(circuit);
+		allParseObjects.add(task);
 		allParseObjects.add(circuitUnit);
 		allParseObjects.add(circuitStarted);
 		allParseObjects.add(districtWatch);

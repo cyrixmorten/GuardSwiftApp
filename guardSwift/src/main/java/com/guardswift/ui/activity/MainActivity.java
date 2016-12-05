@@ -14,6 +14,7 @@ import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
 import com.guardswift.util.Device;
 
 import javax.inject.Inject;
@@ -135,16 +136,22 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
         if (shouldRedirectToOtherActivity()) {
             startActivity(redirectToOtherActivityIntent());
         }
+
         super.onPostResume();
     }
 
+
     @Override
     protected void onDestroy() {
-        Log.e(TAG, "onDestroy");
+        Log.d(TAG, "onDestroy");
         navigationDrawer = null;
-        super.onDestroy();
+        try {
+            super.onDestroy();
+        } catch (NullPointerException npe) {
+            // https://code.google.com/p/android/issues/detail?id=216157
+            Log.e(TAG, "NPE: Bug workaround");
+        }
     }
-
 
 
     private SweetAlertDialog logoutDialog;
@@ -210,7 +217,7 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
                     // but as state loss errors are happening very rarely plus we are not
                     // storing state on any of the fragments it is assumed
                     // to be ok to do here.
-                    fm.beginTransaction().replace(R.id.content, fragment).commitAllowingStateLoss();
+                    fm.beginTransaction().replace(R.id.content, fragment).commitNow();
                 }
             }
         }, 500);

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.location.Location;
 
 import com.guardswift.core.documentation.report.NoTaskReportingStrategy;
-import com.guardswift.core.documentation.report.StandardTaskReportingStrategy;
 import com.guardswift.core.documentation.report.TaskReportingStrategy;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.activity.NoActivityStrategy;
@@ -74,18 +73,18 @@ public class StaticTask extends BaseTask {
     /**
      * Logic
      */
-    private final TaskController<StaticTask> controller;
-    private final TaskReportingStrategy<StaticTask> taskReportingStrategy;
-    private final TaskGeofenceStrategy<StaticTask> geofenceStrategy;
-    private final TaskActivityStrategy<StaticTask> activityStrategy;
-    private final TaskAutomationStrategy<StaticTask> automationStrategy;
+    private final TaskController controller;
+    private final TaskReportingStrategy taskReportingStrategy;
+    private final TaskGeofenceStrategy geofenceStrategy;
+    private final TaskActivityStrategy activityStrategy;
+    private final TaskAutomationStrategy automationStrategy;
 
     public StaticTask() {
         this.controller =  new StaticTaskController();
-        this.taskReportingStrategy = new NoTaskReportingStrategy<>(this); // StandardTaskReportingStrategy<>(this);
-        this.automationStrategy = new NoAutomationStrategy<>();
-        this.geofenceStrategy = new NoGeofenceStrategy<>(this);
-        this.activityStrategy = new NoActivityStrategy<>();
+        this.taskReportingStrategy = new NoTaskReportingStrategy(this); // StandardTaskReportingStrategy<>(this);
+        this.automationStrategy = new NoAutomationStrategy();
+        this.geofenceStrategy = new NoGeofenceStrategy(this);
+        this.activityStrategy = new NoActivityStrategy();
     }
 
 
@@ -96,27 +95,46 @@ public class StaticTask extends BaseTask {
     }
 
     @Override
-    public TaskGeofenceStrategy<StaticTask> getGeofenceStrategy() {
+    public void setPending() {
+
+    }
+
+    @Override
+    public void setAccepted() {
+
+    }
+
+    @Override
+    public void setArrived() {
+
+    }
+
+    @Override
+    public void setAborted() {
+
+    }
+
+    @Override
+    public TaskGeofenceStrategy getGeofenceStrategy() {
         return geofenceStrategy;
     }
 
     @Override
-    public TaskActivityStrategy<StaticTask> getActivityStrategy() {
+    public TaskActivityStrategy getActivityStrategy() {
         return activityStrategy;
     }
 
     @Override
-    public TaskAutomationStrategy<StaticTask> getAutomationStrategy() {
+    public TaskAutomationStrategy getAutomationStrategy() {
         return automationStrategy;
     }
 
-    @Override
-    public TaskReportingStrategy<StaticTask> getTaskReportingStrategy() {
+    public TaskReportingStrategy getTaskReportingStrategy() {
         return taskReportingStrategy;
     }
 
     @Override
-    public TaskController<StaticTask> getController() {
+    public TaskController getController() {
         return controller;
     }
 
@@ -140,9 +158,9 @@ public class StaticTask extends BaseTask {
     @Override
     public TASK_STATE getTaskState() {
         if (isFinished()) {
-            return TASK_STATE.FINSIHED;
+            return TASK_STATE.FINISHED;
         }
-        if (isStarted()) {
+        if (isArrived()) {
             return TASK_STATE.ARRIVED;
         }
         return TASK_STATE.PENDING;
@@ -159,10 +177,6 @@ public class StaticTask extends BaseTask {
         return this;
     }
 
-    @Override
-    public boolean isWithinScheduledTime() {
-        return true;
-    }
 
     @Override
     public String getParseClassName() {
@@ -295,11 +309,16 @@ public class StaticTask extends BaseTask {
      */
 
     public boolean isPending() {
-        return !isStarted() && !isFinished();
+        return !isArrived() && !isFinished();
     }
 
     @Override
-    public boolean isStarted() {
+    public boolean isAccepted() {
+        return true;
+    }
+
+    @Override
+    public boolean isArrived() {
         return has(StaticTask.timeStarted);
     }
 

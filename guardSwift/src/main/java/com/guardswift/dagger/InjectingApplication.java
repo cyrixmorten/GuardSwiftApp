@@ -18,6 +18,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 
+import com.guardswift.core.tasks.controller.AlarmController;
 import com.guardswift.core.tasks.controller.CircuitUnitController;
 import com.guardswift.core.tasks.controller.DistrictWatchClientController;
 import com.guardswift.core.tasks.controller.StaticTaskController;
@@ -33,6 +34,7 @@ import com.guardswift.persistence.cache.task.CircuitUnitCache;
 import com.guardswift.persistence.cache.task.DistrictWatchClientCache;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.cache.task.StaticTaskCache;
+import com.guardswift.persistence.cache.task.TaskCache;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Device;
@@ -133,10 +135,11 @@ public abstract class InjectingApplication extends Application implements
 			CircuitStartedCache.class,
 			DistrictWatchStartedCache.class,
 			// Tasks
-			GSTasksCache.class, // adds extra functionality to task caches
+			TaskCache.class,
 			StaticTaskCache.class,
 			CircuitUnitCache.class,
 			DistrictWatchClientCache.class,
+			GSTasksCache.class, // adds extra functionality to task caches
 			// Data
 			GuardCache.class,
 			ClientCache.class,
@@ -159,6 +162,12 @@ public abstract class InjectingApplication extends Application implements
 				Injector injector) {
 			mApp = app;
 			mInjector = injector;
+		}
+
+		@Provides
+		@Singleton
+		AlarmController provideAlarmController() {
+			return new AlarmController();
 		}
 
 		@Provides

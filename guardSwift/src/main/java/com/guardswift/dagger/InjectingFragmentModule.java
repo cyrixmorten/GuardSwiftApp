@@ -31,6 +31,7 @@ package com.guardswift.dagger;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
+import com.guardswift.ui.parse.documentation.eventlog.TaskEventFragment;
 import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
 import com.guardswift.ui.parse.documentation.eventlog.AbstractEventFragment;
@@ -47,6 +48,9 @@ import com.guardswift.ui.parse.documentation.report.edit.ReportEditViewPagerFrag
 import com.guardswift.ui.parse.documentation.report.edit.ReportSuggestionsListFragment;
 import com.guardswift.ui.parse.documentation.report.edit.ReportSummaryFragment;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
+import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
+import com.guardswift.ui.parse.execution.alarm.FinishedAlarmsFragment;
+import com.guardswift.ui.parse.execution.alarm.ActiveAlarmsFragment;
 import com.guardswift.ui.parse.execution.circuit.ActiveCircuitUnitsFragment;
 import com.guardswift.ui.parse.execution.circuit.CircuitUnitCheckpointsFragment;
 import com.guardswift.ui.parse.execution.circuit.CircuitUnitDescriptionWebViewFragment;
@@ -88,12 +92,18 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		GuardListFragment.class,
 		ClientListFragment.class,
 		// - Execution
+		AbstractTasksRecycleFragment.class,
+		// -- Alarm
+		AlarmsViewPagerFragment.class,
+		ActiveAlarmsFragment.class,
+		FinishedAlarmsFragment.class,
 		// -- StaticTask
 		StaticTaskViewPagerFragment.class,
 		PendingStaticTasksFragment.class,
 		ActiveStaticTasksFragment.class,
 		FinishedStaticTasksFragment.class,
 		// -- CircuitUnit
+		CircuitViewPagerFragment.class,
         ActiveCircuitUnitsFragment.class,
 		FinishedCircuitUnitsFragment.class,
 		// -- DistrictWatch
@@ -108,8 +118,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		AddEventRemarkFragment.class,
 		AddEventSummaryFragment.class,
 		AbstractEventFragment.class,
-		CircuitUnitEventFragment.class, DistrictWatchClientEventFragment.class,
-		CircuitViewPagerFragment.class, AbstractTasksRecycleFragment.class,
+		TaskEventFragment.class,
+		CircuitUnitEventFragment.class,
+		DistrictWatchClientEventFragment.class,
 		CircuitUnitCheckpointsFragment.class,
 		CircuitUnitDescriptionWebViewFragment.class,
 		// Report

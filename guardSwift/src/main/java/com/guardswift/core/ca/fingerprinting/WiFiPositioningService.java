@@ -128,7 +128,7 @@ public class WiFiPositioningService extends InjectingService implements WiFiPosi
 //
 //                        List<CircuitUnit> arrivedNotEnded = new ArrayList<CircuitUnit>();
 //                        for (CircuitUnit circuitUnit: circuitUnits) {
-//                            if (circuitUnit.isStarted() && !circuitUnit.isFinished() && circuitUnit.hasCheckPoints()) {
+//                            if (circuitUnit.isArrived() && !circuitUnit.isFinished() && circuitUnit.hasCheckPoints()) {
 //                                arrivedNotEnded.addUnique(circuitUnit);
 //                            }
 //                        }

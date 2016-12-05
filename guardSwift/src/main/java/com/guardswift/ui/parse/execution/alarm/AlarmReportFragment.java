@@ -44,7 +44,7 @@
 //import javax.inject.Inject;
 //
 //import bolts.Continuation;
-//import bolts.Task;
+//import bolts.ParseTask;
 //import butterknife.Bind;
 //import butterknife.ButterKnife;
 //import butterknife.OnClick;
@@ -210,9 +210,9 @@
 ////            alarmReport.setACL(acl);
 //
 //
-//            EventLog.getQueryBuilder(false).matching(mAlarm).eventCode(EventLog.EventCodes.ALARM_OTHER_REPORT).build().findInBackground().onSuccessTask(new Continuation<List<EventLog>, Task<Void>>() {
+//            EventLog.getQueryBuilder(false).matching(mAlarm).eventCode(EventLog.EventCodes.ALARM_OTHER_REPORT).build().findInBackground().onSuccessTask(new Continuation<List<EventLog>, ParseTask<Void>>() {
 //                @Override
-//                public Task<Void> then(Task<List<EventLog>> task) throws Exception {
+//                public ParseTask<Void> then(ParseTask<List<EventLog>> task) throws Exception {
 ////                    if (task.isFaulted()) {
 ////                        progress_dialog.dismiss();
 ////                        new ParseExceptionHandler(getActivity(), task.getError());
@@ -222,9 +222,9 @@
 //                    Log.d(TAG, "Deleting " + eventLogs.size() + " previous events");
 //                    return ParseObject.deleteAllInBackground(task.getResult());
 //                }
-//            }).onSuccessTask(new Continuation<Void, Task<Void>>() {
+//            }).onSuccessTask(new Continuation<Void, ParseTask<Void>>() {
 //                @Override
-//                public Task<Void> then(Task<Void> task) throws Exception {
+//                public ParseTask<Void> then(ParseTask<Void> task) throws Exception {
 ////                    if (task.isFaulted()) {
 ////                        progress_dialog.dismiss();
 ////                        new ParseExceptionHandler(getActivity(), task.getError());
@@ -233,9 +233,9 @@
 //                    Log.d(TAG, "Saving new/edited events");
 //                    return ParseObject.saveAllInBackground(createEventLogs());
 //                }
-//            }).onSuccessTask(new Continuation<Void, Task<Void>>() {
+//            }).onSuccessTask(new Continuation<Void, ParseTask<Void>>() {
 //                @Override
-//                public Task<Void> then(Task<Void> task) throws Exception {
+//                public ParseTask<Void> then(ParseTask<Void> task) throws Exception {
 ////                    if (task.isFaulted()) {
 ////                        progress_dialog.dismiss();
 ////                        new ParseExceptionHandler(getActivity(), task.getError());
@@ -247,7 +247,7 @@
 //                }
 //            }).continueWith(new Continuation<Void, Object>() {
 //                @Override
-//                public Object then(Task<Void> task) throws Exception {
+//                public Object then(ParseTask<Void> task) throws Exception {
 //
 //                    progress_dialog.dismiss();
 //

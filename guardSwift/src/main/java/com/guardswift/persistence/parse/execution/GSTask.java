@@ -15,13 +15,13 @@ import com.guardswift.persistence.parse.data.client.Client;
 /**
  * Created by cyrix on 4/10/15.
  */
-public interface GSTask<T extends BaseTask> extends Positioned {
+public interface GSTask extends Positioned {
 
 
 
 
-    enum TASK_TYPE {REGULAR, DISTRICTWATCH, STATIC}
-    enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINSIHED}
+    enum TASK_TYPE {REGULAR, DISTRICTWATCH, STATIC, ALARM}
+    enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINISHED}
     enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER}
 
     TASK_TYPE getTaskType();
@@ -34,39 +34,44 @@ public interface GSTask<T extends BaseTask> extends Positioned {
      */
     String getObjectId();
     String getGeofenceId();
+    String getParseClassName();
 
     /*
      * A small descriptive name specified by the guarding company during planning
      */
     String getType();
 
-    TaskQueryBuilder<T> getQueryBuilder(boolean fromLocalDatastore);
+    TaskQueryBuilder getQueryBuilder(boolean fromLocalDatastore);
     String getReportId();
 
     int getEventCode();
-//    TaskSummary getTaskSummaryInstance(Context context);
 
-//    String getTaskTitle(Context context);
+//    TaskReportingStrategy getTaskReportingStrategy();
+    TaskGeofenceStrategy getGeofenceStrategy();
+    TaskActivityStrategy getActivityStrategy();
+    TaskAutomationStrategy getAutomationStrategy();
+    TaskController getController();
+    BaseTaskCache getCache();
 
-    TaskReportingStrategy<T> getTaskReportingStrategy();
-    TaskGeofenceStrategy<T> getGeofenceStrategy();
-    TaskActivityStrategy<T> getActivityStrategy();
-    TaskAutomationStrategy<T> getAutomationStrategy();
-    TaskController<T> getController();
-    BaseTaskCache<T> getCache();
 
-    boolean isWithinScheduledTime();
+    void setPending();
+    void setAccepted();
+    void setArrived();
+    void setAborted();
+    void setFinished();
 
-    boolean isStarted();
+    boolean isPending();
+    boolean isAccepted();
+    boolean isArrived();
     boolean isAborted();
     boolean isFinished();
 
-//    boolean automaticArrival(Context context);
-//    boolean automaticDeparture(Context context);
 
     Guard getGuard();
     Client getClient();
     String getClientName();
 
     ExtendedParseObject getParseObject();
+
+    void pinThenSaveEventually();
 }

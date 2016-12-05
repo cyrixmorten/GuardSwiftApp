@@ -30,9 +30,9 @@ public abstract class ExtendedParseObject extends ParseObject {
 
     // TODO get rid of this and use bolts Tasks instead
     public interface DataStoreCallback<T extends ParseObject> {
-        public void success(List<T> objects);
+        void success(List<T> objects);
 
-        public void failed(ParseException e);
+        void failed(ParseException e);
     }
 
 
@@ -45,7 +45,7 @@ public abstract class ExtendedParseObject extends ParseObject {
     protected final String TAG = this.getClass()
             .getSimpleName();
 
-    public void setDefaultOwner() {
+    protected void setDefaultOwner() {
         put(owner, ParseUser.getCurrentUser());
     }
 
@@ -98,9 +98,9 @@ public abstract class ExtendedParseObject extends ParseObject {
     public  Task<Object> unpinAllPinnedToClass() {
         Log.w(TAG, "Unpinning" + getPin());
         return unpinAllInBackground(getPin())
-//        return getAllNetworkQuery().fromLocalDatastore().findInBackground().continueWithTask(new Continuation<List<ParseObject>, Task<Void>>() {
+//        return getAllNetworkQuery().fromLocalDatastore().findInBackground().continueWithTask(new Continuation<List<ParseObject>, ParseTask<Void>>() {
 //            @Override
-//            public Task<Void> then(Task<List<ParseObject>> task) throws Exception {
+//            public ParseTask<Void> then(ParseTask<List<ParseObject>> task) throws Exception {
 //                Log.w(TAG, "Unpinning from " + getPin() + " objects: " + task.getResult().size());
 //                return ParseObject.unpinAllInBackground(task.getResult());
 //            }
@@ -187,23 +187,23 @@ public abstract class ExtendedParseObject extends ParseObject {
 //    }
 
 
-    public <T extends ParseObject> void pinThenSaveEventually() {
+    public void pinThenSaveEventually() {
         pinThenSaveEventually(null, null, false);
-    };
+    }
 
-    public <T extends ParseObject> void pinThenSaveEventually(boolean postUIUpdate) {
+    public void pinThenSaveEventually(boolean postUIUpdate) {
         pinThenSaveEventually(null, null, postUIUpdate);
-    };
+    }
 
-    public <T extends ParseObject> void pinThenSaveEventually(final SaveCallback pinned) {
+    public void pinThenSaveEventually(final SaveCallback pinned) {
         pinThenSaveEventually(pinned, null, false);
-    };
+    }
 
-    public <T extends ParseObject> void pinThenSaveEventually(final SaveCallback pinned, final SaveCallback saved) {
+    public void pinThenSaveEventually(final SaveCallback pinned, final SaveCallback saved) {
         pinThenSaveEventually(pinned, saved, false);
     }
 
-    public <T extends ParseObject> void pinThenSaveEventually(final SaveCallback pinned, final SaveCallback saved, final boolean postUIUpdate) {
+    public void pinThenSaveEventually(final SaveCallback pinned, final SaveCallback saved, final boolean postUIUpdate) {
 
         this.pinInBackground(getPin(), new SaveCallback() {
             @Override
@@ -378,6 +378,16 @@ public abstract class ExtendedParseObject extends ParseObject {
             }
             return object;
         }
+
+
+    }
+
+    protected String getStringSafe(String key) {
+        return has(key) ? getString(key) : "";
+    }
+
+    protected String getStringSafe(String key, String defaultValue) {
+        return has(key) ? getString(key) : defaultValue;
     }
 //    public void pinAndSaveEventually() {
 //        pinAndSaveEventually(null);

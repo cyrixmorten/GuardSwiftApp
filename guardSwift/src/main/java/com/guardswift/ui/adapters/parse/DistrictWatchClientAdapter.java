@@ -134,7 +134,7 @@
 //        timesArrived.setText(getContext().getString(R.string.times_supervised,
 //                districtWatchClient.getTimesArrived(), districtWatchClient.getSupervisions()));
 //
-//        if (only_visited || districtWatchClient.isStarted()) {
+//        if (only_visited || districtWatchClient.isArrived()) {
 //            v.setBackground(getContext().getResources().getDrawable(
 //                    R.drawable.x_highlight_grey));
 //            arrived.setVisibility(View.GONE);

@@ -12,6 +12,8 @@ import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.persistence.parse.data.client.Client;
 
+import java.lang.ref.WeakReference;
+
 /**
  * Created by cyrix on 2/24/15.
  */
@@ -44,22 +46,30 @@ public class CommonDialogsBuilder {
 
     public static class MaterialDialogs {
 
-        private Context context;
+        private WeakReference<Context> context;
 
         public MaterialDialogs(Context activityContext) {
-            this.context = activityContext;
+            this.context = new WeakReference<>(activityContext);
+        }
+
+        private Context getContext() {
+            return context.get();
         }
 
         public MaterialDialog.Builder ok(int title, String content, MaterialDialog.SingleButtonCallback onPositive) {
-            return new MaterialDialog.Builder(context)
+            return new MaterialDialog.Builder(getContext())
                     .title(title)
                     .content(content)
                     .positiveText(android.R.string.ok)
                     .onPositive(onPositive);
         }
 
+        public MaterialDialog.Builder ok(int title, int content, MaterialDialog.SingleButtonCallback onPositive) {
+            return ok(title, getContext().getString(content), onPositive);
+        }
+
         public MaterialDialog.Builder okCancel(int title, String content, MaterialDialog.SingleButtonCallback onPositive) {
-            return new MaterialDialog.Builder(context)
+            return new MaterialDialog.Builder(getContext())
                     .title(title)
                     .content(content)
                     .positiveText(android.R.string.ok)
@@ -68,7 +78,7 @@ public class CommonDialogsBuilder {
         }
 
         public MaterialDialog.Builder okCancel(int title, String content, MaterialDialog.SingleButtonCallback onPositive, final MaterialDialog.SingleButtonCallback onCancel) {
-            return new MaterialDialog.Builder(context)
+            return new MaterialDialog.Builder(getContext())
                     .title(title)
                     .content(content)
                     .positiveText(android.R.string.ok)
@@ -79,26 +89,35 @@ public class CommonDialogsBuilder {
 
         }
 
+        public MaterialDialog.Builder yesNo(int title, String content, MaterialDialog.SingleButtonCallback onPositive) {
+            return new MaterialDialog.Builder(getContext())
+                    .title(title)
+                    .content(content)
+                    .positiveText(android.R.string.yes)
+                    .negativeText(android.R.string.no)
+                    .onPositive(onPositive);
+        }
+
         public MaterialDialog.Builder clientContacts(Client client) {
 
-            LinearLayout layout = client.createContactsList(context);
+            LinearLayout layout = client.createContactsList(getContext());
 
-            TextView callContactTip = new TextView(context);
-            callContactTip.setText(context.getString(R.string.tip_click_contact_to_call));
+            TextView callContactTip = new TextView(getContext());
+            callContactTip.setText(getContext().getString(R.string.tip_click_contact_to_call));
             layout.addView(callContactTip, 0);
 
-            return new MaterialDialog.Builder(context)
+            return new MaterialDialog.Builder(getContext())
                     .title(client.getName())
                     .customView(layout, true);
 
         }
 
         public MaterialDialog.Builder infoDialog(int  title, int content) {
-            return infoDialog(title, context.getString(content));
+            return infoDialog(title, getContext().getString(content));
         }
 
         public MaterialDialog.Builder infoDialog(int  title, String content) {
-            return new MaterialDialog.Builder(context)
+            return new MaterialDialog.Builder(getContext())
                     .title(title)
                     .content(content);
         }
@@ -108,23 +127,23 @@ public class CommonDialogsBuilder {
         }
 
         public MaterialDialog.Builder indeterminate() {
-            return indeterminate(context.getString(R.string.working), context.getString(R.string.please_wait));
+            return indeterminate(getContext().getString(R.string.working), getContext().getString(R.string.please_wait));
         }
 
         public MaterialDialog.Builder indeterminate(int content) {
-            return indeterminate(context.getString(R.string.working), context.getString(content));
+            return indeterminate(getContext().getString(R.string.working), getContext().getString(content));
         }
 
         public MaterialDialog.Builder indeterminate(int title, int content) {
-            return indeterminate(context.getString(title), context.getString(content));
+            return indeterminate(getContext().getString(title), getContext().getString(content));
         }
 
         public MaterialDialog.Builder indeterminate(String title, int content) {
-            return indeterminate(title, context.getString(content));
+            return indeterminate(title, getContext().getString(content));
         }
 
         public MaterialDialog.Builder indeterminate(String title, String content) {
-            return new MaterialDialog.Builder(context)
+            return new MaterialDialog.Builder(getContext())
                     .title(title)
                     .content(content)
                     .progress(true, 0);

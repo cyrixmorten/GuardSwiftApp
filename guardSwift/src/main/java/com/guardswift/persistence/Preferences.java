@@ -34,7 +34,7 @@ public class Preferences {
 
     public void clear() {
          {
-            sharedPrefs.edit().clear().commit();
+            sharedPrefs.edit().clear().apply();
         }
     }
 
@@ -47,13 +47,13 @@ public class Preferences {
     public void put(int resKey, int value) {
          {
             String key = context.getString(resKey);
-            sharedPrefs.edit().putInt(key, value).commit();
+            sharedPrefs.edit().putInt(key, value).apply();
         }
     }
 
     public void put(@NonNull String key, int value) {
          {
-            sharedPrefs.edit().putInt(key, value).commit();
+            sharedPrefs.edit().putInt(key, value).apply();
         }
     }
 
@@ -65,7 +65,7 @@ public class Preferences {
 
     public void putBoolean(@NonNull  String key, boolean value) {
          {
-            sharedPrefs.edit().putBoolean(key, value).commit();
+            sharedPrefs.edit().putBoolean(key, value).apply();
         }
     }
 
@@ -91,13 +91,13 @@ public class Preferences {
     public void put(int resKey, String value) {
          {
             String key = context.getString(resKey);
-            sharedPrefs.edit().putString(key, value).commit();
+            sharedPrefs.edit().putString(key, value).apply();
         }
     }
 
     public void put(String key, String value) {
          {
-            sharedPrefs.edit().putString(key, value).commit();
+            sharedPrefs.edit().putString(key, value).apply();
         }
     }
 
@@ -131,7 +131,7 @@ public class Preferences {
          {
             Set<String> currentSet = getStringSet(key);
             currentSet.add(value);
-            sharedPrefs.edit().putStringSet(key, currentSet).commit();
+            sharedPrefs.edit().putStringSet(key, currentSet).apply();
         }
     }
 
@@ -139,13 +139,13 @@ public class Preferences {
          {
             Set<String> currentSet = getStringSet(key);
             currentSet.remove(value);
-            sharedPrefs.edit().putStringSet(key, currentSet).commit();
+            sharedPrefs.edit().putStringSet(key, currentSet).apply();
         }
     }
 
     public void clearSet(@NonNull String key) {
          {
-            sharedPrefs.edit().putStringSet(key, Sets.<String>newHashSet()).commit();
+            sharedPrefs.edit().putStringSet(key, Sets.<String>newConcurrentHashSet()).apply();
         }
     }
 
@@ -158,7 +158,7 @@ public class Preferences {
 
     public void remove(String key) {
          {
-            sharedPrefs.edit().remove(key).commit();
+            sharedPrefs.edit().remove(key).apply();
         }
     }
 }

@@ -3,29 +3,26 @@ package com.guardswift.core.documentation.report;
 import android.content.Context;
 import android.util.Log;
 
-import com.guardswift.core.documentation.eventlog.context.LogStrategyFactory;
-import com.guardswift.core.documentation.eventlog.task.TaskLogStrategyFactory;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
-import com.guardswift.persistence.parse.execution.BaseTask;
+import com.guardswift.persistence.parse.execution.GSTask;
 import com.parse.ParseException;
 import com.parse.SaveCallback;
 
 import bolts.Continuation;
 import bolts.Task;
-import rx.exceptions.OnErrorNotImplementedException;
 
 /**
  * Created by cyrix on 6/8/15.
  */
-public class NoTaskReportingStrategy<T extends BaseTask> implements TaskReportingStrategy<T> {
+public class NoTaskReportingStrategy implements TaskReportingStrategy {
 
     private static final String TAG = NoTaskReportingStrategy.class.getSimpleName();
 
-    private final T task;
+    private final GSTask task;
 
-    public NoTaskReportingStrategy(T task) {
+    public NoTaskReportingStrategy(GSTask task) {
         this.task = task;
     }
 

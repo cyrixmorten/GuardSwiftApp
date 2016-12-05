@@ -1,6 +1,6 @@
 package com.guardswift.core.tasks.geofence;
 
-import com.guardswift.persistence.parse.execution.BaseTask;
+import com.guardswift.persistence.parse.execution.GSTask;
 import com.parse.FindCallback;
 import com.parse.ParseObject;
 
@@ -11,7 +11,7 @@ import bolts.Task;
 /**
  * Created by cyrix on 3/12/15.
  */
-public interface TaskGeofenceStrategy<T extends BaseTask> {
+public interface TaskGeofenceStrategy {
 
     String getName();
 

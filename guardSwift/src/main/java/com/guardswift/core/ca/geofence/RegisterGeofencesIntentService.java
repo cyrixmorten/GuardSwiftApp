@@ -24,6 +24,7 @@ import com.guardswift.persistence.parse.execution.TaskFactory;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import java.util.List;
@@ -157,25 +158,26 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
 
         int withinKm = 2;
-        geofencingModule.queryAllGeofenceTasks(withinKm).onSuccess(new Continuation<List<BaseTask>, Object>() {
+        geofencingModule.queryAllGeofenceTasks(withinKm).onSuccess(new Continuation<List<ParseObject>, Object>() {
             @Override
-            public Object then(Task<List<BaseTask>> task) throws Exception {
-                List<BaseTask> tasks = task.getResult();
+            public Object then(Task<List<ParseObject>> task) throws Exception {
+                List<ParseObject> tasks = task.getResult();
                 Log.d(TAG, "Found task scheduled for geofencing: " + tasks.size());
                 if (tasks.size() > 100) {
-                    Crashlytics.log("Task size limit reached at for user " + ParseUser.getCurrentUser().getUsername() + " at " + LocationModule.Recent.getLastKnownLocation().toString() + " with " + tasks.size() + " tasks");
+                    Crashlytics.log("ParseTask size limit reached at for user " + ParseUser.getCurrentUser().getUsername() + " at " + LocationModule.Recent.getLastKnownLocation().toString() + " with " + tasks.size() + " tasks");
                     tasks = tasks.subList(0, 100);
                 }
 
                 List<GSTask> geofencedTasks = Lists.newArrayList();
                 List<Geofence> geofences = Lists.newArrayList();
-                for (BaseTask geofencedTask : tasks) {
-                    ParseGeoPoint position = geofencedTask.getPosition();
-                    float radius = geofencedTask.getGeofenceStrategy().getGeofenceRadius();
-                    Geofence geofence = createGeofence(geofencedTask.getGeofenceId(), position, radius);
+                for (ParseObject geofencedTask : tasks) {
+                    GSTask gsTask = (GSTask)geofencedTask;
+                    ParseGeoPoint position = gsTask.getPosition();
+                    float radius = gsTask.getGeofenceStrategy().getGeofenceRadius();
+                    Geofence geofence = createGeofence(gsTask.getGeofenceId(), position, radius);
                     geofences.add(geofence);
 
-                    geofencedTasks.add(geofencedTask);
+                    geofencedTasks.add(gsTask);
 
                 }
 
@@ -191,7 +193,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
 
 //        for (GSTask task: new TaskFactory().getTasks()) {
-//            Task<List<ParseObject>> getTasksWithinGeofence =  task.getGeofenceStrategy().queryGeofencedTasks(getApplicationContext(), new FindCallback<ParseObject>() {
+//            ParseTask<List<ParseObject>> getTasksWithinGeofence =  task.getGeofenceStrategy().queryGeofencedTasks(getApplicationContext(), new FindCallback<ParseObject>() {
 //                @Override
 //                public void done(List<ParseObject> parseObjects, ParseException e) {
 //                    if (e != null) {

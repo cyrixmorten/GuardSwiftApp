@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by cyrix on 6/7/15.
  */
-public class DistrictWatchAutomationStrategy<T extends BaseTask> implements TaskAutomationStrategy<T> {
+public class DistrictWatchAutomationStrategy implements TaskAutomationStrategy {
 
     private static final String TAG = DistrictWatchAutomationStrategy.class.getSimpleName();
 
@@ -37,7 +37,7 @@ public class DistrictWatchAutomationStrategy<T extends BaseTask> implements Task
 
     @Override
     public void automaticArrival() {
-        TaskController<DistrictWatchClient> controller = task.getController();
+        TaskController controller = task.getController();
         if (controller.canPerformAutomaticAction(TaskController.ACTION.ARRIVE, task)) {
             Log.w(TAG, "automaticArrival " + task.getTaskType() + " " + task.getClientName());
             Sounds.getInstance(context).playNotification(R.raw.arrived);
@@ -50,7 +50,7 @@ public class DistrictWatchAutomationStrategy<T extends BaseTask> implements Task
     @Override
     public void automaticDeparture() {
         Log.w(TAG, "automaticDeparture " + task.getTaskType() + " " + task.getClientName());
-        TaskController<DistrictWatchClient> controller = task.getController();
+        TaskController controller = task.getController();
         controller.performAutomaticAction(TaskController.ACTION.RESET, task);
         stopResettimertask();
     }

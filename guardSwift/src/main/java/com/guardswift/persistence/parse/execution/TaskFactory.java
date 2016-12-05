@@ -13,19 +13,19 @@ import java.util.List;
  */
 public class TaskFactory {
 
-    List<BaseTask> tasks;
+    List<GSTask> tasks;
 
     public TaskFactory() {
 
         tasks = Lists.newArrayList();
 
-//        tasks.add(new Alarm());
+        tasks.add(new ParseTask());
         tasks.add(new StaticTask());
         tasks.add(new CircuitUnit());
         tasks.add(new DistrictWatchClient());
     }
 
-    public List<BaseTask> getTasks() {
+    public List<GSTask> getTasks() {
         return tasks;
     }
 }

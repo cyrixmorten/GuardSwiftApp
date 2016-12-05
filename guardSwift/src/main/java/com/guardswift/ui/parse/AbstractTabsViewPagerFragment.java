@@ -5,6 +5,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -126,7 +127,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
         changeListener.onPageSelected(0); // init
     }
 
-    private class TasksPagerAdapter extends FragmentStatePagerAdapter implements UpdateFloatingActionButtonPageChangeListener.FragmentAdapter {
+    private class TasksPagerAdapter extends FragmentPagerAdapter implements UpdateFloatingActionButtonPageChangeListener.FragmentAdapter {
 
         public TasksPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -157,7 +158,12 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
     @Override
     public void onDestroy() {
         ButterKnife.unbind(this);
-        super.onDestroy();
+        try {
+            super.onDestroy();
+        } catch (NullPointerException npe) {
+            // https://code.google.com/p/android/issues/detail?id=216157
+            Log.e(TAG, "NPE: Bug workaround");
+        }
     }
 
 

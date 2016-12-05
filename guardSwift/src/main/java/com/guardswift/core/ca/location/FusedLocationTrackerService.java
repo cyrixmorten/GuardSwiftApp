@@ -23,6 +23,7 @@ import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
 import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Util;
 import com.parse.ParseGeoPoint;
 
@@ -117,8 +118,6 @@ public class FusedLocationTrackerService extends InjectingService {
     }
 
 
-
-
     public void unsubscribeLocationUpdates() {
         if (locationSubscription != null && !locationSubscription.isUnsubscribed()) {
             Log.i(TAG, "Unsubscribe location updates");
@@ -141,8 +140,6 @@ public class FusedLocationTrackerService extends InjectingService {
     }
 
 
-
-
     private void requestLocationUpdates() {
 
         Log.i(TAG, "requestLocationUpdates");
@@ -161,9 +158,9 @@ public class FusedLocationTrackerService extends InjectingService {
                 .doOnError(new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                    String message = "Error on location init: " + throwable.getMessage();
-                    Log.e(TAG, message, throwable);
-                    Crashlytics.logException(throwable);
+                        String message = "Error on location init: " + throwable.getMessage();
+                        Log.e(TAG, message, throwable);
+                        Crashlytics.logException(throwable);
                     }
                 })
                 .onErrorReturn(new Func1<Throwable, Location>() {
@@ -191,9 +188,8 @@ public class FusedLocationTrackerService extends InjectingService {
                                 inspectDistanceToGeofencedTasks(location);
                             }
 
-                                Guard guard = guardCache.getLoggedIn();
-                                locationTracker.appendLocation(getApplicationContext(), guard, location);
-
+                            Guard guard = guardCache.getLoggedIn();
+                            locationTracker.appendLocation(getApplicationContext(), guard, location);
 
 
                         } else {
@@ -205,11 +201,15 @@ public class FusedLocationTrackerService extends InjectingService {
 
 
     private boolean rebuildGeofencesIfDistanceThresholdReached(Location location) {
+        boolean newTasks = GuardSwiftApplication.getInstance().shouldTriggerNewGeofence();
+
         float distance = Util.distanceMeters(mLastGeofenceRebuildLocation, location);
-        if (mLastGeofenceRebuildLocation == null || distance >= DISTANCE_METERS_FOR_GEOFENCEREBUILD) {
+        if (mLastGeofenceRebuildLocation == null || distance >= DISTANCE_METERS_FOR_GEOFENCEREBUILD || newTasks) {
             mLastGeofenceRebuildLocation = location;
 
             RegisterGeofencesIntentService.start(getApplicationContext());
+
+            GuardSwiftApplication.getInstance().triggerNewGeofence(false);
 
             return true;
         }
@@ -236,7 +236,7 @@ public class FusedLocationTrackerService extends InjectingService {
         List<String> tasksMovedWithinGeofence = Lists.newArrayList();
         List<String> tasksMovedOutsideGeofence = Lists.newArrayList();
 
-        for (GSTask task: geofencedTasks) {
+        for (GSTask task : geofencedTasks) {
 
             ParseGeoPoint clientPosition = task.getPosition();
             float distance = ParseModule.distanceBetweenMeters(location, clientPosition);

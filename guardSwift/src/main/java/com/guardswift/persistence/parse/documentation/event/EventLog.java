@@ -243,6 +243,11 @@ public class EventLog extends ExtendedParseObject {
             return this;
         }
 
+        public Builder deviceTimeStamp(Date time) {
+            eventLog.setDeviceTimestamp(time);
+            return this;
+        }
+
         public Builder wifiSample(Set<AccessPoint> sample) {
             eventLog.put(EventLog.checkpoint_wifi_sample, FingerprintingModule.convertToJsonArray(sample));
             return this;
@@ -332,7 +337,7 @@ public class EventLog extends ExtendedParseObject {
 
 //        private Builder circuitUnit(CircuitUnit circuitUnit) {
 //            eventLog.setCircuitUnit(circuitUnit);
-//            if (circuitUnit.isStarted()) {
+//            if (circuitUnit.isArrived()) {
 //                try {
 //                    // Query locally for the newest circuitStarted
 //                    circuitStarted(CircuitStarted.Query.findFrom(circuitUnit.getCircuit()));
@@ -498,6 +503,8 @@ public class EventLog extends ExtendedParseObject {
 
             return jsonObject;
         }
+
+
 
 
 //        public Builder locationTrackerUrl(String result) {

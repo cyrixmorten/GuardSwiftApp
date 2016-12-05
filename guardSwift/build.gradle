@@ -29,8 +29,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 22 // 23 require runtime permissions!!
-        versionCode 401
-        versionName "4.0.1"
+        versionCode 402
+        versionName "4.0.2"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -97,54 +97,33 @@ repositories {
 dependencies {
     // Local jar dependencies
     compile fileTree(include: ['*.jar'], dir: 'libs/alexandra')
-    compile 'net.sf.jopt-simple:jopt-simple:4.9'
     // used by alexandra WiFi
     // Animations
     //    compile 'com.nineoldandroids:library:2.4.0'
     //    compile 'com.daimajia.easing:library:1.0.1@aar'
     //    compile 'com.daimajia.androidanimations:library:1.1.3@aar'
     // REST
-    compile 'com.squareup.retrofit2:retrofit:2.0.2'
     // Parse.com
-    compile 'com.parse:parseui-login-android:0.0.1'
-    compile 'com.parse:parseui-widget-android:0.0.1'
-    compile 'com.parse:parse-android:1.13.0'
     // Annotations
     //    compile 'frankiesardo:icepick:3.1.0'
     //    provided 'frankiesardo:icepick-processor:3.1.0'
     // DI
     //    provided 'com.github.idamobile:dagger-proguard-helper-processor:1.0-SNAPSHOT'
-    compile 'com.squareup.dagger:dagger:1.2.2'
-    apt 'com.squareup.dagger:dagger-compiler:1.2.2'
-    compile 'com.squareup:javawriter:2.5.1'
-    compile 'javax.inject:javax.inject:1'
-    compile 'com.jakewharton:butterknife:7.0.1'
     // Broadcast
-    compile 'de.greenrobot:eventbus:2.4.0'
     // Image
-    compile 'com.squareup.picasso:picasso:2.5.2'
     // Font
-    compile 'com.mikepenz:fontawesome-typeface:4.4.0.1@aar'
     // Material
-    compile 'com.beardedhen:androidbootstrap:2.0.0'
     compile('com.mikepenz:materialdrawer:5.2.1@aar') {
         transitive = true
     }
     //    compile 'com.github.navasmdc:MaterialDesign:1.5@aar' // wait for attrs rename - currently clashes
-    compile 'com.getbase:floatingactionbutton:1.10.1'
-    compile 'cn.pedant.sweetalert:library:1.3'
     compile('com.afollestad.material-dialogs:core:0.8.3.0@aar') {
         transitive = true
     }
-    compile 'com.code-troopers.betterpickers:library:2.2.2'
     //    compile 'com.cocosw:bottomsheet:1.2.0@aar'
     // Android support libraries
     //    compile "com.android.support:support-v4:22.1.1"
-    compile 'com.malinskiy:superrecyclerview:1.1.4'
-    compile 'com.android.support:cardview-v7:23.3.0'
-    compile 'com.android.support:design:23.3.0'
     //    compile 'com.android.support:recyclerview-v7:23.1.0'
-    compile 'com.android.support:appcompat-v7:23.3.0'
     //CardsLib
     //Core card library
     //    compile 'com.github.gabrielemariotti.cards:cardslib-core:2.1.0'
@@ -153,21 +132,46 @@ dependencies {
     //Optional for RecyclerView
     //compile 'com.github.gabrielemariotti.cards:cardslib-recyclerview:2.1.0'
     // Reactive
-    compile 'pl.charmas.android:android-reactive-location:0.9@aar'
-    compile 'io.reactivex:rxandroid:1.2.0'
-    compile 'io.reactivex:rxjava:1.1.5'
     // Google Play Services
-    compile 'com.google.code.findbugs:jsr305:2.0.2'
-    compile 'com.google.android.gms:play-services-location:8.4.0'
-    compile 'com.google.android.gms:play-services-analytics:8.4.0'
     // Utils
-    compile 'com.google.code.gson:gson:2.4'
-    compile 'net.danlew:android.joda:2.5.1'
-    compile 'com.google.guava:guava:18.0'
     // Multidex
-    compile 'com.android.support:multidex:1.0.1'
     // Crashlytics
     compile('com.crashlytics.sdk.android:crashlytics:2.6.5@aar') {
         transitive = true;
     }
+    compile 'net.sf.jopt-simple:jopt-simple:4.9'
+    compile 'com.squareup.retrofit2:retrofit:2.0.2'
+    compile 'com.parse:parseui-login-android:0.0.1'
+    compile 'com.parse:parseui-widget-android:0.0.1'
+    compile 'com.parse:parse-android:1.13.0'
+    compile 'com.squareup.dagger:dagger:1.2.2'
+    compile 'com.squareup:javawriter:2.5.1'
+    compile 'javax.inject:javax.inject:1'
+    compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'de.greenrobot:eventbus:2.4.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.mikepenz:fontawesome-typeface:4.4.0.1@aar'
+    compile 'com.beardedhen:androidbootstrap:2.0.0'
+    compile 'com.getbase:floatingactionbutton:1.10.1'
+    compile 'cn.pedant.sweetalert:library:1.3'
+    compile 'com.code-troopers.betterpickers:library:2.2.2'
+    compile 'com.malinskiy:superrecyclerview:1.1.4'
+    compile 'com.android.support:cardview-v7:23.4.0'
+    compile 'com.android.support:design:23.4.0'
+    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'pl.charmas.android:android-reactive-location:0.9@aar'
+    compile 'io.reactivex:rxandroid:1.2.0'
+    compile 'io.reactivex:rxjava:1.1.5'
+    compile 'com.google.code.findbugs:jsr305:2.0.2'
+    compile 'com.google.android.gms:play-services-location:10.0.0'
+    compile 'com.google.android.gms:play-services-analytics:10.0.0'
+    compile 'com.google.code.gson:gson:2.4'
+    compile 'net.danlew:android.joda:2.5.1'
+    compile 'com.google.guava:guava:18.0'
+    compile 'com.android.support:multidex:1.0.1'
+    compile 'com.google.firebase:firebase-messaging:10.0.0'
+    compile 'com.google.android.gms:play-services-maps:10.0.0'
+    apt 'com.squareup.dagger:dagger-compiler:1.2.2'
 }
+
+apply plugin: 'com.google.gms.google-services'

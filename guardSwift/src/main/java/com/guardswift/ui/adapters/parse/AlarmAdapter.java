@@ -112,7 +112,7 @@
 //        if (!alarm.isAccepted() || alarm.isAborted()) {
 //            state_not_accepted();
 //        }
-//        if (alarm.isStarted()) {
+//        if (alarm.isArrived()) {
 //            state_arrived();
 //        }
 //        if (alarm.isClosed()) {
@@ -280,7 +280,7 @@
 //                                alarm.getUpdatedAt())));
 //                sharedText.setType("inverse");
 //            }
-//            if (alarm.isStarted()) {
+//            if (alarm.isArrived()) {
 //                sharedText.setText(getContext().getString(
 //                        R.string.marked_arrived,
 //                        alarm.getGuardName(),

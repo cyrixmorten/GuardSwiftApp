@@ -71,12 +71,23 @@ public class Client extends ExtendedParseObject implements Positioned {
 
     public static final String clientId = "clientId";
     public static final String name = "name";
+
+    // since version 4.0.0
+    public static final String street = "street";
+    public static final String streetNumber = "streetNumber";
+    public static final String postalCode = "postalCode";
+    public static final String city = "city";
+    public static final String formattedAddress = "formattedAddress";
+    // <--
+
+    // dreprecated since version 4.0.0
     public static final String addressName = "addressName";
-    public static final String addressName2 = "addressName2";
     public static final String addressNumber = "addressNumber";
     public static final String fullAddress = "fullAddress";
     public static final String cityName = "cityName";
     public static final String zipcode = "zipcode";
+    // <--
+
     public static final String email = "email";
 //    public static final String number = "number";
     public static final String position = "position";
@@ -87,7 +98,6 @@ public class Client extends ExtendedParseObject implements Positioned {
     public static final String contacts = "contacts";
 
     public static final String fingerprints = "fingerprints";
-    private Object contactsRequestingReportEmailsString;
 
 
     @Override
@@ -257,15 +267,12 @@ public class Client extends ExtendedParseObject implements Positioned {
     }
 
     public String getAddressName() {
-        return getString(addressName);
+        return has(Client.addressName) ? getString(Client.addressName) : getStringSafe(Client.street);
     }
 
-    public String getAddressName2() {
-        return getString(addressName2);
-    }
 
     public String getAddressNumber() {
-        return getString(addressNumber);
+        return has(Client.addressNumber) ? getString(Client.addressNumber) : getStringSafe(Client.streetNumber);
     }
 
     public String getFullAddress() {
@@ -273,11 +280,11 @@ public class Client extends ExtendedParseObject implements Positioned {
     }
 
     public String getCityName() {
-        return getString(cityName);
+        return has(Client.cityName) ? getString(Client.cityName) : getStringSafe(Client.city);
     }
 
     public String getZipcode() {
-        return getString(zipcode);
+        return has(Client.zipcode) ? getString(Client.zipcode) : getStringSafe(Client.postalCode);
     }
 
     public String getEmail() {
@@ -377,13 +384,15 @@ public class Client extends ExtendedParseObject implements Positioned {
 //        return this;
 //    }
 
+    // TODO disabled checkpoints to investigate performance issue
     public boolean hasCheckPoints() {
-        for (ClientLocation location : getLocations()) {
-            if (location.isCheckpoint()) {
-                return true;
-            }
-        }
         return false;
+//        for (ClientLocation location : getLocations()) {
+//            if (location.isCheckpoint()) {
+//                return true;
+//            }
+//        }
+//        return false;
     }
 
     public void clearCheckpoints() {

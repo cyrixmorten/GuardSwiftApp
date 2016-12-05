@@ -10,11 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import bolts.Task;
+import bolts.TaskCompletionSource;
 
 /**
  * Created by cyrix on 6/28/15.
  */
-abstract class BaseGeofenceStrategy<T extends BaseTask> implements TaskGeofenceStrategy<T> {
+abstract class BaseGeofenceStrategy implements TaskGeofenceStrategy {
 
     protected final GSTask task;
 
@@ -70,14 +71,14 @@ abstract class BaseGeofenceStrategy<T extends BaseTask> implements TaskGeofenceS
     }
 
     /**
-     * Wraps the {@link TaskGeofenceStrategy} queryGeofencedTasks implementation into a Bolts.Task
+     * Wraps the {@link TaskGeofenceStrategy} queryGeofencedTasks implementation into a Bolts.ParseTask
      *
      * @param radiusKm
      * @return
      */
     @Override
     public Task<List<ParseObject>> queryGeofencedTasks(int radiusKm) {
-        final Task<List<ParseObject>>.TaskCompletionSource successful = Task.create();
+        final TaskCompletionSource<List<ParseObject>> successful = new TaskCompletionSource<List<ParseObject>>();
         queryGeofencedTasks(radiusKm, new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {

@@ -2,6 +2,7 @@ package com.guardswift.ui.parse;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.google.common.collect.Lists;
@@ -58,6 +59,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
 
     // may be null if not attached to activity or fragment
     protected Context context;
+    protected FragmentManager fragmentManager;
     protected boolean fromLocalDataStore;
 
     public void onAttatch(Context context) {

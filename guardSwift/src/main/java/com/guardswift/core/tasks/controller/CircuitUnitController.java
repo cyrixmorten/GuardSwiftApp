@@ -23,38 +23,34 @@ import com.parse.SaveCallback;
 /**
  * Created by cyrix on 2/26/15.
  */
-public class CircuitUnitController extends BaseTaskController<CircuitUnit> {
+public class CircuitUnitController extends BaseTaskController {
 
 
     private static final String TAG = CircuitUnitController.class.getSimpleName();
 
     private final Context ctx;
-    private final GuardCache guardCache;
     private final GSTasksCache tasksCache;
 
 
     public CircuitUnitController() {
         this.ctx = GuardSwiftApplication.getInstance();
-        this.guardCache = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache();
         this.tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
     }
 
 
-    public CircuitUnit performAction(ACTION action, final CircuitUnit circuitUnit, final boolean automatic) {
+    public GSTask performAction(ACTION action, final GSTask task, final boolean automatic) {
 
         Log.e(TAG, "invoking action: " + action.toString());
+
+        final CircuitUnit circuitUnit = (CircuitUnit)task;
 
         if (!canPerformAction(action, circuitUnit)) {
             Log.e(TAG, "unable to apply action to task " + action);
             return circuitUnit;
         }
 
-
-        final Guard guard = guardCache.getLoggedIn();
-
         EventLog.Builder event = null;
 
-        final String clientName = circuitUnit.getClient().getName();
         switch (action) {
             case OPEN:
 //                TaskDetailsActivityFactory.start(ctx, circuitUnit);
@@ -75,7 +71,7 @@ public class CircuitUnitController extends BaseTaskController<CircuitUnit> {
 //                }
 
 
-                circuitUnit.setArrived(guard);
+                circuitUnit.setArrived();
                 tasksCache.addArrived(circuitUnit);
 
                 if (circuitUnit.hasCheckPoints()) {
@@ -115,7 +111,7 @@ public class CircuitUnitController extends BaseTaskController<CircuitUnit> {
 
                 WiFiPositioningService.stop(ctx);
 
-                circuitUnit.setFinished(guard);
+                circuitUnit.setFinished();
                 tasksCache.removeArrived(circuitUnit);
 
                 break;

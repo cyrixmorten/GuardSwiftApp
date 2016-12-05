@@ -36,7 +36,6 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Minutes;
 import org.joda.time.MutableDateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -46,7 +45,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-//import de.keyboardsurfer.android.widget.crouton.Style;
 
 @ParseClassName("CircuitUnit")
 public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
@@ -54,22 +52,22 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
 
     private static final String TAG = CircuitUnit.class.getSimpleName();
 
-    private TaskController<CircuitUnit> controller;
-    private TaskReportingStrategy<CircuitUnit> taskReportingStrategy;
-    private TaskAutomationStrategy<CircuitUnit> automationStrategy;
+    private TaskController controller;
+    private TaskReportingStrategy taskReportingStrategy;
+    private TaskAutomationStrategy automationStrategy;
 
     public CircuitUnit() {
         this.controller = new CircuitUnitController();
-        taskReportingStrategy = new NoTaskReportingStrategy<>(this);
-        automationStrategy = new StandardTaskAutomationStrategy<>(this);
+        taskReportingStrategy = new NoTaskReportingStrategy(this);
+        automationStrategy = new StandardTaskAutomationStrategy(this);
     }
 
 
     @Override
     public TaskGeofenceStrategy getGeofenceStrategy() {
-        TaskGeofenceStrategy<CircuitUnit> geofenceStrategy = new RegularGeofenceStrategy<>(this);
+        TaskGeofenceStrategy geofenceStrategy = new RegularGeofenceStrategy(this);
         if (isRaid()) {
-            geofenceStrategy = new DistrictWatchGeofenceStrategy<>(this);
+            geofenceStrategy = new DistrictWatchGeofenceStrategy(this);
         }
 
         return geofenceStrategy;
@@ -78,9 +76,9 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     @Override
     public TaskActivityStrategy getActivityStrategy() {
 //        if (activityStrategy == null) {
-        TaskActivityStrategy<CircuitUnit> activityStrategy = new ArriveWhenNotInVehicleStrategy<>(this);
+        TaskActivityStrategy activityStrategy = new ArriveWhenNotInVehicleStrategy(this);
         if (isRaid()) {
-            activityStrategy = new NoActivityStrategy<>();
+            activityStrategy = new NoActivityStrategy();
         }
 //        }
         return activityStrategy;
@@ -96,10 +94,6 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
         return automationStrategy;
     }
 
-    @Override
-    public TaskReportingStrategy getTaskReportingStrategy() {
-        return taskReportingStrategy;
-    }
 
     @Override
     public TaskController getController() {
@@ -173,12 +167,12 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     @Override
     public TASK_STATE getTaskState() {
         if (isFinished()) {
-            return TASK_STATE.FINSIHED;
+            return TASK_STATE.FINISHED;
         }
         if (isAborted()) {
             return TASK_STATE.ABORTED;
         }
-        if (isStarted()) {
+        if (isArrived()) {
             return TASK_STATE.ARRIVED;
         }
 
@@ -224,50 +218,59 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
         return null;
     }
 
+//    @Override
+//    public boolean isWithinScheduledTime() {
+//
+////        if (BuildConfig.DEBUG)
+////            return true;
+//
+//        Log.d(TAG, "isWithinScheduledTime ");
+//
+//        DateTime timeStartOrg = new DateTime(getTimeStart());
+//        DateTime timeEndOrg = new DateTime(getTimeEnd());
+//
+//        CircuitStarted selectedCircuitStarted = getCircuitStarted();
+//
+//        if (selectedCircuitStarted == null)
+//            return true; // lets be optimistic
+//
+//        MutableDateTime timeStart = new MutableDateTime(selectedCircuitStarted.getCreatedAt());
+//        int startHour = timeStartOrg.getHourOfDay();
+//        timeStart.setHourOfDay(startHour);
+//        timeStart.setMinuteOfHour(timeStartOrg.getMinuteOfHour());
+//
+//        MutableDateTime timeEnd = new MutableDateTime(selectedCircuitStarted.getCreatedAt());
+//        int endHour = timeEndOrg.getHourOfDay();
+//        if (endHour < startHour)
+//            timeEnd.addDays(1);
+//
+//        timeEnd.setHourOfDay(endHour);
+//        timeEnd.setMinuteOfHour(timeEndOrg.getMinuteOfHour());
+//
+//        DateTime now = DateTime.now(DateTimeZone.getDefault());
+//
+//        Log.d(TAG, "-- timeStart: " + timeStart.getHourOfDay() + ":" + timeStart.getMinuteOfHour());
+//        Log.d(TAG, "-- timeEnd: " + timeEnd.getHourOfDay() + ":" + timeEnd.getMinuteOfHour());
+//        Log.d(TAG, "-- now: " + now.getHourOfDay() + ":" + now.getMinuteOfHour());
+//
+//        boolean afterTimeStart = now.isAfter(timeStart);
+//        boolean beforeTimeEnd = now.isBefore(timeEnd);
+//
+//        Log.d(TAG, "  -- afterTimeStart: " + afterTimeStart);
+//        Log.d(TAG, "  -- beforeTimeEnd: " + beforeTimeEnd);
+//
+//        return afterTimeStart && beforeTimeEnd;
+//    }
+
     @Override
-    public boolean isWithinScheduledTime() {
-
-//        if (BuildConfig.DEBUG)
-//            return true;
-
-        Log.d(TAG, "isWithinScheduledTime ");
-
-        DateTime timeStartOrg = new DateTime(getTimeStart());
-        DateTime timeEndOrg = new DateTime(getTimeEnd());
-
-        CircuitStarted selectedCircuitStarted = getCircuitStarted();
-
-        if (selectedCircuitStarted == null)
-            return true; // lets be optimistic
-
-        MutableDateTime timeStart = new MutableDateTime(selectedCircuitStarted.getCreatedAt());
-        int startHour = timeStartOrg.getHourOfDay();
-        timeStart.setHourOfDay(startHour);
-        timeStart.setMinuteOfHour(timeStartOrg.getMinuteOfHour());
-
-        MutableDateTime timeEnd = new MutableDateTime(selectedCircuitStarted.getCreatedAt());
-        int endHour = timeEndOrg.getHourOfDay();
-        if (endHour < startHour)
-            timeEnd.addDays(1);
-
-        timeEnd.setHourOfDay(endHour);
-        timeEnd.setMinuteOfHour(timeEndOrg.getMinuteOfHour());
-
-        DateTime now = DateTime.now(DateTimeZone.getDefault());
-
-        Log.d(TAG, "-- timeStart: " + timeStart.getHourOfDay() + ":" + timeStart.getMinuteOfHour());
-        Log.d(TAG, "-- timeEnd: " + timeEnd.getHourOfDay() + ":" + timeEnd.getMinuteOfHour());
-        Log.d(TAG, "-- now: " + now.getHourOfDay() + ":" + now.getMinuteOfHour());
-
-        boolean afterTimeStart = now.isAfter(timeStart);
-        boolean beforeTimeEnd = now.isBefore(timeEnd);
-
-        Log.d(TAG, "  -- afterTimeStart: " + afterTimeStart);
-        Log.d(TAG, "  -- beforeTimeEnd: " + beforeTimeEnd);
-
-        return afterTimeStart && beforeTimeEnd;
+    public boolean isPending() {
+        return !isArrived();
     }
 
+    @Override
+    public boolean isAccepted() {
+        return true;
+    }
 
 
     public static final int SORTBY_NEAREST = 1;
@@ -698,6 +701,7 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
 
             return this;
         }
+
     }
 
 //    public static CroutonText createCroutonText(CircuitUnit circuitUnit) {
@@ -708,7 +712,7 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
 //        if (circuitUnit.isFinished()) {
 //            eventText += "afsluttet";
 //            style = Style.CONFIRM;
-//        } else if (circuitUnit.isStarted()) {
+//        } else if (circuitUnit.isArrived()) {
 //            eventText += "ankommet";
 //            style = Style.INFO;
 //        } else if (circuitUnit.getGuardId() == 0) {
@@ -774,29 +778,36 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
         return Minutes.minutesBetween(lastArrived, now).getMinutes();
     }
 
-    public void setArrived(Guard guard) {
-//        setArrivedReported(true);
+    public void setPending() {
+
+    }
+
+    public void setAccepted() {
+
+    }
+
+    public void setArrived() {
+
+        Guard guard = GuardSwiftApplication.getCurrentGuard();
 
         setTimeStartedNow();
         setGuard(guard);
-//        resetTimeEnded();
-//        setCircuitStartOed(CircuitStarted.Recent.getSelected());
-//        clearAutomaticDepartureReports();
         put(isAborted, false);
         put(CircuitUnit.guard, guard);
     }
 
-    public void setFinished(Guard guard) {
+    public void setFinished() {
+        Guard guard = GuardSwiftApplication.getCurrentGuard();
+
         setTimeEndedNow();
         setGuard(guard);
-//        clearAutomaticArrivalReports();
         put(isAborted, false);
     }
 
     public void setAborted() {
         removeGuard();
-        resetTimeStarted();
-        resetTimeEnded();
+//        resetTimeStarted();
+//        resetTimeEnded();
         put(isAborted, true);
     }
 
@@ -805,14 +816,13 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     }
 
 
-    public boolean isStarted() {
+    public boolean isArrived() {
         CircuitStarted circuitStarted = getCircuitStarted();
         if (getTimeStarted() == null || circuitStarted == null) {
             return false;
         } else {
-            boolean arrived = getTimeStarted().after(
+            return getTimeStarted().after(
                     circuitStarted.getCreatedAt());
-            return arrived;
         }
     }
 
@@ -846,7 +856,7 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     public boolean arrivedByAnotherGuard(
             Guard guard) {
 
-        return takenByAnotherGuard(guard) && isStarted();
+        return takenByAnotherGuard(guard) && isArrived();
     }
 
     public boolean finishedByAnotherGuard(

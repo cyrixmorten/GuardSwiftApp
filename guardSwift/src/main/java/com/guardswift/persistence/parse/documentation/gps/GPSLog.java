@@ -23,7 +23,7 @@
 //import bolts.Continuation;
 //
 ///*
-// * Keeps a log of all the GPS positions logged while being inside the geofence of a Task
+// * Keeps a log of all the GPS positions logged while being inside the geofence of a ParseTask
 // */
 //// TODO deprecated
 //@ParseClassName("GPSLog")
@@ -58,9 +58,9 @@
 //    /*
 //     * Only creates a new GPSLog if not found in LDS
 //     */
-////    public static Task<GPSLog> createIfNeeded(GSTask task) {
+////    public static ParseTask<GPSLog> createIfNeeded(GSTask task) {
 ////
-////        final Task<GPSLog>.TaskCompletionSource promise = Task.create();
+////        final ParseTask<GPSLog>.TaskCompletionSource promise = ParseTask.create();
 ////
 ////        final GPSLog newGpsLog = create(task);
 ////
@@ -179,7 +179,7 @@
 //        put(GPSLog.circuitUnit, circuitUnit);
 //        CircuitStarted.Query.findInBackground(circuitUnit.getCircuit()).onSuccess(new Continuation<CircuitStarted, Object>() {
 //            @Override
-//            public Object then(bolts.Task<CircuitStarted> task) throws Exception {
+//            public Object then(bolts.ParseTask<CircuitStarted> task) throws Exception {
 //                Log.d(PIN, "Setting CircuitStarted: " + task.getResult());
 //                put(GPSLog.circuitStarted, task.getResult());
 //                return null;
@@ -191,7 +191,7 @@
 //        put(GPSLog.districtWatchClient, circuitUnit);
 //        DistrictWatchStarted.Query.findInBackground(districtWatchClient.getDistrictWatch()).onSuccess(new Continuation<DistrictWatchStarted, Object>() {
 //            @Override
-//            public Object then(bolts.Task<DistrictWatchStarted> task) throws Exception {
+//            public Object then(bolts.ParseTask<DistrictWatchStarted> task) throws Exception {
 //                Log.d(PIN, "Setting DistrictWatchStarted: " + task.getResult());
 //                put(GPSLog.districtWatchStarted, task.getResult());
 //                return null;

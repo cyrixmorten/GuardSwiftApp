@@ -17,7 +17,6 @@ import com.guardswift.core.ca.activity.ActivityRecognitionService;
 import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
 import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingApplication;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.parse.ParseObjectFactory;
@@ -31,6 +30,7 @@ import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
 import com.guardswift.persistence.parse.documentation.report.Report;
+import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
@@ -41,6 +41,7 @@ import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.parse.Parse;
 import com.parse.ParseACL;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 
@@ -74,6 +75,7 @@ public class GuardSwiftApplication extends InjectingApplication {
     }
 
     private boolean parseObjectsBootstrapped;
+    private boolean triggerNewGeofence = false;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -112,6 +114,10 @@ public class GuardSwiftApplication extends InjectingApplication {
         }
     }
 
+    public static Guard getCurrentGuard() {
+        return GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().getLoggedIn();
+    }
+
 
     private void setupParse() {
         ParseObject.registerSubclass(Report.class);
@@ -121,6 +127,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         ParseObject.registerSubclass(Person.class);
         ParseObject.registerSubclass(ClientContact.class);
         ParseObject.registerSubclass(ClientLocation.class);
+        ParseObject.registerSubclass(ParseTask.class);
         ParseObject.registerSubclass(CircuitUnit.class);
         ParseObject.registerSubclass(CircuitStarted.class);
         ParseObject.registerSubclass(DistrictWatch.class);
@@ -156,6 +163,17 @@ public class GuardSwiftApplication extends InjectingApplication {
         defaultACL.setPublicWriteAccess(false);
         defaultACL.setPublicReadAccess(false);
         ParseACL.setDefaultACL(defaultACL, true);
+
+        saveInstallation();
+    }
+
+    private void saveInstallation() {
+        ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+        ParseUser user = ParseUser.getCurrentUser();
+        if (user != null) {
+            installation.put("owner", user);
+        }
+        installation.saveInBackground();
     }
 
     private void setupFabric() {
@@ -197,6 +215,14 @@ public class GuardSwiftApplication extends InjectingApplication {
                 analytics.setDryRun(true);
         }
         return tracker;
+    }
+
+    public void triggerNewGeofence(boolean trigger) {
+        this.triggerNewGeofence = trigger;
+    }
+
+    public boolean shouldTriggerNewGeofence() {
+        return triggerNewGeofence;
     }
 
     public ParseCacheFactory getCacheFactory() {
@@ -251,31 +277,34 @@ public class GuardSwiftApplication extends InjectingApplication {
         ArrayList<Task<List<ParseObject>>> tasks = new ArrayList<>();
 
 
-        Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType()
-                .updateAllAsync();
+        Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType().updateAllAsync();
         tasks.add(eventTypes.onSuccess(updateClassSuccess));
 
+        Task<List<ParseObject>> clients = parseObjectFactory.getClient().updateAllAsync();
+        tasks.add(clients.onSuccess(updateClassSuccess));
+
+        Task<List<ParseObject>> guards = parseObjectFactory.getGuard().updateAllAsync();
+        tasks.add(guards.onSuccess(updateClassSuccess));
+
         if (guard.canAccessRegularTasks()) {
-            Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted()
-                    .updateAllAsync();
-            Task<List<ParseObject>> circuitUnit = parseObjectFactory
-                    .getCircuitUnit().updateAllAsync();
+            Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted().updateAllAsync();
+            Task<List<ParseObject>> circuitUnit = parseObjectFactory.getCircuitUnit().updateAllAsync();
 
             tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
             tasks.add(circuitUnit.onSuccess(updateClassSuccess));
         }
 
         if (guard.canAccessDistrictTasks()) {
-            Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory
-                    .getDistrictWatchStarted().updateAllAsync();
-            Task<List<ParseObject>> districtWatchClient = parseObjectFactory
-                    .getDistrictWatchClient().updateAllAsync();
+            Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory.getDistrictWatchStarted().updateAllAsync();
+            Task<List<ParseObject>> districtWatchClient = parseObjectFactory.getDistrictWatchClient().updateAllAsync();
 
             tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
             tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
         }
 
         updateClassTotal.set(tasks.size());
+
+        saveInstallation();
 
         return Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
             @Override

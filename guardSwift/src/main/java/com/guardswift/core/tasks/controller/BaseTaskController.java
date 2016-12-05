@@ -7,16 +7,16 @@ import com.guardswift.ui.GuardSwiftApplication;
 /**
  * Created by cyrix on 10/28/15.
  */
-public abstract class BaseTaskController<T extends BaseTask> implements TaskController<T> {
+public abstract class BaseTaskController implements TaskController {
 
-    abstract T performAction(ACTION action, T task, boolean automatic);
+    abstract GSTask performAction(ACTION action, GSTask task, boolean automatic);
 
     @Override
-    public T performAction(ACTION action, T task) {
+    public GSTask performAction(ACTION action, GSTask task) {
         return performAction(action, task, false);
     }
 
-    private boolean actionAllowedByTaskState(ACTION action, T task) {
+    private boolean actionAllowedByTaskState(ACTION action, GSTask task) {
         switch (task.getTaskState()) {
             case PENDING:
                 return action != ACTION.RESET && action != ACTION.ABORT;
@@ -26,7 +26,7 @@ public abstract class BaseTaskController<T extends BaseTask> implements TaskCont
                 return action != ACTION.ARRIVE;
             case ABORTED:
                 return action != ACTION.ABORT;
-            case FINSIHED:
+            case FINISHED:
                 return action != ACTION.FINISH;
         }
 
@@ -34,7 +34,7 @@ public abstract class BaseTaskController<T extends BaseTask> implements TaskCont
     }
 
     @Override
-    public boolean canPerformAction(ACTION action, T task) {
+    public boolean canPerformAction(ACTION action, GSTask task) {
 
         boolean guardLoggedIn = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().isLoggedIn();
 
@@ -43,12 +43,12 @@ public abstract class BaseTaskController<T extends BaseTask> implements TaskCont
 
     
     @Override
-    public boolean canPerformAutomaticAction(ACTION action, T task) {
+    public boolean canPerformAutomaticAction(ACTION action, GSTask task) {
         return canPerformAction(action, task) && !task.isFinished();
     }
 
     @Override
-    public T performAutomaticAction(ACTION action, T task) {
+    public GSTask performAutomaticAction(ACTION action, GSTask task) {
         if (canPerformAutomaticAction(action, task)) {
             return performAction(action, task, true);
         }
@@ -65,7 +65,7 @@ public abstract class BaseTaskController<T extends BaseTask> implements TaskCont
             case ABORT:
                 return GSTask.TASK_STATE.ABORTED;
             case FINISH:
-                return GSTask.TASK_STATE.FINSIHED;
+                return GSTask.TASK_STATE.FINISHED;
         }
         return GSTask.TASK_STATE.PENDING;
     }

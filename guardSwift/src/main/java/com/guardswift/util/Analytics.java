@@ -60,7 +60,7 @@ public class Analytics {
     }
 
     public static void eventTaskTrend(EventAction action, EventLabelTask label) {
-        sendEvent("Task trends", action.toString(), label.toString());
+        sendEvent("ParseTask trends", action.toString(), label.toString());
     }
 
     public static void eventEventLogTrend(CreateEventlogAction action) {

@@ -46,9 +46,10 @@ public class ReportEditViewPagerFragment extends AbstractTabsViewPagerFragment {
         fragmentMap.put(getString(R.string.title_report), ReportEditListFragment.newInstance(task));
         if (task.getTaskType() == GSTask.TASK_TYPE.STATIC) {
             fragmentMap.put(getString(R.string.title_send), ReportSummaryFragment.newInstance((StaticTask) task));
-        } else {
-            fragmentMap.put(getString(R.string.title_suggestions), ReportSuggestionsListFragment.newInstance(task));
         }
+//        else {
+//            fragmentMap.put(getString(R.string.title_suggestions), ReportSuggestionsListFragment.newInstance(task));
+//        }
         fragmentMap.put(getString(R.string.title_history), ReportHistoryListFragment.newInstance(task.getClient(), task.getTaskType()));
 
         super.onCreate(savedInstanceState);

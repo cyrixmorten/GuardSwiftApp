@@ -13,6 +13,7 @@ import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.TaskFactory;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import java.util.ArrayList;
@@ -189,25 +190,25 @@ public class GeofencingModule {
 
     }
 
-    public Task<List<BaseTask>> queryAllGeofenceTasks(int withinKm) {
+    public Task<List<ParseObject>> queryAllGeofenceTasks(int withinKm) {
 
 //        Log.d(TAG, "queryAllGeofenceTasks withinKm: " + withinKm);
 
-        final TaskCompletionSource<List<BaseTask>> promise = new TaskCompletionSource<>();
+        final TaskCompletionSource<List<ParseObject>> promise = new TaskCompletionSource<>();
 
-        final List<BaseTask> geofenceResults = Lists.newArrayList();
+        final List<ParseObject> geofenceResults = Lists.newArrayList();
 
-        ArrayList<Task<List<BaseTask>>> queryGeofenceTasks = new ArrayList<>();
+        ArrayList<Task<List<ParseObject>>> queryGeofenceTasks = new ArrayList<>();
 
-        List<BaseTask> allGSTasks = new TaskFactory().getTasks();
+        List<GSTask> allGSTasks = new TaskFactory().getTasks();
 
-        for (final BaseTask gsTask : allGSTasks) {
-            Task<List<BaseTask>> geofencedTasks = gsTask.getGeofenceStrategy().queryGeofencedTasks(withinKm);
-            geofencedTasks.onSuccess(new Continuation<List<BaseTask>, Object>() {
+        for (final GSTask gsTask : allGSTasks) {
+            Task<List<ParseObject>> geofencedTasks = gsTask.getGeofenceStrategy().queryGeofencedTasks(withinKm);
+            geofencedTasks.onSuccess(new Continuation<List<ParseObject>, Object>() {
                 @Override
-                public Object then(Task<List<BaseTask>> listTask) throws Exception {
+                public Object then(Task<List<ParseObject>> listTask) throws Exception {
 //                    Log.d(TAG, "Found " + listTask.getResult() + " " + gsTask.getTaskType());
-                    for (BaseTask taskObject : listTask.getResult()) {
+                    for (ParseObject taskObject : listTask.getResult()) {
                         geofenceResults.add(taskObject);
                     }
                     return null;
@@ -249,10 +250,10 @@ public class GeofencingModule {
 
         ArrayList<Task<List<BaseTask>>> tasks = new ArrayList<>();
 
-        List<BaseTask> allGSTasks = new TaskFactory().getTasks();
+        List<GSTask> allGSTasks = new TaskFactory().getTasks();
         Map<String, List<String>> objectIdsMap = mapGeofenceIdsToClassName(geofenceIds);
 
-        for (final BaseTask gsTask : allGSTasks) {
+        for (final GSTask gsTask : allGSTasks) {
             if (gsTask.getGeofenceStrategy() instanceof NoGeofenceStrategy) {
 //                Log.d(TAG, "Skipping " + gsTask.getParseClassName());
                 continue;
@@ -266,7 +267,7 @@ public class GeofencingModule {
 
             final String[] objectIdsArray = objectIdsList.toArray(new String[objectIdsList.size()]);
             final ParseQuery<BaseTask> geofencedQueryNetwork = gsTask.getQueryBuilder(false).matchingObjectIds(objectIdsArray).build();
-            ParseQuery<BaseTask> geofencedQueryLDS = new ParseQuery<BaseTask>(geofencedQueryNetwork).fromLocalDatastore();
+            ParseQuery<BaseTask> geofencedQueryLDS = new ParseQuery<>(geofencedQueryNetwork).fromLocalDatastore();
             Task<List<BaseTask>> geofencedTask = geofencedQueryLDS.findInBackground();
             geofencedTask.continueWith(new Continuation<List<BaseTask>, Object>() {
                 @Override
@@ -281,7 +282,7 @@ public class GeofencingModule {
                             // attempt to recover
                             // might be deprecated due to GuardSwiftApplication bootstrapParseObjectsLocally
 //                            Log.w(TAG, "Updating failed objectIds in LDS");
-                            gsTask.updateAll(geofencedQueryNetwork, 100).continueWith(new Continuation<List<BaseTask>, Object>() {
+                            ((BaseTask)gsTask).updateAll(geofencedQueryNetwork, 100).continueWith(new Continuation<List<BaseTask>, Object>() {
                                 @Override
                                 public Object then(Task<List<BaseTask>> task) throws Exception {
                                     if (task.getError() != null) {
@@ -340,79 +341,13 @@ public class GeofencingModule {
             objectIdsMap.put(parseClassName, objectIds);
         }
 
-//        Log.w(TAG, "mapGeofenceIdsToClassName");
-//        for (String parseClassName : objectIdsMap.keySet()) {
-//            Log.w(TAG, parseClassName + ": " + Arrays.toString(objectIdsMap.get(parseClassName).toArray()));
-//        }
+
 
         return objectIdsMap;
     }
 
 
-//    public static class Recent {
-//
-//        private static Set<GSTask> allGSTasks = Sets.newConcurrentHashSet();
-//        private static Set<GSTask> withinGeoFence = Sets.newConcurrentHashSet();
-//
-//        private static Set<GSTask> outsideGeoFence = Sets.newConcurrentHashSet();
-//
-//
-//        public static void setAllGeofencedTasks(List<GSTask> tasks) {
-//            clearAllGeofencedTasks();
-//            allGSTasks.addAll(tasks);
-//        }
-//
-//        public static Set<GSTask> getAllGeofencedTasks() {
-//            return allGSTasks;
-//        }
-//
-//        public static void clearAllGeofencedTasks() {
-//            Log.e(TAG, "clearAllGeofenceTasks");
-//            allGSTasks.clear();
-//            withinGeoFence.clear();
-//            outsideGeoFence.clear();
-//        }
-//
-//        public static boolean moveWithinGeofence(GSTask task) {
-//
-//            boolean addWithin = withinGeoFence.addUnique(task);
-//            boolean removeOutside = outsideGeoFence.remove(task);
-//
-//
-//            if (addWithin) {
-//                EventBusController.postUIUpdate(task, 1000);
-//            }
-//
-//            return addWithin;
-//        }
-//
-//
-//        public static boolean moveOutsideGeofence(GSTask task) {
-//            boolean removeWithin = withinGeoFence.remove(task);
-//            boolean addOutside = outsideGeoFence.addUnique(task);
-//
-//            if (removeWithin) {
-//                EventBusController.postUIUpdate(task, 1000);
-//            }
-//
-//            return removeWithin;
-//        }
-//
-//        public static void removeGeofence(GSTask GSTask) {
-//            outsideGeoFence.remove(GSTask);
-//        }
-//
-//
-//        public static Set<GSTask> getWithinGeofence() {
-//            return withinGeoFence;
-//        }
-//
-//        public static Set<GSTask> getOutsideGeofence() {
-//            return outsideGeoFence;
-//        }
-//
-//
-//    }
+
 
 
 }

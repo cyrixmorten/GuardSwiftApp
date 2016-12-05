@@ -9,6 +9,7 @@ import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.execution.BaseTask;
+import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.FindCallback;
@@ -21,15 +22,12 @@ import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
-/**
- * Created by cyrix on 6/7/15.
- */
-public class RegularGeofenceStrategy<T extends BaseTask> extends BaseGeofenceStrategy<T> {
+public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
 
     private static final String TAG = RegularGeofenceStrategy.class.getSimpleName();
 
 
-    public RegularGeofenceStrategy(T task) {
+    public RegularGeofenceStrategy(GSTask task) {
         super(task);
     }
 
