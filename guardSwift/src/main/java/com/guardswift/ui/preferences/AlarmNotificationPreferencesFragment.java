@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.Preference;
+import android.util.Log;
 
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
@@ -14,7 +15,9 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.ToastHelper;
 import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.takisoft.fix.support.v7.preference.PreferenceCategory;
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat;
@@ -74,6 +77,18 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
         testAlarm.setTitle(R.string.test_alarm_create);
         testAlarm.setIcon(R.drawable.ic_add_alert_black_24dp);
 
+        testAlarm.setEnabled(false);
+
+        final String[] sendTo = {""};
+        final List<String> sendToList = ParseUser.getCurrentUser().getList("sendTo");
+
+        if (sendToList != null && !sendToList.isEmpty()) {
+            sendTo[0] = sendToList.get(0).replace("+", "");
+
+            testAlarm.setEnabled(true);
+        }
+
+
         testAlarm.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -86,11 +101,9 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
                 GuardSwiftServer.API guardSwift = retrofit.create(GuardSwiftServer.API.class);
 
-                List<String> sendTo = ParseUser.getCurrentUser().getList("sendTo");
-
                 showLoading();
 
-                guardSwift.testAlarm(sendTo.get(0).replace("+", "")).enqueue(new Callback<ResponseBody>() {
+                guardSwift.testAlarm(sendTo[0]).enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()) {
@@ -127,18 +140,18 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
                 .findInBackground(new FindCallback<Guard>() {
 
             @Override
-            public void done(List<Guard> objects, ParseException e) {
+            public void done(List<Guard> guards, ParseException e) {
 
                 ((PreferenceCategory)findPreference("alarm_notifications")).removeAll();
 
-                for (Guard guard: objects) {
-                    createAlarmNotifyPreference(guard);
+                for (Guard guard: guards) {
+                    createAlarmNotifyPreference(guards, guard);
                 }
             }
         });
     }
 
-    public void createAlarmNotifyPreference(final Guard guard) {
+    public void createAlarmNotifyPreference(final List<Guard> guards, final Guard guard) {
 
         PreferenceCategory alarmNotifications = (PreferenceCategory)findPreference("alarm_notifications");
 
@@ -150,18 +163,39 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
 
-                Boolean enable = (Boolean)newValue;
 
-                guard.enableAlarmSound(enable);
-                guard.enableAlarmSMS(enable);
-                guard.pinThenSaveEventually();
+                final Boolean enable = (Boolean)newValue;
 
-                guardNotification.setChecked(enable);
+                Guard.getQueryBuilder(true).build().findInBackground(new FindCallback<Guard>() {
+                    @Override
+                    public void done(List<Guard> objects, ParseException e) {
+                        int alarmNotifyCount = 0;
+                        for (Guard g: guards) {
+                            alarmNotifyCount += (g.isAlarmSoundEnabled()) ? 1 : 0;
+                        }
 
-                // if current guard, update last active entry
-                if (guard.equals(GuardSwiftApplication.getLoggedIn())) {
-                    GuardSwiftApplication.saveCurrentGuardAsLastActive();
-                }
+
+                        if (!enable && alarmNotifyCount == 1) {
+                            // do not allow 0 alarm receivers
+                            new CommonDialogsBuilder.MaterialDialogs(getContext()).ok(R.string.not_performed, R.string.last_alarm_receiver_message, null).show();
+
+                            guardNotification.setChecked(true);
+                        } else {
+                            guard.enableAlarmSound(enable);
+                            guard.enableAlarmSMS(enable);
+                            guard.pinThenSaveEventually();
+
+                            guardNotification.setChecked(enable);
+
+                            // if current guard, update last active entry
+                            if (guard.equals(GuardSwiftApplication.getLoggedIn())) {
+                                GuardSwiftApplication.saveCurrentGuardAsLastActive();
+                            }
+                        }
+                    }
+                });
+
+
 
                 return false;
             }
@@ -169,40 +203,5 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
         alarmNotifications.addPreference(guardNotification);
     }
-
-
-//    private void initPreferences() {
-//        pref = PreferenceManager.getDefaultSharedPreferences(getContext());
-//        guard = GuardSwiftApplication.getLoggedIn();
-//        pref.edit()
-//                .putString(GUARD_NAME, guard.getName())
-//                .putString(GUARD_MOBILE_NUMBER, guard.getMobile())
-//                .putBoolean(ALARM_NOTIFY, guard.isAlarmNotificationsEnabled())
-//                .putBoolean(ALARM_SOUND, guard.isAlarmSoundEnabled())
-//                .putBoolean(ALARM_SMS, !guard.getMobile().isEmpty() && guard.isAlarmSMSEnabled())
-//                .apply();
-//
-//    }
-//
-//    private void update() {
-//        EditTextPreference guardName = (EditTextPreference) findPreference(GUARD_NAME);
-//        EditTextPreference guardMobile = (EditTextPreference) findPreference(GUARD_MOBILE_NUMBER);
-//        guardName.setTitle(pref.getString(GUARD_NAME, ""));
-//        guardMobile.setTitle(pref.getString(GUARD_MOBILE_NUMBER, ""));
-//
-//        PreferenceCategory alarmNotifications = (PreferenceCategory)findPreference("alarm_notifications");
-//        if (GuardSwiftApplication.getLoggedIn().canAccessAlarms()) {
-//            CheckBoxPreference alarmNotify = (CheckBoxPreference) findPreference(ALARM_NOTIFY);
-//            CheckBoxPreference alarmSound = (CheckBoxPreference) findPreference(ALARM_SOUND);
-//            CheckBoxPreference alarmSMS = (CheckBoxPreference) findPreference(ALARM_SMS);
-//            alarmNotify.setChecked(pref.getBoolean(ALARM_NOTIFY, false));
-//            alarmSound.setChecked(pref.getBoolean(ALARM_SOUND, false));
-//            alarmSMS.setChecked(pref.getBoolean(ALARM_SMS, false));
-//        } else {
-//            alarmNotifications.removeAll();
-//            alarmNotifications.setVisible(false);
-//        }
-//    }
-
 
 }

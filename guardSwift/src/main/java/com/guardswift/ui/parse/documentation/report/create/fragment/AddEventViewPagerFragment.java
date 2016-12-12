@@ -186,14 +186,6 @@ public class AddEventViewPagerFragment extends InjectingFragment {
         }
     }
 
-    public void saveEventLog() {
-
-//		boolean saveRemarks = (eventBundle.containsKey(SAVE_REMARKS)) ? eventBundle
-//				.getBoolean(SAVE_REMARKS) : false;
-
-        ((AbstractCreateEventHandlerActivity) getActivity()).saveEvent();
-
-    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {

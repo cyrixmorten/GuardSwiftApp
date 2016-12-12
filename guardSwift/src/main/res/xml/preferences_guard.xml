@@ -25,28 +25,28 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="alarm_notifications"
-        android:title="@string/alarm_notifications">
+    <!--<PreferenceCategory-->
+        <!--android:key="alarm_notifications"-->
+        <!--android:title="@string/alarm_notifications">-->
 
-        <CheckBoxPreference
-            android:key="notify_on_incoming_alarms"
-            android:title="@string/notify_on_incoming_alarms"
-            android:summary="@string/notify_on_incoming_alarms_summary" />
+        <!--<CheckBoxPreference-->
+            <!--android:key="notify_on_incoming_alarms"-->
+            <!--android:title="@string/notify_on_incoming_alarms"-->
+            <!--android:summary="@string/notify_on_incoming_alarms_summary" />-->
 
-        <CheckBoxPreference
-            android:key="sound_on_incoming_alarms"
-            android:title="@string/sound_on_incoming_alarms"
-            android:summary="@string/sound_on_incoming_alarms_summary"
-            android:dependency="notify_on_incoming_alarms" />
+        <!--<CheckBoxPreference-->
+            <!--android:key="sound_on_incoming_alarms"-->
+            <!--android:title="@string/sound_on_incoming_alarms"-->
+            <!--android:summary="@string/sound_on_incoming_alarms_summary"-->
+            <!--android:dependency="notify_on_incoming_alarms" />-->
 
-        <CheckBoxPreference
-            android:key="sms_on_incoming_alarms"
-            android:title="@string/sms_on_incoming_alarms"
-            android:summary="@string/sms_on_incoming_alarms_summary"
-            android:dependency="notify_on_incoming_alarms" />
+        <!--<CheckBoxPreference-->
+            <!--android:key="sms_on_incoming_alarms"-->
+            <!--android:title="@string/sms_on_incoming_alarms"-->
+            <!--android:summary="@string/sms_on_incoming_alarms_summary"-->
+            <!--android:dependency="notify_on_incoming_alarms" />-->
 
-    </PreferenceCategory>
+    <!--</PreferenceCategory>-->
 
 
 

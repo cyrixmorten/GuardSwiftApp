@@ -14,6 +14,8 @@ import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 public class CircuitUnitCreateEventHandlerActivity extends AbstractCreateEventHandlerActivity {
@@ -45,7 +47,7 @@ public class CircuitUnitCreateEventHandlerActivity extends AbstractCreateEventHa
 //    }
 
     @Override
-    void saveEvent(String event, int amount, String people, String clientLocation,
+    void saveEvent(Date timestamp, String event, int amount, String people, String clientLocation,
                    String remarks) {
 
         new EventLog.Builder(this)
@@ -55,6 +57,7 @@ public class CircuitUnitCreateEventHandlerActivity extends AbstractCreateEventHa
                 .people(people)
                 .location(clientLocation)
                 .remarks(remarks)
+                .deviceTimeStamp(timestamp)
                 .eventCode(EventCodes.CIRCUITUNIT_OTHER).saveAsync();
 
 //        mCircuitUnit.getTaskSummaryInstance().event(eventlog);

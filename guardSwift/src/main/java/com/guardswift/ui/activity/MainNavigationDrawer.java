@@ -2,13 +2,8 @@ package com.guardswift.ui.activity;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.preference.CheckBoxPreference;
-import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -16,19 +11,16 @@ import android.view.View;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingActivityModule;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
-import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
-import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
@@ -39,7 +31,6 @@ import com.guardswift.ui.parse.execution.statictask.StaticTaskViewPagerFragment;
 import com.guardswift.ui.preferences.AlarmNotificationPreferencesFragment;
 import com.guardswift.ui.preferences.GuardPreferencesFragment;
 import com.guardswift.util.Analytics;
-import com.guardswift.util.ToastHelper;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -52,13 +43,9 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.parse.GetCallback;
 import com.parse.ParseException;
-import com.takisoft.fix.support.v7.preference.EditTextPreference;
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -154,6 +141,8 @@ public class MainNavigationDrawer {
                 })
                 .build();
 
+        navigationDrawer.addItems(getGuardDataDrawerItem());
+
         if (guardCache.getLoggedIn().canAccessAlarms()) {
             navigationDrawer.addItems(getAlarmsDrawerItems());
         }
@@ -172,7 +161,6 @@ public class MainNavigationDrawer {
 
 
         navigationDrawer.addItems(getDataDrawerItems());
-        navigationDrawer.addItems(getGuardSettingsDrawerItem());
         navigationDrawer.addStickyFooterItem(getLogoutDrawerItem());
 
 //        navigationDrawer.setOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
@@ -301,10 +289,10 @@ public class MainNavigationDrawer {
         IDrawerItem alarmHeader = new SectionDrawerItem().withName(R.string.title_drawer_alarms);
         alarmItems.add(alarmHeader);
 
-        IDrawerItem alarmItem = new PrimaryDrawerItem().withName(R.string.title_drawer_alarms).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+        IDrawerItem alarmItem = new PrimaryDrawerItem().withName(R.string.alarms).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                drawerCallback.selectItem(AlarmsViewPagerFragment.newInstance(), R.string.title_drawer_alarms);
+                drawerCallback.selectItem(AlarmsViewPagerFragment.newInstance(), R.string.alarms);
                 return false;
             }
         });
@@ -412,11 +400,11 @@ public class MainNavigationDrawer {
         return new PrimaryDrawerItem().withIdentifier(DRAWER_LOGOUT).withName(context.getString(R.string.title_drawer_logout)).withIcon(FontAwesome.Icon.faw_sign_out);
     }
 
-    private IDrawerItem getGuardSettingsDrawerItem() {
-        return new PrimaryDrawerItem().withName(context.getString(R.string.my_settings)).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+    private IDrawerItem getGuardDataDrawerItem() {
+        return new PrimaryDrawerItem().withName(context.getString(R.string.my_data)).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                drawerCallback.selectItem(GuardPreferencesFragment.newInstance(), R.string.my_settings);
+                drawerCallback.selectItem(GuardPreferencesFragment.newInstance(), R.string.my_data);
                 return true;
             }
         });

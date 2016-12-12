@@ -202,6 +202,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         ParseUser user = ParseUser.getCurrentUser();
         if (user != null) {
             installation.put("owner", user);
+            user.fetchInBackground();
         }
         installation.saveInBackground(new SaveCallback() {
             @Override
@@ -347,8 +348,6 @@ public class GuardSwiftApplication extends InjectingApplication {
         }
 
         updateClassTotal.set(tasks.size());
-
-        saveInstallation();
 
         return Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
             @Override

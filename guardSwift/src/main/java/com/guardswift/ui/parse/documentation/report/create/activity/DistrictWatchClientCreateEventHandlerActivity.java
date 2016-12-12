@@ -12,6 +12,8 @@ import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.ui.GuardSwiftApplication;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 public class DistrictWatchClientCreateEventHandlerActivity extends
@@ -48,8 +50,8 @@ public class DistrictWatchClientCreateEventHandlerActivity extends
 //	}
 
 	@Override
-	void saveEvent(String event, int amount, String people, String clientLocation,
-			String remarks) {
+	void saveEvent(Date timestamp, String event, int amount, String people, String clientLocation,
+				   String remarks) {
 
         new EventLog.Builder(this)
                 .taskPointer(mDistrictWatchClient, GSTask.EVENT_TYPE.OTHER)
@@ -58,6 +60,7 @@ public class DistrictWatchClientCreateEventHandlerActivity extends
 				.people(people)
                 .location(clientLocation)
                 .remarks(remarks)
+				.deviceTimeStamp(timestamp)
                 .eventCode(EventCodes.DISTRICTWATCH_OTHER).saveAsync();
 
 //        mDistrictWatchClient.getTaskSummaryInstance().event(eventlog);

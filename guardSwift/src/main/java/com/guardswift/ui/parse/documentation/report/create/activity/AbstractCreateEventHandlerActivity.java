@@ -5,11 +5,13 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateFormat;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
 import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
+import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.data.EventTypeCache;
@@ -22,9 +24,15 @@ import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventViewPagerFragment;
 import com.guardswift.util.Analytics;
+import com.guardswift.util.ToastHelper;
 import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 
+import org.joda.time.DateTime;
+
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -134,10 +142,30 @@ public abstract class AbstractCreateEventHandlerActivity extends
             public void onClick(View view) {
                 fragment.nextPageDelayed();
                 if (fragment.isLastPage()) {
-                    saveEvent();
+                    verifyEventTimestampAndSave();
                 }
             }
         });
+    }
+
+    private void verifyEventTimestampAndSave() {
+        ToastHelper.toast(this, getString(R.string.verify_event_time));
+
+        final DateTime timestamp = new DateTime();
+        RadialTimePickerDialogFragment timePickerDialog = RadialTimePickerDialogFragment
+                .newInstance(new RadialTimePickerDialogFragment.OnTimeSetListener() {
+                                 @Override
+                                 public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+                                     final Calendar cal = Calendar.getInstance();
+                                     cal.setTime(timestamp.toDate());
+                                     cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                     cal.set(Calendar.MINUTE, minute);
+
+                                     saveEvent(cal.getTime());
+                                 }
+                             }, timestamp.getHourOfDay(), timestamp.getMinuteOfHour(),
+                        DateFormat.is24HourFormat(this));
+        timePickerDialog.show(this.getSupportFragmentManager(), "FRAG_TAG_TIME_PICKER");
     }
 
     @Override
@@ -180,7 +208,9 @@ public abstract class AbstractCreateEventHandlerActivity extends
         if (fragment.isLastPage()) {
             btnNext.setText(getString(R.string.save));
         }
-    };
+    }
+
+    ;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -188,7 +218,6 @@ public abstract class AbstractCreateEventHandlerActivity extends
         outState.putBundle(EXTRA_EVENT_BUNDLE, eventBundle);
         super.onSaveInstanceState(outState);
     }
-
 
 
     @Override
@@ -205,9 +234,11 @@ public abstract class AbstractCreateEventHandlerActivity extends
 
     private Client getClient() {
         return taskCache.getLastSelected().getClient();
-    };
+    }
 
-    abstract void saveEvent(String event, int amount, String people, String clientLocation,
+    ;
+
+    abstract void saveEvent(Date timestamp, String event, int amount, String people, String clientLocation,
                             String remarks);
 
     @Override
@@ -319,7 +350,7 @@ public abstract class AbstractCreateEventHandlerActivity extends
         return eventBundle;
     }
 
-    public void saveEvent() {
+    public void saveEvent(Date timestamp) {
 
         String event_type = eventBundle.getString(EXTRA_EVENT_TYPE);
         int amount = eventBundle.getInt(EXTRA_AMOUNT);
@@ -327,7 +358,7 @@ public abstract class AbstractCreateEventHandlerActivity extends
         final String clientLocation = eventBundle.getString(EXTRA_LOCATIONS, "");
         final String remarks = eventBundle.getString(EXTRA_REMARKS, "");
 
-        saveEvent(event_type, amount, people, clientLocation, remarks);
+        saveEvent(timestamp, event_type, amount, people, clientLocation, remarks);
 
         GSTask task = taskCache.getLastSelected();
         // store remark tokens
@@ -374,7 +405,14 @@ public abstract class AbstractCreateEventHandlerActivity extends
         finish();
     }
 
-    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {};
-    public void onPageScrollStateChanged(int state) {};
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+    }
+
+    ;
+
+    public void onPageScrollStateChanged(int state) {
+    }
+
+    ;
 
 }

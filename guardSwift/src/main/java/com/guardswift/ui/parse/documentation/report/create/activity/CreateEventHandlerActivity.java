@@ -10,6 +10,8 @@ import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 public class CreateEventHandlerActivity extends AbstractCreateEventHandlerActivity {
@@ -43,8 +45,8 @@ public class CreateEventHandlerActivity extends AbstractCreateEventHandlerActivi
 //	}
 
 	@Override
-	void saveEvent(String event, int amount, String people, String clientLocation,
-			String remarks) {
+	void saveEvent(Date timestamp, String event, int amount, String people, String clientLocation,
+				   String remarks) {
 
 
         new EventLog.Builder(this)
@@ -55,6 +57,7 @@ public class CreateEventHandlerActivity extends AbstractCreateEventHandlerActivi
                 .location(clientLocation)
                 .remarks(remarks)
                 .eventCode(task.getEventCode())
+				.deviceTimeStamp(timestamp)
 				.saveAsync();
 
 //        mAlarm.getTaskSummaryInstance().event(eventlog);

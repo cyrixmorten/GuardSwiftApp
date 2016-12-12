@@ -22,9 +22,9 @@ public class GuardPreferencesFragment extends PreferenceFragmentCompat {
 
     private static String GUARD_NAME = "guard_name";
     private static String GUARD_MOBILE_NUMBER = "guard_mobile_number";
-    private static String ALARM_NOTIFY = "notify_on_incoming_alarms";
-    private static String ALARM_SOUND = "sound_on_incoming_alarms";
-    private static String ALARM_SMS = "sms_on_incoming_alarms";
+//    private static String ALARM_NOTIFY = "notify_on_incoming_alarms";
+//    private static String ALARM_SOUND = "sound_on_incoming_alarms";
+//    private static String ALARM_SMS = "sms_on_incoming_alarms";
 
     Guard guard;
     SharedPreferences pref;
@@ -51,15 +51,15 @@ public class GuardPreferencesFragment extends PreferenceFragmentCompat {
                     guard.setMobile(mobile);
                 }
             }
-            if (key.equals(ALARM_NOTIFY)) {
-                guard.enableAlarmNotification(prefs.getBoolean(key, false));
-            }
-            if (key.equals(ALARM_SOUND)) {
-                guard.enableAlarmSound(prefs.getBoolean(key, false));
-            }
-            if (key.equals(ALARM_SMS)) {
-                guard.enableAlarmSMS(prefs.getBoolean(key, false));
-            }
+//            if (key.equals(ALARM_NOTIFY)) {
+//                guard.enableAlarmNotification(prefs.getBoolean(key, false));
+//            }
+//            if (key.equals(ALARM_SOUND)) {
+//                guard.enableAlarmSound(prefs.getBoolean(key, false));
+//            }
+//            if (key.equals(ALARM_SMS)) {
+//                guard.enableAlarmSMS(prefs.getBoolean(key, false));
+//            }
 
             update();
             saveChange();
@@ -117,9 +117,9 @@ public class GuardPreferencesFragment extends PreferenceFragmentCompat {
         pref.edit()
                 .putString(GUARD_NAME, guard.getName())
                 .putString(GUARD_MOBILE_NUMBER, guard.getMobile())
-                .putBoolean(ALARM_NOTIFY, guard.isAlarmNotificationsEnabled())
-                .putBoolean(ALARM_SOUND, guard.isAlarmSoundEnabled())
-                .putBoolean(ALARM_SMS, !guard.getMobile().isEmpty() && guard.isAlarmSMSEnabled())
+//                .putBoolean(ALARM_NOTIFY, guard.isAlarmNotificationsEnabled())
+//                .putBoolean(ALARM_SOUND, guard.isAlarmSoundEnabled())
+//                .putBoolean(ALARM_SMS, !guard.getMobile().isEmpty() && guard.isAlarmSMSEnabled())
                 .apply();
 
     }
@@ -130,18 +130,18 @@ public class GuardPreferencesFragment extends PreferenceFragmentCompat {
         guardName.setTitle(pref.getString(GUARD_NAME, ""));
         guardMobile.setTitle(pref.getString(GUARD_MOBILE_NUMBER, ""));
 
-        PreferenceCategory alarmNotifications = (PreferenceCategory)findPreference("alarm_notifications");
-        if (GuardSwiftApplication.getLoggedIn().canAccessAlarms()) {
-            CheckBoxPreference alarmNotify = (CheckBoxPreference) findPreference(ALARM_NOTIFY);
-            CheckBoxPreference alarmSound = (CheckBoxPreference) findPreference(ALARM_SOUND);
-            CheckBoxPreference alarmSMS = (CheckBoxPreference) findPreference(ALARM_SMS);
-            alarmNotify.setChecked(pref.getBoolean(ALARM_NOTIFY, false));
-            alarmSound.setChecked(pref.getBoolean(ALARM_SOUND, false));
-            alarmSMS.setChecked(pref.getBoolean(ALARM_SMS, false));
-        } else {
-            alarmNotifications.removeAll();
-            alarmNotifications.setVisible(false);
-        }
+//        PreferenceCategory alarmNotifications = (PreferenceCategory)findPreference("alarm_notifications");
+//        if (GuardSwiftApplication.getLoggedIn().canAccessAlarms()) {
+//            CheckBoxPreference alarmNotify = (CheckBoxPreference) findPreference(ALARM_NOTIFY);
+//            CheckBoxPreference alarmSound = (CheckBoxPreference) findPreference(ALARM_SOUND);
+//            CheckBoxPreference alarmSMS = (CheckBoxPreference) findPreference(ALARM_SMS);
+//            alarmNotify.setChecked(pref.getBoolean(ALARM_NOTIFY, false));
+//            alarmSound.setChecked(pref.getBoolean(ALARM_SOUND, false));
+//            alarmSMS.setChecked(pref.getBoolean(ALARM_SMS, false));
+//        } else {
+//            alarmNotifications.removeAll();
+//            alarmNotifications.setVisible(false);
+//        }
     }
 
 
