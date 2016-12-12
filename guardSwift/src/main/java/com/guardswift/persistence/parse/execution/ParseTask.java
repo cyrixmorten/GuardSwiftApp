@@ -2,9 +2,9 @@ package com.guardswift.persistence.parse.execution;
 
 import android.content.Context;
 
-import com.guardswift.core.tasks.activity.ArriveWhenNotInVehicleStrategy;
+import com.guardswift.core.tasks.activity.NoActivityStrategy;
 import com.guardswift.core.tasks.activity.TaskActivityStrategy;
-import com.guardswift.core.tasks.automation.StandardTaskAutomationStrategy;
+import com.guardswift.core.tasks.automation.FinishOnDepartureAutomationStrategy;
 import com.guardswift.core.tasks.automation.TaskAutomationStrategy;
 import com.guardswift.core.tasks.controller.AlarmController;
 import com.guardswift.core.tasks.controller.TaskController;
@@ -92,7 +92,7 @@ public class ParseTask extends BaseTask {
     @Override
     public TaskActivityStrategy getActivityStrategy() {
         if (this.getTaskType() == TASK_TYPE.ALARM) {
-            return new ArriveWhenNotInVehicleStrategy(this);
+            return new NoActivityStrategy();
         }
         return null;
     }
@@ -100,7 +100,7 @@ public class ParseTask extends BaseTask {
     @Override
     public TaskAutomationStrategy getAutomationStrategy() {
         if (this.getTaskType() == TASK_TYPE.ALARM) {
-            return new StandardTaskAutomationStrategy(this);
+            return new FinishOnDepartureAutomationStrategy(this);
         }
         return null;
     }
@@ -212,7 +212,7 @@ public class ParseTask extends BaseTask {
     }
 
     private void setGuardCurrent() {
-        put(ParseTask.guard, GuardSwiftApplication.getCurrentGuard());
+        put(ParseTask.guard, GuardSwiftApplication.getLoggedIn());
     }
 
     @Override
@@ -271,7 +271,7 @@ public class ParseTask extends BaseTask {
     public void setAccepted() {
         setTimeStartedNow();
         setStatus(STATUS.ACCEPTED);
-        setGuardCurrent();
+//        setGuardCurrent();
     }
 
     public void setArrived() {

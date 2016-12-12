@@ -23,6 +23,7 @@ import com.guardswift.core.documentation.eventlog.task.TaskLogStrategyFactory;
 import com.guardswift.core.documentation.eventlog.task.TaskRegularLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskReportIdLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskStaticLogStrategy;
+import com.guardswift.core.documentation.eventlog.task.TaskTypeLogStrategy;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.eventbus.EventBusController;
@@ -542,7 +543,7 @@ public class EventLog extends ExtendedParseObject {
     public static final String timeEnd = TaskRegularLogStrategy.timeEnd;
     public static final String timeEndString = TaskRegularLogStrategy.timeEndString;
     // event description
-    public static final String task_type = "task_type"; // not task specific , e.g. ARRIVE, OTHER, etc.
+//    public static final String task_type = "task_type"; // not task specific , e.g. ARRIVE, OTHER, etc.
     public static final String task_event = "task_event";
     public static final String type = "type";
     public static final String eventType = "eventType";
@@ -734,6 +735,7 @@ public class EventLog extends ExtendedParseObject {
     public boolean isReportEvent() {
         int eventCode = getEventCode();
         switch (eventCode) {
+            case EventCodes.ALARM_OTHER: return true;
             case EventCodes.CIRCUITUNIT_OTHER: return true;
             case EventCodes.DISTRICTWATCH_OTHER: return true;
             case EventCodes.STATIC_OTHER: return true;
@@ -779,7 +781,7 @@ public class EventLog extends ExtendedParseObject {
 
 
     public String getTaskTypeName() {
-        return getString(task_type);
+        return getString(TaskTypeLogStrategy.taskTypeName);
     }
 
     private void setAutomatic(boolean automatic) {
@@ -1124,9 +1126,9 @@ public class EventLog extends ExtendedParseObject {
     }
 
     public GSTask.TASK_TYPE getTaskType() {
-//        if (has(EventLog.alarm)) {
-//            return GSTask.TASK_TYPE.ALARM;
-//        }
+        if (getTaskTypeName().equals(GSTask.TASK_TYPE.ALARM.toString())) {
+            return GSTask.TASK_TYPE.ALARM;
+        }
         if (has(EventLog.circuitUnit)) {
             return GSTask.TASK_TYPE.REGULAR;
         }

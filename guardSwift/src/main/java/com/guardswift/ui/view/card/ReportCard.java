@@ -204,7 +204,7 @@ public class ReportCard extends LinearLayout {
                             return;
                         }
 
-                        if (e != null) {
+                        if (e != null || file == null) {
                             ToastHelper.toast(getContext(), getContext().getString(R.string.error_downloading_file));
                         }
                         Intent target = new Intent(Intent.ACTION_VIEW);

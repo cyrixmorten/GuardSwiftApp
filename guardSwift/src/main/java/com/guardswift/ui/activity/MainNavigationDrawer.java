@@ -2,24 +2,33 @@ package com.guardswift.ui.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.preference.CheckBoxPreference;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingActivityModule;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
+import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
@@ -27,6 +36,10 @@ import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.ui.parse.execution.circuit.CircuitViewPagerFragment;
 import com.guardswift.ui.parse.execution.districtwatch.DistrictwatchViewPagerFragment;
 import com.guardswift.ui.parse.execution.statictask.StaticTaskViewPagerFragment;
+import com.guardswift.ui.preferences.AlarmNotificationPreferencesFragment;
+import com.guardswift.ui.preferences.GuardPreferencesFragment;
+import com.guardswift.util.Analytics;
+import com.guardswift.util.ToastHelper;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -39,17 +52,18 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.parse.GetCallback;
 import com.parse.ParseException;
+import com.takisoft.fix.support.v7.preference.EditTextPreference;
+import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
-/**
- * Created by cyrix on 12/12/15.
- */
 
 public class MainNavigationDrawer {
-
 
     private static final String TAG = MainNavigationDrawer.class.getSimpleName();
 
@@ -84,7 +98,7 @@ public class MainNavigationDrawer {
 
     }
 
-    public void initNavigationDrawer(Activity activity, Toolbar toolbar, final MainNavigationDrawerCallback drawerCallback) {
+    void initNavigationDrawer(Activity activity, Toolbar toolbar, final MainNavigationDrawerCallback drawerCallback) {
 
         this.drawerCallback = drawerCallback;
 
@@ -104,7 +118,7 @@ public class MainNavigationDrawer {
                 .withSelectionListEnabledForSingleProfile(false)
                 .build();
 
-        // init navigationdrawer
+        // initPreferences navigationdrawer
         navigationDrawer = new DrawerBuilder()
                 .withAccountHeader(headerResult)
                 .withActivity(activity)
@@ -140,6 +154,10 @@ public class MainNavigationDrawer {
                 })
                 .build();
 
+        if (guardCache.getLoggedIn().canAccessAlarms()) {
+            navigationDrawer.addItems(getAlarmsDrawerItems());
+        }
+
         if (guardCache.getLoggedIn().canAccessRegularTasks()) {
             navigationDrawer.addItems(getActiveCircuitDrawerItems());
         }
@@ -152,11 +170,9 @@ public class MainNavigationDrawer {
             navigationDrawer.addItems(getStaticGuardingItems());
         }
 
-        if (guardCache.getLoggedIn().canAccessAlarms()) {
-            navigationDrawer.addItems(getAlarmsDrawerItems());
-        }
 
         navigationDrawer.addItems(getDataDrawerItems());
+        navigationDrawer.addItems(getGuardSettingsDrawerItem());
         navigationDrawer.addStickyFooterItem(getLogoutDrawerItem());
 
 //        navigationDrawer.setOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
@@ -239,6 +255,27 @@ public class MainNavigationDrawer {
         try {
             List<CircuitStarted> circuitsStarted = CircuitStarted.getQueryBuilder(true).sortByName().whereActive().build().find();
 
+            // TODO: Patch fix duplicates in drawer
+            boolean hasDuplicates = false;
+            HashMap<String, CircuitStarted> uniqueCircuitsStarted = Maps.newHashMap();
+            for (CircuitStarted circuitStarted: circuitsStarted) {
+                String key = circuitStarted.getName();
+                CircuitStarted unique = uniqueCircuitsStarted.get(key);
+                if (unique != null) {
+                    if (circuitStarted.getCreatedAt().after(unique.getCreatedAt())) {
+                        uniqueCircuitsStarted.put(key, circuitStarted);
+                        hasDuplicates = true;
+                    }
+                } else {
+                    uniqueCircuitsStarted.put(key, circuitStarted);
+                }
+            }
+
+            // Analytics to see how often duplicates are encountered
+            Analytics.sendEvent("Fix", "Duplicate circuits in drawer", hasDuplicates ? "yes" : "no");
+
+            circuitsStarted = Lists.newArrayList(uniqueCircuitsStarted.values());
+
             circuitItems.add(circuitHeader);
             for (CircuitStarted circuitStarted : circuitsStarted) {
                 IDrawerItem circuitItem = new PrimaryDrawerItem().withName(circuitStarted.getName()).withTag(circuitStarted);
@@ -262,9 +299,9 @@ public class MainNavigationDrawer {
     private IDrawerItem[] getAlarmsDrawerItems() {
         alarmItems = Lists.newArrayList();
         IDrawerItem alarmHeader = new SectionDrawerItem().withName(R.string.title_drawer_alarms);
-
         alarmItems.add(alarmHeader);
-        IDrawerItem alarmItem = new PrimaryDrawerItem().withName(R.string.title_drawer_all_alarms).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+
+        IDrawerItem alarmItem = new PrimaryDrawerItem().withName(R.string.title_drawer_alarms).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                 drawerCallback.selectItem(AlarmsViewPagerFragment.newInstance(), R.string.title_drawer_alarms);
@@ -272,6 +309,15 @@ public class MainNavigationDrawer {
             }
         });
         alarmItems.add(alarmItem);
+
+        IDrawerItem alarmPreferences = new PrimaryDrawerItem().withName(R.string.settings).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                drawerCallback.selectItem(AlarmNotificationPreferencesFragment.newInstance(), R.string.settings_alarm);
+                return false;
+            }
+        });
+        alarmItems.add(alarmPreferences);
 
         return alarmItems.toArray(new IDrawerItem[alarmItems.size()]);
     }
@@ -365,5 +411,18 @@ public class MainNavigationDrawer {
     private IDrawerItem getLogoutDrawerItem() {
         return new PrimaryDrawerItem().withIdentifier(DRAWER_LOGOUT).withName(context.getString(R.string.title_drawer_logout)).withIcon(FontAwesome.Icon.faw_sign_out);
     }
+
+    private IDrawerItem getGuardSettingsDrawerItem() {
+        return new PrimaryDrawerItem().withName(context.getString(R.string.my_settings)).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                drawerCallback.selectItem(GuardPreferencesFragment.newInstance(), R.string.my_settings);
+                return true;
+            }
+        });
+    }
+
+
+
 
 }

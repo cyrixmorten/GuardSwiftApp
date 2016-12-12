@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
+import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.LogInCallback;
 import com.parse.ParseACL;
 import com.parse.ParseException;
@@ -155,6 +156,7 @@ public class ParseLoginActivity extends InjectingAppCompatActivity {
 					intent.putExtra("initial_startup", true);
 					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 					startActivity(intent);
+
 					// close this activity
 					finish();
 

@@ -14,6 +14,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.common.collect.Lists;
 import com.guardswift.core.ca.GeofencingModule;
 import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingIntentService;
@@ -78,6 +79,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         Log.d(TAG, "START");
         context.startService(new Intent(context, RegisterGeofencesIntentService.class));
     }
+
 
 //    public static void start(Context context, GSTask geofencedTask) {
 ////        Log.d(TAG, "RegisterGeofencesIntentService start 2 ");
@@ -160,11 +162,23 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         int withinKm = 2;
         geofencingModule.queryAllGeofenceTasks(withinKm).onSuccess(new Continuation<List<ParseObject>, Object>() {
             @Override
-            public Object then(Task<List<ParseObject>> task) throws Exception {
-                List<ParseObject> tasks = task.getResult();
+            public Object then(Task<List<ParseObject>> taskObject) throws Exception {
+                List<ParseObject> tasks = taskObject.getResult();
+
+                // weed away finished tasks
+                for (ParseObject parseObjectTask: tasks) {
+                    GSTask task = (GSTask)parseObjectTask;
+                    if (task.isFinished()) {
+                        tasks.remove(parseObjectTask);
+                    }
+                }
+
                 Log.d(TAG, "Found task scheduled for geofencing: " + tasks.size());
                 if (tasks.size() > 100) {
-                    Crashlytics.log("ParseTask size limit reached at for user " + ParseUser.getCurrentUser().getUsername() + " at " + LocationModule.Recent.getLastKnownLocation().toString() + " with " + tasks.size() + " tasks");
+                    String message = "Geofence task size limit reached for user " + ParseUser.getCurrentUser().getUsername() + " at " + LocationModule.Recent.getLastKnownLocation().toString() + " with " + tasks.size() + " tasks";
+
+                    Log.e(TAG, message);
+                    Crashlytics.log(message);
                     tasks = tasks.subList(0, 100);
                 }
 
@@ -178,6 +192,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                     geofences.add(geofence);
 
                     geofencedTasks.add(gsTask);
+
 
                 }
 
@@ -226,7 +241,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
     }
 
     private Geofence createGeofence(String id, ParseGeoPoint position, float radius) {
-        Log.d(TAG, "createGeofence: " + id + " - " + position);
+        Log.d(TAG, "createGeofence: " + id + " - " + position + " - " + radius);
         return new Geofence.Builder().
                 setRequestId(id).
                 setCircularRegion(position.getLatitude(), position.getLongitude(), radius).
@@ -238,6 +253,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy");
 //        if (mRemoveGeofencesSubscription != null && !mRemoveGeofencesSubscription.isUnsubscribed()) {
 //            mRemoveGeofencesSubscription.unsubscribe();
 //            mRemoveGeofencesSubscription = null;

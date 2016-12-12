@@ -73,7 +73,7 @@ public class TaskEventFragment extends AbstractEventFragment {
 
     @Override
     public GSTask.TASK_TYPE getFragmentType() {
-        return GSTask.TASK_TYPE.REGULAR;
+        return GSTask.TASK_TYPE.ALARM;
     }
 
     @Override

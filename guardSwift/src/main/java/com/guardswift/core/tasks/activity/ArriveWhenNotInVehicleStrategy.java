@@ -6,9 +6,6 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
 
-/**
- * Created by cyrix on 6/7/15.
- */
 public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
 
     private static final String TAG = ArriveWhenNotInVehicleStrategy.class.getSimpleName();

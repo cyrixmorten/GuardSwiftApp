@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/name">
+
+        <EditTextPreference
+            android:key="guard_name"
+            android:title="@string/name"
+            android:inputType="text"
+            android:dialogTitle="@string/name" />
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/mobile_number">
+
+        <EditTextPreference
+            android:key="guard_mobile_number"
+            android:title="@string/mobile_number"
+            android:inputType="phone"
+            android:dialogTitle="@string/mobile_number" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="alarm_notifications"
+        android:title="@string/alarm_notifications">
+
+        <CheckBoxPreference
+            android:key="notify_on_incoming_alarms"
+            android:title="@string/notify_on_incoming_alarms"
+            android:summary="@string/notify_on_incoming_alarms_summary" />
+
+        <CheckBoxPreference
+            android:key="sound_on_incoming_alarms"
+            android:title="@string/sound_on_incoming_alarms"
+            android:summary="@string/sound_on_incoming_alarms_summary"
+            android:dependency="notify_on_incoming_alarms" />
+
+        <CheckBoxPreference
+            android:key="sms_on_incoming_alarms"
+            android:title="@string/sms_on_incoming_alarms"
+            android:summary="@string/sms_on_incoming_alarms_summary"
+            android:dependency="notify_on_incoming_alarms" />
+
+    </PreferenceCategory>
+
+
+
+</PreferenceScreen>

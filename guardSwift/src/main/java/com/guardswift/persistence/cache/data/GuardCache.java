@@ -15,15 +15,8 @@ import javax.inject.Singleton;
 @Singleton
 public class GuardCache extends ParseCache<Guard> {
 
-    private static final String LOGGED_IN = "logged_in";
-//
-//    private static GuardCache instance;
-//    public static GuardCache getInstance(Context context) {
-//        if (instance == null) {
-//            return instance = new GuardCache(context.getApplicationContext());
-//        }
-//        return instance;
-//    }
+    public static final String LOGGED_IN = "logged_in";
+    public static final String LAST_ACTIVE = "last_active";
 
     @Inject
     GuardCache(@InjectingApplication.InjectingApplicationModule.ForApplication Context context) {
@@ -32,6 +25,7 @@ public class GuardCache extends ParseCache<Guard> {
 
     public void setLoggedIn(Guard guard) {
         put(LOGGED_IN, guard);
+        put(LAST_ACTIVE, guard);
     }
 
     public Guard getLoggedIn() {
@@ -42,8 +36,14 @@ public class GuardCache extends ParseCache<Guard> {
         return has(LOGGED_IN);
     }
 
+    public Guard getLastActive() {
+        return get(LAST_ACTIVE);
+    }
+
 
     public void removeLoggedIn() {
         remove(LOGGED_IN);
     }
+
+
 }

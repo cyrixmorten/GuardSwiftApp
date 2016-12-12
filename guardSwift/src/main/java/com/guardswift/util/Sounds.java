@@ -149,9 +149,10 @@ public class Sounds {
 	public void stopAlarm() {
 		Log.i(TAG, "stopAlarm");
 
-        mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, userVolume, AudioManager.FLAG_PLAY_SOUND);
-
 		if (alarmMediaPlayer != null) {
+
+            mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, userVolume, AudioManager.FLAG_PLAY_SOUND);
+
 			alarmMediaPlayer.release();
             alarmMediaPlayer = null;
 		}

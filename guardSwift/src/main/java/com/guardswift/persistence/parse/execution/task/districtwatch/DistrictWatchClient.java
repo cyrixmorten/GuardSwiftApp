@@ -2,7 +2,6 @@ package com.guardswift.persistence.parse.execution.task.districtwatch;
 
 import android.content.Context;
 import android.location.Location;
-import android.util.Log;
 
 import com.guardswift.core.documentation.report.NoTaskReportingStrategy;
 import com.guardswift.core.documentation.report.TaskReportingStrategy;
@@ -10,7 +9,7 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.activity.NoActivityStrategy;
 import com.guardswift.core.tasks.activity.TaskActivityStrategy;
-import com.guardswift.core.tasks.automation.DistrictWatchAutomationStrategy;
+import com.guardswift.core.tasks.automation.ResetOnDepartureAutomationStrategy;
 import com.guardswift.core.tasks.automation.TaskAutomationStrategy;
 import com.guardswift.core.tasks.controller.DistrictWatchClientController;
 import com.guardswift.core.tasks.controller.TaskController;
@@ -45,7 +44,7 @@ public class DistrictWatchClient extends BaseTask {
 
     public DistrictWatchClient() {
         taskReportingStrategy = new NoTaskReportingStrategy(this);
-        automationStrategy = new DistrictWatchAutomationStrategy(this);
+        automationStrategy = new ResetOnDepartureAutomationStrategy(this);
         geofenceStrategy = new DistrictWatchGeofenceStrategy(this);
         activityStrategy = new NoActivityStrategy();
     }

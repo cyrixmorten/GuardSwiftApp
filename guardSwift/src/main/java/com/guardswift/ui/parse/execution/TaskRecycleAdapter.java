@@ -26,8 +26,11 @@ import com.beardedhen.androidbootstrap.AwesomeTextView;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapSize;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
+import com.guardswift.BuildConfig;
 import com.guardswift.R;
+import com.guardswift.core.ca.GeofencingModule;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
@@ -875,6 +878,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         if (task instanceof ParseTask) {
             holder.vContentFooter.setVisibility((task.isArrived() || selectedItems.get(position, false)) ? View.VISIBLE : View.GONE);
             holder.vBtnAborted.setVisibility(View.GONE);
+            holder.vBtnTaskdescription.setVisibility(View.GONE);
 
             ParseTask alarmTask = (ParseTask)task;
             if (holder instanceof AlarmTaskViewHolder) {
@@ -957,7 +961,62 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         holder.setTaskState(context, task);
 
+        geofenceStatus(task, holder);
 //        new UpdateTaskStateAsync(task, holder, isNew).execute();
+    }
+
+    private void geofenceStatus(GSTask task, TaskViewHolder holder) {
+        if (!BuildConfig.DEBUG) {
+            return;
+        }
+
+        LinearLayout linearLayout = (LinearLayout)holder.vContentBody.findViewById(R.id.layout_debug_geofence);
+        if (linearLayout == null) {
+            linearLayout = new LinearLayout(context);
+            linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+            linearLayout.setId(R.id.layout_debug_geofence);
+
+            holder.vContentBody.addView(linearLayout);
+        }
+
+        linearLayout.removeAllViews();
+
+        linearLayout.addView(isGeofenced(task));
+        linearLayout.addView(isWithinGeofence(task));
+        linearLayout.addView(isOutsideGeofence(task));
+
+    }
+
+    private TextView isOutsideGeofence(GSTask task) {
+        boolean outsideGeofence = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().isMovedOutsideGeofence(task);
+
+        TextView tv = new TextView(context);
+        tv.setText(" OUTSIDE ");
+        tv.setTextColor((outsideGeofence) ? Color.GREEN : Color.RED);
+
+        return tv;
+    }
+
+    private TextView isWithinGeofence(GSTask task) {
+        boolean withinGeofence = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().isWithinGeofence(task);
+
+        TextView tv = new TextView(context);
+        tv.setText(" WITHIN ");
+        tv.setTextColor((withinGeofence) ? Color.GREEN : Color.RED);
+
+        return tv;
+    }
+
+    private TextView isGeofenced(GSTask task) {
+        boolean isGeofenced = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().isGeofenced(task);
+
+        TextView tv = new TextView(context);
+        tv.setText(" GEOFENCED ");
+        tv.setTextColor((isGeofenced) ? Color.GREEN : Color.RED);
+
+        return tv;
     }
 
     /**

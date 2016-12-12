@@ -33,7 +33,7 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
 
         ReportHistoryListFragment fragment = new ReportHistoryListFragment();
         Bundle args = new Bundle();
-            args.putSerializable("task_type", task_type);
+            args.putSerializable("taskType", task_type);
         fragment.setArguments(args);
         return fragment;
     }
@@ -51,8 +51,14 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
         return new ParseQueryAdapter.QueryFactory<Report>() {
             @Override
             public ParseQuery<Report> create() {
-                GSTask.TASK_TYPE task_type = (GSTask.TASK_TYPE) getArguments().getSerializable("task_type");
-                return new Report.QueryBuilder(false).include(Report.eventLogs).matching(clientCache.getSelected()).matching(task_type).build().setLimit(10).addDescendingOrder("createdAt");
+                GSTask.TASK_TYPE taskType = (GSTask.TASK_TYPE) getArguments().getSerializable("taskType");
+                return new Report.QueryBuilder(false)
+                        .include(Report.eventLogs)
+                        .matching(clientCache.getSelected())
+                        .matching(taskType)
+                        .build()
+                        .setLimit(10)
+                        .addDescendingOrder("createdAt");
             }
         };
     }

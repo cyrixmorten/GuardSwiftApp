@@ -6,6 +6,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import retrofit2.http.Streaming;
 
 public final class GuardSwiftServer {
@@ -18,6 +19,9 @@ public final class GuardSwiftServer {
         @GET("report/{id}")
         @Streaming
         Call<ResponseBody> report(@Path("id") String reportId);
+
+        @GET("cpsms?from=4528718353&message=Test")
+        Call<ResponseBody> testAlarm(@Query("number") String toNumber);
     }
 
 

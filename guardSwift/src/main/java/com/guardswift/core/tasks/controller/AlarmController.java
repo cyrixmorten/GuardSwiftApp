@@ -26,11 +26,6 @@ public class AlarmController extends BaseTaskController {
     }
 
 
-
-//    private void performAction(ACTION action, GSTask alarm, boolean automatic, boolean verify) {
-//        performAction(action, alarm, verify, null);
-//    }
-
     public GSTask performAction(ACTION action, GSTask alarm, boolean automatic) {
 
         final String clientName = alarm.getClient().getName();
@@ -126,113 +121,6 @@ public class AlarmController extends BaseTaskController {
 
     }
 
-
-//    private boolean verifyAction(final ACTION action, final Alarm alarm, MaterialDialog.ButtonCallback buttonCallback) {
-//        if (!(ctx instanceof Activity)) {
-//            // unable to show dialog if context is not of type activity
-//            return true;
-//        }
-//
-//        if (action == ACTION.FORWARD ) {
-//            // distance to client too large
-//
-//            selectAlarmGroup(alarm, buttonCallback);
-//            return false;
-//        }
-//        if (action == ACTION.ARRIVE && alarm.getClient().hasLargeDistanceToDevice()) {
-//            // distance to client too large
-//
-////            confirmArrival(alarm, buttonCallback);
-//            return true;
-//        }
-//        if (action == ACTION.ABORT) {
-//            // always confirm aborts
-//
-//            confirmAbort(alarm, buttonCallback);
-//            return false;
-//        }
-//
-//        return true;
-//    }
-
-
-//    private MaterialDialog selectAlarmGroup(final Alarm alarm, final MaterialDialog.ButtonCallback buttonCallback) {
-//        List<AlarmGroup> alarmGroups;
-//        try {
-//            alarmGroups = AlarmGroup.getQueryBuilder(true).sortByName().build().find();
-//        } catch (ParseException e) {
-//            Crashlytics.logException(e);
-//            return null;
-//        }
-//
-//        String[] groupNames = new String[alarmGroups.size()];
-//        for (int i = 0; i<alarmGroups.size(); i++) {
-//            groupNames[i] = alarmGroups.get(i).getName();
-//        }
-//        return new MaterialDialog.Builder(ctx)
-//                .title(R.string.forward_alarm)
-//                .items(groupNames)
-//                .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
-//
-//                    @Override
-//                    public boolean onSelection(MaterialDialog materialDialog, View view, int i, CharSequence charSequence) {
-//                        if (buttonCallback != null) {
-//                            buttonCallback.onPositive(materialDialog);
-//                        }
-//
-//                        alarm.setForwardedTo(charSequence);
-//
-//                        performAction(ACTION.FORWARD, alarm, false);
-//
-//                        return true;
-//                    }
-//                })
-//                .callback(buttonCallback)
-//                .positiveText(android.R.string.ok)
-//                .negativeText(android.R.string.cancel)
-//                .show();
-//
-//
-//    }
-
-//    private MaterialDialog confirmArrival(final Alarm alarm, final MaterialDialog.ButtonCallback buttonCallback) {
-//        ParseModule.DistanceStrings distanceStrings = ParseModule.getDistanceStrings(alarm.getClient());
-//        return new MaterialDialog.Builder(ctx)
-//                .title(R.string.mark_arrived)
-//                .positiveText(android.R.string.ok)
-//                .negativeText(android.R.string.cancel)
-//                .content(ctx.getString(R.string.distance_to_client, distanceStrings.distanceValue, distanceStrings.distanceType))
-//                .callback(new MaterialDialog.ButtonCallback() {
-//                              @Override
-//                              public void onPositive(MaterialDialog dialog) {
-//                                  Log.d(TAG, "confirmArrival");
-//                                  if (buttonCallback != null) {
-//                                      buttonCallback.onPositive(dialog);
-//                                  }
-//                                  performAction(ACTION.ARRIVE, alarm, false);
-//                              }
-//                          }
-//                ).show();
-//    }
-
-//    private MaterialDialog confirmAbort(final Alarm alarm, final MaterialDialog.ButtonCallback buttonCallback) {
-//
-//        return new MaterialDialog.Builder(ctx)
-//                .title(R.string.onActionAbort)
-//                .positiveText(android.R.string.ok)
-//                .negativeText(android.R.string.cancel)
-//                .content(ctx.getString(R.string.abort_task_at_client, alarm.getClient().getName()))
-//                .callback(new MaterialDialog.ButtonCallback() {
-//                              @Override
-//                              public void onPositive(MaterialDialog dialog) {
-//                                  if (buttonCallback != null) {
-//                                      buttonCallback.onPositive(dialog);
-//                                  }
-//                                  performAction(ACTION.ABORT, alarm, false);
-//                              }
-//                          }
-//                ).show();
-//    }
 
 
 

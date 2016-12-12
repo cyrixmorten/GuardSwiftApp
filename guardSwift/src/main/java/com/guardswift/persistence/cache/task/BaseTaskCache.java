@@ -96,8 +96,8 @@ public abstract class BaseTaskCache<T extends ParseObject & GSTask> extends Pars
     @Override
     public void removeAllGeofencedTasks() {
         clearSet(GEOFENCED_ALL);
-//        clearSet(GEOFENCE_WITHIN);
-//        clearSet(GEOFENCE_OUTSIDE);
+//        clearSet(GEOFENCE_WITHIN); // keeping within while rebuilding
+        clearSet(GEOFENCE_OUTSIDE);
     }
 
     @SuppressWarnings("unchecked")

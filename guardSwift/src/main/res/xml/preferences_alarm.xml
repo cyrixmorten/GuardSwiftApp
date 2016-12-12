@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="alarm_test"
+        android:title="@string/test_alarm">
+
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="alarm_notifications"
+        android:title="@string/alarm_notifications">
+
+        <Preference
+            android:title="@string/working">
+
+        </Preference>
+
+
+    </PreferenceCategory>
+
+
+
+</PreferenceScreen>

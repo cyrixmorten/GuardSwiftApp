@@ -101,6 +101,10 @@ public class ParseObjectFactory {
 		return eventRemark;
 	}
 
+	public ParseTask getTask() {
+		return task;
+	}
+
 	public CircuitUnit getCircuitUnit() {
 		return circuitUnit;
 	}

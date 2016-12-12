@@ -788,7 +788,7 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
 
     public void setArrived() {
 
-        Guard guard = GuardSwiftApplication.getCurrentGuard();
+        Guard guard = GuardSwiftApplication.getLoggedIn();
 
         setTimeStartedNow();
         setGuard(guard);
@@ -797,7 +797,7 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     }
 
     public void setFinished() {
-        Guard guard = GuardSwiftApplication.getCurrentGuard();
+        Guard guard = GuardSwiftApplication.getLoggedIn();
 
         setTimeEndedNow();
         setGuard(guard);

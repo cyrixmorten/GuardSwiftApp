@@ -13,6 +13,7 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseSession;
 
 import org.json.JSONObject;
 
@@ -21,50 +22,9 @@ import java.util.Date;
 @ParseClassName("Guard")
 public class Guard extends ExtendedParseObject implements Positioned {
 
-
-
-//    public static class Recent {
-//
-//        private static String TAG = "Guard.Recent";
-//
-//        private static Guard selected;
-//
-//        public static Guard getSelected() {
-//            return selected;
-//        }
-//
-//        public static void setSelected(Guard selected) {
-//            Recent.selected = selected;
-//        }
-//
-//        public static Guard getSelected(ParseModulePreferences preferences) {
-//
-//            if (selected != null)
-//                return selected;
-//
-//
-//            if (preferences.isGuardLoggedIn()) {
-//
-//                int guardId = preferences.getGuardid();
-//                try {
-//                    selected = Query.get(guardId);
-//                } catch (ParseException e) {
-//                    Log.e(TAG, "getCurrentGuard not found");
-//                }
-//
-//            }
-//
-//            return selected;
-//        }
-//    }
-
-
-
     public static class Query {
 
         private static String TAG = "Guard.Query";
-
-
 
         public static Guard get(String objectId)
                 throws ParseException {
@@ -84,22 +44,27 @@ public class Guard extends ExtendedParseObject implements Positioned {
     }
 
 
-    public static final String guardId = "guardId";
-    public static final String name = "name";
+    private static final String guardId = "guardId";
+    private static final String name = "name";
+    private static final String session = "session";
+    private static final String mobileNumber = "mobileNumber";
 
+    private static final String alarmNotify = "alarmNotify";
+    private static final String alarmSound = "alarmSound";
+    private static final String alarmSMS = "alarmSMS";
 
-    private static String lastLogin = "lastLogin";
-    private static String lastLogout = "lastLogout";
-    private static String lastEvent = "lastEvent";
-    private static String lastLocationUpdate = "lastLocationUpdate";
-    private static String lastGeocodedAddress = "lastGeocodedAddress";
-    private static String position = "position";
-    private static String isOnline = "isOnline";
+    private static final String lastLogin = "lastLogin";
+    private static final String lastLogout = "lastLogout";
+    private static final String lastEvent = "lastEvent";
+    private static final String lastLocationUpdate = "lastLocationUpdate";
+    private static final String lastGeocodedAddress = "lastGeocodedAddress";
+    private static final String position = "position";
+    private static final String isOnline = "isOnline";
 
     // access rights
-    private static String accessRegular = "accessRegular";
-    private static String accessDistrict = "accessDistrict";
-    private static String accessStatic = "accessStatic";
+    private static final String accessRegular = "accessRegular";
+    private static final String accessDistrict = "accessDistrict";
+    private static final String accessStatic = "accessStatic";
 
     @Override
     public String getParseClassName() {
@@ -136,14 +101,23 @@ public class Guard extends ExtendedParseObject implements Positioned {
             return super.build();
         }
 
+        public QueryBuilder hasSession() {
+            query.whereExists(Guard.session);
+            return this;
+        }
+
     }
 
     public int getGuardId() {
-        return getInt(guardId);
+        return getInt(Guard.guardId);
     }
 
     public String getName() {
-        return getString(name);
+        return getString(Guard.name);
+    }
+
+    public void setName(String name) {
+        put(Guard.name, name);
     }
 
     public ParseObject getOwner() {
@@ -227,6 +201,46 @@ public class Guard extends ExtendedParseObject implements Positioned {
 
     public boolean canAccessAlarms() {
         return getBoolean(accessRegular); // todo temporary
+    }
+
+    public void setSession(ParseSession session) {
+        put(Guard.session, session);
+    }
+
+    public void setMobile(String mobile) {
+        put(Guard.mobileNumber, mobile);
+    }
+
+    public String getMobile() {
+        return getStringSafe(Guard.mobileNumber);
+    }
+
+
+    public boolean isAlarmNotificationsEnabled() {
+        return getBoolean(Guard.alarmNotify);
+    }
+
+    public void enableAlarmNotification(boolean enable) {
+        put(Guard.alarmNotify, enable);
+    }
+
+    public boolean isAlarmSoundEnabled() {
+        return isAlarmNotificationsEnabled() && getBoolean(Guard.alarmSound);
+    }
+
+    public void enableAlarmSound(boolean enable) {
+        if (enable) {
+            put(Guard.alarmNotify, true);
+        }
+        put(Guard.alarmSound, enable);
+    }
+
+    public boolean isAlarmSMSEnabled() {
+        return isAlarmNotificationsEnabled() && getBoolean(Guard.alarmSMS);
+    }
+
+    public void enableAlarmSMS(boolean enable) {
+        put(Guard.alarmSMS, enable);
     }
 
 }

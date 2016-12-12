@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -31,16 +32,24 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingActivityModule.ForActivity;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.eventbus.events.MissingInternetEvent;
+import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.rest.GuardSwiftWeb;
 import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.Device;
 import com.guardswift.util.GSIntents;
 import com.guardswift.util.ToastHelper;
+import com.parse.CountCallback;
+import com.parse.DeleteCallback;
+import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseSession;
 import com.parse.ParseUser;
 import com.squareup.picasso.Picasso;
 
@@ -51,6 +60,7 @@ import javax.inject.Inject;
 
 import bolts.Continuation;
 import bolts.Task;
+import bolts.TaskCompletionSource;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -153,6 +163,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         if (!BuildConfig.DEBUG) {
             development_badge.setVisibility(View.INVISIBLE);
         }
+
 
     }
 //
@@ -327,23 +338,8 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                     Log.d(TAG, "guard " + guard.getGuardId());
 
                     if (guard.getGuardId() == guardId) {
-                        GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard).continueWith(new Continuation<Void, Void>() {
 
-                            @Override
-                            public Void then(Task<Void> result) throws Exception {
-                                if (result.isFaulted()) {
-                                    handleFailedLogin("updateAllClasses", result.getError());
-                                    return null;
-                                }
-
-                                showProgress(false);
-                                mGuardIdView.setText("");
-                                parseModule.login(guard);
-
-                                return null;
-                            }
-                        });
-
+                        loginSuccess(guard);
                         return;
                     }
                 }
@@ -360,6 +356,111 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     }
 
+    private void loginSuccess(final Guard guard) {
+
+        parseModule.login(guard);
+
+        GuardSwiftApplication.saveCurrentGuardAsLastActive();
+
+        saveSessionToGuard(guard);
+
+        checkMobileNumber(guard).continueWith(new Continuation<Void, Object>() {
+            @Override
+            public Object then(Task<Void> task) throws Exception {
+
+                enterGuardSwift(guard);
+
+                return null;
+            }
+        });
+
+    }
+
+    private void enterGuardSwift(final Guard guard) {
+        GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard).continueWith(new Continuation<Void, Void>() {
+
+            @Override
+            public Void then(Task<Void> result) throws Exception {
+                if (result.isFaulted()) {
+                    handleFailedLogin("updateAllClasses", result.getError());
+                    return null;
+                }
+
+                showProgress(false);
+                mGuardIdView.setText("");
+
+                Intent intent = new Intent(context, MainActivity.class);
+                context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
+
+                GuardSwiftApplication.getInstance().startServices();
+
+                return null;
+            }
+        });
+    }
+
+    private void saveSessionToGuard(final Guard guard) {
+        ParseSession.getCurrentSessionInBackground(new GetCallback<ParseSession>() {
+            @Override
+            public void done(ParseSession session, ParseException e) {
+                if (e != null) {
+                    new HandleException(TAG, "Getting current session", e);
+                    return;
+                }
+
+                guard.setSession(session);
+            }
+        });
+    }
+
+
+    // TODO: Hardcoded countrycode +45
+    private Task<Void> checkMobileNumber(final Guard guard) {
+
+        final TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
+
+        if (!guard.canAccessAlarms() || !guard.getMobile().isEmpty()) {
+            return Task.forResult(null);
+        }
+
+        final String[] mobile = {"+45"};
+        new MaterialDialog.Builder(GuardLoginActivity.this)
+                .title(R.string.mobile_number)
+                .content(this.getString(R.string.enter_mobile_number, guard.getName()))
+                .inputType(InputType.TYPE_CLASS_PHONE)
+                .input(null, mobile[0], new MaterialDialog.InputCallback() {
+                    @Override
+                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+                        String editTextString = input.toString();
+
+                        if (!editTextString.startsWith("+45") || editTextString.length() != 11) {
+                            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
+                        } else {
+                            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
+                        }
+
+                        mobile[0] = editTextString;
+                    }
+                })
+                .alwaysCallInputCallback()
+                .negativeText(android.R.string.cancel)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        guard.setMobile(mobile[0]);
+                        guard.pinThenSaveEventually();
+                    }
+                })
+                .onAny(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        taskCompletionSource.setResult(null);
+                    }
+                })
+                .show();
+
+        return taskCompletionSource.getTask();
+    }
 
     private boolean hasGooglePlayServices() {
         int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
@@ -403,7 +504,9 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
             }
         });
 
-
+        Guard guard = GuardSwiftApplication.getLastActiveGuard();
+        String lastActive = guard != null ? guard.getName() : "N/A";
+        Log.d(TAG, "GUARD: " + lastActive);
 //        new FetchLatestVersion(this).execute();
 
         super.onResume();

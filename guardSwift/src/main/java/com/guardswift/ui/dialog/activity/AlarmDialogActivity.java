@@ -17,16 +17,12 @@ import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.persistence.parse.execution.query.AlarmQueryBuilder;
 import com.guardswift.core.tasks.controller.AlarmController;
 import com.guardswift.eventbus.events.ParseObjectUpdatedEvent;
-import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.Sounds;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.concurrent.TimeUnit;
 
@@ -42,8 +38,6 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
     @Inject
     TaskCache alarmCache;
-    @Inject
-    GuardCache guardCache;
     @Inject
     AlarmController alarmController;
 
@@ -77,11 +71,11 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
         Log.d(TAG, "onCreate");
 
 
-        ParseQuery<ParseTask> alarmQuery = null;
+        ParseQuery<ParseTask> alarmQuery;
         if (!alarmId.isEmpty()) {
-            alarmQuery = new AlarmQueryBuilder(false).matchingObjectId(alarmId).build();
+            alarmQuery = new AlarmQueryBuilder(true).matchingObjectId(alarmId).build();
         } else {
-            alarmQuery = new AlarmQueryBuilder(false)
+            alarmQuery = new AlarmQueryBuilder(true)
                     .whereStatus(ParseTask.STATUS.PENDING)
                     .sortByTimeStarted()
                     .build();

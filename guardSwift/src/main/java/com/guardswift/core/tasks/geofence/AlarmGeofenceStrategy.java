@@ -2,10 +2,12 @@ package com.guardswift.core.tasks.geofence;
 
 import android.content.Context;
 import android.location.Location;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -39,7 +41,32 @@ public class AlarmGeofenceStrategy extends BaseGeofenceStrategy {
     }
 
     @Override
+    public void withinGeofence() {
+        super.withinGeofence();
+
+        float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getClient().getPosition());
+        if (distanceToClient < 100) {
+            task.getAutomationStrategy().automaticArrival();
+        }
+    }
+
+    @Override
+    public void exitGeofence() {
+        super.exitGeofence();
+
+        if (!task.isArrived()) {
+            return;
+        }
+
+        if (task.getAutomationStrategy() != null) {
+            task.getAutomationStrategy().automaticDeparture();
+        }
+    }
+
+    @Override
     public void queryGeofencedTasks(final int withinKm, final FindCallback<ParseObject> callback) {
+
+        Log.d(TAG, "queryGeofencedTasks");
 
         if (LocationModule.Recent.getLastKnownLocation() != null) {
             geofenceQuery(withinKm, LocationModule.Recent.getLastKnownLocation()).findInBackground(callback);
@@ -82,6 +109,7 @@ public class AlarmGeofenceStrategy extends BaseGeofenceStrategy {
 
     private ParseQuery<ParseObject> geofenceQuery(int withinKm, Location fromLocation) {
         return new ParseTask().getQueryBuilder(true)
+                .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ACCEPTED, ParseTask.STATUS.ARRIVED, ParseTask.STATUS.ABORTED)
                 .within(withinKm, fromLocation)
                 .buildAsParseObject();
     }

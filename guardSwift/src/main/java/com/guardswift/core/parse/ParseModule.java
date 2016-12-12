@@ -90,23 +90,6 @@ public class ParseModule {
                 .event(context.getString(R.string.login))
                 .eventCode(EventLog.EventCodes.GUARD_LOGIN).saveAsync();
 
-        // Write guard to Session
-//        ParseSession.getCurrentSessionInBackground().onSuccess(new Continuation<ParseSession, Object>() {
-//            @Override
-//            public Object then(ParseTask<ParseSession> task) throws Exception {
-//
-//                ParseSession session = task.getResult();
-//
-//                session.put("guard", guard);
-//
-//                return session.saveInBackground();
-//            }
-//        });
-
-        GuardSwiftApplication.getInstance().startServices();
-
-        Intent intent = new Intent(context, MainActivity.class);
-        context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
     }
 
 
@@ -129,18 +112,6 @@ public class ParseModule {
                         }
             });
 
-            // Remove guard from Session
-//            ParseSession.getCurrentSessionInBackground().onSuccess(new Continuation<ParseSession, Object>() {
-//                @Override
-//                public Object then(ParseTask<ParseSession> task) throws Exception {
-//
-//                    ParseSession session = task.getResult();
-//
-//                    session.remove("guard");
-//
-//                    return session.saveInBackground();
-//                }
-//            });
 
             // todo temporarily disabled GPS tracking
 //            LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
@@ -171,7 +142,7 @@ public class ParseModule {
 
     }
 
-    public void clearData() {
+    private void clearData() {
 
         guardCache.removeLoggedIn();
         tasksCache.clear();
@@ -185,11 +156,13 @@ public class ParseModule {
         unpinAllParseObjects();
     }
 
+    // TODO since pinning to DEFAULT, this no longer makes much sense
     private void unpinAllParseObjects() {
 
         List<Task<Object>> unpinClassNamed = Lists.newArrayList();
         for (ExtendedParseObject parseObject : new ParseObjectFactory().getAll()) {
-            unpinClassNamed.add(parseObject.unpinAllPinnedToClass());
+
+                unpinClassNamed.add(parseObject.unpinAllPinnedToClass());
         }
 
         Task.whenAll(unpinClassNamed).continueWith(new Continuation<Void, Object>() {

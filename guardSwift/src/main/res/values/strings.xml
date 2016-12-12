@@ -190,7 +190,6 @@
     <string name="close">Luk</string>
     <string name="title_activity_checkpoints">Checkpoints</string>
 
-    <string name="action_settings">Settings</string>
     <string name="estimated_distance">Estimeret afstand:</string>
     <string name="not_now">Ikke nu</string>
     <string name="start">Start</string>
@@ -363,6 +362,25 @@
     <string name="copy_failed">Kopieringen fejlede</string>
     <string name="successfully_copied_report_events">Kopierede %1$d hændelser til rapport</string>
     <string name="guard">Vægter</string>
+    <string name="name">Navn</string>
+    <string name="mobile_number">Mobil nummer</string>
+    <string name="enter_mobile_number">Hej %1$s.\nHar du et mobil nummer som GuardSwift må sende SMS\'er til?</string>
+    <string name="my_data">Mine data</string>
+    <string name="my_settings">Mine indstillinger</string>
+    <string name="alarm_notifications">Alarm notifikationer</string>
+    <string name="notify_on_incoming_alarms">Slå notifikationer til</string>
+    <string name="notify_on_incoming_alarms_summary">Giv besked ved nye alarmer</string>
+    <string name="sound_on_incoming_alarms">Afspil lyd</string>
+    <string name="sound_on_incoming_alarms_summary">Afspiller lyd indtil der kvitteres for modtagelse</string>
+    <string name="sms_on_incoming_alarms">Send SMS</string>
+    <string name="sms_on_incoming_alarms_summary">Modtag SMS med alarm (sendes til mobil nummeret ovenfor)</string>
+    <string name="mobile_must_include_countrycode">Mobil nummeret skal inkuldere landekode</string>
+    <string name="mobile_number_too_short">Mobil nummeret er for kort</string>
+    <string name="settings">Indstillinger</string>
+    <string name="settings_alarm">Alarm indstillinger</string>
+    <string name="test_alarm">Test alarm</string>
+    <string name="test_alarm_create">Opret test alarm</string>
+    <string name="test_alarm_created">Test alarm oprettet</string>
 
 
 </resources>

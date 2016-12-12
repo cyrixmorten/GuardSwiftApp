@@ -31,11 +31,11 @@ public class Analytics {
         t.send(new HitBuilders.ScreenViewBuilder().build());
     }
 
-    private static void sendEvent(String category, String action, String label) {
+    public static void sendEvent(String category, String action, String label) {
         sendEvent(category, action, label, 1);
     }
 
-    private static void sendEvent(String category, String action, String label, long value) {
+    public static void sendEvent(String category, String action, String label, long value) {
 
         if (BuildConfig.DEBUG)
             category = "Debug " + category;

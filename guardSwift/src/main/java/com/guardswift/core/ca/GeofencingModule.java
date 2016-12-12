@@ -11,6 +11,7 @@ import com.guardswift.core.tasks.geofence.NoGeofenceStrategy;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.persistence.parse.execution.TaskFactory;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -204,11 +205,15 @@ public class GeofencingModule {
 
         for (final GSTask gsTask : allGSTasks) {
             Task<List<ParseObject>> geofencedTasks = gsTask.getGeofenceStrategy().queryGeofencedTasks(withinKm);
+            Log.d(TAG, "queryAllGeofenceTasks: " + gsTask.getTaskType());
             geofencedTasks.onSuccess(new Continuation<List<ParseObject>, Object>() {
                 @Override
                 public Object then(Task<List<ParseObject>> listTask) throws Exception {
 //                    Log.d(TAG, "Found " + listTask.getResult() + " " + gsTask.getTaskType());
                     for (ParseObject taskObject : listTask.getResult()) {
+                        if (taskObject instanceof ParseTask) {
+                            Log.d(TAG, "ADDING ALARM: " + ((ParseTask)taskObject).getFullAddress());
+                        }
                         geofenceResults.add(taskObject);
                     }
                     return null;
@@ -253,6 +258,7 @@ public class GeofencingModule {
         List<GSTask> allGSTasks = new TaskFactory().getTasks();
         Map<String, List<String>> objectIdsMap = mapGeofenceIdsToClassName(geofenceIds);
 
+
         for (final GSTask gsTask : allGSTasks) {
             if (gsTask.getGeofenceStrategy() instanceof NoGeofenceStrategy) {
 //                Log.d(TAG, "Skipping " + gsTask.getParseClassName());
@@ -261,7 +267,8 @@ public class GeofencingModule {
 
             List<String> objectIdsList = objectIdsMap.get(gsTask.getParseClassName());
             if (objectIdsList == null) {
-//                Log.w(TAG, "Did not found objectIdList for " + gsTask.getParseClassName());
+//                Log.w(TAG, "Did not find objectIdList for " + gsTask.getParseClassName());
+//                Log.w(TAG, objectIdsMap.keySet().toString());
                 continue;
             }
 

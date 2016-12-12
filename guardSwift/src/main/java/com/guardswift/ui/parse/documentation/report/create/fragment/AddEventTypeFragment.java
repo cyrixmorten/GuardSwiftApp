@@ -3,6 +3,7 @@ package com.guardswift.ui.parse.documentation.report.create.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.common.UpdateFloatingActionButton;
 import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
+import com.guardswift.util.ToastHelper;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
@@ -239,8 +241,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
     }
 
     @Override
-    public void updateFloatingActionButton(Context context, android.support.design.widget.FloatingActionButton
-                                                   floatingActionButton) {
+    public void updateFloatingActionButton(Context context, android.support.design.widget.FloatingActionButton floatingActionButton) {
         floatingActionButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_add_white_18dp));
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override

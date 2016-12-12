@@ -33,7 +33,7 @@ public class FinishedAlarmsFragment extends AbstractTasksRecycleFragment<ParseTa
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
 
-        final Guard guard = GuardSwiftApplication.getCurrentGuard();
+        final Guard guard = GuardSwiftApplication.getLoggedIn();
 
         return new ParseQueryAdapter.QueryFactory<ParseTask>() {
 

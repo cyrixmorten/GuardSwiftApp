@@ -8,8 +8,7 @@ import com.guardswift.R;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.controller.TaskController;
-import com.guardswift.persistence.parse.execution.BaseTask;
-import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
+import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
 
@@ -20,17 +19,17 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by cyrix on 6/7/15.
  */
-public class DistrictWatchAutomationStrategy implements TaskAutomationStrategy {
+public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrategy {
 
-    private static final String TAG = DistrictWatchAutomationStrategy.class.getSimpleName();
+    private static final String TAG = ResetOnDepartureAutomationStrategy.class.getSimpleName();
 
-    private final DistrictWatchClient task;
+    private final GSTask task;
     private final Context context;
 
     private Timer timer;
 
 
-    public DistrictWatchAutomationStrategy(DistrictWatchClient task) {
+    public ResetOnDepartureAutomationStrategy(GSTask task) {
         this.task = task;
         this.context = GuardSwiftApplication.getInstance();
     }
@@ -56,7 +55,7 @@ public class DistrictWatchAutomationStrategy implements TaskAutomationStrategy {
     }
 
 
-    public void startResetTimer() {
+    private void startResetTimer() {
         //set a new Timer
         timer = new Timer();
 
@@ -69,13 +68,12 @@ public class DistrictWatchAutomationStrategy implements TaskAutomationStrategy {
                 if (distMeters > task.getGeofenceStrategy().getGeofenceRadius() / 2) {
                     automaticDeparture();
                 } else {
-                    Log.w(TAG, "Reseting reset timer for districtWatch: " + task.getFullAddress());
                     startResetTimer();
                 }
             }
         }, TimeUnit.MINUTES.toMillis(5));
     }
-    public void stopResettimertask() {
+    private void stopResettimertask() {
         //stop the timer, if it's not already null
         if (timer != null) {
             timer.cancel();

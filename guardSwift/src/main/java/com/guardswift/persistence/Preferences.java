@@ -16,7 +16,7 @@ public class Preferences {
 
     private final String TAG = Preferences.class.getName();
 
-    private final SharedPreferences sharedPrefs;
+    protected final SharedPreferences sharedPrefs;
     private final Context context;
 
     @Inject

@@ -200,6 +200,7 @@ public class GSTasksCache extends Preferences {
 
     public void clear() {
         for (GenericTaskCache taskCache: taskCaches) {
+            taskCache.clearGeofenced();
             taskCache.clear();
         }
         super.clear();

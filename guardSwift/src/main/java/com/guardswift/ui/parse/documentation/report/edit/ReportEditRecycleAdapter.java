@@ -81,7 +81,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
     }
 
     @Override
-    public void onBindViewHolder(final ReportViewHolder holder, final int position) {
+    public void onBindViewHolder(final ReportViewHolder holder, int position) {
         final EventLog eventLog = getItem(position);
         Log.d(TAG, "onBindViewHolder: " + eventLog);
         holder.eventLogCard.setEventLog(eventLog);
@@ -92,7 +92,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
         holder.eventLogCard.onRemarksClickListener(new View.OnClickListener() {
                                                        @Override
                                                        public void onClick(View view) {
-                                                           if (getItemViewType(position) == GSTask.TASK_TYPE.STATIC.ordinal() && holder.eventLogCard.hasRemarks()) {
+                                                           if (getItemViewType(holder.getAdapterPosition()) == GSTask.TASK_TYPE.STATIC.ordinal() && holder.eventLogCard.hasRemarks()) {
                                                                // only allow edit if empty
                                                                return;
                                                            }

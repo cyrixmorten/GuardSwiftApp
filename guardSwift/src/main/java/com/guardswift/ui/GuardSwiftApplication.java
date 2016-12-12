@@ -19,6 +19,7 @@ import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication;
 import com.guardswift.persistence.cache.ParseCacheFactory;
+import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.Guard;
@@ -39,11 +40,16 @@ import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
+import com.parse.DeleteCallback;
 import com.parse.Parse;
 import com.parse.ParseACL;
+import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
@@ -114,7 +120,31 @@ public class GuardSwiftApplication extends InjectingApplication {
         }
     }
 
-    public static Guard getCurrentGuard() {
+
+    public static void saveCurrentGuardAsLastActive() {
+        ParseObject.unpinAllInBackground(GuardCache.LAST_ACTIVE, new DeleteCallback() {
+            @Override
+            public void done(ParseException e) {
+                GuardSwiftApplication.getLoggedIn().pinInBackground(GuardCache.LAST_ACTIVE);
+            }
+        });
+    }
+
+    public static Guard getLastActiveGuard() {
+        ParseQuery<Guard> query = ParseQuery.getQuery(Guard.class);
+        query.fromLocalDatastore();
+        query.fromPin(GuardCache.LAST_ACTIVE);
+        Guard guard = null;
+        try {
+            guard = query.getFirst();
+        } catch (ParseException e) {
+            new HandleException(TAG, "Getting last active guard", e);
+        }
+        return guard;
+    }
+
+
+    public static Guard getLoggedIn() {
         return GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().getLoggedIn();
     }
 
@@ -164,8 +194,8 @@ public class GuardSwiftApplication extends InjectingApplication {
         defaultACL.setPublicReadAccess(false);
         ParseACL.setDefaultACL(defaultACL, true);
 
-        saveInstallation();
     }
+
 
     private void saveInstallation() {
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
@@ -173,7 +203,12 @@ public class GuardSwiftApplication extends InjectingApplication {
         if (user != null) {
             installation.put("owner", user);
         }
-        installation.saveInBackground();
+        installation.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                ParsePush.subscribeInBackground("alarm");
+            }
+        });
     }
 
     private void setupFabric() {
@@ -193,7 +228,8 @@ public class GuardSwiftApplication extends InjectingApplication {
     public void startServices() {
         ActivityRecognitionService.start(this);
         FusedLocationTrackerService.start(this);
-        WiFiPositioningService.start(this);
+//        WiFiPositioningService.start(this);
+//        RegisterGeofencesIntentService.start(this); // invoked by FusedLocationTrackerService
     }
 
     public void stopServices() {
@@ -234,6 +270,8 @@ public class GuardSwiftApplication extends InjectingApplication {
     }
 
     public Task<Void> bootstrapParseObjectsLocally(final Activity activity, final Guard guard, boolean performInBackground) {
+
+        saveInstallation();
 
         if (parseObjectsBootstrapped) {
             return Task.forResult(null);
@@ -302,6 +340,12 @@ public class GuardSwiftApplication extends InjectingApplication {
             tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
         }
 
+        if (guard.canAccessAlarms()) {
+            Task<List<ParseObject>> alarms = parseObjectFactory.getTask().updateAllAsync();
+
+            tasks.add(alarms.onSuccess(updateClassSuccess));
+        }
+
         updateClassTotal.set(tasks.size());
 
         saveInstallation();
@@ -316,6 +360,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
                 if (result.getError() == null) {
                     parseObjectsBootstrapped = true;
+                    startServices();
                 } else {
                     new HandleException(TAG, "bootstrapParseObjectsLocally", result.getError());
                     new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {

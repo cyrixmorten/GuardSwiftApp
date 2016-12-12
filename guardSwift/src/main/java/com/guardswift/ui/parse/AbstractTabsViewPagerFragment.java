@@ -127,7 +127,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
         changeListener.onPageSelected(0); // init
     }
 
-    private class TasksPagerAdapter extends FragmentPagerAdapter implements UpdateFloatingActionButtonPageChangeListener.FragmentAdapter {
+    private class TasksPagerAdapter extends FragmentStatePagerAdapter implements UpdateFloatingActionButtonPageChangeListener.FragmentAdapter {
 
         public TasksPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -167,86 +167,5 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
     }
 
 
-//    public void onEventMainThread(RestartCurrentCircuit ev) {
-////        final Circuit circuit = Circuit.Recent.getSelected();
-////        final Circuit circuit = circuitCache.get(ParseCache.Circuit.SELECTED);
-//        final CircuitStarted circuitStarted = circuitStartedCache.getSelected();
-//        if (circuitStarted != null) {
-//            new MaterialDialog.Builder(getActivity())
-//                    .title(getString(R.string.title_reset_circuit, circuitStarted.getName()))
-//                    .positiveText(android.R.string.ok)
-//                    .negativeText(android.R.string.cancel)
-//                    .content(R.string.message_reset_circuit)
-//                    .callback(new MaterialDialog.ButtonCallback() {
-//                                  @Override
-//                                  public void onPositive(MaterialDialog dialog) {
-//                                      restartCircuit(circuitStarted);
-//                                  }
-//                              }
-//                    ).show();
-//        }
-//    }
-
-    // TODO should call Cloud Function
-//    private void restartCircuit(final CircuitStarted circuitStarted) {
-//        final ProgressDialog progress = new ProgressDialog(
-//                getActivity());
-//        progress.setIndeterminate(true);
-//        progress.setCancelable(false);
-//        progress.setMessage(getString(R.string.working));
-//        progress.show();
-//
-//        new CircuitUnit.QueryBuilder(true)
-//                .matching(circuitStarted.getCircuit())
-////                .isRunToday()
-//                .buildNoIncludes()
-//                .findInBackground(
-//                        new FindCallback<CircuitUnit>() {
-//
-//                            @Override
-//                            public void done(
-//                                    final List<CircuitUnit> objects,
-//                                    ParseException e) {
-//                                if (e != null) {
-//                                    new HandleException(getActivity(), TAG, "Reset Circuit" + circuitStarted.getName(), e);
-//                                    return;
-//                                }
-//
-//                                for (CircuitUnit circuitUnit : objects) {
-//
-//                                    circuitUnit.reset();
-//
-////                                    circuitUnit.getAutomationStrategy().clearAllAutomaticReports();
-//                                }
-//
-//                                ParseObject.pinAllInBackground(CircuitUnit.PIN, objects, new SaveCallback() {
-//                                    @Override
-//                                    public void done(ParseException e) {
-//                                        if (e != null) {
-//                                            new HandleException(getActivity(), TAG, " restartCircuit pin", e);
-//                                        }
-//
-//                                        progress.dismiss();
-//
-//                                        EventBusController.postUIUpdate(objects);
-//
-////                                        geofencingModule.rebuildGeofences(new CircuitUnit(), TAG);
-//
-//                                        ParseObject.saveAllInBackground(objects, new SaveCallback() {
-//                                            @Override
-//                                            public void done(ParseException e) {
-//                                                if (e != null) {
-//                                                    new HandleException(getActivity(), TAG, " restartCircuit saveAllInBackground", e);
-//                                                }
-//                                            }
-//                                        });
-//                                    }
-//                                });
-//
-//
-//
-//                            }
-//                        });
-//    }
 
 }

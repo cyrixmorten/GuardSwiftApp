@@ -26,6 +26,6 @@
     <item type="id" name="action_primary" />
     <item type="id" name="action_secondary" />
     <item type="id" name="action_extra_circuitunit" />
-
+    <item type="id" name="layout_debug_geofence" />
 
 </resources>

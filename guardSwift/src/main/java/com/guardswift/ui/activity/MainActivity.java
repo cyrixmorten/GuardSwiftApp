@@ -13,9 +13,14 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
+import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
 import com.guardswift.util.Device;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -69,7 +74,13 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
 
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Guard guard = GuardSwiftApplication.getLastActiveGuard();
+        String lastActive = guard != null ? guard.getName() : "N/A";
+        Log.d(TAG, "GUARD: " + lastActive);
+    }
 
     private void setActionBarTitle(final String title, final String subtitle) {
         new Handler().post(new Runnable() {
@@ -217,7 +228,7 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
                     // but as state loss errors are happening very rarely plus we are not
                     // storing state on any of the fragments it is assumed
                     // to be ok to do here.
-                    fm.beginTransaction().replace(R.id.content, fragment).commitNow();
+                    fm.beginTransaction().replace(R.id.content, fragment).commitNowAllowingStateLoss();
                 }
             }
         }, 500);
