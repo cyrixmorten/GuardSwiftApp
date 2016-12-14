@@ -145,7 +145,9 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
                 ((PreferenceCategory)findPreference("alarm_notifications")).removeAll();
 
                 for (Guard guard: guards) {
-                    createAlarmNotifyPreference(guards, guard);
+                    if (guard.canAccessAlarms()) {
+                        createAlarmNotifyPreference(guards, guard);
+                    }
                 }
             }
         });
@@ -166,7 +168,8 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
                 final Boolean enable = (Boolean)newValue;
 
-                Guard.getQueryBuilder(true).build().findInBackground(new FindCallback<Guard>() {
+                Guard.getQueryBuilder(true)
+                        .build().findInBackground(new FindCallback<Guard>() {
                     @Override
                     public void done(List<Guard> objects, ParseException e) {
                         int alarmNotifyCount = 0;

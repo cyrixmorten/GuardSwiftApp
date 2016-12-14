@@ -190,7 +190,7 @@ public class ActivityRecognitionService extends InjectingService {
 //                        boolean acceptableSpeed = true;
                         if (detectedActivity.getType() == DetectedActivity.IN_VEHICLE) {
                             // driving has reduced confidence requirement but needs a trustworthy GPS speed estimate
-                            requiredConfidence = 50;
+                            requiredConfidence = 75;
 //                            acceptableSpeed = (!hasSpeed) || locationWithSpeed.getSpeed() > walkingSpeed;
                         }
                         if (detectedActivity.getType() == DetectedActivity.STILL) {

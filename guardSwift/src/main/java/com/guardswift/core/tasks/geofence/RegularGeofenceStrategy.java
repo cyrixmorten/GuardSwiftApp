@@ -53,7 +53,7 @@ public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
 
     @Override
     public int getGeofenceRadius() {
-        return 200;
+        return 300;
     }
 
     @Override
