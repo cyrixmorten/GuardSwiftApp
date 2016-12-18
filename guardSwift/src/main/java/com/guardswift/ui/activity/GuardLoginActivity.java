@@ -42,6 +42,7 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.Device;
 import com.guardswift.util.GSIntents;
+import com.guardswift.util.OpenLocalPDF;
 import com.guardswift.util.ToastHelper;
 import com.parse.CountCallback;
 import com.parse.DeleteCallback;
@@ -53,6 +54,7 @@ import com.parse.ParseSession;
 import com.parse.ParseUser;
 import com.squareup.picasso.Picasso;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -163,7 +165,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         if (!BuildConfig.DEBUG) {
             development_badge.setVisibility(View.INVISIBLE);
         }
-
 
     }
 //

@@ -186,7 +186,7 @@
     <string name="collect_fingerprints_message_existing">Opdater data for dette checkpoint?\n Det tager 30 sekunder at indsamle informationer.\n\nStart data indsamling nu?</string>
     <string name="collect_fingerprints_message2">Du har valgt checkpoint <b>%1$s</b>, men GuardSwift tror du er ved <b>%2$s</b>.\nHvis du befinder dig ved <b>%1$s</b>, kan en kalibrering muligvis være nødvendig.\nDet tager 30 sekunder at kalibrere.\n\nStart kalibrering nu?</string>
     <string name="learning_checkpoint">Lærer dette checkpoint at kende</string>
-    <string name="canceled">Afbrudt</string>
+    <string name="canceled">Annuleret</string>
     <string name="close">Luk</string>
     <string name="title_activity_checkpoints">Checkpoints</string>
 
@@ -385,6 +385,7 @@
     <string name="last_alarm_receiver_message">Der skal som minimum være én modtager af alarmer.</string>
     <string name="alarms">Alarmer</string>
     <string name="verify_event_time">Verificer tidspunkt for hændelsen</string>
+    <string name="alarm_panels">Alarm paneler</string>
 
 
 </resources>

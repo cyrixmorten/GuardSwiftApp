@@ -8,6 +8,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.CardView;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -52,6 +53,7 @@ import com.guardswift.ui.parse.documentation.report.edit.ReportEditActivity;
 import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 import com.guardswift.ui.parse.execution.circuit.TaskDescriptionActivity;
 import com.guardswift.util.AnimationHelper;
+import com.guardswift.util.OpenLocalPDF;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQueryAdapter;
@@ -900,6 +902,23 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 alarmTaskViewHolder.vTimeEnd.setText(alarmTask.getTimeEndString());
 
                 alarmTaskViewHolder.setupTaskActionButtons(context, alarmTask);
+
+
+                if (alarmTask.getCentralName().equals("G4S")) {
+                    View centralButton = alarmTaskViewHolder.vContentFooter.findViewById(R.id.button_central_pdf);
+                    if (centralButton == null) {
+                        Button g4spdf = new Button(new ContextThemeWrapper(context, android.R.style.Widget_DeviceDefault_Button_Borderless), null, android.R.style.Widget_DeviceDefault_Button_Borderless);
+                        g4spdf.setId(R.id.button_central_pdf);
+                        g4spdf.setText(context.getString(R.string.alarm_panels));
+                        g4spdf.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                new OpenLocalPDF(context, "G4S").execute();
+                            }
+                        });
+                        alarmTaskViewHolder.vContentFooter.addView(g4spdf);
+                    }
+                }
             }
         }
 

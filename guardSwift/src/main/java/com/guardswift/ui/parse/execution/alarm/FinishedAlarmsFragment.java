@@ -41,7 +41,7 @@ public class FinishedAlarmsFragment extends AbstractTasksRecycleFragment<ParseTa
             public ParseQuery<ParseTask> create() {
                 return new ParseTask().getQueryBuilder(false)
                         .sortByTimeEnded()
-                        .whereStatus(ParseTask.STATUS.FINISHED)
+                        .whereStatus(ParseTask.STATUS.FINISHED, ParseTask.STATUS.ABORTED)
                         .build();
             }
         };

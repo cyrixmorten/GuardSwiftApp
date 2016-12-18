@@ -69,10 +69,7 @@ public class AlarmReceiver extends FirebaseMessagingService {
 
                             // notify about the new alarm
                             Guard guard = GuardSwiftApplication.getLastActiveGuard();
-                            Log.d(TAG, "has guard: " + (guard != null));
                             if (guard != null) {
-                                Log.d(TAG, "guard name: " + guard.getName());
-                                Log.d(TAG, "isAlarmSoundEnabled: " + guard.isAlarmSoundEnabled());
                                 if (guard.isAlarmSoundEnabled()) {
                                     AlarmDialogActivity.start(getApplicationContext(), alarmId);
                                 }

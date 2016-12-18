@@ -31,12 +31,13 @@ public class ActiveAlarmsFragment extends AbstractTasksRecycleFragment<ParseTask
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
 
+
         return new ParseQueryAdapter.QueryFactory<ParseTask>() {
 
             @Override
             public ParseQuery<ParseTask> create() {
                 return new ParseTask().getQueryBuilder(false)
-                        .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ARRIVED, ParseTask.STATUS.ACCEPTED, ParseTask.STATUS.ABORTED)
+                        .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ARRIVED, ParseTask.STATUS.ACCEPTED)
                         .sortByTimeEnded()
                         .build();
 

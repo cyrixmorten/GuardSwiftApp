@@ -50,10 +50,13 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
     private Runnable snoozeRunnable = new SnoozeRunnable();
 
     private static String alarmId;
+    private static boolean isOpen;
 
     public static void start(final Context context, String alarmId) {
 
-        if (!alarmId.equals(AlarmDialogActivity.alarmId)) {
+        Log.d(TAG, "START");
+
+        if (!isOpen) {
             AlarmDialogActivity.alarmId = alarmId;
 
             Intent i = new Intent(context, AlarmDialogActivity.class);
@@ -73,10 +76,12 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
         ParseQuery<ParseTask> alarmQuery;
         if (!alarmId.isEmpty()) {
+            Log.d(TAG, "Using alarmId");
             alarmQuery = new AlarmQueryBuilder(true).matchingObjectId(alarmId).build();
         } else {
+            Log.d(TAG, "No alarmId");
             alarmQuery = new AlarmQueryBuilder(true)
-                    .whereStatus(ParseTask.STATUS.PENDING)
+                    .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ABORTED)
                     .sortByTimeStarted()
                     .build();
         }
@@ -91,6 +96,8 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
                 if (alarm != null) {
                     createAndShowAlarmDialog(alarm);
+                } else {
+                    Log.d(TAG, "Alarm is null");
                 }
             }
         });
@@ -135,6 +142,7 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
     @Override
     protected void onDestroy() {
         stopAlarm();
+        isOpen = false;
         super.onDestroy();
     }
 
@@ -157,10 +165,19 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
                         alarm.getFullAddress() + "\n" +
                         getText(R.string.security_level) + ": " + alarm.getPriority();
 
+        if (alarm.isAborted()) {
+            String canceled = "--- " + getString(R.string.canceled).toUpperCase() + " ---";
+            alarmBody = canceled + "\n\n" + alarmBody + "\n\n" + canceled;
+        }
+
+        Log.d(TAG, "alarmBody: " + alarmBody);
+
         new CommonDialogsBuilder.MaterialDialogs(AlarmDialogActivity.this).ok(R.string.alarm, alarmBody, new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                alarmController.performAction(AlarmController.ACTION.ACCEPT, alarm, false);
+                if (alarm.isPending()) {
+                    alarmController.performAction(AlarmController.ACTION.ACCEPT, alarm, false);
+                }
                 AlarmDialogActivity.this.finish();
             }
         })

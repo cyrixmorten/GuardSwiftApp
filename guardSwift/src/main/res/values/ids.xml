@@ -27,5 +27,6 @@
     <item type="id" name="action_secondary" />
     <item type="id" name="action_extra_circuitunit" />
     <item type="id" name="layout_debug_geofence" />
+    <item type="id" name="button_central_pdf" />
 
 </resources>
