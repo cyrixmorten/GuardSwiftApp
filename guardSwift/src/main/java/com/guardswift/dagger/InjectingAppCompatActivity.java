@@ -36,6 +36,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
+import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.eventbus.events.MissingInternetEvent;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.util.Analytics;
@@ -135,19 +136,26 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     @Override
     @CallSuper
     protected void onStart() {
-        super.onStart();
+        try {
+            super.onStart();
 
-        Analytics.sendScreenName(getClass().getSimpleName());
+            Analytics.sendScreenName(getClass().getSimpleName());
 
-        GoogleAnalytics.getInstance(this).reportActivityStart(this);
-
+            GoogleAnalytics.getInstance(this).reportActivityStart(this);
+        } catch (Exception e) {
+            new HandleException(TAG, "onStart", e);
+        }
     }
 
     @Override
     @CallSuper
     protected void onStop() {
-        super.onStop();
-        GoogleAnalytics.getInstance(this).reportActivityStop(this);
+        try {
+            super.onStop();
+            GoogleAnalytics.getInstance(this).reportActivityStop(this);
+        } catch (Exception e) {
+            new HandleException(TAG, "onStop", e);
+        }
     }
 
     // workaround from http://stackoverflow.com/questions/13418436/android-4-2-back-stack-behaviour-with-nested-fragments

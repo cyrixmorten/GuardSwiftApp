@@ -51,7 +51,6 @@ public class ReportEditActivity extends InjectingAppCompatActivity {
         setSupportActionBar(toolbar);
 
         GSTask task = gsTasksCache.getLastSelected();
-        Log.e(TAG, "TASK: " + task);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
