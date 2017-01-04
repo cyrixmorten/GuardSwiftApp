@@ -155,6 +155,10 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
     public void createAlarmNotifyPreference(final List<Guard> guards, final Guard guard) {
 
+        if (getContext() == null || isDetached()) {
+            return;
+        }
+
         PreferenceCategory alarmNotifications = (PreferenceCategory)findPreference("alarm_notifications");
 
         final CheckBoxPreference guardNotification = new CheckBoxPreference(getContext());
