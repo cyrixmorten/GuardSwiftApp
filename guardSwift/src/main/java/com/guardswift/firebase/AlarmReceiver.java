@@ -12,9 +12,13 @@ import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
+import com.guardswift.util.Device;
 import com.parse.GetCallback;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParseSession;
+import com.parse.ParseUser;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,17 +90,36 @@ public class AlarmReceiver extends FirebaseMessagingService {
             @Override
             public Task<Guard> then(Task<Void> task) throws Exception {
                 Guard guard = GuardSwiftApplication.getLastActiveGuard();
+
+
                 if (guard != null) {
                     return guard.fetchInBackground();
                 }
 
                 throw new Exception("No last active guard found");
+
             }
         }).continueWith(new Continuation<Guard, Object>() {
             @Override
             public Object then(Task<Guard> task) throws Exception {
                 if (task.isFaulted()) {
-                    new HandleException(TAG, "Failed receive alarm: " + alarmId, task.getError());
+                    Exception exception = task.getError();
+
+                    new HandleException(TAG, "Failed receive alarm: " + alarmId, exception);
+
+                    Device device = new Device(GuardSwiftApplication.getInstance());
+
+                    // TODO: Builder pattern or bake into HandleException
+                    ParseObject error = new ParseObject("Error");
+                    error.put("owner", ParseUser.getCurrentUser());
+                    error.put("installation", ParseInstallation.getCurrentInstallation());
+                    error.put("platform", "Android");
+                    error.put("tag", TAG);
+                    error.put("gsVersion", device.getVersionCode());
+                    error.put("context", "Receive alarm notification for id: " + alarmId);
+                    error.put("message", exception.getMessage());
+                    error.saveInBackground();
+
                     return null;
                 }
 
