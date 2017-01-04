@@ -24,6 +24,9 @@ public class Sounds {
 
 	private static final String TAG = Sounds.class.getSimpleName();
 
+    public static int ALARM_NEW = R.raw.alarm;
+    public static int ALARM_CANCELLED = R.raw.departure;
+
 	private Context context;
     private MediaPlayer alarmMediaPlayer;
     private MediaPlayer notificationMediaPlayer;
@@ -98,9 +101,9 @@ public class Sounds {
 
 	}
 
-	public void playAlarmSound() {
+	public void playSoundRepeating(int sound) {
 
-		Log.i(TAG, "playAlarmSound");
+		Log.i(TAG, "playSoundRepeating");
 
 //        if (BuildConfig.DEBUG)
 //            return;
@@ -118,7 +121,7 @@ public class Sounds {
         alarmMediaPlayer = new MediaPlayer();
 
         Resources res = context.getResources();
-        AssetFileDescriptor afd = res.openRawResourceFd(R.raw.alarm);
+        AssetFileDescriptor afd = res.openRawResourceFd(sound);
 
 
         alarmMediaPlayer.reset();

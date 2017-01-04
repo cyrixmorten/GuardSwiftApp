@@ -37,7 +37,7 @@ public class ActiveAlarmsFragment extends AbstractTasksRecycleFragment<ParseTask
             @Override
             public ParseQuery<ParseTask> create() {
                 return new ParseTask().getQueryBuilder(false)
-                        .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ARRIVED, ParseTask.STATUS.ACCEPTED)
+                        .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ACCEPTED, ParseTask.STATUS.ARRIVED)
                         .sortByTimeEnded()
                         .build();
 

@@ -181,7 +181,6 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         public void onActionOpen(Context context, ParseTask task) {
             super.onActionOpen(context, task);
 
-//            boolean inverseSelection = !selectedItems.get(getAdapterPosition(), false);
             boolean inverseSelection = vContentFooter.getVisibility() == View.GONE;
 
             // Save the selected positions to the SparseBooleanArray
@@ -490,6 +489,8 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         @Bind(R.id.task_state_arrived)
         BootstrapButton vBtnArrived;
+        @Bind(R.id.task_state_accepted)
+        BootstrapButton vBtnAccepted;
         @Bind(R.id.task_state_aborted)
         BootstrapButton vBtnAborted;
         @Bind(R.id.task_state_finished)
@@ -548,6 +549,15 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             performTaskAction(context, task, ACTION.ACCEPT);
 
 
+            vBtnAccepted.setVisibility(View.GONE);
+            vBtnArrived.setVisibility(View.VISIBLE);
+
+            if (!task.getTaskType().equals(GSTask.TASK_TYPE.ALARM)) {
+                vBtnAborted.setVisibility(View.VISIBLE);
+            }
+
+            vBtnFinished.setVisibility(View.VISIBLE);
+
         }
 
         @Override
@@ -581,6 +591,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             super(v);
             ButterKnife.bind(this, v);
 
+            this.vBtnAccepted.setBootstrapSize(DefaultBootstrapSize.LG);
             this.vBtnArrived.setBootstrapSize(DefaultBootstrapSize.LG);
             this.vBtnAborted.setBootstrapSize(DefaultBootstrapSize.LG);
             this.vBtnFinished.setBootstrapSize(DefaultBootstrapSize.LG);
@@ -599,6 +610,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 }
             });
 
+            this.vBtnAccepted.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onActionAccept(context, task);
+                }
+            });
 
             this.vBtnArrived.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -881,6 +898,13 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             holder.vContentFooter.setVisibility((task.isArrived() || selectedItems.get(position, false)) ? View.VISIBLE : View.GONE);
             holder.vBtnAborted.setVisibility(View.GONE);
             holder.vBtnTaskdescription.setVisibility(View.GONE);
+
+            if (task.isPending()) {
+                holder.vBtnAccepted.setVisibility(View.VISIBLE);
+                holder.vBtnArrived.setVisibility(View.GONE);
+                holder.vBtnAborted.setVisibility(View.GONE);
+                holder.vBtnFinished.setVisibility(View.GONE);
+            }
 
             ParseTask alarmTask = (ParseTask)task;
             if (holder instanceof AlarmTaskViewHolder) {

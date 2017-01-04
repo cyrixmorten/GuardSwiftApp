@@ -152,6 +152,9 @@ public class ParseTask extends BaseTask {
         if (isArrived()) {
             return TASK_STATE.ARRIVED;
         }
+        if (isAccepted()) {
+            return TASK_STATE.ACCEPTED;
+        }
         return TASK_STATE.PENDING;
     }
 

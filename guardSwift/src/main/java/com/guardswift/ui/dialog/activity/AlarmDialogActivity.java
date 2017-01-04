@@ -44,8 +44,8 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
     @Inject
     Sounds mSounds;
 
+    private int currentAlarmSound = Sounds.ALARM_NEW;
 
-    private boolean isNew = true;
     private Handler snoozeHandler = new Handler();
     private Runnable snoozeRunnable = new SnoozeRunnable();
 
@@ -89,16 +89,13 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
         alarmQuery.getFirstInBackground(new GetCallback<ParseTask>() {
             @Override
             public void done(ParseTask alarm, ParseException e) {
-                if (e != null) {
+                if (e != null || alarm == null) {
                     new HandleException(TAG, "Find alarm", e);
+                    AlarmDialogActivity.this.finish();
                     return;
                 }
 
-                if (alarm != null) {
-                    createAndShowAlarmDialog(alarm);
-                } else {
-                    Log.d(TAG, "Alarm is null");
-                }
+                createAndShowAlarmDialog(alarm);
             }
         });
 
@@ -107,13 +104,8 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
     @Override
     protected void onResume() {
-        if (isNew) {
-            mSounds.playAlarmSound();
-        } else {
-            snoozeAlarm();
-        }
+//        snoozeAlarm();
 
-        isNew = false;
         super.onResume();
     }
 
@@ -135,7 +127,7 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
         @Override
         public void run() {
             if (mSounds != null)
-                mSounds.playAlarmSound();
+                mSounds.playSoundRepeating(currentAlarmSound);
         }
     }
 
@@ -157,6 +149,9 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
         if (isDestroyed()) {
             return;
         }
+
+        currentAlarmSound = alarm.isAborted() ? Sounds.ALARM_CANCELLED : Sounds.ALARM_NEW;
+        mSounds.playSoundRepeating(currentAlarmSound);
 
         Log.d(TAG, "createAndShowAlarmDialog");
 

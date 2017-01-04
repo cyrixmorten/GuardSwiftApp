@@ -14,12 +14,16 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
 import com.parse.GetCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Map;
+
+import bolts.Continuation;
+import bolts.Task;
 
 public class AlarmReceiver extends FirebaseMessagingService {
 
@@ -40,7 +44,7 @@ public class AlarmReceiver extends FirebaseMessagingService {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            for (String key: mapData.keySet()) {
+            for (String key : mapData.keySet()) {
                 Log.d(TAG, "Key: " + key + " Value: " + mapData.get(key));
             }
         }
@@ -53,39 +57,63 @@ public class AlarmReceiver extends FirebaseMessagingService {
 
     }
 
-    private void handleNewAlarmNotification(final String alarmId) {
 
+    private void pinAlarmAndAddToGeofence(ParseTask alarm) {
 
-        new ParseTask().getQueryBuilder(false).matchingObjectId(alarmId).build().getFirstInBackground(new GetCallback<ParseTask>() {
+        new ParseTask().pinUpdate(alarm, new ExtendedParseObject.DataStoreCallback<ParseTask>() {
             @Override
-            public void done(ParseTask object, ParseException e) {
-                if (object != null) {
-                    Log.w(TAG, "handleNewAlarmNotification: " + object.getObjectId());
-                    new ParseTask().pinUpdate(object, new ExtendedParseObject.DataStoreCallback<ParseTask>() {
-                        @Override
-                        public void success(List<ParseTask> objects) {
-                            // rebuilding geofence to include new alarm
-                            RegisterGeofencesIntentService.start(getApplicationContext());
+            public void success(List<ParseTask> objects) {
+                // rebuilding geofence to include new alarm
+                RegisterGeofencesIntentService.start(getApplicationContext());
+            }
 
-                            // notify about the new alarm
-                            Guard guard = GuardSwiftApplication.getLastActiveGuard();
-                            if (guard != null) {
-                                if (guard.isAlarmSoundEnabled()) {
-                                    AlarmDialogActivity.start(getApplicationContext(), alarmId);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void failed(ParseException e) {
-                            new HandleException(TAG, "Failed to pin alarm to local datastore", e);
-                        }
-                    });
-                } else {
-                    new HandleException(TAG, "Unable to download alarm with id: " + alarmId, e);
-                }
+            @Override
+            public void failed(ParseException e) {
+                new HandleException(TAG, "Failed to pin alarm to local datastore", e);
             }
         });
+    }
+
+    private void handleNewAlarmNotification(final String alarmId) {
+
+        ParseTask alarm = ParseTask.createWithoutData(ParseTask.class, alarmId);
+        alarm.fetchInBackground().onSuccessTask(new Continuation<ParseObject, Task<Void>>() {
+            @Override
+            public Task<Void> then(Task<ParseObject> task) throws Exception {
+                return task.getResult().pinInBackground();
+            }
+        }).onSuccessTask(new Continuation<Void, Task<Guard>>() {
+            @Override
+            public Task<Guard> then(Task<Void> task) throws Exception {
+                Guard guard = GuardSwiftApplication.getLastActiveGuard();
+                if (guard != null) {
+                    return guard.fetchInBackground();
+                }
+
+                throw new Exception("No last active guard found");
+            }
+        }).continueWith(new Continuation<Guard, Object>() {
+            @Override
+            public Object then(Task<Guard> task) throws Exception {
+                if (task.isFaulted()) {
+                    new HandleException(TAG, "Failed receive alarm: " + alarmId, task.getError());
+                    return null;
+                }
+
+                // Update geofence to include new alarm
+                RegisterGeofencesIntentService.start(getApplicationContext());
+
+                Guard guard = task.getResult();
+
+
+                if (guard.isAlarmSoundEnabled()) {
+                    AlarmDialogActivity.start(getApplicationContext(), alarmId);
+                }
+
+                return null;
+            }
+        });
+
 
     }
 
