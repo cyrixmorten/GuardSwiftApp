@@ -1081,7 +1081,10 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
     private RemoveItemCallback defaultRemoveItemCallback = new RemoveItemCallback() {
         @Override
         public void removeAt(int position) {
-            removeItemAt(position);
+            // saw crash reports due to java.lang.ArrayIndexOutOfBoundsException by getAdapterPosition() returning -1
+            if (position >= 0) {
+                removeItemAt(position);
+            }
         }
     };
 
