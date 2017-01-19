@@ -10,9 +10,9 @@
 //import com.guardswift.ui.activity.details.DetailsActivityFactory;
 //import com.guardswift.persistence.parse.planning.GSTask;
 //
-//public class Notifications {
+//public class AlarmNotification {
 //
-//	private static final String TAG = Notifications.class.getSimpleName();
+//	private static final String TAG = AlarmNotification.class.getSimpleName();
 //
 //
 //	private static final int NOTICIFATION_ID_TASK = 1;

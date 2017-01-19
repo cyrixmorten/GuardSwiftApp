@@ -15,7 +15,7 @@
 //import com.guardswift.persistence.parse.planning.regular.CircuitUnit;
 //import com.guardswift.persistence.parse.planning.GSTask;
 //import com.guardswift.util.Analytics;
-//import com.guardswift.util.Notifications;
+//import com.guardswift.util.AlarmNotification;
 //import com.guardswift.util.Sounds;
 //
 //import java.util.List;
@@ -63,7 +63,7 @@
 //            showSingleOptionDialog(task);
 //
 //            String clickToOpenDetails = getString(R.string.click_to_open_task);
-//            Notifications.displayTaskNotification(this, task,
+//            AlarmNotification.displayTaskNotification(this, task,
 //                    clickToOpenDetails
 //            );
 //        }

@@ -85,6 +85,10 @@ public class MainNavigationDrawer {
 
     }
 
+    void close() {
+        navigationDrawer.closeDrawer();
+    }
+
     void initNavigationDrawer(Activity activity, Toolbar toolbar, final MainNavigationDrawerCallback drawerCallback) {
 
         this.drawerCallback = drawerCallback;

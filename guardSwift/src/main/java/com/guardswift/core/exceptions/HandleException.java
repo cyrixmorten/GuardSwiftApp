@@ -10,7 +10,12 @@ import com.crashlytics.android.Crashlytics;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.eventbus.EventBusController;
+import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.util.Device;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
+import com.parse.ParseObject;
+import com.parse.ParseUser;
 
 
 public class HandleException {
@@ -42,7 +47,36 @@ public class HandleException {
             });
         }
 
+        saveError(tag, message, e);
+    }
 
+    private void saveError(String tag, String message, Throwable exception) {
+
+        ParseUser user = ParseUser.getCurrentUser();
+
+        if (user != null) {
+            Device device = new Device(GuardSwiftApplication.getInstance());
+
+            ParseObject error = new ParseObject("Error");
+            error.put("owner", user);
+            error.put("installation", ParseInstallation.getCurrentInstallation());
+            error.put("platform", "Android");
+            error.put("tag", tag);
+            error.put("gsVersion", device.getVersionCode());
+            error.put("message", message);
+
+            if (exception != null) {
+                if (exception.getCause() != null) {
+                    if (exception.getCause().getMessage() != null) {
+                        error.put("exception", exception.getMessage());
+                    }
+
+                    error.put("cause", exception.getCause().getMessage());
+                }
+            }
+
+            error.saveInBackground();
+        }
     }
 }
 

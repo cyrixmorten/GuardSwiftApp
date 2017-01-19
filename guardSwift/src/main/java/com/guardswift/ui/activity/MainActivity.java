@@ -16,6 +16,7 @@ import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
+import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.util.Device;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -33,6 +34,8 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final String TAG_FRAGMENT_CONTENT = "TAG_FRAGMENT_CONTENT";
+
+    public static final String SELECT_ALARMS = "SELECT_ALARMS";
 
 
     @Inject
@@ -70,8 +73,17 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
 
             // bootstrap parseObjects if it has not been done during this session
             GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn(), true);
+
+            setSelectionFromIntent();
         }
 
+    }
+
+    private void setSelectionFromIntent() {
+        if (getIntent().hasExtra(SELECT_ALARMS)) {
+            selectItem(AlarmsViewPagerFragment.newInstance(), R.string.alarms);
+            navigationDrawer.close();
+        }
     }
 
     @Override

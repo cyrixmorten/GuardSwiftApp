@@ -11,18 +11,13 @@ import android.util.Log;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
-import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.cache.task.TaskCache;
 import com.guardswift.persistence.parse.execution.ParseTask;
-import com.guardswift.persistence.parse.execution.query.AlarmQueryBuilder;
 import com.guardswift.core.tasks.controller.AlarmController;
-import com.guardswift.eventbus.events.ParseObjectUpdatedEvent;
-import com.guardswift.persistence.parse.ExtendedParseObject;
+import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
+import com.guardswift.ui.notification.AlarmNotification;
 import com.guardswift.util.Sounds;
-import com.parse.GetCallback;
-import com.parse.ParseException;
-import com.parse.ParseQuery;
 
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +27,8 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
     protected static final String TAG = AlarmDialogActivity.class
             .getSimpleName();
+
+    private final static String EXTRA_ALARM_ID = "EXTRA_ALARM_ID";
 
     @Inject
     FragmentManager fm;
@@ -49,15 +46,14 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
     private Handler snoozeHandler = new Handler();
     private Runnable snoozeRunnable = new SnoozeRunnable();
 
-    private static String alarmId;
-    private static boolean isOpen;
+    private static ParseTask alarm;
 
-    public static void start(final Context context, String alarmId) {
+    public static void start(final Context context, ParseTask alarm) {
 
-        Log.d(TAG, "START");
+        Log.d(TAG, "START " + alarm);
 
-        if (!isOpen) {
-            AlarmDialogActivity.alarmId = alarmId;
+        if (AlarmDialogActivity.alarm == null) {
+            AlarmDialogActivity.alarm = alarm;
 
             Intent i = new Intent(context, AlarmDialogActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -66,58 +62,65 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
     }
 
+//    public static void start(final Context context, String alarmId) {
+//
+//        Log.d(TAG, "START " + alarmId);
+//
+//
+//        Intent i = new Intent(context, AlarmDialogActivity.class);
+//
+//        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        i.putExtra(EXTRA_ALARM_ID, alarmId);
+//        context.startActivity(i);
+//
+//    }
+
 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
         Log.d(TAG, "onCreate");
+        createAndShowAlarmDialog(alarm);
 
-
-        ParseQuery<ParseTask> alarmQuery;
-        if (!alarmId.isEmpty()) {
-            Log.d(TAG, "Using alarmId");
-            alarmQuery = new AlarmQueryBuilder(true).matchingObjectId(alarmId).build();
-        } else {
-            Log.d(TAG, "No alarmId");
-            alarmQuery = new AlarmQueryBuilder(true)
-                    .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ABORTED)
-                    .sortByTimeStarted()
-                    .build();
-        }
-
-        alarmQuery.getFirstInBackground(new GetCallback<ParseTask>() {
-            @Override
-            public void done(ParseTask alarm, ParseException e) {
-                if (e != null || alarm == null) {
-                    new HandleException(TAG, "Find alarm", e);
-                    AlarmDialogActivity.this.finish();
-                    return;
-                }
-
-                createAndShowAlarmDialog(alarm);
-            }
-        });
+//        ParseQuery<ParseTask> alarmQuery;
+//        String alarmId = "No alarmId";
+//        if (getIntent().hasExtra(EXTRA_ALARM_ID)) {
+//            alarmId = getIntent().getStringExtra(EXTRA_ALARM_ID);
+//            Log.d(TAG, "Using alarmId");
+//            alarmQuery = new AlarmQueryBuilder(true).matchingObjectId(alarmId).build();
+//        } else {
+//            Log.d(TAG, "No alarmId");
+//            alarmQuery = new AlarmQueryBuilder(true)
+//                    .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ABORTED)
+//                    .sortByTimeStarted()
+//                    .build();
+//        }
+//
+//        final String finalAlarmId = alarmId;
+//        alarmQuery.getFirstInBackground(new GetCallback<ParseTask>() {
+//            @Override
+//            public void done(ParseTask alarm, ParseException e) {
+//                if (e != null || alarm == null) {
+//                    new HandleException(TAG, "Find alarm " + finalAlarmId, e);
+//                    AlarmDialogActivity.this.finish();
+//                    return;
+//                }
+//
+//                createAndShowAlarmDialog(alarm);
+//            }
+//        });
 
     }
 
-
-    @Override
-    protected void onResume() {
-//        snoozeAlarm();
-
-        super.onResume();
-    }
 
     private void stopAlarm() {
         mSounds.stopAlarm();
         snoozeHandler.removeCallbacks(snoozeRunnable);
+        AlarmDialogActivity.alarm = null;
     }
 
     private void snoozeAlarm() {
-
-        Log.d(TAG, "Snooze");
-
         stopAlarm();
         snoozeHandler.postDelayed(snoozeRunnable, TimeUnit.MINUTES.toMillis(1));
     }
@@ -126,23 +129,18 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
         @Override
         public void run() {
-            if (mSounds != null)
+            if (mSounds != null) {
                 mSounds.playSoundRepeating(currentAlarmSound);
+            }
         }
     }
 
     @Override
     protected void onDestroy() {
         stopAlarm();
-        isOpen = false;
         super.onDestroy();
     }
 
-
-    public void onEventMainThread(ParseObjectUpdatedEvent ev) {
-        ExtendedParseObject object = ev.getObject();
-        // stop sound if accepted
-    }
 
     private void createAndShowAlarmDialog(final ParseTask alarm) {
 
@@ -174,6 +172,14 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
                     alarmController.performAction(AlarmController.ACTION.ACCEPT, alarm, false);
                 }
                 AlarmDialogActivity.this.finish();
+
+                Intent intent = new Intent(AlarmDialogActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                intent.putExtra(MainActivity.SELECT_ALARMS, true);
+                AlarmDialogActivity.this.startActivity(intent);
+
+                stopAlarm();
+                AlarmNotification.cancel(AlarmDialogActivity.this);
             }
         })
         .cancelable(false)

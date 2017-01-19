@@ -29,8 +29,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 22 // 23 require runtime permissions!!
-        versionCode 418
-        versionName "4.1.8"
+        versionCode 420
+        versionName "4.2.0"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -122,6 +122,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-maps:10.0.1'
     compile 'com.squareup.dagger:dagger:1.2.2'
     compile 'com.takisoft.fix:preference-v7:25.0.1.0'
+    compile 'com.parse.bolts:bolts-tasks:1.4.0'
+
     apt 'com.squareup.dagger:dagger-compiler:1.2.2'
 }
 

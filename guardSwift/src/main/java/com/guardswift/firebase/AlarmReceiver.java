@@ -7,31 +7,27 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
-import com.guardswift.util.Device;
-import com.parse.GetCallback;
-import com.parse.ParseException;
-import com.parse.ParseInstallation;
-import com.parse.ParseObject;
-import com.parse.ParseSession;
-import com.parse.ParseUser;
+import com.guardswift.ui.notification.AlarmNotification;
 
+import org.joda.time.DateTime;
+import org.joda.time.Seconds;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.List;
 import java.util.Map;
 
+import bolts.Capture;
 import bolts.Continuation;
 import bolts.Task;
 
 public class AlarmReceiver extends FirebaseMessagingService {
 
     private static String TAG = AlarmReceiver.class.getSimpleName();
+
+    private static DateTime lastAlarmReceive;
 
     public AlarmReceiver() {
     }
@@ -62,28 +58,21 @@ public class AlarmReceiver extends FirebaseMessagingService {
     }
 
 
-    private void pinAlarmAndAddToGeofence(ParseTask alarm) {
-
-        new ParseTask().pinUpdate(alarm, new ExtendedParseObject.DataStoreCallback<ParseTask>() {
-            @Override
-            public void success(List<ParseTask> objects) {
-                // rebuilding geofence to include new alarm
-                RegisterGeofencesIntentService.start(getApplicationContext());
-            }
-
-            @Override
-            public void failed(ParseException e) {
-                new HandleException(TAG, "Failed to pin alarm to local datastore", e);
-            }
-        });
-    }
 
     private void handleNewAlarmNotification(final String alarmId) {
 
         ParseTask alarm = ParseTask.createWithoutData(ParseTask.class, alarmId);
-        alarm.fetchInBackground().onSuccessTask(new Continuation<ParseObject, Task<Void>>() {
+
+        final Capture<ParseTask> alarmCapture = new Capture<>();
+
+        final Task<ParseTask> fetchAlarm = alarm.fetchInBackground();
+
+        fetchAlarm.onSuccessTask(new Continuation<ParseTask, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParseObject> task) throws Exception {
+            public Task<Void> then(Task<ParseTask> task) throws Exception {
+
+                alarmCapture.set(task.getResult());
+
                 return task.getResult().pinInBackground();
             }
         }).onSuccessTask(new Continuation<Void, Task<Guard>>() {
@@ -107,19 +96,6 @@ public class AlarmReceiver extends FirebaseMessagingService {
 
                     new HandleException(TAG, "Failed receive alarm: " + alarmId, exception);
 
-                    Device device = new Device(GuardSwiftApplication.getInstance());
-
-                    // TODO: Builder pattern or bake into HandleException
-                    ParseObject error = new ParseObject("Error");
-                    error.put("owner", ParseUser.getCurrentUser());
-                    error.put("installation", ParseInstallation.getCurrentInstallation());
-                    error.put("platform", "Android");
-                    error.put("tag", TAG);
-                    error.put("gsVersion", device.getVersionCode());
-                    error.put("context", "Receive alarm notification for id: " + alarmId);
-                    error.put("message", exception.getMessage());
-                    error.saveInBackground();
-
                     return null;
                 }
 
@@ -129,9 +105,16 @@ public class AlarmReceiver extends FirebaseMessagingService {
                 Guard guard = task.getResult();
 
 
-                if (guard.isAlarmSoundEnabled()) {
-                    AlarmDialogActivity.start(getApplicationContext(), alarmId);
+                boolean someTimePast =  lastAlarmReceive == null ||  Seconds.secondsBetween(lastAlarmReceive, new DateTime()).isGreaterThan(Seconds.seconds(30));
+
+                if (guard.isAlarmSoundEnabled() && someTimePast) {
+                    ParseTask alarm = alarmCapture.get();
+                    AlarmDialogActivity.start(AlarmReceiver.this, alarm);
+                    AlarmNotification.show(AlarmReceiver.this, alarm);
+
+                    lastAlarmReceive = new DateTime();
                 }
+
 
                 return null;
             }
@@ -139,5 +122,7 @@ public class AlarmReceiver extends FirebaseMessagingService {
 
 
     }
+
+
 
 }

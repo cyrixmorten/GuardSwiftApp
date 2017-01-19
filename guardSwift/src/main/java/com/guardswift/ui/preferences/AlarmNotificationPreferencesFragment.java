@@ -142,6 +142,14 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
             @Override
             public void done(List<Guard> guards, ParseException e) {
 
+                if (e != null) {
+                    new HandleException(TAG, "Fetching guards", e);
+                    return;
+                }
+                if (guards == null) {
+                    return;
+                }
+
                 ((PreferenceCategory)findPreference("alarm_notifications")).removeAll();
 
                 for (Guard guard: guards) {
@@ -188,6 +196,7 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
                             guardNotification.setChecked(true);
                         } else {
+                            guard.enableAlarmNotification(enable);
                             guard.enableAlarmSound(enable);
                             guard.enableAlarmSMS(enable);
                             guard.pinThenSaveEventually();
