@@ -76,7 +76,7 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
 
     private Drawer messagesDrawer;
     private MenuItem messagesMenu;
-    private static Set<String> hasReadGroups = Sets.newConcurrentHashSet();
+
 
     public CircuitViewPagerFragment() {
     }
@@ -90,7 +90,7 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
     }
 
     private int newMessagesCount(List<Message> messages) {
-        if (hasReadGroups.contains(getGroupId())) {
+        if (GuardSwiftApplication.hasReadGroups.contains(getGroupId())) {
             return 0;
         }
 
@@ -167,7 +167,7 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_messages) {
             messagesDrawer.openDrawer();
-            hasReadGroups.add(getGroupId());
+            GuardSwiftApplication.hasReadGroups.add(getGroupId());
             ActionItemBadge.update(messagesMenu, Integer.MIN_VALUE);
         }
         return super.onOptionsItemSelected(item);

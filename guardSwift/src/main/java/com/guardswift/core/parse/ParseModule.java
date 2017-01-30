@@ -117,6 +117,8 @@ public class ParseModule {
 
     private void clearData() {
 
+        GuardSwiftApplication.hasReadGroups.clear();
+
         guardCache.removeLoggedIn();
         tasksCache.clear();
 

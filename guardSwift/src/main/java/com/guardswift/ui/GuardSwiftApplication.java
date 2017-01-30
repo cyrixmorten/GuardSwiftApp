@@ -10,6 +10,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.TypefaceProvider;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.common.collect.Sets;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.ca.activity.ActivityRecognitionService;
@@ -55,6 +56,7 @@ import net.danlew.android.joda.JodaTimeAndroid;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
@@ -73,6 +75,8 @@ public class GuardSwiftApplication extends InjectingApplication {
     @Inject
     ParseCacheFactory parseCacheFactory;
 
+    // mark messages as read for groups
+    public static final Set<String> hasReadGroups = Sets.newConcurrentHashSet();
 
     private static GuardSwiftApplication instance;
 
