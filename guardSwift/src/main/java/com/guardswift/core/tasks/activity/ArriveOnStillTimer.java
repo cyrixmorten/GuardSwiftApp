@@ -46,6 +46,7 @@ class ArriveOnStillTimer {
     private class InactivityTimerTask extends TimerTask {
         @Override
         public void run() {
+            Log.d(TAG, "Arrival triggered by still timer");
             task.getAutomationStrategy().automaticArrival();
 
         }

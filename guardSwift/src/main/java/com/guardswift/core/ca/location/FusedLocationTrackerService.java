@@ -9,9 +9,13 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationRequest;
 import com.google.common.collect.Lists;
+import com.guardswift.core.ca.ActivityDetectionModule;
+import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingService;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.core.ca.LocationModule;
@@ -21,7 +25,7 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.data.Guard;
-import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
+import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Util;
@@ -73,7 +77,7 @@ public class FusedLocationTrackerService extends InjectingService {
     private Location mLastGeofenceRebuildLocation;
     private Location mLastUIUpdateLocation;
 
-    private LocationTracker locationTracker;
+    private Tracker tracker;
 
 
     @Inject
@@ -94,7 +98,7 @@ public class FusedLocationTrackerService extends InjectingService {
         Log.i(TAG, "Starting GPSTrackerService! " + LOCATION_PRIORITY);
         if (hasGooglePlayServices()) {
 
-            locationTracker = new LocationTracker();
+            tracker = new Tracker();
             requestLocationUpdates();
 
         }
@@ -132,8 +136,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
 
     private boolean hasGooglePlayServices() {
-        int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
-        if (result != ConnectionResult.SUCCESS) {
+        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
             return false;
         }
         return true;
@@ -155,18 +158,21 @@ public class FusedLocationTrackerService extends InjectingService {
 
         locationSubscription = locationProvider.getUpdatedLocation(request)
                 .observeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
-                .doOnError(new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        String message = "Error on location init: " + throwable.getMessage();
-                        Log.e(TAG, message, throwable);
-                        Crashlytics.logException(throwable);
-                    }
-                })
+//                .doOnError(new Action1<Throwable>() {
+//                    @Override
+//                    public void call(Throwable throwable) {
+//                        new HandleException(TAG, "Location error", throwable);
+//                        Crashlytics.logException(throwable);
+//                    }
+//                })
                 .onErrorReturn(new Func1<Throwable, Location>() {
                     @Override
                     public Location call(Throwable throwable) {
                         Location location = new android.location.Location("");
+                        location.setAccuracy(100); // do not let past filter
+
+                        new HandleException(TAG, "Location error", throwable);
+
                         return location;
                     }
                 })
@@ -188,8 +194,8 @@ public class FusedLocationTrackerService extends InjectingService {
                                 inspectDistanceToGeofencedTasks(location);
                             }
 
-                            Guard guard = guardCache.getLoggedIn();
-                            locationTracker.appendLocation(getApplicationContext(), guard, location);
+
+                            tracker.appendLocation(getApplicationContext(), location);
 
 
                         } else {
@@ -231,6 +237,7 @@ public class FusedLocationTrackerService extends InjectingService {
     private void inspectDistanceToGeofencedTasks(Location location) {
 
         Set<GSTask> geofencedTasks = tasksCache.getAllGeofencedTasks();
+
 
         List<String> tasksWithinGeofence = Lists.newArrayList();
         List<String> tasksMovedWithinGeofence = Lists.newArrayList();

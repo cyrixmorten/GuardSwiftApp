@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import bolts.Task;
+import bolts.TaskCompletionSource;
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
 import rx.Observable;
 import rx.functions.Action1;
@@ -67,10 +68,6 @@ public class LocationModule {
         map.put("provider", location.getProvider());
         map.put("latitude", location.getLatitude());
         map.put("longitude", location.getLongitude());
-        map.put("hasSpeed", location.hasSpeed());
-        map.put("hasAccuracy", location.hasAccuracy());
-        map.put("hasBearing", location.hasBearing());
-        map.put("hasAltitude", location.hasAltitude());
         map.put("speed", location.getSpeed());
         map.put("accuracy", location.getAccuracy());
         map.put("bearing", location.getBearing());
@@ -81,7 +78,7 @@ public class LocationModule {
 
     // Reverse geocode GPS clientPosition
     public static Task<GeocodedAddress> reverseGeocodedAddress(Context context) {
-        final Task<GeocodedAddress>.TaskCompletionSource result = Task.create();
+        final TaskCompletionSource<GeocodedAddress> result = new TaskCompletionSource<>();
 
         final ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(context);
         Observable<Location> lastKnownLocationObservable = locationProvider.getLastKnownLocation();

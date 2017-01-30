@@ -7,7 +7,7 @@ import com.guardswift.persistence.parse.data.client.ClientContact;
 import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
-import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
+import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
@@ -17,6 +17,7 @@ import com.guardswift.persistence.parse.execution.task.regular.Circuit;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.persistence.parse.misc.Message;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +43,9 @@ public class ParseObjectFactory {
 	private final Guard guard;
     private final ClientContact clientContact;
     private final ClientLocation clientLocation;
-    private final LocationTracker locationTracker;
+    private final Tracker tracker;
 	private final Report report;
+	private final Message message;
 
 	private final List<ExtendedParseObject> allParseObjects;
 
@@ -64,10 +66,10 @@ public class ParseObjectFactory {
         eventLog = new EventLog();
         eventRemark = new EventRemark();
         eventType = new EventType();
-        locationTracker = new LocationTracker();
-//		message = new Message();
+        tracker = new Tracker();
         guard = new Guard();
 		report = new Report();
+		message = new Message();
 
 		allParseObjects = new ArrayList<>();
 		allParseObjects.add(client);
@@ -84,7 +86,8 @@ public class ParseObjectFactory {
 		allParseObjects.add(guard);
         allParseObjects.add(clientContact);
         allParseObjects.add(clientLocation);
-        allParseObjects.add(locationTracker);
+        allParseObjects.add(tracker);
+		allParseObjects.add(message);
 	}
 
 	public List<ExtendedParseObject> getAll() {
@@ -143,5 +146,7 @@ public class ParseObjectFactory {
 	public Guard getGuard() {
 		return guard;
 	}
+
+	public Message getMessage() { return message; }
 
 }

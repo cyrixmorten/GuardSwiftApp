@@ -5,8 +5,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.guardswift.R;
 import com.guardswift.core.parse.ParseModule;
@@ -17,7 +24,15 @@ import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
+import com.guardswift.ui.view.drawer.OverflowMenuDrawerItem;
 import com.guardswift.util.Device;
+import com.guardswift.util.ToastHelper;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SectionDrawerItem;
+import com.mikepenz.materialdrawer.util.DrawerItemViewHelper;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 
@@ -48,13 +63,13 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
     Device device;
     @Inject
     FragmentManager fm;
-    @Inject MainNavigationDrawer navigationDrawer;
-
+    @Inject
+    MainNavigationDrawer navigationDrawer;
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
 
-
+    private Drawer messagesDrawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,20 +84,36 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
 
         if (!shouldRedirectToOtherActivity()) {
 
-            navigationDrawer.initNavigationDrawer(this, toolbar, this);
-
             // bootstrap parseObjects if it has not been done during this session
             GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn(), true);
 
             setSelectionFromIntent();
+
+
+            Drawer drawer = navigationDrawer.initNavigationDrawer(this, toolbar, this);
+
+            messagesDrawer = new DrawerBuilder()
+                    .withActivity(this)
+                    .withDrawerGravity(Gravity.END)
+                    .withCloseOnClick(false)
+                    .append(drawer);
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (messagesDrawer.isDrawerOpen()) {
+            messagesDrawer.closeDrawer();
+            return;
+        }
+        super.onBackPressed();
     }
 
     private void setSelectionFromIntent() {
         if (getIntent().hasExtra(SELECT_ALARMS)) {
             selectItem(AlarmsViewPagerFragment.newInstance(), R.string.alarms);
-            navigationDrawer.close();
+            navigationDrawer.getDrawer().closeDrawer();
         }
     }
 
@@ -152,7 +183,6 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
     }
 
 
-
     @Override
     protected void onPostResume() {
         Log.e(TAG, "onPostResume");
@@ -201,7 +231,6 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
     }
 
 
-
     @Override
     public void selectItem(Fragment fragment) {
         fm.beginTransaction().replace(R.id.content, fragment).commit();
@@ -244,5 +273,13 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
                 }
             }
         }, 500);
+    }
+
+    public Drawer getDrawer() {
+        return navigationDrawer.getDrawer();
+    }
+
+    public Drawer getMessagesDrawer() {
+        return messagesDrawer;
     }
 }

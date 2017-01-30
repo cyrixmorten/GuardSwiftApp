@@ -386,6 +386,8 @@
     <string name="alarms">Alarmer</string>
     <string name="verify_event_time">Verificer tidspunkt for hændelsen</string>
     <string name="alarm_panels">Alarm paneler</string>
+    <string name="confirm_delete_message">Slet besked?</string>
+    <string name="message_saved">Beskeden er gemt</string>
 
 
 </resources>

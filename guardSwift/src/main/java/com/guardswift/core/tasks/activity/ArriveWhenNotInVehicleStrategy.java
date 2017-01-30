@@ -1,6 +1,9 @@
 package com.guardswift.core.tasks.activity;
 
+import android.util.Log;
+
 import com.google.android.gms.location.DetectedActivity;
+import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.execution.BaseTask;
@@ -20,9 +23,13 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
 
     @Override
     public void handleActivityInsideGeofence(DetectedActivity activity) {
+        Log.d(TAG, "handleActivityInsideGeofence");
+        Log.d(TAG, "task.isArrived(): " + task.isArrived());
         if (task.isArrived()) {
             return;
         }
+
+        Log.d(TAG, "Activity: " + ActivityDetectionModule.getNameFromType(activity.getType()));
 
         arriveOnStillTimer.stop();
 
@@ -34,6 +41,9 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
             }
 
             float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getClient().getPosition());
+
+            Log.d(TAG, "distanceToClient: " + distanceToClient);
+
             if (distanceToClient < 75) {
                 task.getAutomationStrategy().automaticArrival();
             }

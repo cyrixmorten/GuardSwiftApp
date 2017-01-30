@@ -171,7 +171,6 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         TextView vTimeEnd;
 
 
-
         public AlarmTaskViewHolder(View v, RemoveItemCallback removeItemCallback) {
             super(v, removeItemCallback);
         }
@@ -207,7 +206,6 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 }
             }).show();
         }
-
 
 
         @Override
@@ -297,39 +295,39 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         @Override
         public void onActionFinish(final Context context, final CircuitUnit task) {
+            if (task.isArrived() || task.isAborted()) {
+                extraTimeDialog(context, task);
+                return;
+            }
 
-            if (!task.isArrived()) {
-                if (fragmentManager != null) {
-                    missingArrivalTimestampDialog(context, new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            arrivalTimeDialog(context, new RadialTimePickerDialogFragment.OnTimeSetListener() {
-                                @Override
-                                public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-                                    final Calendar cal = Calendar.getInstance();
-                                    cal.setTime(new Date());
-                                    cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                                    cal.set(Calendar.MINUTE, minute);
+            if (fragmentManager != null) {
+                missingArrivalTimestampDialog(context, new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        arrivalTimeDialog(context, new RadialTimePickerDialogFragment.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+                                final Calendar cal = Calendar.getInstance();
+                                cal.setTime(new Date());
+                                cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                cal.set(Calendar.MINUTE, minute);
 
-                                    new EventLog.Builder(context)
-                                            .taskPointer(task, GSTask.EVENT_TYPE.ARRIVE)
-                                            .event(context.getString(R.string.event_arrived))
-                                            .automatic(false)
-                                            .deviceTimeStamp(cal.getTime())
-                                            .eventCode(EventLog.EventCodes.CIRCUITUNIT_ARRIVED).saveAsync();
+                                new EventLog.Builder(context)
+                                        .taskPointer(task, GSTask.EVENT_TYPE.ARRIVE)
+                                        .event(context.getString(R.string.event_arrived))
+                                        .automatic(false)
+                                        .deviceTimeStamp(cal.getTime())
+                                        .eventCode(EventLog.EventCodes.CIRCUITUNIT_ARRIVED).saveAsync();
 
 
-                                    extraTimeDialog(context, task);
+                                extraTimeDialog(context, task);
 
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    Log.e(TAG, "Should show missing arrival dialog but had no fragment manager");
-                    extraTimeDialog(context, task);
-                }
+                            }
+                        });
+                    }
+                });
             } else {
+                Log.e(TAG, "Should show missing arrival dialog but had no fragment manager");
                 extraTimeDialog(context, task);
             }
 
@@ -348,8 +346,8 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     R.string.missing_arrival_time,
                     R.string.please_enter_arrival_time,
                     callback)
-                .canceledOnTouchOutside(false)
-                .show();
+                    .canceledOnTouchOutside(false)
+                    .show();
         }
 
         private void extraTimeDialog(final Context context, final CircuitUnit task) {
@@ -435,7 +433,6 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             });
         }
     }
-
 
 
     public static class DistrictWatchTaskViewHolder extends TaskViewHolder<DistrictWatchClient> {
@@ -667,7 +664,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     @Override
                     protected GSTask doInBackground(Void... voids) {
                         // might contain LDS lookup
-                        return  taskController.performAction(action, task);
+                        return taskController.performAction(action, task);
                     }
 
                     @Override
@@ -906,7 +903,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 holder.vBtnFinished.setVisibility(View.GONE);
             }
 
-            ParseTask alarmTask = (ParseTask)task;
+            ParseTask alarmTask = (ParseTask) task;
             if (holder instanceof AlarmTaskViewHolder) {
 //                holder.vBtnTaskdescription.setVisibility((!circuitUnit.getDescription().isEmpty()) ? View.VISIBLE : View.GONE);
 
@@ -1013,7 +1010,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             return;
         }
 
-        LinearLayout linearLayout = (LinearLayout)holder.vContentBody.findViewById(R.id.layout_debug_geofence);
+        LinearLayout linearLayout = (LinearLayout) holder.vContentBody.findViewById(R.id.layout_debug_geofence);
         if (linearLayout == null) {
             linearLayout = new LinearLayout(context);
             linearLayout.setLayoutParams(new LinearLayout.LayoutParams(

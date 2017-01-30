@@ -10,7 +10,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.TypefaceProvider;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.analytics.GoogleAnalytics;
-import com.google.android.gms.analytics.Tracker;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.ca.activity.ActivityRecognitionService;
@@ -29,7 +28,7 @@ import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.data.client.Person;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
-import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
+import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
@@ -39,6 +38,7 @@ import com.guardswift.persistence.parse.execution.task.regular.Circuit;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.persistence.parse.misc.Message;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.parse.DeleteCallback;
 import com.parse.Parse;
@@ -81,6 +81,7 @@ public class GuardSwiftApplication extends InjectingApplication {
     }
 
     private boolean parseObjectsBootstrapped;
+    private boolean bootstrapInProgress;
     private boolean triggerNewGeofence = false;
 
     @Override
@@ -167,8 +168,9 @@ public class GuardSwiftApplication extends InjectingApplication {
         ParseObject.registerSubclass(EventType.class);
         ParseObject.registerSubclass(EventRemark.class);
         ParseObject.registerSubclass(Guard.class);
+        ParseObject.registerSubclass(Message.class);
 
-        ParseObject.registerSubclass(LocationTracker.class);
+        ParseObject.registerSubclass(Tracker.class);
 
         String applicationId = "guardswift";
 
@@ -239,9 +241,9 @@ public class GuardSwiftApplication extends InjectingApplication {
         WiFiPositioningService.stop(this);
     }
 
-    private Tracker tracker;
+    private com.google.android.gms.analytics.Tracker tracker;
 
-    public synchronized Tracker getTracker() {
+    public synchronized com.google.android.gms.analytics.Tracker getTracker() {
         if (tracker == null) {
 
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
@@ -272,11 +274,12 @@ public class GuardSwiftApplication extends InjectingApplication {
 
     public Task<Void> bootstrapParseObjectsLocally(final Activity activity, final Guard guard, boolean performInBackground) {
 
-        saveInstallation();
-
-        if (parseObjectsBootstrapped) {
+        if (parseObjectsBootstrapped || bootstrapInProgress) {
             return Task.forResult(null);
         }
+
+        saveInstallation();
+        bootstrapInProgress = true;
 
         ParseObjectFactory parseObjectFactory = new ParseObjectFactory();
 
@@ -336,9 +339,11 @@ public class GuardSwiftApplication extends InjectingApplication {
         if (guard.canAccessDistrictTasks()) {
             Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory.getDistrictWatchStarted().updateAllAsync();
             Task<List<ParseObject>> districtWatchClient = parseObjectFactory.getDistrictWatchClient().updateAllAsync();
+            Task<List<ParseObject>> message = parseObjectFactory.getMessage().updateAllAsync();
 
             tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
             tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
+            tasks.add(message.onSuccess(updateClassSuccess));
         }
 
         if (guard.canAccessAlarms()) {
@@ -349,19 +354,21 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         updateClassTotal.set(tasks.size());
 
-        return Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
+        return Task.whenAll(tasks).continueWithTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Void then(Task<Void> result) throws Exception {
+            public Task<Void> then(Task<Void> task) throws Exception {
                 // no matter what happens e.g. success/error, the dialog should be dismissed
                 if (updateDialog != null) {
                     updateDialog.dismiss();
                 }
 
-                if (result.getError() == null) {
+                if (!task.isFaulted()) {
                     parseObjectsBootstrapped = true;
                     startServices();
                 } else {
-                    new HandleException(TAG, "bootstrapParseObjectsLocally", result.getError());
+
+                    new HandleException(TAG, "bootstrapParseObjectsLocally", task.getError());
+
                     new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
@@ -370,6 +377,7 @@ public class GuardSwiftApplication extends InjectingApplication {
                     }).cancelable(false).show();
                 }
 
+                bootstrapInProgress = false;
                 return null;
             }
         });

@@ -2,7 +2,6 @@ package com.guardswift.core.parse;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
@@ -19,11 +18,9 @@ import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.documentation.gps.LocationTracker;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GuardLoginActivity;
-import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.Device;
 import com.parse.GetCallback;
@@ -31,7 +28,6 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseSession;
 import com.parse.ProgressCallback;
 import com.parse.SaveCallback;
 
@@ -70,15 +66,6 @@ public class ParseModule {
         this.guardCache = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache();
     }
 
-//	public static boolean isAlarmResponsible() {
-//		ParseInstallation installation = ParseInstallation.getCurrentInstallation();
-//		ParseObject alarmGroup = installation.getParseObject("alarmGroup");
-//		if (alarmGroup != null) {
-//			return alarmGroup.getBoolean("responsible");
-//		}
-//		return false;
-//	}
-
 
     public void login(final Guard guard) {
         guard.setOnline(true);
@@ -95,47 +82,33 @@ public class ParseModule {
 
     private void logout(final SaveCallback saveCallback, ProgressCallback progressCallback) {
 
-        Guard guard = guardCache.getLoggedIn();
+        final Guard guard = guardCache.getLoggedIn();
         Log.w(TAG, "LOGOUG GUARD: " + guard);
 
         if (guard != null) {
-            guard.setOnline(false);
-            guard.pinThenSaveEventually();
+            Tracker.upload(context, guard, progressCallback).continueWithTask(new Continuation<Void, Task<Void>>() {
+                @Override
+                public Task<Void> then(Task<Void> task) throws Exception {
+                    return new EventLog.Builder(context).event(context.getString(R.string.logout)).eventCode(EventLog.EventCodes.GUARD_LOGOUT).build().saveInBackground();
+                }
+            }).continueWithTask(new Continuation<Void, Task<Void>>() {
+                @Override
+                public Task<Void> then(Task<Void> task) throws Exception {
+                    guard.setOnline(false);
+                    return guard.saveInBackground();
+                }
+            }).continueWithTask(new Continuation<Void, Task<Void>>() {
+                @Override
+                public Task<Void> then(Task<Void> task) throws Exception {
+                    if (task.isFaulted()) {
+                        new HandleException(context, TAG, "logout", task.getError());
+                        saveCallback.done(new ParseException(task.getError()));
+                    }
+                    saveCallback.done(null);
 
-            // write logout EventLog
-            new EventLog.Builder(context)
-            .event(context.getString(R.string.logout))
-                    .eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
-                        @Override
-                        public void done(EventLog object, ParseException e) {
-                            saveCallback.done(e);
-                        }
+                    return null;
+                }
             });
-
-
-            // todo temporarily disabled GPS tracking
-//            LocationTracker.uploadForGuard(context, guard, progressCallback).continueWith(new Continuation<String, Object>() {
-//                @Override
-//                public Object then(ParseTask<String> task) throws Exception {
-//                    if (task.isFaulted()) {
-//                        new HandleException(context, TAG, "upload guard locations", task.getError());
-//                        saveCallback.done((ParseException) task.getError());
-//                    } else {
-//                        Log.w(TAG, "Location url: " + task.getResult());
-//                        new EventLog.Builder(context)
-//                                .event(context.getString(R.string.logout))
-//                                .locationTrackerUrl(task.getResult())
-//                                .eventCode(EventLog.EventCodes.GUARD_LOGOUT).saveAsync(new GetCallback<EventLog>() {
-//                            @Override
-//                            public void done(EventLog object, ParseException e) {
-//                                saveCallback.done(e);
-//                            }
-//                        });
-//                    }
-//
-//                    return null;
-//                }
-//            });
         } else {
             saveCallback.done(null);
         }
@@ -162,7 +135,7 @@ public class ParseModule {
         List<Task<Object>> unpinClassNamed = Lists.newArrayList();
         for (ExtendedParseObject parseObject : new ParseObjectFactory().getAll()) {
 
-                unpinClassNamed.add(parseObject.unpinAllPinnedToClass());
+            unpinClassNamed.add(parseObject.unpinAllPinnedToClass());
         }
 
         Task.whenAll(unpinClassNamed).continueWith(new Continuation<Void, Object>() {
@@ -193,10 +166,10 @@ public class ParseModule {
                 .title(R.string.working)
                 .content(R.string.please_wait)
                 .progress(true, 0)
-//                .progress(false, 0, true)
+                .progress(false, 0, true)
                 .show();
 
-//        updateDialog.setMaxProgress(100);
+        updateDialog.setMaxProgress(100);
         updateDialog.setCancelable(false);
 
 
@@ -229,8 +202,6 @@ public class ParseModule {
             @Override
             public void done(Integer percentDone) {
                 Log.e(TAG, "Logout progress: " + percentDone);
-//                                sDialog.getProgressHelper()
-//                                        .setProgress(percentDone);
                 updateDialog.setProgress(percentDone);
             }
         });
@@ -311,6 +282,7 @@ public class ParseModule {
 
         return distanceBetweenMeters(deviceLocation, client.getPosition());
     }
+
     public static float distanceBetweenMeters(Location deviceLocation,
                                               ParseGeoPoint targetGeoPoint) {
         if (deviceLocation == null || targetGeoPoint == null) {

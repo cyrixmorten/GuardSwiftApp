@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -83,13 +84,14 @@ public class MainNavigationDrawer {
         this.guardCache = parseCacheFactory.getGuardCache();
         this.circuitStartedCache = parseCacheFactory.getCircuitStartedCache();
 
+
     }
 
-    void close() {
-        navigationDrawer.closeDrawer();
+    Drawer getDrawer() {
+        return navigationDrawer;
     }
 
-    void initNavigationDrawer(Activity activity, Toolbar toolbar, final MainNavigationDrawerCallback drawerCallback) {
+    Drawer initNavigationDrawer(Activity activity, Toolbar toolbar, final MainNavigationDrawerCallback drawerCallback) {
 
         this.drawerCallback = drawerCallback;
 
@@ -200,6 +202,8 @@ public class MainNavigationDrawer {
         } else {
             navigationDrawer.openDrawer();
         }
+
+        return navigationDrawer;
     }
 
     private IDrawerItem existingStaticGuardingReports;

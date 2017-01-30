@@ -10,6 +10,7 @@ import com.crashlytics.android.Crashlytics;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.eventbus.EventBusController;
+import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Device;
 import com.parse.ParseException;
@@ -65,13 +66,22 @@ public class HandleException {
             error.put("gsVersion", device.getVersionCode());
             error.put("message", message);
 
-            if (exception != null) {
-                if (exception.getCause() != null) {
-                    if (exception.getCause().getMessage() != null) {
-                        error.put("exception", exception.getMessage());
-                    }
 
-                    error.put("cause", exception.getCause().getMessage());
+            if (exception != null) {
+
+                String exceptionMessage = exception.getMessage();
+                if (exceptionMessage != null) {
+                    error.put("exception", exceptionMessage);
+                }
+
+                Throwable cause = exception.getCause();
+                if (cause != null) {
+
+                    String causeMessage = cause.getMessage();
+
+                    if (causeMessage != null) {
+                        error.put("cause", causeMessage);
+                    }
                 }
             }
 

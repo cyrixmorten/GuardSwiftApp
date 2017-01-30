@@ -26,7 +26,6 @@ public class TaskRegularLogStrategy implements LogTaskStrategy {
             CircuitUnit circuitUnit = (CircuitUnit) task;
 
             toParseObject.put(TaskRegularLogStrategy.circuitUnit, circuitUnit);
-            toParseObject.put(TaskRegularLogStrategy.isExtra, circuitUnit.isExtra());
             toParseObject.put(TaskRegularLogStrategy.timeStart, circuitUnit.getTimeStart());
             toParseObject.put(TaskRegularLogStrategy.timeStartString, circuitUnit.getTimeStartString());
             toParseObject.put(TaskRegularLogStrategy.timeEnd, circuitUnit.getTimeEnd());

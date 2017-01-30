@@ -28,6 +28,7 @@ import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.BaseTask;
+import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
@@ -47,18 +48,16 @@ import java.util.List;
 
 
 @ParseClassName("CircuitUnit")
-public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
+public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
 
 
     private static final String TAG = CircuitUnit.class.getSimpleName();
 
     private TaskController controller;
-    private TaskReportingStrategy taskReportingStrategy;
     private TaskAutomationStrategy automationStrategy;
 
     public CircuitUnit() {
         this.controller = new CircuitUnitController();
-        taskReportingStrategy = new NoTaskReportingStrategy(this);
         automationStrategy = new StandardTaskAutomationStrategy(this);
     }
 
@@ -113,43 +112,10 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
         resetTimeStarted();
         resetTimeEnded();
         setGuard(null);
-        put(isAborted, false);
+        setPending();
         clearCheckpoints();
     }
 
-
-//    public static class Recent {
-//        private static CircuitUnit selected;
-//        private static CircuitUnit arrived;
-//
-//
-//        public static CircuitUnit getSelected() {
-//            return selected;
-//        }
-//
-//        public static void setSelected(CircuitUnit selected) {
-//            Recent.selected = selected;
-//
-//            Client.Recent.setSelected(null);
-//            if (selected != null) {
-//                Client.Recent.setSelected(selected.getClient());
-//            }
-//        }
-//
-//        public static CircuitUnit getArrived() {
-//            return arrived;
-//        }
-//
-//        public static void setArrived(CircuitUnit circuitUnit) {
-//            Recent.arrived = circuitUnit;
-//
-//            Client.Recent.setArrived(null);
-//            if (circuitUnit != null) {
-//                Client.Recent.setArrived(circuitUnit.getClient());
-//            }
-//        }
-//
-//    }
 
 
     @Override
@@ -159,7 +125,7 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
 
     /**
      * Notice - Ordering matters!
-     *
+     * <p>
      * A task can both be arrived and finished, in which case finished has precedence
      *
      * @return
@@ -189,10 +155,6 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
         return (getCircuitStarted() != null) ? getCircuitStarted().getObjectId() + getObjectId() : "";
     }
 
-//    @Override
-//    public String getTaskTitle(Context context) {
-//        return context.getString(R.string.task_circuit) + " \n" + getClient().getName() + " " + getClient().getFullAddress();
-//    }
 
 
     @Override
@@ -218,63 +180,12 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
         return null;
     }
 
-//    @Override
-//    public boolean isWithinScheduledTime() {
-//
-////        if (BuildConfig.DEBUG)
-////            return true;
-//
-//        Log.d(TAG, "isWithinScheduledTime ");
-//
-//        DateTime timeStartOrg = new DateTime(getTimeStart());
-//        DateTime timeEndOrg = new DateTime(getTimeEnd());
-//
-//        CircuitStarted selectedCircuitStarted = getCircuitStarted();
-//
-//        if (selectedCircuitStarted == null)
-//            return true; // lets be optimistic
-//
-//        MutableDateTime timeStart = new MutableDateTime(selectedCircuitStarted.getCreatedAt());
-//        int startHour = timeStartOrg.getHourOfDay();
-//        timeStart.setHourOfDay(startHour);
-//        timeStart.setMinuteOfHour(timeStartOrg.getMinuteOfHour());
-//
-//        MutableDateTime timeEnd = new MutableDateTime(selectedCircuitStarted.getCreatedAt());
-//        int endHour = timeEndOrg.getHourOfDay();
-//        if (endHour < startHour)
-//            timeEnd.addDays(1);
-//
-//        timeEnd.setHourOfDay(endHour);
-//        timeEnd.setMinuteOfHour(timeEndOrg.getMinuteOfHour());
-//
-//        DateTime now = DateTime.now(DateTimeZone.getDefault());
-//
-//        Log.d(TAG, "-- timeStart: " + timeStart.getHourOfDay() + ":" + timeStart.getMinuteOfHour());
-//        Log.d(TAG, "-- timeEnd: " + timeEnd.getHourOfDay() + ":" + timeEnd.getMinuteOfHour());
-//        Log.d(TAG, "-- now: " + now.getHourOfDay() + ":" + now.getMinuteOfHour());
-//
-//        boolean afterTimeStart = now.isAfter(timeStart);
-//        boolean beforeTimeEnd = now.isBefore(timeEnd);
-//
-//        Log.d(TAG, "  -- afterTimeStart: " + afterTimeStart);
-//        Log.d(TAG, "  -- beforeTimeEnd: " + beforeTimeEnd);
-//
-//        return afterTimeStart && beforeTimeEnd;
-//    }
-
-    @Override
-    public boolean isPending() {
-        return !isArrived();
-    }
-
-    @Override
-    public boolean isAccepted() {
-        return true;
-    }
 
 
     public static final int SORTBY_NEAREST = 1;
     public static final int SORTBY_ID = 2;
+
+    public static final String status = "status";
 
     // predefined
     public static final String objectName = "CircuitUnit";
@@ -283,22 +194,15 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     public static final String clientId = "clientId";
     public static final String clientName = "clientName";
     public static final String circuit = "circuit";
-//    public static final String circuitStarted = "circuitStarted";
 
-    // public static final String circuits = "circuits";
     public static final String description = "description";
     public static final String messages = "messages";
     public static final String days = "days";
     public static final String timeStartDate = "timeStartDate";
     public static final String timeEndDate = "timeEndDate";
     public static final String isRaid = "isRaid";
-    public static final String isExtra = "isExtra";
-    public static final String isHidden = "isHidden";
-    public static final String isAborted = "isAborted";
     public static final String clientPosition = "clientPosition";
     // cleared locally at startup
-    // public static final String circuitStarted = "circuitStarted";
-    // public static final String guard = "guard";
     public static final String guard = "guard";
     public static final String guardId = "guardId";
     public static final String guardName = "guardName";
@@ -306,59 +210,10 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     public static final String timeEnded = "timeEnded";
 
     // calculated at startup
-    // public static final String timeStartHour = "timeStartHour";
-    // public static final String timeStartMinute = "timeStartMinute";
-    // public static final String timeEndHour = "timeEndHour";
-    // public static final String timeEndMinute = "timeEndMinute";
     public static final String timeStartSortable = "timeStartSortable";
     public static final String timeEndSortable = "timeEndSortable";
 
 
-    public static CircuitUnit createExtra(String name,
-                                          CircuitUnit fromCircuitUnit, CircuitStarted circuitStarted,
-                                          int timeStartHour, int timeStartMinute, int timeEndHour, int timeEndMinute) {
-
-
-        circuitStarted.incrementExtras();
-
-        CircuitUnit circuitUnit = new CircuitUnit();
-        for (String key : fromCircuitUnit.keySet()) {
-            if (fromCircuitUnit.get(key) != null) {
-                circuitUnit.put(key, fromCircuitUnit.get(key));
-            }
-        }
-
-
-//        circuitUnit.put(CircuitUnit.circuitStarted, circuitStarted);
-        circuitUnit.put(CircuitUnit.isExtra, true);
-        circuitUnit.put(CircuitUnit.isRaid, fromCircuitUnit.isRaid());
-        circuitUnit.put(CircuitUnit.name, name);
-//        circuitUnit.put(CircuitUnit.client, fromCircuitUnit.getClient());
-//        circuitUnit.put(CircuitUnit.circuit, fromCircuitUnit.getCircuit());
-
-        MutableDateTime startDate = new MutableDateTime();
-        startDate.setHourOfDay(timeStartHour);
-        startDate.setMinuteOfHour(timeStartMinute);
-        circuitUnit.put(CircuitUnit.timeStartDate, startDate.toDate());
-
-        MutableDateTime endDate = new MutableDateTime();
-        endDate.setHourOfDay(timeEndHour);
-        endDate.setMinuteOfHour(timeEndMinute);
-        circuitUnit.put(CircuitUnit.timeEndDate, endDate.toDate());
-
-//        circuitUnit.put(owner, ParseUser.getCurrentUser());
-//        int[] daysValues = new int[]{0, 1, 2, 3, 4, 5, 6};
-//        JSONArray days = new JSONArray();
-//        for (int day : daysValues) {
-//            days.put(day);
-//        }
-//        circuitUnit.put(CircuitUnit.days, days);
-
-        circuitUnit.saveEventually();
-
-        return circuitUnit;
-
-    }
 
     @Override
     public String getParseClassName() {
@@ -374,176 +229,9 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     @Override
     public void updateFromJSON(final Context context,
                                final JSONObject jsonObject) {
-//        try {
-//            final String objectId = jsonObject
-//                    .getString(ExtendedParseObject.objectId);
-//            if (objectId != null) {
-//                getFromObjectId(CircuitUnit.class, objectId, true,
-//                        new GetCallback<CircuitUnit>() {
-//
-//                            @Override
-//                            public void done(CircuitUnit object,
-//                                             ParseException e) {
-//                                if (e != null) {
-//                                    Log.e(TAG, "updateFromJSON circuitUnit not found: " + objectId);
-//                                    return;
-//                                }
-//                                try {
-//                                    int updatedGuardId = (jsonObject
-//                                            .has(guardId)) ? jsonObject
-//                                            .getInt(guardId) : 0;
-//
-//									/*
-//                                     * Push checkpoint should weed out updates
-//									 * made by this device
-//									 *
-//									 * Nevertheless as an precaution an extra
-//									 * check is made here
-//									 */
-//                                    Guard currentGuard = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().getLoggedIn();
-//                                    if (currentGuard != null) {
-//                                        if (currentGuard.getGuardId() == updatedGuardId) {
-//                                            Log.e(TAG,
-//                                                    "I should not receive this init!");
-//                                            return;
-//                                        }
-//                                    }
-//
-//                                    final String updatedGuardName = (jsonObject
-//                                            .has(guardName)) ? jsonObject
-//                                            .getString(guardName) : "";
-//
-//                                    String updatedTimeStartDateString = (jsonObject
-//                                            .has(timeStartDate)) ? jsonObject
-//                                            .getJSONObject(timeStartDate)
-//                                            .getString("iso") : null;
-//
-//                                    String updatedTimeEndDateString = (jsonObject
-//                                            .has(timeEndDate)) ? jsonObject
-//                                            .getJSONObject(timeEndDate)
-//                                            .getString("iso") : null;
-//
-//                                    String updatedTimeStartedString = (jsonObject
-//                                            .has(timeStarted)) ? jsonObject
-//                                            .getJSONObject(timeStarted)
-//                                            .getString("iso") : null;
-//                                    String updatedTimeEndedString = (jsonObject
-//                                            .has(timeEnded)) ? jsonObject
-//                                            .getJSONObject(timeEnded)
-//                                            .getString("iso") : null;
-//
-//                                    Log.e(TAG, "updatedTimeStartDateString "
-//                                            + updatedTimeStartDateString);
-//                                    Log.e(TAG, "updatedTimeEndDateString "
-//                                            + updatedTimeEndDateString);
-//
-//                                    DateTimeFormatter fmt = ISODateTimeFormat
-//                                            .dateTime();
-//
-//                                    Date updatedTimeStart = null;
-//                                    if (updatedTimeStartDateString != null) {
-//                                        updatedTimeStart = fmt.parseDateTime(
-//                                                updatedTimeStartDateString)
-//                                                .toDate();
-//                                    }
-//
-//                                    Date updatedTimeEnd = null;
-//                                    if (updatedTimeEndDateString != null) {
-//                                        updatedTimeEnd = fmt.parseDateTime(
-//                                                updatedTimeEndDateString)
-//                                                .toDate();
-//                                    }
-//
-//                                    Date updatedTimeStarted = null;
-//                                    if (updatedTimeStartedString != null) {
-//                                        updatedTimeStarted = fmt.parseDateTime(
-//                                                updatedTimeStartedString)
-//                                                .toDate();
-//                                    }
-//
-//                                    Date updatedTimeEnded = null;
-//                                    if (updatedTimeEndedString != null) {
-//                                        updatedTimeEnded = fmt.parseDateTime(
-//                                                updatedTimeEndedString)
-//                                                .toDate();
-//                                    }
-//
-//                                    // init values
-//
-//                                    object.setGuardId(updatedGuardId);
-//                                    object.setGuardName(updatedGuardName);
-//
-//                                    object.setTimeStartDate(updatedTimeStart);
-//                                    object.setTimeEndDate(updatedTimeEnd);
-//
-//                                    if (updatedTimeStarted != null) {
-//                                        object.setTimeStarted(updatedTimeStarted);
-//                                    } else {
-//                                        object.remove(timeStarted);
-//                                    }
-//                                    if (updatedTimeEnded != null) {
-//                                        object.setTimeEnded(updatedTimeEnded);
-//                                    } else {
-//                                        object.remove(timeEnded);
-//                                    }
-//
-//                                    pinUpdate(
-//                                            object,
-//                                            new DataStoreCallback<CircuitUnit>() {
-//
-//                                                @Override
-//                                                public void success(
-//                                                        List<CircuitUnit> objects) {
-//                                                    EventBusController.postParseObjectUpdated(objects.get(0));
-//                                                }
-//
-//                                                @Override
-//                                                public void failed(
-//                                                        ParseException e) {
-//                                                    Log.e(TAG,
-//                                                            "updateFromJSON", e);
-//                                                }
-//
-//                                            });
-//                                } catch (JSONException e1) {
-//                                    Log.e(TAG, "updateFromJSON data", e1);
-//                                }
-//                            }
-//                        });
-//            }
-//        } catch (JSONException e) {
-//            Log.e(TAG, "updateFromJSON no objectId", e);
-//        }
+
     }
 
-
-//    public void setCircuitStarted(CircuitStarted selected) {
-//        put(CircuitUnit.circuitStarted, selected);
-////        pinInBackground(PIN);
-//    }
-//
-//    public CircuitStarted getCircuitStarted(boolean withData) {
-//        CircuitStarted circuitStarted = (CircuitStarted) getParseObject(CircuitUnit.circuitStarted);
-//
-//        if (circuitStarted == null) {
-//            circuitStarted = CircuitStarted.Recent.getSelected();
-//        }
-//
-//        if (withData && circuitStarted != null && !circuitStarted.isDataAvailable()) {
-//            try {
-//                circuitStarted.fetchFromLocalDatastore();
-//            } catch (ParseException e) {
-//                Log.e(TAG, "getCircuitStarted1", e);
-//                circuitStarted = CircuitStarted.Recent.getSelected();
-//                try {
-//                    circuitStarted.fetchFromLocalDatastore();
-//                } catch (ParseException e1) {
-//                    Log.e(TAG, "getCircuitStarted2", e);
-//                }
-//            }
-//        }
-//        return circuitStarted;
-//    }
 
     private void setTimeStartDate(Date updatedTimeStart) {
         put(timeStartDate, updatedTimeStart);
@@ -553,10 +241,6 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
         put(timeEndDate, updatedTimeEnd);
     }
 
-    // @Override
-    // public ParseQuery<CircuitUnit> getAllDatastoreQuery() {
-    // return new QueryBuilder(true).build();
-    // };
 
     public TaskQueryBuilder<CircuitUnit> getQueryBuilder(boolean fromLocalDatastore) {
         return new QueryBuilder(fromLocalDatastore);
@@ -623,7 +307,6 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
             int javascript_day_of_week = day_of_week - 1;
 
             query.whereEqualTo(CircuitUnit.days, javascript_day_of_week);
-            query.whereNotEqualTo(isHidden, true);
             return this;
         }
 
@@ -763,14 +446,6 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     }
 
 
-    public boolean isExtra() {
-        return getBoolean(isExtra);
-    }
-
-    public void setExtra(boolean extra) {
-        put(CircuitUnit.isExtra, extra);
-    }
-
     public int minutesSinceLastArrival() {
         DateTime now = new DateTime();
         DateTime lastArrived = new DateTime(getTimeStarted());
@@ -778,12 +453,20 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
         return Minutes.minutesBetween(lastArrived, now).getMinutes();
     }
 
-    public void setPending() {
+    private void setStatus(String status) {
+        put(ParseTask.status, status);
+    }
 
+    private boolean isStatus(String status) {
+        return getStringSafe(ParseTask.status).equals(status);
+    }
+
+    public void setPending() {
+        setStatus(ParseTask.STATUS.PENDING);
     }
 
     public void setAccepted() {
-
+        setStatus(ParseTask.STATUS.ACCEPTED);
     }
 
     public void setArrived() {
@@ -792,53 +475,48 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
 
         setTimeStartedNow();
         setGuard(guard);
-        put(isAborted, false);
-        put(CircuitUnit.guard, guard);
+        setStatus(ParseTask.STATUS.ARRIVED);
     }
+
+    public void setAborted() {
+        setStatus(ParseTask.STATUS.ABORTED);
+    }
+
 
     public void setFinished() {
         Guard guard = GuardSwiftApplication.getLoggedIn();
 
         setTimeEndedNow();
         setGuard(guard);
-        put(isAborted, false);
+        setStatus(ParseTask.STATUS.FINISHED);
     }
 
-    public void setAborted() {
-        removeGuard();
-//        resetTimeStarted();
-//        resetTimeEnded();
-        put(isAborted, true);
+
+    @Override
+    public boolean isPending() {
+        return isStatus(ParseTask.STATUS.PENDING);
+    }
+
+    @Override
+    public boolean isAccepted() {
+        return true;
     }
 
     public boolean isAborted() {
-        return getBoolean(isAborted);
+        return isStatus(ParseTask.STATUS.ABORTED);
     }
 
-
     public boolean isArrived() {
-        CircuitStarted circuitStarted = getCircuitStarted();
-        if (getTimeStarted() == null || circuitStarted == null) {
-            return false;
-        } else {
-            return getTimeStarted().after(
-                    circuitStarted.getCreatedAt());
-        }
+        return isStatus(ParseTask.STATUS.ARRIVED);
     }
 
     public boolean isFinished() {
-        CircuitStarted circuitStarted = getCircuitStarted();
-        if (getTimeStarted() == null || getTimeEnded() == null
-                || circuitStarted == null)
-            return false;
-        return getTimeEnded().after(circuitStarted.getCreatedAt())
-                && getTimeEnded().after(getTimeStarted());
-
+        return isStatus(ParseTask.STATUS.FINISHED);
     }
 
     @Override
     public Guard getGuard() {
-        return (Guard)getLDSFallbackParseObject(guard);
+        return (Guard) getLDSFallbackParseObject(guard);
     }
 
     public boolean takenByAnyGuard() {
@@ -905,26 +583,17 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     public void setGuard(Guard guard) {
         // put(CircuitUnit.guard, guard);
         if (guard == null) {
+            remove(CircuitUnit.guard);
             put(CircuitUnit.guardId, 0);
             put(CircuitUnit.guardName, "");
         } else {
+            put(CircuitUnit.guard, guard);
             put(CircuitUnit.guardId, guard.getGuardId());
             put(CircuitUnit.guardName, guard.getName());
         }
 
     }
 
-    private void setGuardId(int guardId) {
-        put(CircuitUnit.guardId, guardId);
-    }
-
-    private void setGuardName(String guardName) {
-        put(CircuitUnit.guardName, guardName);
-    }
-
-    // public Guard getGuard() {
-    // return (Guard) getParseObject(guard);
-    // }
 
     public int getGuardId() {
         return getInt(guardId);
@@ -935,7 +604,7 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     }
 
     public void removeGuard() {
-        // remove(guard);
+        remove(guard);
         remove(guardId);
         remove(guardName);
     }
@@ -968,31 +637,6 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     }
 
 
-    // public void setCircuitStarted(CircuitStarted circuitStarted) {
-    // put(CircuitUnit.circuitStarted, circuitStarted);
-    // }
-    //
-    // public CircuitStarted getCircuitStarted() {
-    // return (CircuitStarted) getParseObject(circuitStarted);
-    // }
-
-    // public List<Circuit> getSharedCircuits() {
-    // return getSet(circuits);
-    // }
-
-    // public void setTimeStart(int hour, int minute) {
-    // put(CircuitUnit.timeStartHour, hour);
-    // put(CircuitUnit.timeStartMinute, minute);
-    // }
-    //
-    // public void setTimeEnd(int hour, int minute) {
-    // put(CircuitUnit.timeEndHour, hour);
-    // put(CircuitUnit.timeEndMinute, minute);
-    // }
-    //
-    // public int getTimeStartHour() {
-    // return getInt(CircuitUnit.timeEndHour);
-    // }
 
     public void setTimeStartSortable(int timeStartSortable) {
         put(CircuitUnit.timeStartSortable, timeStartSortable);
@@ -1051,24 +695,6 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit>  {
     public Date getTimeEnded() {
         return getDate(timeEnded);
     }
-
-//    public boolean hasUnreadMessagesFor(Guard guard) {
-//        for (Message info : getMessages()) {
-//            if (!info.isReadBy(guard)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//
-//    public List<Message> getMessages() {
-//        if (has(messages)) return getList(messages);
-//        return new ArrayList<Message>();
-//    }
-//
-//    public void addMessage(Message message) {
-//        add(CircuitUnit.messages, message);
-//    }
 
     @Override
     public ExtendedParseObject getParseObject() {
