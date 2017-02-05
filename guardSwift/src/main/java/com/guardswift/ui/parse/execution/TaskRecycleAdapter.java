@@ -54,6 +54,7 @@ import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragme
 import com.guardswift.ui.parse.execution.circuit.TaskDescriptionActivity;
 import com.guardswift.util.AnimationHelper;
 import com.guardswift.util.OpenLocalPDF;
+import com.guardswift.util.Util;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQueryAdapter;
@@ -165,10 +166,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     public static class AlarmTaskViewHolder extends TaskViewHolder<ParseTask> {
 
-        @Bind(R.id.timeStart)
-        TextView vTimeStart;
-        @Bind(R.id.timeEnd)
-        TextView vTimeEnd;
+        @Bind(R.id.timeDate)
+        TextView vTimeDate;
+//        @Bind(R.id.timeStart)
+//        TextView vTimeStart;
+//        @Bind(R.id.timeEnd)
+//        TextView vTimeEnd;
 
 
         public AlarmTaskViewHolder(View v, RemoveItemCallback removeItemCallback) {
@@ -919,8 +922,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 }
 
                 alarmTaskViewHolder.vTaskDesc.setText(description);
-                alarmTaskViewHolder.vTimeStart.setText(alarmTask.getTimeStartString());
-                alarmTaskViewHolder.vTimeEnd.setText(alarmTask.getTimeEndString());
+//                alarmTaskViewHolder.vTimeStart.setText(alarmTask.getTimeStartString());
+//                alarmTaskViewHolder.vTimeEnd.setText(alarmTask.getTimeEndString());
+
+                alarmTaskViewHolder.vTimeDate.setText(
+                        DateFormat.getDateFormat(context).format(alarmTask.getCreatedAt()) + ' ' + DateFormat.getTimeFormat(context).format(alarmTask.getCreatedAt())
+                );
 
                 alarmTaskViewHolder.setupTaskActionButtons(context, alarmTask);
 
@@ -1115,8 +1122,10 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     from(parent.getContext()).
                     inflate(R.layout.gs_view_task_planned_times, parent, false);
 
-            contentBody.addView(taskPlannedTimesView, 0);
+            LinearLayout timesLayout = ButterKnife.findById(taskPlannedTimesView, R.id.layout_time_start_end);
+            timesLayout.setVisibility(View.GONE);
 
+            contentBody.addView(taskPlannedTimesView, 0);
 
             return new AlarmTaskViewHolder(itemView, defaultRemoveItemCallback);
         }
