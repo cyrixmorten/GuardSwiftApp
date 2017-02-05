@@ -3,6 +3,7 @@ package com.guardswift.ui.parse.execution;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -29,9 +30,7 @@ import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapSize;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
-import com.guardswift.core.ca.GeofencingModule;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
@@ -54,7 +53,9 @@ import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragme
 import com.guardswift.ui.parse.execution.circuit.TaskDescriptionActivity;
 import com.guardswift.util.AnimationHelper;
 import com.guardswift.util.OpenLocalPDF;
-import com.guardswift.util.Util;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQueryAdapter;
@@ -166,8 +167,8 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     public static class AlarmTaskViewHolder extends TaskViewHolder<ParseTask> {
 
-        @Bind(R.id.timeDate)
-        TextView vTimeDate;
+        @Bind(R.id.info)
+        TextView vInfo;
 //        @Bind(R.id.timeStart)
 //        TextView vTimeStart;
 //        @Bind(R.id.timeEnd)
@@ -260,10 +261,15 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     public static class RegularTaskViewHolder extends TaskViewHolder<CircuitUnit> {
 
+        @Bind(R.id.info)
+        TextView vInfo;
+        @Bind(R.id.layout_info)
+        LinearLayout vInfoLayout;
         @Bind(R.id.timeStart)
         TextView vTimeStart;
         @Bind(R.id.timeEnd)
         TextView vTimeEnd;
+
 
         private FragmentManager fragmentManager;
 
@@ -925,7 +931,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 //                alarmTaskViewHolder.vTimeStart.setText(alarmTask.getTimeStartString());
 //                alarmTaskViewHolder.vTimeEnd.setText(alarmTask.getTimeEndString());
 
-                alarmTaskViewHolder.vTimeDate.setText(
+                alarmTaskViewHolder.vInfo.setText(
                         DateFormat.getDateFormat(context).format(alarmTask.getCreatedAt()) + ' ' + DateFormat.getTimeFormat(context).format(alarmTask.getCreatedAt())
                 );
 
@@ -980,6 +986,29 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 regularTaskViewHolder.vTaskDesc.setText(circuitUnit.getName());
                 regularTaskViewHolder.vTimeStart.setText(circuitUnit.getTimeStartString());
                 regularTaskViewHolder.vTimeEnd.setText(circuitUnit.getTimeEndString());
+
+
+                if (regularTaskViewHolder.vInfoLayout.getChildCount() > 1) {
+                    regularTaskViewHolder.vInfoLayout.removeViewAt(0);
+                }
+
+                ImageView iconView = new ImageView(context);
+                GoogleMaterial.Icon icon = (circuitUnit.isRaid()) ? GoogleMaterial.Icon.gmd_car : GoogleMaterial.Icon.gmd_walk;
+                iconView.setImageDrawable(new IconicsDrawable(context)
+                        .icon(icon)
+                        .color(Color.DKGRAY)
+                        .sizeDp(24));
+
+                regularTaskViewHolder.vInfoLayout.addView(iconView, 0);
+
+                String infoText = "";
+                if (circuitUnit.getSuperVisions() > 1) {
+                    infoText = context.getString(R.string.times_supervised,
+                            circuitUnit.getTimesArrived(),
+                            circuitUnit.getSuperVisions());
+                }
+
+                regularTaskViewHolder.vInfo.setText(infoText);
 
                 regularTaskViewHolder.setupTaskActionButtons(context, (CircuitUnit) task);
             }

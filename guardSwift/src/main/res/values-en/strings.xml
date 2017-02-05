@@ -102,7 +102,7 @@
     <string name="task_districtwatch">District watches</string>
     <string name="time_end">Time end</string>
     <string name="time_start">Time start</string>
-    <string name="times_supervised">Visited %1$d of %2$d times</string>
+    <string name="times_supervised">%1$d/%2$d supervisions</string>
     <string name="title_activity_circuitunit">Regular parseTask</string>
     <string name="title_activity_districtwatch">District watch</string>
     <string name="title_activity_login">Login</string>

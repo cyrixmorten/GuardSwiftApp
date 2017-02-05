@@ -7,11 +7,20 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/timeDate"
-        style="@style/wrapping"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        tools:text="30/06/87"/>
+    <LinearLayout
+        android:id="@+id/layout_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/info"
+            style="@style/wrapping"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            tools:text="30/06/87"/>
+
+    </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/layout_time_start_end"

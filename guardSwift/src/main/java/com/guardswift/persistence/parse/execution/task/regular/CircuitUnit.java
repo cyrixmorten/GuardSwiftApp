@@ -13,6 +13,7 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.activity.ArriveWhenNotInVehicleStrategy;
 import com.guardswift.core.tasks.activity.NoActivityStrategy;
 import com.guardswift.core.tasks.activity.TaskActivityStrategy;
+import com.guardswift.core.tasks.automation.ResetOnDepartureAutomationStrategy;
 import com.guardswift.core.tasks.automation.StandardTaskAutomationStrategy;
 import com.guardswift.core.tasks.automation.TaskAutomationStrategy;
 import com.guardswift.core.tasks.controller.CircuitUnitController;
@@ -53,34 +54,26 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
 
     private static final String TAG = CircuitUnit.class.getSimpleName();
 
-    private TaskController controller;
-    private TaskAutomationStrategy automationStrategy;
 
     public CircuitUnit() {
-        this.controller = new CircuitUnitController();
-        automationStrategy = new StandardTaskAutomationStrategy(this);
     }
 
 
     @Override
     public TaskGeofenceStrategy getGeofenceStrategy() {
-        TaskGeofenceStrategy geofenceStrategy = new RegularGeofenceStrategy(this);
         if (isRaid()) {
-            geofenceStrategy = new DistrictWatchGeofenceStrategy(this);
+            return new DistrictWatchGeofenceStrategy(this);
         }
 
-        return geofenceStrategy;
+        return new RegularGeofenceStrategy(this);
     }
 
     @Override
     public TaskActivityStrategy getActivityStrategy() {
-//        if (activityStrategy == null) {
-        TaskActivityStrategy activityStrategy = new ArriveWhenNotInVehicleStrategy(this);
         if (isRaid()) {
-            activityStrategy = new NoActivityStrategy();
+            return new NoActivityStrategy();
         }
-//        }
-        return activityStrategy;
+        return new ArriveWhenNotInVehicleStrategy(this);
     }
 
     @Override
@@ -90,13 +83,16 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
 
     @Override
     public TaskAutomationStrategy getAutomationStrategy() {
-        return automationStrategy;
+        if (isRaid()) {
+            return new ResetOnDepartureAutomationStrategy(this);
+        }
+        return new StandardTaskAutomationStrategy(this);
     }
 
 
     @Override
     public TaskController getController() {
-        return controller;
+        return new CircuitUnitController();
     }
 
     @Override
@@ -109,8 +105,8 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
     }
 
     public void reset() {
-        resetTimeStarted();
-        resetTimeEnded();
+//        resetTimeStarted();
+//        resetTimeEnded();
         setGuard(null);
         setPending();
         clearCheckpoints();
@@ -194,6 +190,7 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
     public static final String clientId = "clientId";
     public static final String clientName = "clientName";
     public static final String circuit = "circuit";
+    public static final String supervisions = "supervisions";
 
     public static final String description = "description";
     public static final String messages = "messages";
@@ -212,6 +209,8 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
     // calculated at startup
     public static final String timeStartSortable = "timeStartSortable";
     public static final String timeEndSortable = "timeEndSortable";
+
+    public static final String timesArrived = "timesArrived";
 
 
 
@@ -446,12 +445,12 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
     }
 
 
-    public int minutesSinceLastArrival() {
-        DateTime now = new DateTime();
-        DateTime lastArrived = new DateTime(getTimeStarted());
-
-        return Minutes.minutesBetween(lastArrived, now).getMinutes();
-    }
+//    public int minutesSinceLastArrival() {
+//        DateTime now = new DateTime();
+//        DateTime lastArrived = new DateTime(getTimeStarted());
+//
+//        return Minutes.minutesBetween(lastArrived, now).getMinutes();
+//    }
 
     private void setStatus(String status) {
         put(ParseTask.status, status);
@@ -473,9 +472,14 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
 
         Guard guard = GuardSwiftApplication.getLoggedIn();
 
-        setTimeStartedNow();
         setGuard(guard);
         setStatus(ParseTask.STATUS.ARRIVED);
+        increment(CircuitUnit.timesArrived);
+
+        if (isRaid() && getTimesArrived() >= getSuperVisions()) {
+            setFinished();
+        }
+
     }
 
     public void setAborted() {
@@ -486,7 +490,6 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
     public void setFinished() {
         Guard guard = GuardSwiftApplication.getLoggedIn();
 
-        setTimeEndedNow();
         setGuard(guard);
         setStatus(ParseTask.STATUS.FINISHED);
     }
@@ -531,21 +534,21 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
         return guard != null && takenByAnyGuard() && getGuardId() != guard.getGuardId();
     }
 
-    public boolean arrivedByAnotherGuard(
-            Guard guard) {
-
-        return takenByAnotherGuard(guard) && isArrived();
-    }
-
-    public boolean finishedByAnotherGuard(
-            Guard guard) {
-        return takenByAnotherGuard(guard) && isFinished();
-    }
-
-    public void setSortableTimes(int timeStartSortable, int timeEndSortable) {
-        setTimeStartSortable(timeStartSortable);
-        setTimeEndSortable(timeEndSortable);
-    }
+//    public boolean arrivedByAnotherGuard(
+//            Guard guard) {
+//
+//        return takenByAnotherGuard(guard) && isArrived();
+//    }
+//
+//    public boolean finishedByAnotherGuard(
+//            Guard guard) {
+//        return takenByAnotherGuard(guard) && isFinished();
+//    }
+//
+//    public void setSortableTimes(int timeStartSortable, int timeEndSortable) {
+//        setTimeStartSortable(timeStartSortable);
+//        setTimeEndSortable(timeEndSortable);
+//    }
 
     public String getName() {
         return getString(name);
@@ -638,63 +641,73 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
 
 
 
-    public void setTimeStartSortable(int timeStartSortable) {
-        put(CircuitUnit.timeStartSortable, timeStartSortable);
+//    public void setTimeStartSortable(int timeStartSortable) {
+//        put(CircuitUnit.timeStartSortable, timeStartSortable);
+//    }
+//
+//    public int getTimeStartSortable() {
+//        return getInt(timeStartSortable);
+//    }
+//
+//    public void setTimeEndSortable(int timeEndSortable) {
+//        put(CircuitUnit.timeEndSortable, timeEndSortable);
+//    }
+//
+//    public int getTimeEndSortable() {
+//        return getInt(timeEndSortable);
+//    }
+//
+//    private void resetTimeStarted() {
+//
+//        CircuitStarted circuitStarted = getCircuitStarted();
+//
+//        Date justBeforeCircuitStarted = new Date(circuitStarted
+//                .getTimeStarted().getTime() - 3600);
+//        put(CircuitUnit.timeStarted, justBeforeCircuitStarted);
+//    }
+//
+//    private void resetTimeEnded() {
+//
+//        CircuitStarted circuitStarted = getCircuitStarted();
+//
+//        Date justBeforeCircuitStarted = new Date(circuitStarted
+//                .getTimeStarted().getTime() - 3600);
+//        put(CircuitUnit.timeEnded, justBeforeCircuitStarted);
+//    }
+//
+//    private void setTimeStartedNow() {
+//        put(CircuitUnit.timeStarted, new Date());
+//    }
+//
+//    private void setTimeStarted(Date timeStarted) {
+//        put(CircuitUnit.timeStarted, timeStarted);
+//    }
+//
+//    private void setTimeEndedNow() {
+//        put(CircuitUnit.timeEnded, new Date());
+//    }
+//
+//    private void setTimeEnded(Date timeEnded) {
+//        put(CircuitUnit.timeEnded, timeEnded);
+//    }
+//
+//    public Date getTimeStarted() {
+//        return getDate(timeStarted);
+//    }
+//
+//    public Date getTimeEnded() {
+//        return getDate(timeEnded);
+//    }
+
+    public int getSuperVisions() {
+        return getInt(supervisions);
     }
 
-    public int getTimeStartSortable() {
-        return getInt(timeStartSortable);
+    public int getTimesArrived() {
+        return getInt(timesArrived);
     }
 
-    public void setTimeEndSortable(int timeEndSortable) {
-        put(CircuitUnit.timeEndSortable, timeEndSortable);
-    }
 
-    public int getTimeEndSortable() {
-        return getInt(timeEndSortable);
-    }
-
-    private void resetTimeStarted() {
-
-        CircuitStarted circuitStarted = getCircuitStarted();
-
-        Date justBeforeCircuitStarted = new Date(circuitStarted
-                .getTimeStarted().getTime() - 3600);
-        put(CircuitUnit.timeStarted, justBeforeCircuitStarted);
-    }
-
-    private void resetTimeEnded() {
-
-        CircuitStarted circuitStarted = getCircuitStarted();
-
-        Date justBeforeCircuitStarted = new Date(circuitStarted
-                .getTimeStarted().getTime() - 3600);
-        put(CircuitUnit.timeEnded, justBeforeCircuitStarted);
-    }
-
-    private void setTimeStartedNow() {
-        put(CircuitUnit.timeStarted, new Date());
-    }
-
-    private void setTimeStarted(Date timeStarted) {
-        put(CircuitUnit.timeStarted, timeStarted);
-    }
-
-    private void setTimeEndedNow() {
-        put(CircuitUnit.timeEnded, new Date());
-    }
-
-    private void setTimeEnded(Date timeEnded) {
-        put(CircuitUnit.timeEnded, timeEnded);
-    }
-
-    public Date getTimeStarted() {
-        return getDate(timeStarted);
-    }
-
-    public Date getTimeEnded() {
-        return getDate(timeEnded);
-    }
 
     @Override
     public ExtendedParseObject getParseObject() {
