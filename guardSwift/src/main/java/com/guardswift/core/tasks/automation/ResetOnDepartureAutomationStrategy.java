@@ -4,6 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
+import com.google.common.collect.Sets;
 import com.guardswift.R;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.parse.ParseModule;
@@ -12,6 +13,7 @@ import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
 
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +30,7 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
 
     private Timer timer;
 
+    private static Set<GSTask> lockedTasks = Sets.newConcurrentHashSet();
 
     public ResetOnDepartureAutomationStrategy(GSTask task) {
         this.task = task;
@@ -36,12 +39,16 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
 
     @Override
     public void automaticArrival() {
+        if (lockedTasks.contains(this.task)) {
+            // task is locked for arrivals
+            return;
+        }
         TaskController controller = task.getController();
         if (controller.canPerformAutomaticAction(TaskController.ACTION.ARRIVE, task)) {
             Log.w(TAG, "automaticArrival " + task.getTaskType() + " " + task.getClientName());
             Sounds.getInstance(context).playNotification(R.raw.arrived);
             controller.performAutomaticAction(TaskController.ACTION.ARRIVE, task);
-            startResetTimer();
+            startLockTimer();
         }
 
     }
@@ -51,29 +58,26 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
         Log.w(TAG, "automaticDeparture " + task.getTaskType() + " " + task.getClientName());
         TaskController controller = task.getController();
         controller.performAutomaticAction(TaskController.ACTION.RESET, task);
-        stopResettimertask();
     }
 
 
-    private void startResetTimer() {
+    private void startLockTimer() {
+        lockedTasks.add(this.task);
+
         //set a new Timer
         timer = new Timer();
 
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Location location = LocationModule.Recent.getLastKnownLocation();
-                float distMeters = ParseModule.distanceBetweenMeters(location, task.getPosition());
-                Log.w(TAG, "Reset timer, distance to task in meters; " + distMeters);
-                if (distMeters > task.getGeofenceStrategy().getGeofenceRadius() / 2) {
-                    automaticDeparture();
-                } else {
-                    startResetTimer();
-                }
+                lockedTasks.remove(ResetOnDepartureAutomationStrategy.this.task);
+
+                ResetOnDepartureAutomationStrategy.this.clearLockTimer();
             }
-        }, TimeUnit.MINUTES.toMillis(5));
+        }, TimeUnit.MINUTES.toMillis(10));
     }
-    private void stopResettimertask() {
+    private void clearLockTimer() {
+
         //stop the timer, if it's not already null
         if (timer != null) {
             timer.cancel();

@@ -29,8 +29,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 22 // 23 require runtime permissions!!
-        versionCode 430
-        versionName "4.3.0"
+        versionCode 440
+        versionName "4.4.0"
 
         // Enabling multidex support.
         multiDexEnabled true

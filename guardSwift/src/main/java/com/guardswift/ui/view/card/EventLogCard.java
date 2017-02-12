@@ -17,6 +17,7 @@ import com.beardedhen.androidbootstrap.AwesomeTextView;
 import com.beardedhen.androidbootstrap.BootstrapText;
 import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapBrand;
 import com.guardswift.R;
+import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 
 import java.util.Date;
@@ -33,7 +34,10 @@ public class EventLogCard extends LinearLayout {
 
 
     @Bind(R.id.card_header)
-    RelativeLayout cardHeader;
+    RelativeLayout layoutCardHeader;
+
+    @Bind(R.id.card_body)
+    LinearLayout layoutCardBody;
 
     @Bind(R.id.tvTitle)
     TextView tvTitle;
@@ -46,6 +50,9 @@ public class EventLogCard extends LinearLayout {
 
     @Bind(R.id.btn_copy_to_report)
     Button btnCopyToReport;
+
+    @Bind(R.id.tv_guard_name)
+    TextView tvGuardName;
 
     @Bind(R.id.tv_timestamp)
     TextView tvTimestamp;
@@ -125,10 +132,6 @@ public class EventLogCard extends LinearLayout {
         setEventLog(eventLog);
     }
 
-    public EventLogCard(Context context, EventLog eventLog) {
-        this(context, null, eventLog);
-    }
-
     public EventLogCard(Context context) {
         this(context, null, null);
 
@@ -136,6 +139,8 @@ public class EventLogCard extends LinearLayout {
         setDeletable(true);
         setTimestamped(true);
         setCopyToReportEnabled(false);
+
+        layoutCardBody.setVisibility(VISIBLE);
     }
 
     public void setEventLog(EventLog eventLog) {
@@ -144,30 +149,43 @@ public class EventLogCard extends LinearLayout {
 
         this.eventLog = eventLog;
 
+        boolean isWrittenReportEvent = eventLog.isReportEvent();
+        boolean isNewEvent = eventLog.getCreatedAt() == null;
+
         Date date = (eventLog.getDeviceTimestamp() != null) ? eventLog.getDeviceTimestamp() : new Date();
         String formattedDate = android.text.format.DateUtils.formatDateTime(getContext(),
                 date.getTime(),
                 DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR);
         tvTimestamp.setText(formattedDate);
 
-        String eventType = getContext().getString(R.string.event);
-        updateLayout(layoutEvent, cardEvent, tvEvent, eventLog.getEvent(), eventType);
-        layoutEvent.setVisibility((editable) ? VISIBLE : GONE); // shown as title
+        if (isNewEvent || isWrittenReportEvent) {
+            String eventType = getContext().getString(R.string.event);
+            updateLayout(layoutEvent, cardEvent, tvEvent, eventLog.getEvent(), eventType);
+            layoutEvent.setVisibility((editable) ? VISIBLE : GONE); // shown as title
 
-        String amount = getContext().getString(R.string.amount);
-        String amountText = (eventLog.getAmount() != 0) ? String.valueOf(eventLog.getAmount()) : "";
-        updateLayout(layoutAmount, cardAmount, tvAmount, amountText, amount);
+            String amount = getContext().getString(R.string.amount);
+            String amountText = (eventLog.getAmount() != 0) ? String.valueOf(eventLog.getAmount()) : "";
+            updateLayout(layoutAmount, cardAmount, tvAmount, amountText, amount);
 
-        String people = getContext().getString(R.string.people);
-        updateLayout(layoutPeople, cardPeople, tvPeople, eventLog.getPeople(), people);
+            String people = getContext().getString(R.string.people);
+            updateLayout(layoutPeople, cardPeople, tvPeople, eventLog.getPeople(), people);
 
-        String location = getContext().getString(R.string.location);
-        updateLayout(layoutLocations, cardLocations, tvLocations, eventLog.getLocations(), location);
+            String location = getContext().getString(R.string.location);
+            updateLayout(layoutLocations, cardLocations, tvLocations, eventLog.getLocations(), location);
 
-        String remarks = getContext().getString(R.string.remarks);
-        updateLayout(layoutRemarks, cardRemarks, tvRemarks, eventLog.getRemarks(), remarks);
+            String remarks = getContext().getString(R.string.remarks);
+            updateLayout(layoutRemarks, cardRemarks, tvRemarks, eventLog.getRemarks(), remarks);
+
+            layoutCardBody.setVisibility(VISIBLE);
+        } else {
+            setEditable(false);
+            setDeletable(false);
+
+            layoutCardBody.setVisibility(GONE);
+        }
 
         tvTitle.setText(eventLog.getEvent());
+        tvGuardName.setText(eventLog.getGuardName());
 
         btnDelete.setVisibility((deletable) ? VISIBLE : GONE);
         tvTimestamp.setVisibility((timestamped) ? VISIBLE : GONE);
@@ -272,16 +290,36 @@ public class EventLogCard extends LinearLayout {
     }
 
     public void setHeaderVisibility(int visibility) {
-        this.cardHeader.setVisibility(visibility);
+        this.layoutCardHeader.setVisibility(visibility);
+    }
+
+    public void setEventVisibility(int visibility) {
+        this.layoutEvent.setVisibility(visibility);
+    }
+
+    public void setAmountVisibility(int visibility) {
+        this.layoutAmount.setVisibility(visibility);
+    }
+
+    public void setPeopleVisibility(int visibility) {
+        this.layoutPeople.setVisibility(visibility);
+    }
+
+    public void setLocationsVisibility(int visibility) {
+        this.layoutLocations.setVisibility(visibility);
     }
 
     public void setRemarksVisibility(int visibility) {
         this.layoutRemarks.setVisibility(visibility);
     }
 
+
+
     public boolean hasRemarks() {
         return tvRemarks.getTag() != null;
     }
+
+
 
     private class EventClickListener implements OnClickListener {
 
@@ -292,12 +330,12 @@ public class EventLogCard extends LinearLayout {
             this.parentClickListener = parentClickListener;
             this.childView = childView;
         }
+
         @Override
         public void onClick(View view) {
             parentClickListener.onClick(childView);
         }
     }
-
 
 
 }

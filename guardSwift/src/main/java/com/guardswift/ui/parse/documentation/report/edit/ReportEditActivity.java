@@ -14,6 +14,8 @@ import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.ParseTask;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 
 import javax.inject.Inject;

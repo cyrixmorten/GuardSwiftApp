@@ -37,6 +37,16 @@ public class CircuitUnitController extends BaseTaskController {
         this.tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
     }
 
+    @Override
+    public boolean canPerformAutomaticAction(ACTION action, GSTask task) {
+        boolean canPeform = super.canPerformAutomaticAction(action, task);
+        boolean withinScheduledTime = true;
+        if (action.equals(ACTION.ARRIVE) && task instanceof CircuitUnit) {
+            withinScheduledTime = ((CircuitUnit) task).isWithinScheduledTime();
+        }
+
+        return canPeform && withinScheduledTime;
+    }
 
     public GSTask performAction(ACTION action, final GSTask task, final boolean automatic) {
 
@@ -74,13 +84,13 @@ public class CircuitUnitController extends BaseTaskController {
                 circuitUnit.setArrived();
                 tasksCache.addArrived(circuitUnit);
 
-                if (circuitUnit.hasCheckPoints()) {
-                    if (!circuitUnit.isAborted()) {
-                        // otherwise resume where we left off
-                        circuitUnit.clearCheckpoints();
-                    }
-                    WiFiPositioningService.start(ctx);
-                }
+//                if (circuitUnit.hasCheckPoints()) {
+//                    if (!circuitUnit.isAborted()) {
+//                        // otherwise resume where we left off
+//                        circuitUnit.clearCheckpoints();
+//                    }
+//                    WiFiPositioningService.start(ctx);
+//                }
 
 
                 break;
@@ -117,8 +127,17 @@ public class CircuitUnitController extends BaseTaskController {
                 break;
 
             case RESET:
-                circuitUnit.reset();
 
+                event = new EventLog.Builder(ctx)
+                        .taskPointer(circuitUnit, GSTask.EVENT_TYPE.LEAVE)
+                        .event(ctx.getString(R.string.event_left))
+                        .automatic(automatic)
+                        .eventCode(EventLog.EventCodes.CIRCUITUNIT_LEFT);
+
+                WiFiPositioningService.stop(ctx);
+
+                circuitUnit.reset();
+                tasksCache.removeArrived(circuitUnit);
                 break;
             case OPEN_WRITE_REPORT:
                 GSTaskCreateReportActivity.start(ctx, circuitUnit);

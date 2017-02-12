@@ -8,6 +8,9 @@ import android.text.InputType;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -109,7 +112,22 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
 
         setListAdapter(mAdapter);
 
+        setHasOptionsMenu(true);
+
         return rootView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        new AddEntryMenuItem().create(getContext(), menu, new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                addPerson();
+                return false;
+            }
+        });
+
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override

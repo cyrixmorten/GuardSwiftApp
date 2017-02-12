@@ -13,7 +13,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
-import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
@@ -21,7 +20,6 @@ import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandler;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
 import com.guardswift.ui.view.card.EventLogCard;
-import com.guardswift.ui.view.card.StaticTaskEventLog;
 import com.guardswift.util.ToastHelper;
 import com.parse.ParseQueryAdapter;
 
@@ -29,6 +27,9 @@ import org.joda.time.DateTime;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 /**
  * Created by cyrix on 11/21/15.
@@ -51,23 +52,16 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
     }
 
     private WeakReference<FragmentActivity> activityWeakReference;
-    private Client client;
 
-    public ReportEditRecycleAdapter(FragmentActivity activity, Client client, ParseQueryAdapter.QueryFactory<EventLog> queryFactory) {
+    public ReportEditRecycleAdapter(FragmentActivity activity, ParseQueryAdapter.QueryFactory<EventLog> queryFactory) {
         super(queryFactory);
-        this.activityWeakReference = new WeakReference<FragmentActivity>(activity);
-        this.client = client;
+        this.activityWeakReference = new WeakReference<>(activity);
     }
 
     @Override
     public ReportViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (activityWeakReference.get() != null) {
-            EventLogCard eventLogCard = null;
-            if (viewType == GSTask.TASK_TYPE.STATIC.ordinal()) {
-                eventLogCard = new StaticTaskEventLog(activityWeakReference.get());
-            } else {
-                eventLogCard = new EventLogCard(activityWeakReference.get());
-            }
+            EventLogCard eventLogCard = new EventLogCard(activityWeakReference.get());
 
             return new ReportViewHolder(eventLogCard);
         }
@@ -84,39 +78,52 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
     public void onBindViewHolder(final ReportViewHolder holder, int position) {
         final EventLog eventLog = getItem(position);
         Log.d(TAG, "onBindViewHolder: " + eventLog);
-        holder.eventLogCard.setEventLog(eventLog);
-
         final FragmentActivity activity = activityWeakReference.get();
 
 
-        holder.eventLogCard.onRemarksClickListener(new View.OnClickListener() {
-                                                       @Override
-                                                       public void onClick(View view) {
-                                                           if (getItemViewType(holder.getAdapterPosition()) == GSTask.TASK_TYPE.STATIC.ordinal() && holder.eventLogCard.hasRemarks()) {
-                                                               // only allow edit if empty
-                                                               return;
-                                                           }
-                                                           UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS);
-                                                       }
-                                                   }
-        );
+        final boolean isExtraTimeEvent = eventLog.getEventCode() == EventLog.EventCodes.CIRCUITUNIT_EXTRA_TIME;
+        final boolean isStaticReport = getItemViewType(position) == GSTask.TASK_TYPE.STATIC.ordinal();
 
-        /**
-         * STATIC REPORTS ONLY HAS REMARKS
-         */
+        final EventLogCard eventLogCard = holder.eventLogCard;
+                
+        eventLogCard.setEventLog(eventLog);
 
-        if (getItemViewType(position) == GSTask.TASK_TYPE.STATIC.ordinal()) {
-            return;
+        // STATIC REPORTS ONLY HAS REMARKS
+        if (isStaticReport || isExtraTimeEvent) {
+            eventLogCard.setCopyToReportEnabled(false);
+            eventLogCard.setDeletable(false);
+            eventLogCard.setEditable(false);
+            eventLogCard.setTimestamped(true);
+            eventLogCard.setHeaderVisibility(isExtraTimeEvent ? VISIBLE : GONE);
+            eventLogCard.setEventVisibility(GONE);
+            eventLogCard.setAmountVisibility(GONE);
+            eventLogCard.setPeopleVisibility(GONE);
+            eventLogCard.setLocationsVisibility(GONE);
+            eventLogCard.setRemarksVisibility(View.VISIBLE);
+        } else {
+            eventLogCard.setCopyToReportEnabled(false);
+            eventLogCard.setDeletable(true);
+            eventLogCard.setEditable(true);
+            eventLogCard.setTimestamped(true);
+            eventLogCard.setHeaderVisibility(VISIBLE);
+            eventLogCard.setEventVisibility(View.VISIBLE);
+            eventLogCard.setAmountVisibility(View.VISIBLE);
+            eventLogCard.setPeopleVisibility(View.VISIBLE);
+            eventLogCard.setLocationsVisibility(View.VISIBLE);
+            eventLogCard.setRemarksVisibility(View.VISIBLE);
         }
 
-        holder.eventLogCard.onEventClickListener(new View.OnClickListener() {
+
+
+        eventLogCard.onEventClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_TYPE);
             }
         });
-//
-        holder.eventLogCard.onAmountClickListener(new View.OnClickListener() {
+
+
+        eventLogCard.onAmountClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
                 new CommonDialogsBuilder.BetterPicks(activity.getSupportFragmentManager()).enterEventAmount(eventLog.getEvent(), new NumberPickerDialogFragment.NumberPickerDialogHandler() {
@@ -126,7 +133,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
                         // update locally
                         eventLog.setAmount(number);
                         // update card
-                        holder.eventLogCard.setEventLog(eventLog);
+                        eventLogCard.setEventLog(eventLog);
                         // save online
                         eventLog.pinThenSaveEventually();
                     }
@@ -134,21 +141,21 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
             }
         });
 
-        holder.eventLogCard.onPeopleClickListener(new View.OnClickListener() {
+        eventLogCard.onPeopleClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_PEOPLE);
             }
         });
 
-        holder.eventLogCard.onLocationsClickListener(new View.OnClickListener() {
+        eventLogCard.onLocationsClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_LOCATIONS);
             }
         });
 
-        holder.eventLogCard.onDeleteClickListener(new View.OnClickListener()
+        eventLogCard.onDeleteClickListener(new View.OnClickListener()
 
                                                   {
                                                       @Override
@@ -167,7 +174,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
 
         );
 
-        holder.eventLogCard.onTimestampClickListener(new View.OnClickListener()
+        eventLogCard.onTimestampClickListener(new View.OnClickListener()
 
                                                      {
                                                          @Override
@@ -184,7 +191,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
                                                                                           // update locally
                                                                                           eventLog.setDeviceTimestamp(cal.getTime());
                                                                                           // update card
-                                                                                          holder.eventLogCard.setEventLog(eventLog);
+                                                                                          eventLogCard.setEventLog(eventLog);
                                                                                           // update online
                                                                                           eventLog.pinThenSaveEventually();
 
@@ -195,6 +202,22 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
                                                          }
                                                      }
 
+        );
+
+        eventLogCard.onRemarksClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View view) {
+                                                    if (isStaticReport && eventLogCard.hasRemarks()) {
+                                                        // only allow edit if empty
+                                                        return;
+                                                    }
+                                                    if (isExtraTimeEvent) {
+                                                        // no edit allowed of extra time events
+                                                        return;
+                                                    }
+                                                    UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS);
+                                                }
+                                            }
         );
     }
 }

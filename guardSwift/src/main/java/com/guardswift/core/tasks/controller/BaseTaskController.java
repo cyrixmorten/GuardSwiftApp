@@ -1,5 +1,6 @@
 package com.guardswift.core.tasks.controller;
 
+import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -19,13 +20,13 @@ public abstract class BaseTaskController implements TaskController {
     private boolean actionAllowedByTaskState(ACTION action, GSTask task) {
         switch (task.getTaskState()) {
             case PENDING:
-                return action != ACTION.RESET && action != ACTION.ABORT;
+                return action != ACTION.ABORT && action != ACTION.RESET;
             case ACCEPTED:
                 return action != ACTION.ACCEPT;
             case ARRIVED:
                 return action != ACTION.ARRIVE;
             case ABORTED:
-                return action != ACTION.ABORT;
+                return action != ACTION.ABORT && action != ACTION.RESET;
             case FINISHED:
                 return action != ACTION.FINISH;
         }
@@ -50,7 +51,11 @@ public abstract class BaseTaskController implements TaskController {
     @Override
     public GSTask performAutomaticAction(ACTION action, GSTask task) {
         if (canPerformAutomaticAction(action, task)) {
-            return performAction(action, task, true);
+            GSTask executedTask = performAction(action, task, true);
+
+            EventBusController.postUIUpdate(task);
+
+            return executedTask;
         }
         return task;
     }

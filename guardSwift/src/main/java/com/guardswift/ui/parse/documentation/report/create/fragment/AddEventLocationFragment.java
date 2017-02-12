@@ -1,15 +1,21 @@
 package com.guardswift.ui.parse.documentation.report.create.fragment;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -26,6 +32,10 @@ import com.guardswift.ui.common.UpdateFloatingActionButton;
 import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
 import com.guardswift.util.Device;
 import com.guardswift.util.StringUtil;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.materialdrawer.icons.MaterialDrawerFont;
 import com.parse.ParseException;
 import com.parse.SaveCallback;
 
@@ -112,15 +122,33 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
 
         setListAdapter(mAdapter);
 
+        setHasOptionsMenu(true);
+
         return rootView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        new AddEntryMenuItem().create(getContext(), menu, new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                addLocation();
+                return false;
+            }
+        });
+
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         updateLocations();
+
         super.onViewCreated(view, savedInstanceState);
     }
+
+
 
     @Override
     public void onActivityCreated(Bundle savedState) {

@@ -271,9 +271,9 @@ public class AddEventViewPagerFragment extends InjectingFragment {
         public ScreenSlidePagerAdapter(FragmentManager fm) {
             super(fm);
             fragments.add(AddEventTypeFragment.newInstance(clientCache.getSelected()));
-            fragments.add(AddEventPeopleFragment.newInstance(clientCache.getSelected()));
-            fragments.add(AddEventLocationFragment.newInstance(clientCache.getSelected()));
-            fragments.add(AddEventRemarkFragment.newInstance(clientCache.getSelected(), eventTypeCache.getSelected()));
+//            fragments.add(AddEventPeopleFragment.newInstance(clientCache.getSelected()));
+//            fragments.add(AddEventLocationFragment.newInstance(clientCache.getSelected()));
+//            fragments.add(AddEventRemarkFragment.newInstance(clientCache.getSelected(), eventTypeCache.getSelected()));
             fragments.add(AddEventSummaryFragment.newInstance());
 
             PAGES_COUNT = fragments.size();

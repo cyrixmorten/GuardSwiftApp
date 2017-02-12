@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/CardView.Light"
     android:layout_width="match_parent"
@@ -30,7 +30,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/layoutDelete"
-                android:text="@string/title_event_observed" />
+                android:text="@string/title_event_observed"
+                />
 
             <!-- wrap delete button in layout to add greater surface to click -->
             <LinearLayout
@@ -42,14 +43,13 @@
                 android:orientation="vertical">
 
                 <com.beardedhen.androidbootstrap.AwesomeTextView
+                    android:id="@+id/btnDelete"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/btnDelete"
                     android:textSize="28dp"
                     app:bootstrapBrand="danger"
                     app:fontAwesomeIcon="fa_remove"
-                    tools:ignore="SpUsage"
-                    />
+                    tools:ignore="SpUsage" />
 
             </LinearLayout>
 
@@ -60,7 +60,8 @@
             android:id="@+id/card_body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <!-- Event -->
             <LinearLayout
@@ -160,6 +161,7 @@
             android:orientation="vertical"
             android:padding="@dimen/micro_padding">
 
+
             <TextView
                 android:id="@+id/tv_timestamp"
                 style="@style/Base.TextAppearance.AppCompat.Small"
@@ -168,23 +170,34 @@
                 android:layout_alignParentEnd="true"
                 android:paddingTop="@dimen/micro_padding"
 
-                android:text="14/12/2015 18:35" />
+                tools:text="14/12/2015 18:35" />
+
+            <TextView
+                android:id="@+id/tv_guard_name"
+                style="@style/Base.TextAppearance.AppCompat.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@+id/tv_timestamp"
+                android:paddingTop="@dimen/micro_padding"
+
+                tools:text="John Doe" />
 
             <LinearLayout
                 android:id="@+id/footer_buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/tv_timestamp"
-                android:paddingTop="@dimen/small_padding"
+                android:layout_below="@+id/tv_guard_name"
                 android:orientation="vertical"
+                android:paddingTop="@dimen/small_padding"
                 android:visibility="visible">
 
-            <Button
-                android:id="@+id/btn_copy_to_report"
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/copy_to_report" />
+                <Button
+                    android:id="@+id/btn_copy_to_report"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/copy_to_report" />
 
             </LinearLayout>
         </RelativeLayout>

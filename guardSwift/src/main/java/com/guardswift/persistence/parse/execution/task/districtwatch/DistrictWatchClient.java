@@ -415,6 +415,11 @@ public class DistrictWatchClient extends BaseTask {
     }
 
     @Override
+    public boolean isWithinScheduledTime() {
+        return true;
+    }
+
+    @Override
     public Guard getGuard() {
         return (Guard)getLDSFallbackParseObject(guard);
     }

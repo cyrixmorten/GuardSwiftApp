@@ -65,8 +65,10 @@ public class AlarmQueryBuilder extends
         return this;
     }
 
-    public AlarmQueryBuilder sortByTimeEnded() {
-        query.addDescendingOrder(ParseTask.timeEnded);
+    public AlarmQueryBuilder sortByCreatedAtDescending() {
+
+        query.addDescendingOrder(ParseTask.createdAt);
+
         return this;
     }
 

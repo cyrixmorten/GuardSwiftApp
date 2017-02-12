@@ -204,16 +204,22 @@ public abstract class ExtendedParseObject extends ParseObject {
     }
 
     public void pinThenSaveEventually(final SaveCallback pinned, final SaveCallback saved, final boolean postUIUpdate) {
+        Log.d(TAG, "pinThenSaveEventually: " + getPin());
 
         this.pinInBackground(getPin(), new SaveCallback() {
             @Override
             public void done(ParseException e) {
 
+                if (e != null) {
+                    new HandleException(TAG, "pinThenSaveEventually failed to pin", e);
+                }
                 if (pinned != null) {
+                    Log.d(TAG, "pin callback");
                     pinned.done(e);
                 }
 
                 if (postUIUpdate) {
+                    Log.d(TAG, "postUIUpdate");
                     EventBusController.postUIUpdate(ExtendedParseObject.this);
                 }
 
@@ -221,7 +227,7 @@ public abstract class ExtendedParseObject extends ParseObject {
                     @Override
                     public void done(ParseException e) {
                         if (e != null) {
-                            new HandleException(TAG, "pinThenSaveEventually " + getPin() + " fallback to saveEventually", e);
+                            new HandleException(TAG, "pinThenSaveEventually fallback to saveEventually", e);
                             ExtendedParseObject.this.saveEventually(saved);
                             return;
                         }

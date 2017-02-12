@@ -2,7 +2,6 @@ package com.guardswift.core.tasks.activity;
 
 import android.util.Log;
 
-import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
 
 import java.util.Timer;
@@ -20,9 +19,11 @@ class ArriveOnStillTimer {
 
     private Timer mTimer;
     private GSTask task;
+    private  ArriveWhenNotInVehicleStrategy.TriggerArrival arrival;
 
-    public ArriveOnStillTimer(GSTask task) {
+    public ArriveOnStillTimer(GSTask task, ArriveWhenNotInVehicleStrategy.TriggerArrival arrival) {
         this.task = task;
+        this.arrival = arrival;
     }
 
     public void start() {
@@ -42,12 +43,16 @@ class ArriveOnStillTimer {
         }
     }
 
+    boolean running() {
+        return mTimer != null;
+    }
+
 
     private class InactivityTimerTask extends TimerTask {
         @Override
         public void run() {
             Log.d(TAG, "Arrival triggered by still timer");
-            task.getAutomationStrategy().automaticArrival();
+            arrival.trigger();
 
         }
     }

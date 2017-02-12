@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.FingerprintingModule;
@@ -50,7 +51,9 @@ import com.parse.SaveCallback;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -86,6 +89,7 @@ public class EventLog extends ExtendedParseObject {
         public static final int CIRCUITUNIT_ARRIVED = 101;
         public static final int CIRCUITUNIT_FINISHED = 102;
         public static final int CIRCUITUNIT_ABORT = 103;
+        public static final int CIRCUITUNIT_LEFT = 108;
         public static final int CIRCUITUNIT_OTHER = 104;
         public static final int CIRCUITUNIT_EXTRA_TIME = 105;
         public static final int CIRCUITUNIT_CHECKPOINT_ARRIVED = 106;
@@ -672,6 +676,12 @@ public class EventLog extends ExtendedParseObject {
             return this;
         }
 
+        public QueryBuilder matchingEventTypes(String ...eventTypes) {
+            List<String> events = Lists.newArrayList(eventTypes);
+            if (!events.isEmpty())
+                query.whereContainedIn(EventLog.eventType, events);
+            return this;
+        }
 
         public QueryBuilder matchingEvent(String event) {
             if (event != null && !event.isEmpty())
@@ -699,10 +709,19 @@ public class EventLog extends ExtendedParseObject {
          */
         public QueryBuilder whereIsReportEntry() {
 
-            query.whereContainedIn(eventCode, Arrays.asList(EventCodes.STATIC_OTHER, EventCodes.ALARM_OTHER, EventCodes.CIRCUITUNIT_OTHER, EventCodes.DISTRICTWATCH_OTHER));
+
+            List<Integer> arrived = Arrays.asList(EventCodes.CIRCUITUNIT_ARRIVED, EventCodes.ALARM_ARRIVED, EventCodes.DISTRICTWATCH_ARRIVED, EventCodes.STATIC_ARRIVED);
+            List<Integer> written = Arrays.asList(EventCodes.STATIC_OTHER, EventCodes.ALARM_OTHER, EventCodes.CIRCUITUNIT_OTHER, EventCodes.DISTRICTWATCH_OTHER, EventCodes.CIRCUITUNIT_EXTRA_TIME);
+
+            List<Integer> reportEntryCodes = Lists.newArrayList();
+            reportEntryCodes.addAll(arrived);
+            reportEntryCodes.addAll(written);
+
+            query.whereContainedIn(eventCode, reportEntryCodes);
 
             return this;
         }
+
 
 
         public QueryBuilder matchingReportId(String reportId) {
@@ -739,6 +758,7 @@ public class EventLog extends ExtendedParseObject {
             case EventCodes.CIRCUITUNIT_OTHER: return true;
             case EventCodes.DISTRICTWATCH_OTHER: return true;
             case EventCodes.STATIC_OTHER: return true;
+            case EventCodes.CIRCUITUNIT_EXTRA_TIME: return true;
             default: return false;
         }
     }

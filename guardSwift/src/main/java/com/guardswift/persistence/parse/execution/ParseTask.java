@@ -283,6 +283,7 @@ public class ParseTask extends BaseTask {
     }
 
     public void setAborted() {
+        setTimeEndedNow();
         setStatus(STATUS.ABORTED);
         setGuardCurrent();
     }
@@ -316,6 +317,11 @@ public class ParseTask extends BaseTask {
     @Override
     public boolean isFinished() {
         return getStatus().equals(STATUS.FINISHED);
+    }
+
+    @Override
+    public boolean isWithinScheduledTime() {
+        return true;
     }
 
     @Override

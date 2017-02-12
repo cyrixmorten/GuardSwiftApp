@@ -1,6 +1,7 @@
 package com.guardswift.persistence.parse.execution.task.regular;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.guardswift.persistence.parse.ExtendedParseObject;
@@ -18,7 +19,12 @@ import java.util.Date;
 import bolts.Task;
 
 @ParseClassName("CircuitStarted")
-public class CircuitStarted extends ExtendedParseObject {
+public class CircuitStarted extends ExtendedParseObject implements Comparable<CircuitStarted>{
+
+    @Override
+    public int compareTo(@NonNull CircuitStarted circuitStarted) {
+        return getName().compareTo(circuitStarted.getName());
+    }
 
 //    public static class Recent {
 //

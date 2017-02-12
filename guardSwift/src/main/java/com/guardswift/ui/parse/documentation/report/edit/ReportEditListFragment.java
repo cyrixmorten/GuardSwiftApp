@@ -73,8 +73,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
     @Override
     protected ParseRecyclerQueryAdapter<EventLog, ReportEditRecycleAdapter.ReportViewHolder> createRecycleAdapter() {
-        Client client = gsTasksCache.getLastSelected().getClient();
-        ReportEditRecycleAdapter adaper = new ReportEditRecycleAdapter(getActivity(), client, createNetworkQueryFactory());
+        ReportEditRecycleAdapter adaper = new ReportEditRecycleAdapter(getActivity(), createNetworkQueryFactory());
 
         adaper.addOnQueryLoadListener(new ParseRecyclerQueryAdapter.OnQueryLoadListener<EventLog>() {
             @Override

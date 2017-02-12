@@ -332,6 +332,10 @@ public class StaticTask extends BaseTask {
         return has(StaticTask.timeEnded);
     }
 
+    @Override
+    public boolean isWithinScheduledTime() {
+        return true;
+    }
 
 
     public void setStartedBy(Guard guard) {

@@ -29,6 +29,7 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -80,6 +81,12 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         context.startService(new Intent(context, RegisterGeofencesIntentService.class));
     }
 
+    public static void stop(Context context) {
+        // relying on previously set task_type
+        Log.d(TAG, "STOP");
+        context.startService(new Intent(context, RegisterGeofencesIntentService.class).putExtra("clear", true));
+    }
+
 
 //    public static void start(Context context, GSTask geofencedTask) {
 ////        Log.d(TAG, "RegisterGeofencesIntentService start 2 ");
@@ -101,6 +108,11 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         super.onHandleIntent(intent); // Inject to ObjectGraph
 
         Log.d(TAG, "onHandleIntent");
+
+        if (intent.hasExtra("clear")) {
+            clear();
+            return;
+        }
         new ReactiveLocationProvider(getApplicationContext()).getLastKnownLocation().subscribe(new Action1<Location>() {
             @Override
             public void call(final Location deviceLocation) {
@@ -157,13 +169,15 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
      */
     private void rebuildGeofenceForTasks() {
 
-
+        Log.d(TAG, "rebuildGeofenceForTasks");
 
         int withinKm = 2;
-        geofencingModule.queryAllGeofenceTasks(withinKm).onSuccess(new Continuation<List<ParseObject>, Object>() {
+        geofencingModule.queryAllGeofenceTasks(withinKm).onSuccess(new Continuation<Set<ParseObject>, Object>() {
             @Override
-            public Object then(Task<List<ParseObject>> taskObject) throws Exception {
-                List<ParseObject> tasks = taskObject.getResult();
+            public Object then(Task<Set<ParseObject>> taskObject) throws Exception {
+                List<ParseObject> tasks = Lists.newCopyOnWriteArrayList(taskObject.getResult());
+
+                Log.d(TAG, "All tasks in geofence: " + tasks.size());
 
                 // weed away finished tasks
                 for (ParseObject parseObjectTask: tasks) {
@@ -173,11 +187,10 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                     }
                 }
 
-                Log.d(TAG, "Found task scheduled for geofencing: " + tasks.size());
+                Log.d(TAG, "Found tasks scheduled for geofencing: " + tasks.size());
                 if (tasks.size() > 100) {
                     String message = "Geofence task size limit reached for user " + ParseUser.getCurrentUser().getUsername() + " at " + LocationModule.Recent.getLastKnownLocation().toString() + " with " + tasks.size() + " tasks";
-
-                    Log.e(TAG, message);
+                    new HandleException(getBaseContext(), TAG, "100+ geofences", new IllegalStateException(message));
                     Crashlytics.log(message);
                     tasks = tasks.subList(0, 100);
                 }
@@ -201,6 +214,14 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                 tasksCache.setAllGeofencedTasks(geofencedTasks);
 
 
+                return null;
+            }
+        }).continueWithTask(new Continuation<Object, Task<Void>>() {
+            @Override
+            public Task<Void> then(Task<Object> task) throws Exception {
+                if (task.isFaulted()) {
+                    Log.e(TAG, "Query geofences", task.getError());
+                }
                 return null;
             }
         });
@@ -251,8 +272,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                 build();
     }
 
-    @Override
-    public void onDestroy() {
+    public void clear() {
         Log.d(TAG, "onDestroy");
 //        if (mRemoveGeofencesSubscription != null && !mRemoveGeofencesSubscription.isUnsubscribed()) {
 //            mRemoveGeofencesSubscription.unsubscribe();

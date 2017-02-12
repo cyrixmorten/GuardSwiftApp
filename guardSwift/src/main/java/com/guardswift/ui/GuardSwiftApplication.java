@@ -15,6 +15,7 @@ import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.ca.activity.ActivityRecognitionService;
 import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
+import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication;
@@ -86,7 +87,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
     private boolean parseObjectsBootstrapped;
     private boolean bootstrapInProgress;
-    private boolean triggerNewGeofence = false;
+//    private boolean triggerNewGeofence = false;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -120,9 +121,6 @@ public class GuardSwiftApplication extends InjectingApplication {
         });
 
 
-        if (parseCacheFactory.getGuardCache().isLoggedIn()) {
-            startServices();
-        }
     }
 
 
@@ -233,16 +231,19 @@ public class GuardSwiftApplication extends InjectingApplication {
     }
 
     public void startServices() {
+        Log.d(TAG, "startServices");
+
         ActivityRecognitionService.start(this);
         FusedLocationTrackerService.start(this);
 //        WiFiPositioningService.start(this);
-//        RegisterGeofencesIntentService.start(this); // invoked by FusedLocationTrackerService
+        RegisterGeofencesIntentService.start(this);
     }
 
     public void stopServices() {
         ActivityRecognitionService.stop(this);
         FusedLocationTrackerService.stop(this);
         WiFiPositioningService.stop(this);
+        RegisterGeofencesIntentService.stop(this);
     }
 
     private com.google.android.gms.analytics.Tracker tracker;
@@ -258,14 +259,6 @@ public class GuardSwiftApplication extends InjectingApplication {
                 analytics.setDryRun(true);
         }
         return tracker;
-    }
-
-    public void triggerNewGeofence(boolean trigger) {
-        this.triggerNewGeofence = trigger;
-    }
-
-    public boolean shouldTriggerNewGeofence() {
-        return triggerNewGeofence;
     }
 
     public ParseCacheFactory getCacheFactory() {

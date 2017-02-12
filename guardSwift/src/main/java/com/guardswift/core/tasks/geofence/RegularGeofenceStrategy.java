@@ -8,11 +8,13 @@ import com.google.android.gms.location.DetectedActivity;
 import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.FindCallback;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
@@ -32,6 +34,25 @@ public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
     }
 
     @Override
+    public void withinGeofence() {
+        super.withinGeofence();
+
+        if (!task.isArrived()) {
+
+            Location guardLoaction = LocationModule.Recent.getLastKnownLocation();
+            ParseGeoPoint clientLocation = task.getPosition();
+
+            float distanceMeters = ParseModule.distanceBetweenMeters(guardLoaction, clientLocation);
+
+            if (distanceMeters < 75f) {
+                DetectedActivity lastActivity = ActivityDetectionModule.Recent.getDetectedActivity();
+                task.getActivityStrategy().handleActivityInsideGeofence(lastActivity);
+            }
+
+        }
+    }
+
+    @Override
     public void exitGeofence() {
         super.exitGeofence();
 
@@ -45,6 +66,7 @@ public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
 
 //        Log.e(TAG, "exitGeofence: " + ActivityDetectionModule.getNameFromType(activity.getType()) + " speed: " + locationWithSpeed.getSpeed());
     }
+
 
     @Override
     public String getName() {

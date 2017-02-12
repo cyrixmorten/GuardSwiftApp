@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.tasks.geofence.NoGeofenceStrategy;
 import com.guardswift.persistence.cache.task.GSTasksCache;
@@ -191,13 +192,13 @@ public class GeofencingModule {
 
     }
 
-    public Task<List<ParseObject>> queryAllGeofenceTasks(int withinKm) {
+    public Task<Set<ParseObject>> queryAllGeofenceTasks(int withinKm) {
 
 //        Log.d(TAG, "queryAllGeofenceTasks withinKm: " + withinKm);
 
-        final TaskCompletionSource<List<ParseObject>> promise = new TaskCompletionSource<>();
+        final TaskCompletionSource<Set<ParseObject>> promise = new TaskCompletionSource<>();
 
-        final List<ParseObject> geofenceResults = Lists.newArrayList();
+        final Set<ParseObject> geofenceResults = Sets.newConcurrentHashSet();
 
         ArrayList<Task<List<ParseObject>>> queryGeofenceTasks = new ArrayList<>();
 
@@ -209,7 +210,7 @@ public class GeofencingModule {
             geofencedTasks.onSuccess(new Continuation<List<ParseObject>, Object>() {
                 @Override
                 public Object then(Task<List<ParseObject>> listTask) throws Exception {
-//                    Log.d(TAG, "Found " + listTask.getResult() + " " + gsTask.getTaskType());
+                    Log.d(TAG, "Found geofence tasks: " + listTask.getResult().size() + " " + gsTask.getTaskType());
                     for (ParseObject taskObject : listTask.getResult()) {
                         if (taskObject instanceof ParseTask) {
                             Log.d(TAG, "ADDING ALARM: " + ((ParseTask)taskObject).getFullAddress());

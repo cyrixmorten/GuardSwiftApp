@@ -388,6 +388,10 @@
     <string name="alarm_panels">Alarm paneler</string>
     <string name="confirm_delete_message">Slet besked?</string>
     <string name="message_saved">Beskeden er gemt</string>
+    <string name="event_left">Forladt</string>
+    <string name="missing_supervisions">Mangler tilsyn</string>
+    <string name="confirm_finish_missing_supervisions">Der mangler stadig %1$d tilsyn.\n\nSikker på du vil afslutte denne opgave?</string>
+    <string name="add_new">Tilføj ny</string>
 
 
 </resources>

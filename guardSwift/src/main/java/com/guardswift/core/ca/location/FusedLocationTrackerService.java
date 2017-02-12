@@ -207,15 +207,14 @@ public class FusedLocationTrackerService extends InjectingService {
 
 
     private boolean rebuildGeofencesIfDistanceThresholdReached(Location location) {
-        boolean newTasks = GuardSwiftApplication.getInstance().shouldTriggerNewGeofence();
 
         float distance = Util.distanceMeters(mLastGeofenceRebuildLocation, location);
-        if (mLastGeofenceRebuildLocation == null || distance >= DISTANCE_METERS_FOR_GEOFENCEREBUILD || newTasks) {
+        boolean triggerByDistance = distance >= DISTANCE_METERS_FOR_GEOFENCEREBUILD;
+
+        if (triggerByDistance) {
             mLastGeofenceRebuildLocation = location;
 
             RegisterGeofencesIntentService.start(getApplicationContext());
-
-            GuardSwiftApplication.getInstance().triggerNewGeofence(false);
 
             return true;
         }

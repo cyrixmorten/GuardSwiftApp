@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.guardswift.persistence.cache.task.CircuitUnitCache;
+import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GSTaskCreateReportActivity;
@@ -46,13 +48,12 @@ public class CircuitUnitEventFragment extends AbstractEventFragment {
     ParseQuery<EventLog> getEventLogQuery(List<String> filterEvents, boolean excludePerimiterEvents, boolean excludeAutomaticEvent) {
         EventLog.QueryBuilder builder = EventLog.getQueryBuilder(true);
 
-        if (excludeAutomaticEvent)
-            builder.excludeAutomatic();
+//        if (excludeAutomaticEvent)
+//            builder.excludeAutomatic();
 
         if (excludePerimiterEvents)
             builder.whereIsReportEntry();
 
-        builder.matchingEvents(filterEvents);
 
         builder.matching(circuitUnitCache.getSelected().getClient());
 

@@ -7,6 +7,7 @@ import com.guardswift.R;
 import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
 
@@ -39,17 +40,10 @@ public class StandardTaskAutomationStrategy implements TaskAutomationStrategy {
     @Override
     public void automaticDeparture() {
         TaskController controller = task.getController();
-        if (controller.canPerformAutomaticAction(TaskController.ACTION.ABORT, task)) {
-//            DetectedActivity activity = ActivityDetectionModule.Recent.getDetectedActivity();
-//            if (activity.getType() == DetectedActivity.IN_VEHICLE) {
-//                Location locationWithSpeed = LocationModule.Recent.getLastKnownLocationWithSpeed();
-//                if (locationWithSpeed != null && locationWithSpeed.getSpeed() > 1.4f) {
-//                    // TODO Test rules
-//                }
-//            }
+        if (controller.canPerformAutomaticAction(TaskController.ACTION.RESET, task)) {
             Log.w(TAG, "automaticDeparture " + task.getTaskType() + " " + task.getClientName());
             Sounds.getInstance(context).playNotification(R.raw.departure);
-            controller.performAutomaticAction(TaskController.ACTION.ABORT, task);
+            controller.performAutomaticAction(TaskController.ACTION.RESET, task);
         }
     }
 

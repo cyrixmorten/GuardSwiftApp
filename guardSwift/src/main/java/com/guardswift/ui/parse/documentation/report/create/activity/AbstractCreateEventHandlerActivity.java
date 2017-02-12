@@ -149,6 +149,11 @@ public abstract class AbstractCreateEventHandlerActivity extends
     }
 
     private void verifyEventTimestampAndSave() {
+        if (taskCache.getLastSelected().isWithinScheduledTime()) {
+            saveEvent(new Date());
+            return;
+        }
+
         ToastHelper.toast(this, getString(R.string.verify_event_time));
 
         final DateTime timestamp = new DateTime();
@@ -272,16 +277,16 @@ public abstract class AbstractCreateEventHandlerActivity extends
     public void setEventType(EventType event) {
         setEventType(event.getName());
 
-        boolean nextpage = !event.hasAmount();
-        if (!nextpage) {
-            new CommonDialogsBuilder.BetterPicks(getSupportFragmentManager()).enterEventAmount(getEventType(), new NumberPickerDialogFragment.NumberPickerDialogHandler() {
-                @Override
-                public void onDialogNumberSet(int reference, int number, double decimal, boolean isNegative, double fullNumber) {
-                    selectAmount(String.valueOf(number));
-                }
-            }).show();
-            return;
-        }
+//        boolean nextpage = !event.hasAmount();
+//        if (!nextpage) {
+//            new CommonDialogsBuilder.BetterPicks(getSupportFragmentManager()).enterEventAmount(getEventType(), new NumberPickerDialogFragment.NumberPickerDialogHandler() {
+//                @Override
+//                public void onDialogNumberSet(int reference, int number, double decimal, boolean isNegative, double fullNumber) {
+//                    selectAmount(String.valueOf(number));
+//                }
+//            }).show();
+//            return;
+//        }
         fragment.nextPageDelayed();
     }
 

@@ -45,6 +45,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -251,6 +252,8 @@ public class MainNavigationDrawer {
         try {
             List<CircuitStarted> circuitsStarted = CircuitStarted.getQueryBuilder(true).sortByName().whereActive().build().find();
 
+
+
             // TODO: Patch fix duplicates in drawer
             boolean hasDuplicates = false;
             HashMap<String, CircuitStarted> uniqueCircuitsStarted = Maps.newHashMap();
@@ -267,13 +270,19 @@ public class MainNavigationDrawer {
                 }
             }
 
+
             // Analytics to see how often duplicates are encountered
             Analytics.sendEvent("Fix", "Duplicate circuits in drawer", hasDuplicates ? "yes" : "no");
 
-            circuitsStarted = Lists.newArrayList(uniqueCircuitsStarted.values());
+            if (hasDuplicates) {
+                circuitsStarted = Lists.newArrayList(uniqueCircuitsStarted.values());
+            }
+
+            Collections.sort(circuitsStarted);
 
             circuitItems.add(circuitHeader);
             for (CircuitStarted circuitStarted : circuitsStarted) {
+                Log.d(TAG, "getName(): " + circuitStarted.getName());
                 IDrawerItem circuitItem = new PrimaryDrawerItem().withName(circuitStarted.getName()).withTag(circuitStarted);
                 circuitItems.add(circuitItem);
                 circuitStartedCache.addActive(circuitStarted);

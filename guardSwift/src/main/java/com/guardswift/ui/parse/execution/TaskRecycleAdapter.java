@@ -3,7 +3,6 @@ package com.guardswift.ui.parse.execution;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -53,7 +52,6 @@ import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragme
 import com.guardswift.ui.parse.execution.circuit.TaskDescriptionActivity;
 import com.guardswift.util.AnimationHelper;
 import com.guardswift.util.OpenLocalPDF;
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.parse.GetCallback;
@@ -105,7 +103,6 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
             vTimeEnd.setVisibility(View.GONE);
         }
-
 
         @Override
         public void onActionOpen(final Context context, final StaticTask task) {
@@ -162,6 +159,29 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     onActionOpen(context, task);
                 }
             });
+        }
+
+        @Override
+        public void update(Context context, GSTask task) {
+            super.update(context, task);
+
+            if (task instanceof StaticTask) {
+                vContentFooter.setVisibility(View.GONE);
+                vContentHeader.setVisibility(View.GONE);
+                Date timeStarted = ((StaticTask) task).getTimeArrived();
+                if (timeStarted != null) {
+                    vTimeStart.setText(DateFormat.getLongDateFormat(context).format(timeStarted));
+                    vTimeEnd.setVisibility(View.GONE);
+                    iconClock.setVisibility(View.VISIBLE);
+                } else {
+                    vTimeStart.setVisibility(View.GONE);
+                    vTimeEnd.setVisibility(View.GONE);
+                    iconClock.setVisibility(View.GONE);
+                }
+
+                setupTaskActionButtons(context, (StaticTask) task);
+            }
+            super.update(context, task);
         }
     }
 
@@ -257,6 +277,62 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 }
             });
         }
+
+        @Override
+        public void update(final Context context, GSTask task) {
+            super.update(context, task);
+
+            if (task instanceof ParseTask && task.getTaskType() == GSTask.TASK_TYPE.ALARM) {
+                ParseTask alarmTask = (ParseTask) task;
+
+//                vBtnAborted.setVisibility(View.GONE);
+                vBtnTaskdescription.setVisibility(View.GONE);
+
+                if (task.isPending()) {
+                    vBtnAccepted.setVisibility(View.VISIBLE);
+                    vBtnArrived.setVisibility(View.GONE);
+//                    vBtnAborted.setVisibility(View.GONE);
+                    vBtnFinished.setVisibility(View.GONE);
+                }
+
+                String description = context.getText(R.string.security_level) + ": " + alarmTask.getPriority() + "\n" +
+                        context.getText(R.string.keybox) + ": " + alarmTask.getKeybox() + "\n" +
+                        context.getText(R.string.remarks) + ": " + alarmTask.getRemarks();
+
+//                if (alarmTask.getGuard() != null) {
+//                    description += "\n\n";
+//                    description += context.getString(R.string.guard) + ": " + alarmTask.getGuard().getName();
+//                }
+
+                vTaskDesc.setText(description);
+//                alarmTaskViewHolder.vTimeStart.setText(alarmTask.getTimeStartString());
+//                alarmTaskViewHolder.vTimeEnd.setText(alarmTask.getTimeEndString());
+
+                vInfo.setText(
+                        DateFormat.getDateFormat(context).format(alarmTask.getCreatedAt()) + ' ' + DateFormat.getTimeFormat(context).format(alarmTask.getCreatedAt())
+                );
+
+                setupTaskActionButtons(context, alarmTask);
+
+
+                if (alarmTask.getCentralName().equals("G4S")) {
+                    View centralButton = vContentFooter.findViewById(R.id.button_central_pdf);
+                    if (centralButton == null) {
+                        Button g4spdf = new Button(new ContextThemeWrapper(context, android.R.style.Widget_DeviceDefault_Button_Borderless), null, android.R.style.Widget_DeviceDefault_Button_Borderless);
+                        g4spdf.setId(R.id.button_central_pdf);
+                        g4spdf.setText(context.getString(R.string.alarm_panels));
+                        g4spdf.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                new OpenLocalPDF(context, "G4S").execute();
+                            }
+                        });
+                        vContentFooter.addView(g4spdf);
+                    }
+                }
+
+            }
+        }
     }
 
     public static class RegularTaskViewHolder extends TaskViewHolder<CircuitUnit> {
@@ -304,48 +380,79 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         @Override
         public void onActionFinish(final Context context, final CircuitUnit task) {
-            if (task.isArrived() || task.isAborted()) {
-                extraTimeDialog(context, task);
-                return;
-            }
+            confirmIfMissingSupervisions(context, task, new GetCallback<CircuitUnit>() {
+                @Override
+                public void done(CircuitUnit object, ParseException e) {
+                    // Either not missing supervisions, or finish despite
+                    finishWithChecks(context, task);
+                }
+            });
+        }
 
-            if (fragmentManager != null) {
+        private void finishWithChecks(final Context context, final CircuitUnit task) {
+            if (task.getTimesArrived() == 0 && fragmentManager != null) {
                 missingArrivalTimestampDialog(context, new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        arrivalTimeDialog(context, new RadialTimePickerDialogFragment.OnTimeSetListener() {
+                        addArrivalTimeDialog(context, task, new GetCallback<CircuitUnit>() {
                             @Override
-                            public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-                                final Calendar cal = Calendar.getInstance();
-                                cal.setTime(new Date());
-                                cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                                cal.set(Calendar.MINUTE, minute);
-
-                                new EventLog.Builder(context)
-                                        .taskPointer(task, GSTask.EVENT_TYPE.ARRIVE)
-                                        .event(context.getString(R.string.event_arrived))
-                                        .automatic(false)
-                                        .deviceTimeStamp(cal.getTime())
-                                        .eventCode(EventLog.EventCodes.CIRCUITUNIT_ARRIVED).saveAsync();
-
-
-                                extraTimeDialog(context, task);
-
+                            public void done(CircuitUnit object, ParseException e) {
+                                RegularTaskViewHolder.super.onActionFinish(context, task);
                             }
                         });
                     }
                 });
             } else {
                 Log.e(TAG, "Should show missing arrival dialog but had no fragment manager");
-                extraTimeDialog(context, task);
+                RegularTaskViewHolder.super.onActionFinish(context, task);
             }
-
         }
 
-        private void arrivalTimeDialog(Context context, RadialTimePickerDialogFragment.OnTimeSetListener onTimeSetListener) {
+        private void confirmIfMissingSupervisions(final Context context, final CircuitUnit task, final GetCallback<CircuitUnit> okCallback) {
+            int plannedSupervision = task.getPlannedSuperVisions();
+            int timesArrived = task.getTimesArrived();
+            int diff = plannedSupervision - timesArrived;
+
+            if (plannedSupervision > 1 && diff != 0) {
+                new CommonDialogsBuilder.MaterialDialogs(context).okCancel(
+                        R.string.missing_supervisions,
+                        context.getString(R.string.confirm_finish_missing_supervisions, diff),
+                        new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                okCallback.done(task, null);
+                            }
+                        })
+                        .canceledOnTouchOutside(false)
+                        .show();
+            } else {
+                okCallback.done(task, null);
+            }
+        }
+
+        private void addArrivalTimeDialog(final Context context, final CircuitUnit task, final GetCallback<CircuitUnit> callback) {
             final DateTime timestamp = new DateTime();
             RadialTimePickerDialogFragment timePickerDialog = RadialTimePickerDialogFragment
-                    .newInstance(onTimeSetListener, timestamp.getHourOfDay(), timestamp.getMinuteOfHour(),
+                    .newInstance(new RadialTimePickerDialogFragment.OnTimeSetListener() {
+                                     @Override
+                                     public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+                                         final Calendar cal = Calendar.getInstance();
+                                         cal.setTime(new Date());
+                                         cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                         cal.set(Calendar.MINUTE, minute);
+
+                                         new EventLog.Builder(context)
+                                                 .taskPointer(task, GSTask.EVENT_TYPE.ARRIVE)
+                                                 .event(context.getString(R.string.event_arrived))
+                                                 .automatic(false)
+                                                 .deviceTimeStamp(cal.getTime())
+                                                 .eventCode(EventLog.EventCodes.CIRCUITUNIT_ARRIVED).saveAsync();
+
+
+                                         callback.done(task, null);
+
+                                     }
+                                 }, timestamp.getHourOfDay(), timestamp.getMinuteOfHour(),
                             DateFormat.is24HourFormat(context));
             timePickerDialog.show(fragmentManager, "FRAG_TAG_ARRIVAL_TIME_PICKER");
         }
@@ -380,7 +487,6 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                                         .eventCode(EventLog.EventCodes.CIRCUITUNIT_EXTRA_TIME).saveAsync();
                             }
 
-                            RegularTaskViewHolder.super.onActionFinish(context, task);
 
                             return true;
                         }
@@ -441,6 +547,61 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 }
             });
         }
+
+        public void update(final Context context, final GSTask task) {
+            super.update(context, task);
+
+            if (task instanceof CircuitUnit) {
+                CircuitUnit circuitUnit = (CircuitUnit) task;
+                vBtnTaskdescription.setVisibility((!circuitUnit.getDescription().isEmpty()) ? View.VISIBLE : View.GONE);
+
+                vTaskDesc.setText(circuitUnit.getName());
+                vTimeStart.setText(circuitUnit.getTimeStartString());
+                vTimeEnd.setText(circuitUnit.getTimeEndString());
+
+
+                if (vInfoLayout.getChildCount() > 1) {
+                    vInfoLayout.removeViewAt(0);
+                }
+
+                ImageView iconView = new ImageView(context);
+                GoogleMaterial.Icon icon = (circuitUnit.isRaid()) ? GoogleMaterial.Icon.gmd_car : GoogleMaterial.Icon.gmd_walk;
+                iconView.setImageDrawable(new IconicsDrawable(context)
+                        .icon(icon)
+                        .color(Color.DKGRAY)
+                        .sizeDp(24));
+
+                iconView.setPadding(0, 0, 12, 0);
+
+                vInfoLayout.addView(iconView, 0);
+
+                String infoText = context.getString(R.string.times_supervised,
+                        circuitUnit.getTimesArrived(),
+                        circuitUnit.getPlannedSuperVisions());
+
+                vInfo.setText(infoText);
+
+                setupTaskActionButtons(context, circuitUnit);
+
+                if (circuitUnit.completeButNotFinished()) {
+                    updateTaskState(context, GSTask.TASK_STATE.ACCEPTED);
+                }
+            }
+
+            // Add extra time button setup
+            if (task instanceof CircuitUnit) {
+                final CircuitUnit circuitUnit = (CircuitUnit) task;
+                vBtnAddExtraTime.setVisibility(View.VISIBLE);
+                vBtnAddExtraTime.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        extraTimeDialog(context, circuitUnit);
+                    }
+                });
+            } else {
+                vBtnAddExtraTime.setVisibility(View.GONE);
+            }
+        }
     }
 
 
@@ -454,12 +615,13 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         public DistrictWatchTaskViewHolder(View itemView, RemoveItemCallback removeItemCallback) {
             super(itemView, removeItemCallback);
 
-            this.vBtnAborted.setVisibility(View.GONE);
+//            this.vBtnAborted.setVisibility(View.GONE);
             this.vBtnFinished.setVisibility(View.GONE);
             this.vClientNumber.setVisibility(View.GONE);
             this.vTaskDesc.setVisibility(View.GONE);
 
         }
+
 
         @Override
         public void onActionArrive(final Context context, final DistrictWatchClient task) {
@@ -481,10 +643,28 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         }
 
+        @Override
+        public void update(Context context, GSTask task) {
+            if (task instanceof DistrictWatchClient) {
+                vContentFooter.setVisibility(View.GONE);
+                DistrictWatchClient districtWatchClient = (DistrictWatchClient) task;
+                // swap name and address to enhance the address
+                vName.setText(districtWatchClient.getFullAddress());
+                vAddress.setText(districtWatchClient.getClientName());
+                vTimesVisited_actual.setText(String.valueOf(districtWatchClient.getTimesArrived()));
+                vTimesVisited_expected.setText(String.valueOf(districtWatchClient.getSupervisions()));
+                if (districtWatchClient.getTimesArrived() == districtWatchClient.getSupervisions()) {
+                    vBtnArrived.setEnabled(false);
+                }
+
+                setupTaskActionButtons(context, (DistrictWatchClient) task);
+            }
+            super.update(context, task);
+        }
     }
 
 
-    public static class TaskViewHolder<T extends BaseTask> extends PositionedViewHolder implements TaskActionCallback<T> {
+    static class TaskViewHolder<T extends BaseTask> extends PositionedViewHolder implements TaskActionCallback<T> {
 
 
         @Bind(R.id.cardview)
@@ -497,8 +677,8 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         BootstrapButton vBtnArrived;
         @Bind(R.id.task_state_accepted)
         BootstrapButton vBtnAccepted;
-        @Bind(R.id.task_state_aborted)
-        BootstrapButton vBtnAborted;
+//        @Bind(R.id.task_state_aborted)
+//        BootstrapButton vBtnAborted;
         @Bind(R.id.task_state_finished)
         BootstrapButton vBtnFinished;
 
@@ -517,12 +697,16 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         TextView vAddress;
         @Bind(R.id.taskTypeDesc)
         TextView vTaskDesc;
+        @Bind(R.id.tv_guard_name)
+        TextView tvGuardName;
 
         // footer buttons
         @Bind(R.id.btn_view_report)
         Button vBtnViewReport;
         @Bind(R.id.btn_new_event)
         Button vBtnAddNewEvent;
+        @Bind(R.id.btn_extra_time)
+        Button vBtnAddExtraTime;
         @Bind(R.id.btn_report_history)
         Button vBtnReportHistory;
         @Bind(R.id.btn_task_description)
@@ -532,7 +716,13 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         @Bind(R.id.btn_checkpoints)
         Button vBtnCheckpoints;
 
+
         protected RemoveItemCallback removeItemCallback;
+
+        public void update(Context context, GSTask task) {
+            tvGuardName.setText((task.getGuard() != null) ? task.getGuard().getName() : "");
+            setTaskState(context, task);
+        }
 
         @Override
         public void onActionOpen(Context context, T task) {
@@ -558,9 +748,9 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             vBtnAccepted.setVisibility(View.GONE);
             vBtnArrived.setVisibility(View.VISIBLE);
 
-            if (!task.getTaskType().equals(GSTask.TASK_TYPE.ALARM)) {
-                vBtnAborted.setVisibility(View.VISIBLE);
-            }
+//            if (!task.getTaskType().equals(GSTask.TASK_TYPE.ALARM)) {
+//                vBtnAborted.setVisibility(View.VISIBLE);
+//            }
 
             vBtnFinished.setVisibility(View.VISIBLE);
 
@@ -572,7 +762,13 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                    performTaskAction(context, task, ACTION.ARRIVE);
+                    performTaskAction(context, task, ACTION.ARRIVE).onSuccess(new Continuation<GSTask, Object>() {
+                        @Override
+                        public Object then(Task<GSTask> task) throws Exception {
+                            update(context, task.getResult());
+                            return null;
+                        }
+                    });
                 }
             }).show();
         }
@@ -599,7 +795,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
             this.vBtnAccepted.setBootstrapSize(DefaultBootstrapSize.LG);
             this.vBtnArrived.setBootstrapSize(DefaultBootstrapSize.LG);
-            this.vBtnAborted.setBootstrapSize(DefaultBootstrapSize.LG);
+//            this.vBtnAborted.setBootstrapSize(DefaultBootstrapSize.LG);
             this.vBtnFinished.setBootstrapSize(DefaultBootstrapSize.LG);
 
             setRemoveItemCallback(removeItemCallback);
@@ -630,12 +826,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 }
             });
 
-            this.vBtnAborted.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onActionAbort(context, task);
-                }
-            });
+//            this.vBtnAborted.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    onActionAbort(context, task);
+//                }
+//            });
 
 
             this.vBtnFinished.setOnClickListener(new View.OnClickListener() {
@@ -690,10 +886,15 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
 
+
         public void setTaskState(Context context, GSTask task) {
             GSTask.TASK_STATE state = task.getTaskState();
-            int color = getTaskStateColor(context, state);
-            updateTaskStateButtons(context, state);
+            updateTaskState(context, state);
+        }
+
+        public void updateTaskState(Context context, GSTask.TASK_STATE toState) {
+            int color = getTaskStateColor(context, toState);
+            updateTaskStateButtons(context, toState);
             for (View border : this.vColorBorders) {
                 tintBackgroundColor(border, color, 100);
             }
@@ -717,7 +918,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         private void updateTaskStateButtons(Context context, GSTask.TASK_STATE state) {
             bootstrapActionButtonDefaults(context, this.vBtnArrived);
-            bootstrapActionButtonDefaults(context, this.vBtnAborted);
+//            bootstrapActionButtonDefaults(context, this.vBtnAborted);
             bootstrapActionButtonDefaults(context, this.vBtnFinished);
 
             int colorRes = getTaskStateColorResource(state);
@@ -725,9 +926,9 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 case ARRIVED:
                     bootstrapActionButtonSelect(context, this.vBtnArrived, colorRes);
                     break;
-                case ABORTED:
-                    bootstrapActionButtonSelect(context, this.vBtnAborted, colorRes);
-                    break;
+//                case ABORTED:
+//                    bootstrapActionButtonSelect(context, this.vBtnAborted, colorRes);
+//                    break;
                 case FINISHED:
                     bootstrapActionButtonSelect(context, this.vBtnFinished, colorRes);
                     bootstrapActionDisableAll();
@@ -751,7 +952,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         private void bootstrapActionDisableAll() {
             this.vBtnArrived.setEnabled(false);
-            this.vBtnAborted.setEnabled(false);
+//            this.vBtnAborted.setEnabled(false);
             this.vBtnFinished.setEnabled(false);
         }
 
@@ -900,148 +1101,18 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             holder.vBtnClientContacts.setVisibility((!client.getContactsWithNames().isEmpty()) ? View.VISIBLE : View.GONE);
         }
 
-        if (task instanceof ParseTask) {
-            holder.vContentFooter.setVisibility((task.isArrived() || selectedItems.get(position, false)) ? View.VISIBLE : View.GONE);
-            holder.vBtnAborted.setVisibility(View.GONE);
-            holder.vBtnTaskdescription.setVisibility(View.GONE);
-
-            if (task.isPending()) {
-                holder.vBtnAccepted.setVisibility(View.VISIBLE);
-                holder.vBtnArrived.setVisibility(View.GONE);
-                holder.vBtnAborted.setVisibility(View.GONE);
-                holder.vBtnFinished.setVisibility(View.GONE);
-            }
-
-            ParseTask alarmTask = (ParseTask) task;
-            if (holder instanceof AlarmTaskViewHolder) {
-//                holder.vBtnTaskdescription.setVisibility((!circuitUnit.getDescription().isEmpty()) ? View.VISIBLE : View.GONE);
-
-                AlarmTaskViewHolder alarmTaskViewHolder = (AlarmTaskViewHolder) holder;
-
-                String description = context.getText(R.string.security_level) + ": " + alarmTask.getPriority() + "\n" +
-                        context.getText(R.string.keybox) + ": " + alarmTask.getKeybox() + "\n" +
-                        context.getText(R.string.remarks) + ": " + alarmTask.getRemarks();
-
-                if (alarmTask.getGuard() != null) {
-                    description += "\n\n";
-                    description += context.getString(R.string.guard) + ": " + alarmTask.getGuard().getName();
-                }
-
-                alarmTaskViewHolder.vTaskDesc.setText(description);
-//                alarmTaskViewHolder.vTimeStart.setText(alarmTask.getTimeStartString());
-//                alarmTaskViewHolder.vTimeEnd.setText(alarmTask.getTimeEndString());
-
-                alarmTaskViewHolder.vInfo.setText(
-                        DateFormat.getDateFormat(context).format(alarmTask.getCreatedAt()) + ' ' + DateFormat.getTimeFormat(context).format(alarmTask.getCreatedAt())
-                );
-
-                alarmTaskViewHolder.setupTaskActionButtons(context, alarmTask);
+        holder.vContentFooter.setVisibility((task.isArrived() || selectedItems.get(position, false)) ? View.VISIBLE : View.GONE);
 
 
-                if (alarmTask.getCentralName().equals("G4S")) {
-                    View centralButton = alarmTaskViewHolder.vContentFooter.findViewById(R.id.button_central_pdf);
-                    if (centralButton == null) {
-                        Button g4spdf = new Button(new ContextThemeWrapper(context, android.R.style.Widget_DeviceDefault_Button_Borderless), null, android.R.style.Widget_DeviceDefault_Button_Borderless);
-                        g4spdf.setId(R.id.button_central_pdf);
-                        g4spdf.setText(context.getString(R.string.alarm_panels));
-                        g4spdf.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                new OpenLocalPDF(context, "G4S").execute();
-                            }
-                        });
-                        alarmTaskViewHolder.vContentFooter.addView(g4spdf);
-                    }
-                }
-            }
-        }
+        holder.update(context, task);
 
-        if (task instanceof StaticTask) {
-            holder.vContentFooter.setVisibility(View.GONE);
-            holder.vContentHeader.setVisibility(View.GONE);
-            if (holder instanceof StaticTaskViewHolder) {
-                StaticTaskViewHolder staticTaskViewHolder = (StaticTaskViewHolder) holder;
-                Date timeStarted = ((StaticTask) task).getTimeArrived();
-                if (timeStarted != null) {
-                    staticTaskViewHolder.vTimeStart.setText(DateFormat.getLongDateFormat(context).format(timeStarted));
-                    staticTaskViewHolder.vTimeEnd.setVisibility(View.GONE);
-                    staticTaskViewHolder.iconClock.setVisibility(View.VISIBLE);
-                } else {
-                    staticTaskViewHolder.vTimeStart.setVisibility(View.GONE);
-                    staticTaskViewHolder.vTimeEnd.setVisibility(View.GONE);
-                    staticTaskViewHolder.iconClock.setVisibility(View.GONE);
-                }
-
-                staticTaskViewHolder.setupTaskActionButtons(context, (StaticTask) task);
-            }
-        }
-
-        if (task instanceof CircuitUnit) {
-            holder.vContentFooter.setVisibility((task.isArrived() || selectedItems.get(position, false)) ? View.VISIBLE : View.GONE);
-            CircuitUnit circuitUnit = (CircuitUnit) task;
-            if (holder instanceof RegularTaskViewHolder) {
-                holder.vBtnTaskdescription.setVisibility((!circuitUnit.getDescription().isEmpty()) ? View.VISIBLE : View.GONE);
-
-                RegularTaskViewHolder regularTaskViewHolder = (RegularTaskViewHolder) holder;
-                regularTaskViewHolder.vTaskDesc.setText(circuitUnit.getName());
-                regularTaskViewHolder.vTimeStart.setText(circuitUnit.getTimeStartString());
-                regularTaskViewHolder.vTimeEnd.setText(circuitUnit.getTimeEndString());
-
-
-                if (regularTaskViewHolder.vInfoLayout.getChildCount() > 1) {
-                    regularTaskViewHolder.vInfoLayout.removeViewAt(0);
-                }
-
-                ImageView iconView = new ImageView(context);
-                GoogleMaterial.Icon icon = (circuitUnit.isRaid()) ? GoogleMaterial.Icon.gmd_car : GoogleMaterial.Icon.gmd_walk;
-                iconView.setImageDrawable(new IconicsDrawable(context)
-                        .icon(icon)
-                        .color(Color.DKGRAY)
-                        .sizeDp(24));
-
-                regularTaskViewHolder.vInfoLayout.addView(iconView, 0);
-
-                String infoText = "";
-                if (circuitUnit.getSuperVisions() > 1) {
-                    infoText = context.getString(R.string.times_supervised,
-                            circuitUnit.getTimesArrived(),
-                            circuitUnit.getSuperVisions());
-                }
-
-                regularTaskViewHolder.vInfo.setText(infoText);
-
-                regularTaskViewHolder.setupTaskActionButtons(context, (CircuitUnit) task);
-            }
-        }
-
-        if (task instanceof DistrictWatchClient) {
-            holder.vContentFooter.setVisibility(View.GONE);
-            DistrictWatchClient districtWatchClient = (DistrictWatchClient) task;
-            // swap name and address to enhance the address
-            holder.vName.setText(districtWatchClient.getFullAddress());
-            holder.vAddress.setText(districtWatchClient.getClientName());
-            if (holder instanceof DistrictWatchTaskViewHolder) {
-                DistrictWatchTaskViewHolder districtWatchTaskViewHolder = ((DistrictWatchTaskViewHolder) holder);
-                districtWatchTaskViewHolder.vTimesVisited_actual.setText(String.valueOf(districtWatchClient.getTimesArrived()));
-                districtWatchTaskViewHolder.vTimesVisited_expected.setText(String.valueOf(districtWatchClient.getSupervisions()));
-                if (districtWatchClient.getTimesArrived() == districtWatchClient.getSupervisions()) {
-                    holder.vBtnArrived.setEnabled(false);
-                }
-
-                districtWatchTaskViewHolder.setupTaskActionButtons(context, (DistrictWatchClient) task);
-            }
-        }
-
+//        debugGeofenceStatus(task, holder);
 
         new PositionedViewHolder.CalcDistanceAsync(task, holder).execute();
-
-        holder.setTaskState(context, task);
-
-        geofenceStatus(task, holder);
 //        new UpdateTaskStateAsync(task, holder, isNew).execute();
     }
 
-    private void geofenceStatus(GSTask task, TaskViewHolder holder) {
+    private void debugGeofenceStatus(GSTask task, TaskViewHolder holder) {
         if (!BuildConfig.DEBUG) {
             return;
         }
@@ -1062,7 +1133,21 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         linearLayout.addView(isGeofenced(task));
         linearLayout.addView(isWithinGeofence(task));
         linearLayout.addView(isOutsideGeofence(task));
+        linearLayout.addView(isWithinScheduledTime(task));
+    }
 
+    private TextView isWithinScheduledTime(GSTask task) {
+        TextView tv = new TextView(context);
+        tv.setText(" TIME ");
+        boolean isWithinScheduled = false;
+        if (task instanceof CircuitUnit) {
+            isWithinScheduled = ((CircuitUnit) task).isWithinScheduledTime();
+        }
+
+
+        tv.setTextColor((isWithinScheduled) ? Color.GREEN : Color.RED);
+
+        return tv;
     }
 
     private TextView isOutsideGeofence(GSTask task) {

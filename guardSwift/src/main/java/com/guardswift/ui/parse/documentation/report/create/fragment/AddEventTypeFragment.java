@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -80,27 +83,6 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 
 		ButterKnife.bind(this, rootView);
 
-//		final Client client = localData.getSelectedClient();
-		// addButton.setText(R.string.add_type);
-
-		// new EventType.QueryBuilder(true).matchingIncludes(client).sortByTimesUsed()
-		// .build()
-		// .findInBackground(new FindCallback<EventType>() {
-		//
-		// @Override
-		// public void done(List<EventType> objects, ParseException e) {
-		// if (e != null) {
-		// Log.e(TAG, e.getMessage(), e);
-		// return;
-		// }
-		//
-		// for (EventType type : objects) {
-		// Log.d(TAG, type.getName());
-		// }
-		//
-		// }
-		// });
-
 		// mAdapter = new AddEventTypeAdapter(getActivity());
 		mAdapter = new EventTypeParseAdapter(getActivity(),
 				new ParseQueryAdapter.QueryFactory<EventType>() {
@@ -138,8 +120,23 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 
 //        footerButton.setText(getString(R.string.add_event_type));
 
-		return rootView;
-	}
+        setHasOptionsMenu(true);
+
+        return rootView;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        new AddEntryMenuItem().create(getContext(), menu, new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                addEventType();
+                return false;
+            }
+        });
+
+        super.onCreateOptionsMenu(menu, inflater);
+    }
 
     private void loadPreselected() {
 
@@ -242,14 +239,14 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 
     @Override
     public void updateFloatingActionButton(Context context, android.support.design.widget.FloatingActionButton floatingActionButton) {
-        floatingActionButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_add_white_18dp));
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addEventType();
-            }
-        });
-        floatingActionButton.show();
+//        floatingActionButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_add_white_18dp));
+//        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                addEventType();
+//            }
+//        });
+//        floatingActionButton.show();
     }
 
     // @Override

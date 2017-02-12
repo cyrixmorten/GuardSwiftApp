@@ -18,11 +18,9 @@ import com.guardswift.persistence.parse.data.client.Client;
 public interface GSTask extends Positioned {
 
 
-
-
     enum TASK_TYPE {REGULAR, DISTRICTWATCH, STATIC, ALARM}
     enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINISHED}
-    enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER}
+    enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER, LEAVE}
 
     TASK_TYPE getTaskType();
     TASK_STATE getTaskState();
@@ -65,6 +63,8 @@ public interface GSTask extends Positioned {
     boolean isArrived();
     boolean isAborted();
     boolean isFinished();
+
+    boolean isWithinScheduledTime();
 
 
     Guard getGuard();

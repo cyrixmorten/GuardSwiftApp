@@ -102,7 +102,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
         });
 
 
-        tabs.setDistributeEvenly(true);
+
 
         // Setting Custom Color for the Scroll bar indicator of the Tab View
 //        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
@@ -114,7 +114,12 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 //        });
 
 //         Setting the ViewPager For the SlidingTabsLayout
-        tabs.setViewPager(mViewPager);
+        if (getTabbedFragments().keySet().size() > 1) {
+            tabs.setDistributeEvenly(true);
+            tabs.setViewPager(mViewPager);
+        } else {
+            tabs.setVisibility(View.GONE);
+        }
 
 
         return rootView;
@@ -129,7 +134,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 
     private class TasksPagerAdapter extends FragmentStatePagerAdapter implements UpdateFloatingActionButtonPageChangeListener.FragmentAdapter {
 
-        public TasksPagerAdapter(FragmentManager fm) {
+        TasksPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 

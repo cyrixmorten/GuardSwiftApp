@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingAppCompatActivity;
@@ -85,7 +86,12 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
         if (!shouldRedirectToOtherActivity()) {
 
             // bootstrap parseObjects if it has not been done during this session
-            GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn(), true);
+
+            if (!BuildConfig.DEBUG) {
+                GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn());
+            } else {
+                GuardSwiftApplication.getInstance().startServices();
+            }
 
             setSelectionFromIntent();
 
@@ -97,6 +103,7 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
                     .withDrawerGravity(Gravity.END)
                     .withCloseOnClick(false)
                     .append(drawer);
+
         }
 
     }
