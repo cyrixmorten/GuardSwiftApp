@@ -1,6 +1,7 @@
 package com.guardswift.persistence.cache.task;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -76,11 +77,15 @@ public class GSTasksCache extends Preferences {
 
 
     public void setSelected(GSTask task) {
+        Log.w(TAG, "setSelected: " + task);
         for (GenericTaskCache taskCache: taskCaches) {
+            Log.d(TAG, "Accepted: " + taskCache.acceptsTask(task));
             if (taskCache.acceptsTask(task)) {
                 taskCache.setSelected(task);
 
                 put(LAST_SELECTED_TASK_TYPE, task.getTaskType().toString());
+
+                Log.d(TAG, "LAST_SELECTED_TASK_TYPE: " + task.getTaskType().toString());
 
                 return;
             }
@@ -90,12 +95,18 @@ public class GSTasksCache extends Preferences {
     }
 
     public GSTask getLastSelected() {
+        Log.w(TAG, "getLastSelected");
         String lastSelectedTaskType = getString(LAST_SELECTED_TASK_TYPE);
 
+        Log.d(TAG, "lastSelectedTaskType: " + lastSelectedTaskType);
         for (GSTask task: new TaskFactory().getTasks()) {
-            GSTask.TASK_TYPE type = task.getTaskType();
-            if (type.toString().equals(lastSelectedTaskType)) {
-                return (GSTask)task.getCache().getSelected();
+            List<GSTask.TASK_TYPE> types = task.getPossibleTaskTypes();
+            for (GSTask.TASK_TYPE type: types) {
+                boolean matchTaskType = type.toString().equals(lastSelectedTaskType);
+                Log.d(TAG, "type: " + type);
+                if (matchTaskType) {
+                    return (GSTask) task.getCache().getSelected();
+                }
             }
         }
 

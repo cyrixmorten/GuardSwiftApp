@@ -35,7 +35,9 @@ import com.parse.SaveCallback;
 import org.joda.time.DateTime;
 import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @ParseClassName("StaticTask")
 public class StaticTask extends BaseTask {
@@ -148,6 +150,11 @@ public class StaticTask extends BaseTask {
     @Override
     public TASK_TYPE getTaskType() {
         return TASK_TYPE.STATIC;
+    }
+
+    @Override
+    public List<TASK_TYPE> getPossibleTaskTypes() {
+        return Collections.singletonList(TASK_TYPE.STATIC);
     }
 
     @Override

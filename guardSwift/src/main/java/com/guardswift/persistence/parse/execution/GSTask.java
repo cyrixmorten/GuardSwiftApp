@@ -11,6 +11,8 @@ import com.guardswift.persistence.parse.TaskQueryBuilder;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 
+import java.util.List;
+
 /**
  * Created by cyrix on 4/10/15.
  */
@@ -24,7 +26,9 @@ public interface GSTask extends Positioned {
     enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINISHED}
     enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER, LEAVE}
 
+
     TASK_TYPE getTaskType();
+    List<TASK_TYPE> getPossibleTaskTypes();
     TASK_STATE getTaskState();
 
 //    public boolean equals(Object o1);

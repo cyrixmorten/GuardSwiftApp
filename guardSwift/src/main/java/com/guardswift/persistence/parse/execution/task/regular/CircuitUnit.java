@@ -41,6 +41,7 @@ import org.joda.time.MutableDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -118,6 +119,11 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
             return TASK_TYPE.RAID;
         }
         return TASK_TYPE.REGULAR;
+    }
+
+    @Override
+    public List<TASK_TYPE> getPossibleTaskTypes() {
+        return Arrays.asList(TASK_TYPE.REGULAR, TASK_TYPE.RAID);
     }
 
     /**

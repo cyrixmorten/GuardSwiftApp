@@ -30,7 +30,9 @@ import com.parse.ParseQuery;
 import org.json.JSONObject;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @ParseClassName("DistrictWatchClient")
 public class DistrictWatchClient extends BaseTask {
@@ -122,6 +124,11 @@ public class DistrictWatchClient extends BaseTask {
     @Override
     public TASK_TYPE getTaskType() {
         return TASK_TYPE.DISTRICTWATCH;
+    }
+
+    @Override
+    public List<TASK_TYPE> getPossibleTaskTypes() {
+        return Collections.singletonList(TASK_TYPE.DISTRICTWATCH);
     }
 
     @Override

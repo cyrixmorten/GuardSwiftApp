@@ -25,7 +25,9 @@ import com.parse.ParseQuery;
 
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 
 @ParseClassName("Task")
@@ -130,6 +132,11 @@ public class ParseTask extends BaseTask {
             return TASK_TYPE.ALARM;
 //        }
 //        return null;
+    }
+
+    @Override
+    public List<TASK_TYPE> getPossibleTaskTypes() {
+        return Arrays.asList(TASK_TYPE.ALARM);
     }
 
     private void setStatus(String status) {

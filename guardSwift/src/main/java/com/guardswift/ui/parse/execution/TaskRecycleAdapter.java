@@ -1267,18 +1267,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             return new AlarmTaskViewHolder(itemView, defaultRemoveItemCallback);
         }
 
-        if (viewType == GSTask.TASK_TYPE.REGULAR.ordinal()) {
-
-            View taskPlannedTimesView = LayoutInflater.
-                    from(parent.getContext()).
-                    inflate(R.layout.gs_view_task_planned_times, parent, false);
-
-            contentBody.addView(taskPlannedTimesView, 0);
-
-            return new RegularTaskViewHolder(itemView, defaultRemoveItemCallback, fragmentManager);
-        }
-
-        if (viewType == GSTask.TASK_TYPE.RAID.ordinal()) {
+        if (viewType == GSTask.TASK_TYPE.REGULAR.ordinal() || viewType == GSTask.TASK_TYPE.RAID.ordinal()) {
 
             View taskPlannedTimesView = LayoutInflater.
                     from(parent.getContext()).
