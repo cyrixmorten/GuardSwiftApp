@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.CardView;
+import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -283,7 +284,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             super.update(context, task);
 
             if (task instanceof ParseTask && task.getTaskType() == GSTask.TASK_TYPE.ALARM) {
-                ParseTask alarmTask = (ParseTask) task;
+                final ParseTask alarmTask = (ParseTask) task;
 
 //                vBtnAborted.setVisibility(View.GONE);
                 vBtnTaskdescription.setVisibility(View.GONE);
@@ -308,8 +309,16 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 //                alarmTaskViewHolder.vTimeStart.setText(alarmTask.getTimeStartString());
 //                alarmTaskViewHolder.vTimeEnd.setText(alarmTask.getTimeEndString());
 
+                String centralName = alarmTask.getCentralName();
+
+
+
                 vInfo.setText(
-                        DateFormat.getDateFormat(context).format(alarmTask.getCreatedAt()) + ' ' + DateFormat.getTimeFormat(context).format(alarmTask.getCreatedAt())
+                        new SpannableStringBuilder(centralName)
+                                .append(" ")
+                                .append(DateFormat.getDateFormat(context).format(alarmTask.getCreatedAt()))
+                                .append(" ")
+                                .append(DateFormat.getTimeFormat(context).format(alarmTask.getCreatedAt()))
                 );
 
                 setupTaskActionButtons(context, alarmTask);
@@ -329,6 +338,20 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                         });
                         vContentFooter.addView(g4spdf);
                     }
+                }
+
+                View centralButton = vContentFooter.findViewById(R.id.button_original_alarm_text);
+                if (centralButton == null) {
+                    Button originalAlarm = new Button(new ContextThemeWrapper(context, android.R.style.Widget_DeviceDefault_Button_Borderless), null, android.R.style.Widget_DeviceDefault_Button_Borderless);
+                    originalAlarm.setId(R.id.button_original_alarm_text);
+                    originalAlarm.setText(context.getString(R.string.alarm_original_text));
+                    originalAlarm.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.alarm, alarmTask.getOriginal()).show();
+                        }
+                    });
+                    vContentFooter.addView(originalAlarm);
                 }
 
             }
@@ -1106,7 +1129,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         holder.update(context, task);
 
-//        debugGeofenceStatus(task, holder);
+        debugGeofenceStatus(task, holder);
 
         new PositionedViewHolder.CalcDistanceAsync(task, holder).execute();
 //        new UpdateTaskStateAsync(task, holder, isNew).execute();
@@ -1245,6 +1268,17 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         if (viewType == GSTask.TASK_TYPE.REGULAR.ordinal()) {
+
+            View taskPlannedTimesView = LayoutInflater.
+                    from(parent.getContext()).
+                    inflate(R.layout.gs_view_task_planned_times, parent, false);
+
+            contentBody.addView(taskPlannedTimesView, 0);
+
+            return new RegularTaskViewHolder(itemView, defaultRemoveItemCallback, fragmentManager);
+        }
+
+        if (viewType == GSTask.TASK_TYPE.RAID.ordinal()) {
 
             View taskPlannedTimesView = LayoutInflater.
                     from(parent.getContext()).

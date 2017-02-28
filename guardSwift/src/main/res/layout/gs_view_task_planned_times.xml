@@ -5,20 +5,21 @@
     android:id="@+id/task_date_planned_timespan"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingBottom="@dimen/small_padding">
 
     <LinearLayout
         android:id="@+id/layout_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="@dimen/micro_padding"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingEnd="@dimen/micro_padding">
 
         <TextView
             android:id="@+id/info"
             style="@style/wrapping"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            tools:text="30/06/87"/>
+            tools:text="30/06/87" />
 
     </LinearLayout>
 
@@ -41,13 +42,13 @@
                 android:id="@+id/timeStart"
                 style="@style/wrapping_micropadding"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                tools:text="18:00"/>
+                tools:text="18:00" />
 
             <TextView
                 android:id="@+id/timeEnd"
                 style="@style/wrapping_micropadding"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                tools:text="21:00"/>
+                tools:text="21:00" />
 
         </LinearLayout>
 
@@ -60,4 +61,5 @@
             app:bootstrapBrand="regular"
             app:fontAwesomeIcon="fa_clock_o" />
     </LinearLayout>
+
 </LinearLayout>

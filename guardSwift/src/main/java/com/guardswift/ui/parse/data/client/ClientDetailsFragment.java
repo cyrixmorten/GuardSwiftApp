@@ -1,14 +1,16 @@
 package com.guardswift.ui.parse.data.client;
 
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.ColorUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,26 +21,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingFragment;
-import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.cache.data.ClientCache;
 import com.guardswift.persistence.cache.data.GuardCache;
-import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.data.client.ClientContact;
-import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.web.GoogleMapFragment;
-import com.guardswift.ui.web.GoogleMapFragment.OnGoogleMapFragmentListener;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
-import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,64 +48,65 @@ import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 public class ClientDetailsFragment extends InjectingFragment implements
-		OnGoogleMapFragmentListener {
+        OnMapReadyCallback {
 
-    public interface ClientPositionDetails {
+    private interface ClientPositionDetails {
 
-        @NonNull LatLng getMapPosition();
+        @NonNull
+        LatLng getMapPosition();
 
-        @NonNull String getMapTitle();
+        @NonNull
+        String getMapTitle();
 
-        @NonNull String getMapSnippet();
+        @NonNull
+        String getMapSnippet();
 
 //        int getGeofenceRadius();
     }
 
-	protected static final String TAG = ClientDetailsFragment.class
-			.getSimpleName();
+    protected static final String TAG = ClientDetailsFragment.class
+            .getSimpleName();
 
-	public static ClientDetailsFragment newInstance(Context context, Client client) {
+    public static ClientDetailsFragment newInstance(Client client) {
 
-        GuardSwiftApplication.getInstance().getCacheFactory().getClientCache().setSelected(client);
+        ClientDetailsFragment fragment = new ClientDetailsFragment();
 
-		ClientDetailsFragment fragment = new ClientDetailsFragment();
-		Bundle args = new Bundle();
-		fragment.setArguments(args);
-		return fragment;
-	}
+        fragment.mClient = client;
 
-	public ClientDetailsFragment() {
-	}
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
-    @Inject
-    ClientCache clientCache;
+    public ClientDetailsFragment() {
+    }
+
     @Inject
     GuardCache guardCache;
 
-	private Client mClient;
-    private Guard mGuard;
-	private ClientPositionDetails mClientPositionDetails;
-	private List<View> mDetailsViews;
+    private Client mClient;
+    private ClientPositionDetails mClientPositionDetails;
+    private List<View> mDetailsViews;
 
 
-	@Bind(R.id.mapContainer) RelativeLayout mapContainer;
-//    @Bind(R.id.button_navigation)
+    @Bind(R.id.mapContainer)
+    RelativeLayout mapContainer;
+    //    @Bind(R.id.button_navigation)
 //    Button startNavigationButton;
-	@Bind(R.id.detailsContainer) LinearLayout detailsContainer;
+    @Bind(R.id.contactsContainer)
+    LinearLayout detailsContainer;
 //    @Bind(R.id.button_messages)
 //    BootstrapButton button_messages;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-	}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
 
-        mClient = clientCache.getSelected();
-        mGuard = guardCache.getLoggedIn();
         mClientPositionDetails = new ClientPositionDetails() {
             @NonNull
             @Override
@@ -117,7 +115,7 @@ public class ClientDetailsFragment extends InjectingFragment implements
                     ParseGeoPoint position = mClient.getPosition();
                     return new LatLng(position.getLatitude(), position.getLongitude());
                 }
-                return new LatLng(0,0);
+                return new LatLng(0, 0);
             }
 
             @NonNull
@@ -137,53 +135,61 @@ public class ClientDetailsFragment extends InjectingFragment implements
             }
 
         };
+
         mDetailsViews = getDetailsViews();
 
-        EventBus.getDefault().register(this);
     }
-
 
 
     private List<View> getDetailsViews() {
         List<View> views = new ArrayList<View>();
+        if (mClient == null) {
+            return views;
+        }
+
         LayoutInflater li = LayoutInflater.from(getActivity());
-        for (ParseObject contactObject: mClient.getContactsWithNames()) {
+        for (ParseObject contactObject : mClient.getContactsWithNames()) {
             if (!contactObject.isDataAvailable()) {
                 continue;
             }
 
-            ClientContact contact = (ClientContact)contactObject;
+            ClientContact contact = (ClientContact) contactObject;
             View v = li.inflate(R.layout.view_client_contact, null);
             TextView name = (TextView) v.findViewById(R.id.name);
             TextView desc = (TextView) v.findViewById(R.id.desc);
-            BootstrapButton phoneNumber = (BootstrapButton) v.findViewById(R.id.button_phoneNumber);
             name.setText(contact.getName());
             desc.setText(contact.getDesc());
 
+            BootstrapButton phoneNumber = (BootstrapButton) v.findViewById(R.id.button_phoneNumber);
             String phoneNumberString = contact.getPhoneNumber();
-            phoneNumber.setText(phoneNumberString);
-            phoneNumber.setTag(phoneNumberString);
-            phoneNumber.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String phoneNumberString = (String) v.getTag();
-                    Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumberString));
-                    startActivity(intent);
-                }
-            });
+
+                phoneNumber.setText(phoneNumberString);
+                phoneNumber.setTag(phoneNumberString);
+                phoneNumber.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String phoneNumberString = (String) v.getTag();
+                        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumberString));
+                        startActivity(intent);
+                    }
+                });
+
+            if (phoneNumberString.isEmpty()) {
+                phoneNumber.setVisibility(View.GONE);
+            }
             views.add(v);
         }
         return views;
     }
 
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		View rootView = inflater.inflate(R.layout.fragment_client_details,
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_client_details,
                 container, false);
 
-		ButterKnife.bind(this, rootView);
+        ButterKnife.bind(this, rootView);
 
 //        if (!(getActivity() instanceof AbstractTaskDetailsActivity)) {
 //            startNavigationButton.setVisibility(View.GONE);
@@ -193,25 +199,20 @@ public class ClientDetailsFragment extends InjectingFragment implements
         addDetailsViews();
 //        updateMessagesButtonUI();
 
-		return rootView;
-	}
+        return rootView;
+    }
 
     private void addMapFragment() {
 
         final FragmentManager fm = getChildFragmentManager();
 
-        GoogleMapFragment mapFragment = (GoogleMapFragment)fm.findFragmentByTag("map");
+        GoogleMapFragment mapFragment = (GoogleMapFragment) fm.findFragmentByTag("map");
 
         if (mapFragment != null) {
             Log.e(TAG, "reusing map");
             fm.beginTransaction().attach(mapFragment).commit();
 
-            mapFragment.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(GoogleMap googleMap) {
-                    onMapReady(googleMap);
-                }
-            });
+            mapFragment.getMapAsync(this);
 
         } else {
             Log.e(TAG, "new map");
@@ -241,9 +242,6 @@ public class ClientDetailsFragment extends InjectingFragment implements
 //        }
 //    }
 
-    public void onEventMainThread(UpdateUIEvent ev) {
-        // do nothing
-    }
 
 //    @OnClick(R.id.button_navigation)
 //    public void startNavigation() {
@@ -273,21 +271,21 @@ public class ClientDetailsFragment extends InjectingFragment implements
 //    }
 
 
-	private long addDetailsViews() {
-		if (!mDetailsViews.isEmpty())
-			detailsContainer.removeAllViews();
+    private long addDetailsViews() {
+        if (!mDetailsViews.isEmpty())
+            detailsContainer.removeAllViews();
 
-		// long delay = 500;
-		for (View v : mDetailsViews) {
-			addDetailsView(v, 0);
-			// delay += 100;
-		}
+        // long delay = 500;
+        for (View v : mDetailsViews) {
+            addDetailsView(v, 0);
+            // delay += 100;
+        }
 
-		return 0;
-	}
+        return 0;
+    }
 
-	private void addDetailsView(final View detailView, long delay) {
-		new Handler().postDelayed(new Runnable() {
+    private void addDetailsView(final View detailView, long delay) {
+        new Handler().postDelayed(new Runnable() {
 
             @Override
             public void run() {
@@ -295,81 +293,96 @@ public class ClientDetailsFragment extends InjectingFragment implements
                     detailsContainer.addView(detailView);
             }
         }, delay);
-	}
+    }
 
-	@Override
-	public void onMapReady(GoogleMap map) {
+    private class MapData {
+        private CircleOptions regularTaskRadius;
+        private CircleOptions raidTaskRadius;
 
-        if (mClientPositionDetails != null && mClientPositionDetails
-                .getMapPosition() != null) {
-            map.addMarker(new MarkerOptions().position(mClientPositionDetails
-                    .getMapPosition()).title(mClientPositionDetails.getMapTitle()).snippet(mClientPositionDetails.getMapSnippet()))
-            // .title(getMapTitle()).snippet(getMapSnippet()))
-            // .showInfoWindow();
-            ;
-
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    mClientPositionDetails.getMapPosition(), 15));
-        }
-        else {
-            if (mClient != null) {
-                Crashlytics.log(ParseUser.getCurrentUser().getUsername() + " missing mClientPositionDetails for client " + mClient.getName());
-            }
+        public CircleOptions getRegularTaskRadius() {
+            return regularTaskRadius;
         }
 
-		// Zoom in, animating the camera.
+        public void setRegularTaskRadius(CircleOptions regularTaskRadius) {
+            this.regularTaskRadius = regularTaskRadius;
+        }
+
+        public CircleOptions getRaidTaskRadius() {
+            return raidTaskRadius;
+        }
+
+        public void setRaidTaskRadius(CircleOptions raidTaskRadius) {
+            this.raidTaskRadius = raidTaskRadius;
+        }
+    }
+
+    private MapData mapData;
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+
+        Log.d(TAG, "onMapReady");
+
+        mapData = new MapData();
+
+        map.addMarker(new MarkerOptions().position(mClientPositionDetails
+                .getMapPosition()).title(mClientPositionDetails.getMapTitle()).snippet(mClientPositionDetails.getMapSnippet()));
+
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                mClientPositionDetails.getMapPosition(), 15));
+
+        // Zoom in, animating the camera.
 //		map.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
 //		map.setIndoorEnabled(true);
-		map.setMyLocationEnabled(true);
+        map.setMyLocationEnabled(true);
+//        map.getUiSettings().setAllGesturesEnabled(false);
 
-//        displayGeofence(map);
+        mapData.setRegularTaskRadius(createCircle(mClient.getRadius(GSTask.TASK_TYPE.REGULAR), R.color.md_green_500));
+        mapData.setRaidTaskRadius(createCircle(mClient.getRadius(GSTask.TASK_TYPE.RAID), R.color.md_blue_500));
 
-	}
+        map.addCircle(mapData.getRegularTaskRadius());
+        map.addCircle(mapData.getRaidTaskRadius());
+    }
 
-//    private void displayGeofence(GoogleMap map) {
-//        LatLng pos = mClientPositionDetails.getMapPosition();
-//            CircleOptions circleOptions1 = new CircleOptions()
-//                    .center(new LatLng(pos.latitude, pos.longitude))
-//                    .radius(mClientPositionDetails.getGeofenceRadius()).strokeColor(Color.BLACK)
-//                    .strokeWidth(2).fillColor(0x500000ff);
-//            map.addCircle(circleOptions1);
-//    }
 
-	@Override
-	public void onDestroyView() {
-		super.onDestroyView();
-		ButterKnife.unbind(this);
-	}
+    private CircleOptions createCircle(int radius, int color) {
+        LatLng pos = mClientPositionDetails.getMapPosition();
+        return new CircleOptions()
+                .center(new LatLng(pos.latitude, pos.longitude))
+                .radius(radius).strokeColor(Color.BLACK)
+                .strokeWidth(2).fillColor(ColorUtils.setAlphaComponent(ContextCompat.getColor(getContext(), color), 50));
 
-	@Override
-	public void onDetach() {
-		EventBus.getDefault().unregister(this);
-		super.onDetach();
-	}
+
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ButterKnife.unbind(this);
+    }
+
+    @Override
+    public void onDetach() {
+        EventBus.getDefault().unregister(this);
+        super.onDetach();
+    }
 
     public void startGoogleMapsNavigation() {
         LatLng clientPosition = mClientPositionDetails.getMapPosition();
         String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?&daddr=%f,%f (%s)", clientPosition.latitude, clientPosition.longitude, mClientPositionDetails.getMapTitle());
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
         intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
-        try
-        {
+        try {
             startActivity(intent);
-        }
-        catch(ActivityNotFoundException ex)
-        {
-            try
-            {
+        } catch (ActivityNotFoundException ex) {
+            try {
                 Intent unrestrictedIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                 startActivity(unrestrictedIntent);
-            }
-            catch(ActivityNotFoundException innerEx)
-            {
+            } catch (ActivityNotFoundException innerEx) {
                 Toast.makeText(getContext(), "Please install a maps application", Toast.LENGTH_LONG).show();
             }
         }
     }
-
 
 
 }

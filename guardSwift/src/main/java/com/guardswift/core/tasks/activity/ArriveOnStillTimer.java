@@ -29,7 +29,7 @@ class ArriveOnStillTimer {
     public void start() {
 
         long triggerMillis = TimeUnit.MINUTES.toMillis(TRIGGER_AFTER_MINUTES);
-        Log.d(TAG, "Starting still arrival timer - will trigger in: " + triggerMillis);
+        Log.d(TAG, "Starting still arrival timer - will trigger in: " + triggerMillis + " " + task.getObjectId() + " " + task.getClientName());
         mTimer = new Timer();
         mTimer.schedule(new InactivityTimerTask(), triggerMillis);
 

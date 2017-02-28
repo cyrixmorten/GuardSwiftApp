@@ -68,6 +68,10 @@ public class CommonDialogsBuilder {
             return ok(title, getContext().getString(content), onPositive);
         }
 
+        public MaterialDialog.Builder ok(int title, String content) {
+            return ok(title, content, null);
+        }
+
         public MaterialDialog.Builder okCancel(int title, String content, MaterialDialog.SingleButtonCallback onPositive) {
             return new MaterialDialog.Builder(getContext())
                     .title(title)

@@ -19,18 +19,21 @@ public class StaticTaskController extends BaseTaskController {
 
     private static final String TAG = StaticTaskController.class.getSimpleName();
 
-    private final Context ctx;
+    private static StaticTaskController instance;
+    public static StaticTaskController getInstance() {
+        if (instance == null) {
+            instance = new StaticTaskController();
+        }
 
-    private final GuardCache guardCache;
-
-
-    public StaticTaskController()
-    {
-        this.ctx = GuardSwiftApplication.getInstance();
-        this.guardCache =  GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache();
+        return instance;
     }
 
+    private StaticTaskController() {}
+
     public GSTask performAction(ACTION action, GSTask task, boolean automatic) {
+
+        Context ctx = GuardSwiftApplication.getInstance();
+        GuardCache guardCache =  GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache();
 
         StaticTask staticTask = (StaticTask)task;
 

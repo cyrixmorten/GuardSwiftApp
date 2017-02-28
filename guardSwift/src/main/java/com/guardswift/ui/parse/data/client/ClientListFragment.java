@@ -2,17 +2,14 @@ package com.guardswift.ui.parse.data.client;
 
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.View;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.data.client.Client;
-import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.common.RecyclerViewClickListener;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
-import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
@@ -23,9 +20,14 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
         void clientSelected(Client client);
     }
 
-    public static ClientListFragment newInstance() {
+    private Client.SORT_BY sortBy;
+
+    public static ClientListFragment newInstance(Client.SORT_BY sortBy) {
 
         ClientListFragment fragment = new ClientListFragment();
+
+        fragment.sortBy = sortBy;
+
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -48,7 +50,7 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
         return new ParseQueryAdapter.QueryFactory<Client>() {
             @Override
             public ParseQuery<Client> create() {
-                return new Client.QueryBuilder(false).sortByDistance().build();
+                return new Client.QueryBuilder(false).notAutomatic().sort(ClientListFragment.this.sortBy).build();
             }
         };
     }
@@ -63,12 +65,6 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
                 if (onClientSelectedListener != null) {
                     // creating static report
                     onClientSelectedListener.clientSelected(client);
-                } else {
-                    // show report history
-//                    Fragment fragment = ReportHistoryListFragment.newInstance(client);
-//                    String title = "Rapporter";
-//                    String subtitle = client.getFullAddress();
-//                    GenericToolbarActivity.start(getContext(), title, subtitle, fragment);
                 }
             }
         });

@@ -230,8 +230,8 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         ButterKnife.unbind(this);
+        super.onDestroyView();
     }
 
 

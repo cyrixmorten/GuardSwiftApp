@@ -10,11 +10,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.guardswift.R;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.Positioned;
+import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.util.GSIntents;
 import com.parse.ParseClassName;
 import com.parse.ParseGeoPoint;
@@ -29,45 +31,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import butterknife.ButterKnife;
 import dk.alexandra.positioning.wifi.Fingerprint;
 import dk.alexandra.positioning.wifi.io.WiFiIO;
 
-//import com.guardswift.persistence.parse.MessagesHolder;
-//import com.guardswift.persistence.parse.data.Message;
-
 @ParseClassName("Client")
 public class Client extends ExtendedParseObject implements Positioned {
 
-//    public static class Recent {
-//
-//        private static String TAG = "Client.Recent";
-//
-//        private static Client selected;
-//        private static Client arrived;
-//
-//        public static Client getSelected() {
-//            return selected;
-//        }
-//
-//        public static void setSelected(Client selected) {
-//            Recent.selected = selected;
-//        }
-//
-//        public static Client getArrived() {
-//            return arrived;
-//        }
-//
-//        public static void setArrived(Client arrived) {
-//            Recent.arrived = arrived;
-//
-//            Log.d(TAG, "Set arrived: " + arrived);
-//        }
-//    }
-
-//    public static final String PIN = "Client";
 
     public static final String clientId = "clientId";
     public static final String name = "name";
@@ -89,15 +62,17 @@ public class Client extends ExtendedParseObject implements Positioned {
     // <--
 
     public static final String email = "email";
-//    public static final String number = "number";
+    //    public static final String number = "number";
     public static final String position = "position";
 
-//    public static final String messages = "messages";
+    //    public static final String messages = "messages";
     public static final String roomLocations = "roomLocations";
     public static final String people = "people";
     public static final String contacts = "contacts";
+    public static final String automatic = "automatic"; // e.g. alarm client
 
     public static final String fingerprints = "fingerprints";
+    public static final String tasksRadius = "tasksRadius";
 
 
     @Override
@@ -122,40 +97,13 @@ public class Client extends ExtendedParseObject implements Positioned {
     }
 
     public void storeFingerprints(Set<Fingerprint> fingerprints) {
-
-//        ArrayList<Fingerprint> listFingerprints = Lists.newArrayList(fingerprints);
-//        String jsonString = WiFiIO.convertToJSON(listFingerprints);
-//        try {
-//            put(Client.fingerprints, new JSONObject(jsonString));
-//        } catch (JSONException e) {
-//            Log.e(TAG, e.getMessage(), e);
-//            e.printStackTrace();
-//        }
-
         JSONArray jsonArray = new JSONArray();
         for (Fingerprint fingerprint : fingerprints) {
             try {
                 String jsonString = WiFiIO.convertToJSON(fingerprint);
                 JSONObject jsonObject = new JSONObject(jsonString);
-//                jsonObject.put("id", fingerprint.getId().toString());
-//                jsonObject.put("averageSignalStrengths", fingerprint.getAverageSignalStrengths());
-//                jsonObject.put("standardDeviations", fingerprint.getStandardDeviations());
-//
-//                Coordinates coordinates = fingerprint.getCoordinates();
-//                JSONObject jsonCoordinates = new JSONObject();
-//                jsonCoordinates.put("x", coordinates.getX());
-//                jsonCoordinates.put("y", coordinates.getY());
-//                jsonCoordinates.put("z", coordinates.getZ());
-//                jsonCoordinates.put("symbolic", coordinates.getSymbolic());
-//                jsonObject.put("coordinates", jsonCoordinates);
 
                 jsonArray.put(jsonObject);
-
-
-//                ClientLocation checkpoint = findCheckpoint(fingerprint.getCoordinates().getSymbolic());
-//                if (checkpoint != null) {
-//                    checkpoint.setFingerprint(jsonObject);
-//                }
             } catch (JSONException e) {
                 e.printStackTrace();
                 Log.e(TAG, "storeFingerprints", e);
@@ -217,12 +165,40 @@ public class Client extends ExtendedParseObject implements Positioned {
 
     public List<String> getContactsRequestingReportEmails() {
         List<String> emails = Lists.newArrayList();
-        for (ClientContact clientContact: getContactsRequestingReport()) {
+        for (ClientContact clientContact : getContactsRequestingReport()) {
             emails.add(clientContact.getEmail());
         }
         return emails;
     }
 
+    public int getRadius(GSTask.TASK_TYPE taskType) {
+        Map<String, Integer> radiusMap = getMap(Client.tasksRadius);
+        String key = taskType.toString();
+        if (radiusMap != null && radiusMap.containsKey(key)) {
+            return radiusMap.get(key);
+        }
+
+        switch (taskType) {
+            case REGULAR: return GSTask.DEFAULT_RADIUS_REGULAR;
+            case RAID: return GSTask.DEFAULT_RADIUS_RAID;
+            case ALARM: return GSTask.DEFAULT_RADIUS_ALARM;
+        }
+
+        return 0;
+    }
+
+    public void setRadius(GSTask.TASK_TYPE taskType, int radius) {
+        Map<String, Integer> radiusMap = getMap(Client.tasksRadius);
+        String key = taskType.toString();
+        if (radiusMap == null) {
+            radiusMap = Maps.newHashMap();
+        }
+        radiusMap.put(key, radius);
+
+        put(key, radiusMap);
+    }
+
+    public enum SORT_BY {NAME, DISTANCE}
 
     public static class QueryBuilder extends ParseQueryBuilder<Client> {
 
@@ -233,7 +209,6 @@ public class Client extends ExtendedParseObject implements Positioned {
         @Override
         public ParseQuery<Client> build() {
             query.setLimit(1000);
-//            query.include(contacts);
             query.include(roomLocations);
             query.include(people);
             return super.build();
@@ -244,7 +219,28 @@ public class Client extends ExtendedParseObject implements Positioned {
             return this;
         }
 
-        public QueryBuilder sortByDistance() {
+        public QueryBuilder sort(SORT_BY sortBy) {
+            if (sortBy == SORT_BY.NAME) {
+                return sortByName();
+            }
+            if (sortBy == SORT_BY.DISTANCE) {
+                return sortByDistance();
+            }
+
+            return this;
+        }
+
+        public QueryBuilder notAutomatic() {
+            query.whereNotEqualTo(Client.automatic, true);
+            return this;
+        }
+
+        QueryBuilder sortByName() {
+            query.orderByAscending(Client.name);
+            return this;
+        }
+
+        QueryBuilder sortByDistance() {
             ParseModule.sortNearest(query,
                     Client.position);
             return this;
@@ -295,24 +291,6 @@ public class Client extends ExtendedParseObject implements Positioned {
     public String getId() {
         return (has(clientId)) ? getString(clientId) : "";
     }
-
-//    public boolean hasUnreadMessagesFor(Guard guard) {
-//        for (Message info : getMessages()) {
-//            if (!info.isReadBy(guard)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
-//    public List<Message> getMessages() {
-//        if (has(messages)) return getList(messages);
-//        return new ArrayList<Message>();
-//    }
-//
-//    public void addMessage(Message message) {
-//        add(Client.messages, message);
-//    }
 
 
     public List<Person> getPeople() {
@@ -379,10 +357,6 @@ public class Client extends ExtendedParseObject implements Positioned {
         return new ArrayList<>();
     }
 
-//    @Override
-//    public ExtendedParseObject getParseObject() {
-//        return this;
-//    }
 
     // TODO disabled checkpoints to investigate performance issue
     public boolean hasCheckPoints() {
@@ -445,18 +419,6 @@ public class Client extends ExtendedParseObject implements Positioned {
 
         return checked;
     }
-
-//    public boolean hasLargeDistanceToDevice() {
-//
-//        if (LocationModule.Recent.getLastKnownLocation() == null)
-//            return false;
-//
-//        float distance = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), getPosition());
-//        if (distance < TaskController.MAX_DISTANCE_METERS) {
-//            return false;
-//        }
-//        return true;
-//    }
 
 
 }

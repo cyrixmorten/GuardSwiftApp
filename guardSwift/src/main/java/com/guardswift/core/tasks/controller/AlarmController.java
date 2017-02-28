@@ -16,17 +16,22 @@ public class AlarmController extends BaseTaskController {
 
     private static final String TAG = AlarmController.class.getSimpleName();
 
-    private final Context ctx;
 
+    private static AlarmController instance;
+    public static AlarmController getInstance() {
+        if (instance == null) {
+            instance = new AlarmController();
+        }
 
-
-    public AlarmController()
-    {
-        this.ctx = GuardSwiftApplication.getInstance();
+        return instance;
     }
+
+    private AlarmController() {}
 
 
     public GSTask performAction(ACTION action, GSTask alarm, boolean automatic) {
+
+        Context ctx = GuardSwiftApplication.getInstance();
 
         final String clientName = alarm.getClient().getName();
 

@@ -5,9 +5,7 @@ import android.util.Log;
 
 import com.guardswift.R;
 import com.guardswift.core.tasks.controller.TaskController;
-import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
 
@@ -19,16 +17,20 @@ public class StandardTaskAutomationStrategy implements TaskAutomationStrategy {
     private static final String TAG = StandardTaskAutomationStrategy.class.getSimpleName();
 
     private final GSTask task;
-    private final Context context;
 
-    public StandardTaskAutomationStrategy(GSTask task) {
+    public static TaskAutomationStrategy getInstance(GSTask task) {
+        return new StandardTaskAutomationStrategy(task);
+    }
+
+
+    private StandardTaskAutomationStrategy(GSTask task) {
         this.task = task;
-        this.context = GuardSwiftApplication.getInstance();
     }
 
 
     @Override
     public void automaticArrival() {
+        Context context = GuardSwiftApplication.getInstance();
         TaskController controller = task.getController();
         if (controller.canPerformAutomaticAction(TaskController.ACTION.ARRIVE, task)) {
             Log.w(TAG, "automaticArrival " + task.getTaskType() + " " + task.getClientName());
@@ -39,6 +41,7 @@ public class StandardTaskAutomationStrategy implements TaskAutomationStrategy {
 
     @Override
     public void automaticDeparture() {
+        Context context = GuardSwiftApplication.getInstance();
         TaskController controller = task.getController();
         if (controller.canPerformAutomaticAction(TaskController.ACTION.RESET, task)) {
             Log.w(TAG, "automaticDeparture " + task.getTaskType() + " " + task.getClientName());

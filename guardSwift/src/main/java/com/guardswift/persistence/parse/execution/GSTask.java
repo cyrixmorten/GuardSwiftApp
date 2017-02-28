@@ -1,6 +1,5 @@
 package com.guardswift.persistence.parse.execution;
 
-import com.guardswift.core.documentation.report.TaskReportingStrategy;
 import com.guardswift.core.tasks.activity.TaskActivityStrategy;
 import com.guardswift.core.tasks.automation.TaskAutomationStrategy;
 import com.guardswift.core.tasks.controller.TaskController;
@@ -17,8 +16,11 @@ import com.guardswift.persistence.parse.data.client.Client;
  */
 public interface GSTask extends Positioned {
 
+    int DEFAULT_RADIUS_RAID = 50;
+    int DEFAULT_RADIUS_REGULAR = 75;
+    int DEFAULT_RADIUS_ALARM = 75;
 
-    enum TASK_TYPE {REGULAR, DISTRICTWATCH, STATIC, ALARM}
+    enum TASK_TYPE {REGULAR, RAID, DISTRICTWATCH, STATIC, ALARM}
     enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINISHED}
     enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER, LEAVE}
 
@@ -44,7 +46,6 @@ public interface GSTask extends Positioned {
 
     int getEventCode();
 
-//    TaskReportingStrategy getTaskReportingStrategy();
     TaskGeofenceStrategy getGeofenceStrategy();
     TaskActivityStrategy getActivityStrategy();
     TaskAutomationStrategy getAutomationStrategy();
@@ -66,6 +67,8 @@ public interface GSTask extends Positioned {
 
     boolean isWithinScheduledTime();
 
+    // radius in meters for automatic arrival
+    int getRadius();
 
     Guard getGuard();
     Client getClient();

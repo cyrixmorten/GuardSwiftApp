@@ -132,8 +132,9 @@ public abstract class ExtendedParseObject extends ParseObject {
 
     }
 
-    public <T extends ParseObject> Task<List<ParseObject>> updateAllAsync() {
-        return updateAll(getAllNetworkQuery(), 1000);
+    public <T extends ParseObject> Task<List<T>> updateAllAsync() {
+        ParseQuery<T> query = getAllNetworkQuery();
+        return updateAll(query, 1000);
     }
 
     @SuppressWarnings("unchecked")
@@ -148,7 +149,7 @@ public abstract class ExtendedParseObject extends ParseObject {
             query = getAllNetworkQuery();
         }
 
-        final bolts.TaskCompletionSource promise = new TaskCompletionSource();
+        final bolts.TaskCompletionSource<List<T>> promise = new TaskCompletionSource<>();
 
 
         updateAll(query.setLimit(limit), new DataStoreCallback<T>() {
@@ -167,7 +168,7 @@ public abstract class ExtendedParseObject extends ParseObject {
     }
 
 
-    public <T extends ParseObject> void updateAll(ParseQuery<T> query, final DataStoreCallback<T> callback) {
+    private <T extends ParseObject> void updateAll(ParseQuery<T> query, final DataStoreCallback<T> callback) {
         query.findInBackground(new FindCallback<T>() {
 
             @Override

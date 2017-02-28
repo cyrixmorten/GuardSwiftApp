@@ -1,6 +1,7 @@
 package com.guardswift.core.tasks.activity;
 
 import com.google.android.gms.location.DetectedActivity;
+import com.guardswift.persistence.parse.execution.GSTask;
 
 
 public interface TaskActivityStrategy {

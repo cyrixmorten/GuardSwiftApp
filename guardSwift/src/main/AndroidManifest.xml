@@ -86,7 +86,6 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateVisible" />
-
         <activity
             android:name=".ui.activity.MainActivityDispatcher"
             android:label="@string/app_name"
@@ -97,14 +96,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.activity.MainActivity"
             android:configChanges="keyboardHidden"
-            android:screenOrientation="portrait"
             android:label="@string/app_name"
-            android:launchMode="singleTask">
-        </activity>
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"></activity>
         <activity
             android:name="com.parse.ui.ParseLoginActivity"
             android:label="@string/app_name"
@@ -126,11 +123,9 @@
         <activity
             android:name=".ui.activity.GuardLoginActivity"
             android:excludeFromRecents="true"
-            android:screenOrientation="portrait"
             android:label="@string/title_guard_login"
-            android:taskAffinity=".activity.GuardLoginActivity">
-
-        </activity>
+            android:screenOrientation="portrait"
+            android:taskAffinity=".activity.GuardLoginActivity"></activity>
         <activity
             android:name=".ui.dialog.activity.CheckpointsDialogActivity"
             android:excludeFromRecents="true"
@@ -144,8 +139,8 @@
         </activity>
         <activity
             android:name=".ui.parse.documentation.report.edit.ReportEditActivity"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".ui.activity.MainActivity" />
+            android:parentActivityName=".ui.activity.MainActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.parse.documentation.report.create.activity.CircuitUnitCreateEventHandlerActivity"
             android:label="@string/title_event_add"
@@ -163,18 +158,16 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity"
-            android:screenOrientation="portrait"
-            android:label="@string/title_activity_add_event" />
-
+            android:label="@string/title_activity_add_event"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.activity.GSTaskCreateReportActivity"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".ui.activity.MainActivity" />
-
+            android:parentActivityName=".ui.activity.MainActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.dialog.activity.AlarmDialogActivity"
-            android:screenOrientation="portrait"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             android:showOnLockScreen="true"
             android:theme="@style/AppTheme.Light.Dialog" />
 
@@ -185,7 +178,6 @@
         </receiver>
 
         <service android:name="com.parse.PushService" />
-
 
         <receiver
             android:name="com.parse.ParsePushBroadcastReceiver"
@@ -237,11 +229,10 @@
             android:name=".core.ca.geofence.RegisterGeofencesIntentService"
             android:exported="false" />
 
-
         <!-- META -->
-        <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyBuSqlNo5WZ6IHDlY7O8E9KjguAG9eMtck" />
+        <!-- <meta-data -->
+        <!-- android:name="com.google.android.maps.v2.API_KEY" -->
+        <!-- android:value="AIzaSyBuSqlNo5WZ6IHDlY7O8E9KjguAG9eMtck" /> -->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -260,12 +251,26 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service
-            android:name=".firebase.TokenRefreshService">
+        <service android:name=".firebase.TokenRefreshService">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <activity
+            android:name=".ui.activity.MapsActivity"
+            android:label="@string/title_activity_maps"></activity>
     </application>
 
 </manifest>

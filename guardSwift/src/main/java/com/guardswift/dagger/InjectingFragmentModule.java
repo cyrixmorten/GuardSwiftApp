@@ -30,13 +30,13 @@ package com.guardswift.dagger;
 
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
+import com.guardswift.ui.parse.data.client.ClientDetailsFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
-import com.guardswift.ui.parse.documentation.eventlog.TaskEventFragment;
-import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
 import com.guardswift.ui.parse.documentation.eventlog.AbstractEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.CircuitUnitEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.DistrictWatchClientEventFragment;
+import com.guardswift.ui.parse.documentation.eventlog.TaskEventFragment;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventLocationFragment;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventPeopleFragment;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventRemarkFragment;
@@ -47,10 +47,11 @@ import com.guardswift.ui.parse.documentation.report.edit.ReportEditListFragment;
 import com.guardswift.ui.parse.documentation.report.edit.ReportEditViewPagerFragment;
 import com.guardswift.ui.parse.documentation.report.edit.ReportSuggestionsListFragment;
 import com.guardswift.ui.parse.documentation.report.edit.ReportSummaryFragment;
+import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
+import com.guardswift.ui.parse.execution.alarm.ActiveAlarmsFragment;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.ui.parse.execution.alarm.FinishedAlarmsFragment;
-import com.guardswift.ui.parse.execution.alarm.ActiveAlarmsFragment;
 import com.guardswift.ui.parse.execution.circuit.ActiveCircuitUnitsFragment;
 import com.guardswift.ui.parse.execution.circuit.CircuitUnitCheckpointsFragment;
 import com.guardswift.ui.parse.execution.circuit.CircuitUnitDescriptionWebViewFragment;
@@ -91,6 +92,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		// - Data
 		GuardListFragment.class,
 		ClientListFragment.class,
+		ClientDetailsFragment.class,
 		// - Execution
 		AbstractTasksRecycleFragment.class,
 		// -- Alarm

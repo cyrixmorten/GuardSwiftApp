@@ -80,11 +80,11 @@ public class StaticTask extends BaseTask {
     private final TaskAutomationStrategy automationStrategy;
 
     public StaticTask() {
-        this.controller =  new StaticTaskController();
+        this.controller =  StaticTaskController.getInstance();
         this.taskReportingStrategy = new NoTaskReportingStrategy(this); // StandardTaskReportingStrategy<>(this);
-        this.automationStrategy = new NoAutomationStrategy();
-        this.geofenceStrategy = new NoGeofenceStrategy(this);
-        this.activityStrategy = new NoActivityStrategy();
+        this.automationStrategy = NoAutomationStrategy.getInstance();
+        this.geofenceStrategy = NoGeofenceStrategy.getInstance(this);
+        this.activityStrategy = NoActivityStrategy.getInstance();
     }
 
 
@@ -335,6 +335,11 @@ public class StaticTask extends BaseTask {
     @Override
     public boolean isWithinScheduledTime() {
         return true;
+    }
+
+    @Override
+    public int getRadius() {
+        return 0;
     }
 
 

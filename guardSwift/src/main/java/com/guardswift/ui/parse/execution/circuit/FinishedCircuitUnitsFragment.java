@@ -34,8 +34,6 @@ public class FinishedCircuitUnitsFragment extends AbstractTasksRecycleFragment<C
 
     @Inject
     CircuitStartedCache circuitStartedCache;
-    @Inject
-    CircuitUnitController controller;
 
 	public FinishedCircuitUnitsFragment() {
 	}

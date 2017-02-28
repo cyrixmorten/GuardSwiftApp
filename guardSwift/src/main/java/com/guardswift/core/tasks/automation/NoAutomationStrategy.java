@@ -8,9 +8,9 @@ public class NoAutomationStrategy implements TaskAutomationStrategy {
     private static final String TAG = NoAutomationStrategy.class.getSimpleName();
 
 
-    public NoAutomationStrategy() {
-    }
+    public static NoAutomationStrategy getInstance() { return new NoAutomationStrategy(); }
 
+    private NoAutomationStrategy() {}
 
     @Override
     public void automaticArrival() {

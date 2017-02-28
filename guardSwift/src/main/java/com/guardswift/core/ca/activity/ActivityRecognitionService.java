@@ -1,5 +1,7 @@
 package com.guardswift.core.ca.activity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -12,29 +14,22 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.location.LocationRequest;
 import com.guardswift.BuildConfig;
 import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.GeofencingModule;
 import com.guardswift.core.ca.LocationModule;
-import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
-import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.util.TriggerTask;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.TimerTask;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -45,28 +40,19 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-//import com.guardswift.persistence.parse.documentation.activity.ActivityRecognition;
 
 public class ActivityRecognitionService extends InjectingService {
     private static final String TAG = ActivityRecognitionService.class.getSimpleName();
 
+    private static final int INACTIVITY_TIMEOUT_MINUTES = 60;
+
     private Subscription filteredActivitySubscription;
-    private Subscription loggingActivitySubscription;
-
-//    private LinkedHashMap<Date, JSONArray> savedJSONActivities;
-//    private LinkedHashMap<Date, JSONObject> savedJSONMostProbableActivities;
-//    private LinkedHashMap<Date, List<DetectedActivity>> savedMostProbableActivities;
-
-//    private Preferences preferences;
-
-//    private CircuitUnit circuitUnit;
+    private TriggerTask logoutOnStill;
 
     @Inject
     GeofencingModule geofencingModule;
     @Inject
     ParseModule parseModule;
-
-    private DectectedActivityInactivityTimer dectectedActivityInactivityTimerTask;
 
     public ActivityRecognitionService() {
 
@@ -75,7 +61,7 @@ public class ActivityRecognitionService extends InjectingService {
     @Override
     public void onCreate() {
         super.onCreate();
-        this.dectectedActivityInactivityTimerTask = new DectectedActivityInactivityTimer(getApplicationContext());
+        this.logoutOnStill = new TriggerTask();
     }
 
     private static boolean mIsRunning;
@@ -125,10 +111,28 @@ public class ActivityRecognitionService extends InjectingService {
         return Service.START_STICKY;
     }
 
+    /**
+     * Manual restart of service
+     * http://stackoverflow.com/questions/24077901/how-to-create-an-always-running-background-service
+     * @param rootIntent
+     */
+//    @Override
+//    public void onTaskRemoved(Intent rootIntent) {
+//        Intent restartService = new Intent(getApplicationContext(),
+//                this.getClass());
+//        restartService.setPackage(getPackageName());
+//        PendingIntent restartServicePI = PendingIntent.getService(
+//                getApplicationContext(), 1, restartService,
+//                PendingIntent.FLAG_ONE_SHOT);
+//
+//        AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+//        alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() +100, restartServicePI);
+//
+//    }
 
     @Override
     public IBinder onBind(Intent intent) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return null;
     }
 
     public void speakText(String toSpeak) {
@@ -204,20 +208,6 @@ public class ActivityRecognitionService extends InjectingService {
                         DetectedActivity previousActivity = ActivityDetectionModule.Recent.getDetectedActivity();
 
                         boolean isNewActivity = detectedActivity.getType() != previousActivity.getType();
-//                        boolean hasHigherConfidence = detectedActivity.getConfidence() > previousActivity.getConfidence();
-
-//                        if (!acceptableSpeed) {
-//                            Log.e(TAG, "GPS speed blocking activity: " + ActivityDetectionModule.getNameFromType(detectedActivity.getType()) + " " + locationWithSpeed.getSpeed());
-//                        }
-//                        Log.w(TAG, "Filter: " + ActivityDetectionModule.getNameFromType(detectedActivity.getType()) + " confidence: " + detectedActivity.getConfidence() + " speed: " + ((hasSpeed) ? locationWithSpeed.getSpeed() : "?"));
-//                        boolean passedFilter = (mJustStarted || (isNewActivity && highConfidence && notUnknown && acceptableSpeed));
-//                        Log.w(TAG, "Filter passed: " + passedFilter);
-//                        if (!passedFilter) {
-//                            Log.w(TAG, "isNewActivity: " + isNewActivity);
-//                            Log.w(TAG, "highConfidence: " + highConfidence);
-//                            Log.w(TAG, "notUnknown: " + notUnknown);
-//                            Log.w(TAG, "acceptableSpeed: " + acceptableSpeed);
-//                        }
 
                         return mJustStarted || (isNewActivity && highConfidence && notUnknown);
                     }
@@ -227,12 +217,7 @@ public class ActivityRecognitionService extends InjectingService {
 
                         DetectedActivity previousDetectedActivity = ActivityDetectionModule.Recent.getDetectedActivity();
                         DetectedActivity currentDetectedActivity = activityRecognitionResult.getMostProbableActivity();
-                        // TODO enable power saving feature
-//                        handleInactivityTimer(previousDetectedActivity, currentDetectedActivity);
 
-//                        Log.i(TAG, "Activity changed or increased in confidence:");
-//                        Log.i(TAG, "Last: " + ActivityDetectionModule.getNameFromType(ActivityDetectionModule.Recent.getDetectedActivity().getType()) + " confidence: " + ActivityDetectionModule.Recent.getDetectedActivity().getConfidence());
-//                        Log.i(TAG, "New: " + ActivityDetectionModule.getNameFromType(currentDetectedActivity.getType()) + " confidence: " + currentDetectedActivity.getConfidence());
                         ActivityDetectionModule.Recent.setDetectedActivity(currentDetectedActivity);
 
                         if (BuildConfig.DEBUG) {
@@ -244,40 +229,27 @@ public class ActivityRecognitionService extends InjectingService {
 
                         mJustStarted = false;
 
-//                        if (BuildConfig.DEBUG) {
-//                            new EventLog.Builder(getApplicationContext()).
-//                                    event("Activity").
-//                                    activity(activityRecognitionResult).
-//                                    remarks(ActivityDetectionModule.getNameFromType(ActivityDetectionModule.Recent.getDetectedActivity().getType())).
-//                                    saveAsync();
-//                        }
+
+                        logoutOnInactivity(currentDetectedActivity);
 
                     }
                 });
     }
 
-    private void handleInactivityTimer(DetectedActivity previousDetectedActivity, DetectedActivity currentDetectedActivity) {
-        Log.d(TAG, "handleInactivityTimer");
-        if (previousDetectedActivity.getType() != DetectedActivity.STILL && currentDetectedActivity.getType() == DetectedActivity.STILL) {
-            Log.d(TAG, " - handleInactivityTimer start timer");
-            // Turns off Location updates and WiFi scanning after a period of inactivity
-            dectectedActivityInactivityTimerTask.start();
-        }
-
-        if (previousDetectedActivity.getType() == DetectedActivity.STILL && currentDetectedActivity.getType() != DetectedActivity.STILL){
-            Log.d(TAG, " - handleInactivityTimer still->not still");
-            // Moving from still to other
-            if (dectectedActivityInactivityTimerTask.isTriggered()) {
-                Log.w(TAG, " - handleInactivityTimer restart services");
-                FusedLocationTrackerService.start(getApplicationContext(), LocationRequest.PRIORITY_HIGH_ACCURACY);
-                WiFiPositioningService.start(getApplicationContext());
+    private void logoutOnInactivity(DetectedActivity activity) {
+        Guard guard = GuardSwiftApplication.getLoggedIn();
+        if (guard != null && guard.canAccessRegularTasks()) {
+            if (activity.getType() == DetectedActivity.STILL) {
+                logoutOnStill.start(new TimerTask() {
+                    @Override
+                    public void run() {
+                        speakText("Inactivity logout complete");
+                        parseModule.logoutDueToInactivity();
+                    }
+                }, INACTIVITY_TIMEOUT_MINUTES);
+            } else {
+                logoutOnStill.stop();
             }
-        }
-
-        if (currentDetectedActivity.getType() != DetectedActivity.STILL) {
-            Log.d(TAG, " - handleInactivityTimer stop timer");
-            // Other than still
-            dectectedActivityInactivityTimerTask.stop();
         }
     }
 
@@ -312,7 +284,6 @@ public class ActivityRecognitionService extends InjectingService {
 
     public void unsubscribeActivityUpdates() {
         unsubscribe(filteredActivitySubscription);
-        unsubscribe(loggingActivitySubscription);
     }
 
     private void unsubscribe(Subscription subscription) {

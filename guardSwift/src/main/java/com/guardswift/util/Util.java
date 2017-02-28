@@ -37,7 +37,7 @@ public class Util {
 
     public static float distanceMeters(Location l1, Location l2) {
         if (l1 == null || l2 == null)
-            return -1;
+            return Float.MAX_VALUE;
 
         double lat1 = l1.getLatitude();
         double lng1 = l1.getLongitude();

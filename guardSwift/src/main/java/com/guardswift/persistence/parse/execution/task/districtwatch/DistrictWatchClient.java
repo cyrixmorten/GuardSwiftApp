@@ -3,8 +3,6 @@ package com.guardswift.persistence.parse.execution.task.districtwatch;
 import android.content.Context;
 import android.location.Location;
 
-import com.guardswift.core.documentation.report.NoTaskReportingStrategy;
-import com.guardswift.core.documentation.report.TaskReportingStrategy;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.activity.NoActivityStrategy;
@@ -37,17 +35,6 @@ import java.util.Date;
 @ParseClassName("DistrictWatchClient")
 public class DistrictWatchClient extends BaseTask {
 
-    private TaskReportingStrategy taskReportingStrategy;
-    private TaskGeofenceStrategy geofenceStrategy;
-    private TaskActivityStrategy activityStrategy;
-    private TaskAutomationStrategy automationStrategy;
-
-    public DistrictWatchClient() {
-        taskReportingStrategy = new NoTaskReportingStrategy(this);
-        automationStrategy = new ResetOnDepartureAutomationStrategy(this);
-        geofenceStrategy = new DistrictWatchGeofenceStrategy(this);
-        activityStrategy = new NoActivityStrategy();
-    }
 
     @Override
     public BaseTaskCache<DistrictWatchClient> getCache() {
@@ -81,23 +68,23 @@ public class DistrictWatchClient extends BaseTask {
 
     @Override
     public TaskGeofenceStrategy getGeofenceStrategy() {
-        return geofenceStrategy;
+        return DistrictWatchGeofenceStrategy.getInstance(this);
     }
 
     @Override
     public TaskActivityStrategy getActivityStrategy() {
-        return activityStrategy;
+        return NoActivityStrategy.getInstance();
     }
 
     @Override
     public TaskAutomationStrategy getAutomationStrategy() {
-        return automationStrategy;
+        return ResetOnDepartureAutomationStrategy.getInstance(this);
     }
 
 
     @Override
     public TaskController getController() {
-        return new DistrictWatchClientController();
+        return DistrictWatchClientController.getInstance();
     }
 
     @Override
@@ -417,6 +404,11 @@ public class DistrictWatchClient extends BaseTask {
     @Override
     public boolean isWithinScheduledTime() {
         return true;
+    }
+
+    @Override
+    public int getRadius() {
+        return 50;
     }
 
     @Override

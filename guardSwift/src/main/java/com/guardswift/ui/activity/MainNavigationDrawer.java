@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -23,6 +22,7 @@ import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWat
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
+import com.guardswift.ui.parse.data.client.ClientDetailsFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
@@ -32,6 +32,7 @@ import com.guardswift.ui.parse.execution.statictask.StaticTaskViewPagerFragment;
 import com.guardswift.ui.preferences.AlarmNotificationPreferencesFragment;
 import com.guardswift.ui.preferences.GuardPreferencesFragment;
 import com.guardswift.util.Analytics;
+import com.guardswift.util.ToastHelper;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -224,7 +225,7 @@ public class MainNavigationDrawer {
         IDrawerItem createNewStaticGuardingReport = new PrimaryDrawerItem().withName(context.getString(R.string.create_new)).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                ClientListFragment clientListFragment = ClientListFragment.newInstance();
+                ClientListFragment clientListFragment = ClientListFragment.newInstance(Client.SORT_BY.DISTANCE);
                 clientListFragment.setOnClientSelectedListener(new ClientListFragment.OnClientSelectedListener() {
                     @Override
                     public void clientSelected(Client client) {
@@ -358,7 +359,7 @@ public class MainNavigationDrawer {
                 });
 
             }
-        }, 1000);
+        }, 500);
     }
 
     private IDrawerItem[] getActiveDistrictWatchDrawerItems() {
@@ -398,7 +399,16 @@ public class MainNavigationDrawer {
         dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_clients)).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                drawerCallback.selectItem(ClientListFragment.newInstance(), R.string.title_drawer_clients);
+                ClientListFragment clientListFragment = ClientListFragment.newInstance(Client.SORT_BY.NAME);
+                clientListFragment.setOnClientSelectedListener(new ClientListFragment.OnClientSelectedListener() {
+                    @Override
+                    public void clientSelected(Client client) {
+                        ToastHelper.toast(MainNavigationDrawer.this.context, client.getName());
+                        GenericToolbarActivity.start(MainNavigationDrawer.this.context, client.getName(), client.getFullAddress(), ClientDetailsFragment.newInstance(client));
+
+                    }
+                });
+                drawerCallback.selectItem(clientListFragment, R.string.title_drawer_clients);
                 return true;
             }
         }));

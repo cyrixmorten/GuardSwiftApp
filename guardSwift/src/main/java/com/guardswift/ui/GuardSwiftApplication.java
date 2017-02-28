@@ -52,6 +52,8 @@ import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
@@ -95,9 +97,23 @@ public class GuardSwiftApplication extends InjectingApplication {
         MultiDex.install(this);
     }
 
+    public static RefWatcher getRefWatcher(Context context) {
+        GuardSwiftApplication application = (GuardSwiftApplication) context.getApplicationContext();
+        return application.refWatcher;
+    }
+
+    private RefWatcher refWatcher;
+
     @Override
     public void onCreate() {
         super.onCreate();
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // You should not init your app in this process.
+            return;
+        }
+        refWatcher = LeakCanary.install(this);
+        // Normal app init code...
 
         instance = this;
 
@@ -114,9 +130,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         RxJavaPlugins.getInstance().registerErrorHandler(new RxJavaErrorHandler() {
             @Override
             public void handleError(Throwable e) {
-                Log.w("Error", e);
-                Crashlytics.log("RxJavaError: " + e.getMessage());
-                Crashlytics.logException(e);
+                new HandleException(TAG, "RxJava", e);
             }
         });
 
@@ -269,6 +283,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         return bootstrapParseObjectsLocally(activity, guard, false);
     }
 
+    private MaterialDialog retryBootstrapDialog;
     public Task<Void> bootstrapParseObjectsLocally(final Activity activity, final Guard guard, boolean performInBackground) {
 
         if (parseObjectsBootstrapped || bootstrapInProgress) {
@@ -296,6 +311,11 @@ public class GuardSwiftApplication extends InjectingApplication {
         Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
             @Override
             public List<ParseObject> then(Task<List<ParseObject>> task) throws Exception {
+
+                if (task.getResult() != null && !task.getResult().isEmpty()) {
+                    Log.d(TAG, task.getResult().get(0).getClassName());
+                }
+
                 int currentProgress = updateClassProgress.incrementAndGet();
                 int outOfTotal = updateClassTotal.get();
 
@@ -305,6 +325,7 @@ public class GuardSwiftApplication extends InjectingApplication {
                     updateDialog.setMaxProgress(outOfTotal);
                     updateDialog.setProgress(currentProgress);
                 }
+
 
                 Log.d(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
 
@@ -351,37 +372,59 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         updateClassTotal.set(tasks.size());
 
-        return Task.whenAll(tasks).continueWithTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
-                // no matter what happens e.g. success/error, the dialog should be dismissed
-                if (updateDialog != null) {
-                    updateDialog.dismiss();
-                }
+        return Task.whenAll(tasks)
+                .onSuccess(new Continuation<Void, Void>() {
+                    @Override
+                    public Void then(Task<Void> task) throws Exception {
+                        Log.d(TAG, "Bootstrap success");
 
-                if (!task.isFaulted()) {
-                    parseObjectsBootstrapped = true;
-                    startServices();
-                } else {
+                        parseObjectsBootstrapped = true;
+                        startServices();
 
-                    new HandleException(TAG, "bootstrapParseObjectsLocally", task.getError());
+                        return null;
+                    }
+                })
+                .continueWithTask(new Continuation<Void, Task<Void>>() {
+                    @Override
+                    public Task<Void> then(Task<Void> task) throws Exception {
 
-                    new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
-                            bootstrapParseObjectsLocally(activity, guard);
+                        // no matter what happens e.g. success/error, the dialog should be dismissed
+                        if (updateDialog != null) {
+                            updateDialog.dismiss();
                         }
-                    }).cancelable(false).show();
-                }
 
-                bootstrapInProgress = false;
-                return null;
-            }
-        });
+                        bootstrapInProgress = false;
+
+                        if (task.isFaulted()) {
+                            Log.d(TAG, "Bootstrap failed");
+                            new HandleException(TAG, "bootstrapParseObjectsLocally", task.getError());
+
+
+                            if (getLoggedIn() != null) {
+                                retryBootstrapDialog = new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {
+                                    @Override
+                                    public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
+                                        bootstrapParseObjectsLocally(activity, guard);
+                                    }
+                                }).cancelable(false).show();
+                            }
+
+                            throw task.getError();
+                        }
+
+
+                        return task;
+                    }
+                });
     }
 
     public void teardownParseObjectsLocally() {
         // todo move last part of logout process here
         parseObjectsBootstrapped = false;
+
+        if (retryBootstrapDialog != null) {
+            retryBootstrapDialog.dismiss();
+            retryBootstrapDialog = null;
+        }
     }
 }

@@ -26,7 +26,11 @@ public class AlarmGeofenceStrategy extends BaseGeofenceStrategy {
 
     private static final String TAG = AlarmGeofenceStrategy.class.getSimpleName();
 
-    public AlarmGeofenceStrategy(GSTask task) {
+    public static TaskGeofenceStrategy getInstance(GSTask task) {
+        return new AlarmGeofenceStrategy(task);
+    }
+
+    private AlarmGeofenceStrategy(GSTask task) {
         super(task);
     }
 
@@ -45,7 +49,7 @@ public class AlarmGeofenceStrategy extends BaseGeofenceStrategy {
         super.withinGeofence();
 
         float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getClient().getPosition());
-        if (distanceToClient < 100) {
+        if (distanceToClient < task.getRadius()) {
             task.getAutomationStrategy().automaticArrival();
         }
     }

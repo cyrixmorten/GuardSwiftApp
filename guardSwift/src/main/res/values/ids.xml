@@ -28,6 +28,7 @@
     <item type="id" name="action_extra_circuitunit" />
     <item type="id" name="layout_debug_geofence" />
     <item type="id" name="button_central_pdf" />
+    <item type="id" name="button_original_alarm_text" />
     <item type="id" name="material_drawer_item_overflow_menu"></item>
 
 </resources>

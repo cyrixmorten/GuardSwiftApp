@@ -10,7 +10,9 @@ public class NoGeofenceStrategy extends BaseGeofenceStrategy {
 
     private static final String TAG = NoGeofenceStrategy.class.getSimpleName();
 
-    public NoGeofenceStrategy(GSTask task) {
+    public static TaskGeofenceStrategy getInstance(GSTask task) {return new NoGeofenceStrategy(task); }
+
+    private NoGeofenceStrategy(GSTask task) {
         super(task);
     }
 

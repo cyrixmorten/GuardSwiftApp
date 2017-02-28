@@ -35,8 +35,6 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
     @Inject
     TaskCache alarmCache;
-    @Inject
-    AlarmController alarmController;
 
     @Inject
     Sounds mSounds;
@@ -169,7 +167,7 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 if (alarm.isPending()) {
-                    alarmController.performAction(AlarmController.ACTION.ACCEPT, alarm, false);
+                    AlarmController.getInstance().performAction(AlarmController.ACTION.ACCEPT, alarm, false);
                 }
                 AlarmDialogActivity.this.finish();
 

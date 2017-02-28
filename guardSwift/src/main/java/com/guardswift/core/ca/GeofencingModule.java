@@ -12,14 +12,12 @@ import com.guardswift.core.tasks.geofence.NoGeofenceStrategy;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.persistence.parse.execution.TaskFactory;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -204,18 +202,27 @@ public class GeofencingModule {
 
         List<GSTask> allGSTasks = new TaskFactory().getTasks();
 
+        Log.d(TAG, "allGSTasks " + allGSTasks.size());
+
         for (final GSTask gsTask : allGSTasks) {
-            Task<List<ParseObject>> geofencedTasks = gsTask.getGeofenceStrategy().queryGeofencedTasks(withinKm);
             Log.d(TAG, "queryAllGeofenceTasks: " + gsTask.getTaskType());
+
+            Task<List<ParseObject>> geofencedTasks = gsTask.getGeofenceStrategy().queryGeofencedTasks(withinKm);
             geofencedTasks.onSuccess(new Continuation<List<ParseObject>, Object>() {
                 @Override
                 public Object then(Task<List<ParseObject>> listTask) throws Exception {
                     Log.d(TAG, "Found geofence tasks: " + listTask.getResult().size() + " " + gsTask.getTaskType());
                     for (ParseObject taskObject : listTask.getResult()) {
-                        if (taskObject instanceof ParseTask) {
-                            Log.d(TAG, "ADDING ALARM: " + ((ParseTask)taskObject).getFullAddress());
-                        }
                         geofenceResults.add(taskObject);
+                    }
+                    return null;
+                }
+            }).continueWith(new Continuation<Object, Object>() {
+                @Override
+                public Object then(Task<Object> task) throws Exception {
+                    Exception e = task.getError();
+                    if (e != null) {
+                        new HandleException(TAG, gsTask.getTaskType().toString(), e);
                     }
                     return null;
                 }

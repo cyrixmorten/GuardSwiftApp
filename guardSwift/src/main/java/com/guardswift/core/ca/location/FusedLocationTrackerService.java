@@ -1,10 +1,13 @@
 package com.guardswift.core.ca.location;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -104,6 +107,25 @@ public class FusedLocationTrackerService extends InjectingService {
         }
         return Service.START_STICKY;
     }
+
+    /**
+     * Manual restart of service
+     * http://stackoverflow.com/questions/24077901/how-to-create-an-always-running-background-service
+     * @param rootIntent
+     */
+//    @Override
+//    public void onTaskRemoved(Intent rootIntent) {
+//        Intent restartService = new Intent(getApplicationContext(),
+//                this.getClass());
+//        restartService.setPackage(getPackageName());
+//        PendingIntent restartServicePI = PendingIntent.getService(
+//                getApplicationContext(), 1, restartService,
+//                PendingIntent.FLAG_ONE_SHOT);
+//
+//        AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+//        alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() +100, restartServicePI);
+//
+//    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -210,6 +232,8 @@ public class FusedLocationTrackerService extends InjectingService {
 
         float distance = Util.distanceMeters(mLastGeofenceRebuildLocation, location);
         boolean triggerByDistance = distance >= DISTANCE_METERS_FOR_GEOFENCEREBUILD;
+
+        Log.d(TAG, "rebuildGeofences: " + triggerByDistance);
 
         if (triggerByDistance) {
             mLastGeofenceRebuildLocation = location;

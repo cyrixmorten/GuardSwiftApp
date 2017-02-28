@@ -45,6 +45,9 @@ package com.guardswift.dagger;
 import android.app.Activity;
 import android.support.v4.app.DialogFragment;
 
+import com.guardswift.ui.GuardSwiftApplication;
+import com.squareup.leakcanary.RefWatcher;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,10 +80,16 @@ public class InjectingDialogFragment extends DialogFragment implements Injector 
 		// make sure it's the first time through; we don't want to re-inject a
 		// retained fragment that is going
 		// through a detach/attach sequence.
-		if (mFirstAttach == true) {
+		if (mFirstAttach) {
 			inject(this);
 			mFirstAttach = false;
 		}
+	}
+
+	@Override public void onDestroyView() {
+		super.onDestroyView();
+		RefWatcher refWatcher = GuardSwiftApplication.getRefWatcher(getActivity());
+		refWatcher.watch(this);
 	}
 
 	@Override

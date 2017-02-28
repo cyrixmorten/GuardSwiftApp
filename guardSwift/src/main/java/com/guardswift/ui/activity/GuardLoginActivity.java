@@ -78,9 +78,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     private static final String TAG = GuardLoginActivity.class.getSimpleName();
 
-    public static final String UPDATE_VERSIONCHECK_URL = "http://www.guardswift.com/downloads/latest-versioncode.txt";
-    public static final String UPDATE_DOWNLOAD_URL = "http://www.guardswift.com/downloads/guardswift.apk";
-
     public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     @Inject
@@ -138,9 +135,13 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    public static void start(Context context) {
+    public static void start(String message) {
         Log.w(TAG, "START");
+        Context context = GuardSwiftApplication.getInstance();
         Intent intent = new Intent(context, GuardLoginActivity.class);
+        if (message != null) {
+            intent.putExtra("MESSAGE", message);
+        }
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
@@ -166,6 +167,9 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
             development_badge.setVisibility(View.INVISIBLE);
         }
 
+        if (getIntent().hasExtra("MESSAGE")) {
+            new CommonDialogsBuilder.MaterialDialogs(this).ok(R.string.info, getIntent().getStringExtra("MESSAGE")).show();
+        }
     }
 //
 //    public MaterialDialog updateDownloadingProgress;
@@ -358,47 +362,41 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
     private void loginSuccess(final Guard guard) {
-
-        parseModule.login(guard);
-
-        GuardSwiftApplication.saveCurrentGuardAsLastActive();
-
-        saveSessionToGuard(guard);
-
-        checkMobileNumber(guard).continueWith(new Continuation<Void, Object>() {
+        checkMobileNumber(guard).continueWithTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Object then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) throws Exception {
+                return GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard);
+            }
+        }).onSuccess(new Continuation<Void, Void>() {
+            @Override
+            public Void then(Task<Void> task) throws Exception {
+                parseModule.login(guard);
 
-                enterGuardSwift(guard);
+                GuardSwiftApplication.saveCurrentGuardAsLastActive();
+
+                saveSessionToGuard(guard);
+
+                Intent intent = new Intent(context, MainActivity.class);
+                context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
 
                 return null;
             }
-        });
-
-    }
-
-    private void enterGuardSwift(final Guard guard) {
-        GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard).continueWith(new Continuation<Void, Void>() {
-
+        }).continueWith(new Continuation<Void, Void>() {
             @Override
-            public Void then(Task<Void> result) throws Exception {
-                if (result.isFaulted()) {
-                    handleFailedLogin("updateAllClasses", result.getError());
-                    return null;
+            public Void then(Task<Void> task) throws Exception {
+                if (task.isFaulted()) {
+                    handleFailedLogin("updateAllClasses", task.getError());
                 }
 
                 showProgress(false);
                 mGuardIdView.setText("");
 
-                Intent intent = new Intent(context, MainActivity.class);
-                context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
-
-                GuardSwiftApplication.getInstance().startServices();
-
                 return null;
             }
         });
+
     }
+
 
     private void saveSessionToGuard(final Guard guard) {
         ParseSession.getCurrentSessionInBackground(new GetCallback<ParseSession>() {

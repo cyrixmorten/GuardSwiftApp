@@ -18,6 +18,12 @@ public class GenericToolbarActivity extends AbstractToolbarActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        fragment = null;
+        super.onDestroy();
+    }
+
+    @Override
     protected Fragment getFragment() {
         return fragment;
     }

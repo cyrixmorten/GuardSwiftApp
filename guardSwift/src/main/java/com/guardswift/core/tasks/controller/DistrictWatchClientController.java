@@ -23,20 +23,22 @@ public class DistrictWatchClientController extends BaseTaskController {
 
     private static final String TAG = DistrictWatchClientController.class.getSimpleName();
 
-    private final Context ctx;
-    private final GSTasksCache tasksCache;
 
+    private static DistrictWatchClientController instance;
+    public static DistrictWatchClientController getInstance() {
+        if (instance == null) {
+            instance = new DistrictWatchClientController();
+        }
 
-    public DistrictWatchClientController() {
-        this.ctx = GuardSwiftApplication.getInstance();
-        this.tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
+        return instance;
     }
 
-
-
+    private DistrictWatchClientController() {}
 
     public GSTask performAction(TaskController.ACTION action, final GSTask task, final boolean automatic) {
 
+        Context ctx = GuardSwiftApplication.getInstance();
+        GSTasksCache tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
 
         final DistrictWatchClient districtWatchClient = (DistrictWatchClient)task;
 

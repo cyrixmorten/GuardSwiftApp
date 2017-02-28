@@ -80,7 +80,12 @@ public class ParseModule {
     }
 
 
+
     private void logout(final SaveCallback saveCallback, ProgressCallback progressCallback) {
+        logout(saveCallback, progressCallback, null, false);
+    }
+
+    private void logout(final SaveCallback saveCallback, ProgressCallback progressCallback, final String withMessage, final boolean inactivity) {
 
         final Guard guard = guardCache.getLoggedIn();
         Log.w(TAG, "LOGOUG GUARD: " + guard);
@@ -89,7 +94,7 @@ public class ParseModule {
             Tracker.upload(context, guard, progressCallback).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
                 public Task<Void> then(Task<Void> task) throws Exception {
-                    return new EventLog.Builder(context).event(context.getString(R.string.logout)).eventCode(EventLog.EventCodes.GUARD_LOGOUT).build().saveInBackground();
+                    return new EventLog.Builder(context).event(context.getString(R.string.logout)).eventCode(EventLog.EventCodes.GUARD_LOGOUT).automatic(inactivity).build().saveInBackground();
                 }
             }).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
@@ -102,18 +107,95 @@ public class ParseModule {
                 public Task<Void> then(Task<Void> task) throws Exception {
                     if (task.isFaulted()) {
                         new HandleException(context, TAG, "logout", task.getError());
-                        saveCallback.done(new ParseException(task.getError()));
+                        if (saveCallback != null) {
+                            saveCallback.done(new ParseException(task.getError()));
+                        }
                     }
-                    saveCallback.done(null);
+
+                    GuardLoginActivity.start(withMessage);
+                    clearData();
+
+                    if (saveCallback != null) {
+                        saveCallback.done(null);
+                    }
 
                     return null;
                 }
             });
         } else {
-            saveCallback.done(null);
+            if (saveCallback != null) {
+                saveCallback.done(null);
+            }
         }
 
     }
+
+    /**
+     * Logout performed in background when guard has been still for a certain amount of time
+     */
+    public void logoutDueToInactivity() {
+        Guard guard = GuardSwiftApplication.getLastActiveGuard();
+
+        String message = context.getString(R.string.inactivity_logout_message, guard.getName());
+
+        logout(null, null, message, true);
+    }
+
+    /**
+     * Active logout with the press of a button within the application
+     *
+     * @param activity
+     */
+    public void logout(final Activity activity) {
+        if (!new Device(activity).isOnline()) {
+            // Missing internet connection
+            new CommonDialogsBuilder.MaterialDialogs(activity).infoDialog(R.string.title_internet_missing, R.string.could_not_connect_to_server).show();
+            return;
+        }
+        // Prepare progress dialog
+        final MaterialDialog updateDialog = new MaterialDialog.Builder(activity)
+                .title(R.string.working)
+                .content(R.string.please_wait)
+                .progress(true, 0)
+                .progress(false, 0, true)
+                .show();
+
+        updateDialog.setMaxProgress(100);
+        updateDialog.setCancelable(false);
+
+
+        // Perform logout, upload
+        logout(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+
+                Log.d(TAG, "Logout completed! " + e);
+                if (e != null) {
+                    if (e.getCode() == ParseException.TIMEOUT) {
+                        new CommonDialogsBuilder.MaterialDialogs(activity).infoDialog(R.string.title_internet_missing, R.string.could_not_connect_to_server).show();
+                    } else {
+                        new CommonDialogsBuilder.MaterialDialogs(activity).infoDialog(R.string.error_an_error_occured, e.getMessage()).show();
+                    }
+
+                    new HandleException(TAG, "Guard logout", e);
+                    return;
+                }
+
+
+                if (!activity.isDestroyed()) {
+                    updateDialog.cancel();
+                    activity.finish();
+                }
+            }
+        }, new ProgressCallback() {
+            @Override
+            public void done(Integer percentDone) {
+                Log.e(TAG, "Logout progress: " + percentDone);
+                updateDialog.setProgress(percentDone);
+            }
+        });
+    }
+
 
     private void clearData() {
 
@@ -156,59 +238,6 @@ public class ParseModule {
 
         return new ParseGeoPoint(loc.getLatitude(), loc.getLongitude());
     }
-
-    public void logout(final Activity activity) {
-        if (!new Device(activity).isOnline()) {
-            // Missing internet connection
-            new CommonDialogsBuilder.MaterialDialogs(activity).infoDialog(R.string.title_internet_missing, R.string.could_not_connect_to_server).show();
-            return;
-        }
-        // Prepare progress dialog
-        final MaterialDialog updateDialog = new MaterialDialog.Builder(activity)
-                .title(R.string.working)
-                .content(R.string.please_wait)
-                .progress(true, 0)
-                .progress(false, 0, true)
-                .show();
-
-        updateDialog.setMaxProgress(100);
-        updateDialog.setCancelable(false);
-
-
-        // Perform logout, upload
-        logout(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-
-                Log.d(TAG, "Logout completed! " + e);
-                if (e != null) {
-                    if (e.getCode() == ParseException.TIMEOUT) {
-                        new CommonDialogsBuilder.MaterialDialogs(activity).infoDialog(R.string.title_internet_missing, R.string.could_not_connect_to_server).show();
-                    } else {
-                        new CommonDialogsBuilder.MaterialDialogs(activity).infoDialog(R.string.error_an_error_occured, e.getMessage()).show();
-                    }
-
-                    new HandleException(TAG, "Guard logout", e);
-                    return;
-                }
-
-                GuardLoginActivity.start(activity.getApplicationContext());
-                clearData();
-
-                if (!activity.isDestroyed()) {
-                    updateDialog.cancel();
-                    activity.finish();
-                }
-            }
-        }, new ProgressCallback() {
-            @Override
-            public void done(Integer percentDone) {
-                Log.e(TAG, "Logout progress: " + percentDone);
-                updateDialog.setProgress(percentDone);
-            }
-        });
-    }
-
 
     public static class DistanceStrings {
 

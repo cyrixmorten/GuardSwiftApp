@@ -7,7 +7,6 @@ import com.crashlytics.android.Crashlytics;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
-import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -31,7 +30,11 @@ public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
     private static final String TAG = DistrictWatchGeofenceStrategy.class.getSimpleName();
 
 
-    public DistrictWatchGeofenceStrategy(GSTask task) {
+    public static TaskGeofenceStrategy getInstance(GSTask task) {
+        return new DistrictWatchGeofenceStrategy(task);
+    }
+
+    private DistrictWatchGeofenceStrategy(GSTask task) {
         super(task);
     }
 
@@ -53,13 +56,13 @@ public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
 
         ParseGeoPoint C = task.getPosition();
 
-        int radius = getGeofenceRadius();
-        double innerRadius = radius*0.2;
+//        int radius = getGeofenceRadius();
+//        double innerRadius = radius*0.2;
 
         // First check - if update happened within the inner radius
         if (B != null) {
             float LBC = ParseModule.distanceBetweenMeters(B, C);
-            if (LBC <= innerRadius) {
+            if (LBC <= task.getRadius()) {
                 task.getAutomationStrategy().automaticArrival();
                 return;
             }
@@ -122,7 +125,7 @@ public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
             }
 
             // segment intersects with geofence radius
-            if (LEC < innerRadius) {
+            if (LEC < task.getRadius()) {
 //                if (
                         task.getAutomationStrategy().automaticArrival();
 //                        && BuildConfig.DEBUG) {
@@ -164,7 +167,7 @@ public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
 
     @Override
     public int getGeofenceRadius() {
-        return 200;
+        return 300;
     }
 
     @Override

@@ -5,17 +5,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
-import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingAppCompatActivity;
@@ -23,21 +16,10 @@ import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
-import com.guardswift.ui.view.drawer.OverflowMenuDrawerItem;
 import com.guardswift.util.Device;
-import com.guardswift.util.ToastHelper;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.SectionDrawerItem;
-import com.mikepenz.materialdrawer.util.DrawerItemViewHelper;
-import com.parse.FindCallback;
-import com.parse.ParseException;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -87,11 +69,11 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
 
             // bootstrap parseObjects if it has not been done during this session
 
-            if (!BuildConfig.DEBUG) {
+//            if (!BuildConfig.DEBUG) {
                 GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn());
-            } else {
-                GuardSwiftApplication.getInstance().startServices();
-            }
+//            } else {
+//                GuardSwiftApplication.getInstance().startServices();
+//            }
 
             setSelectionFromIntent();
 

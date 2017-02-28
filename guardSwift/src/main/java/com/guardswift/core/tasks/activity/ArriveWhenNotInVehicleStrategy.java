@@ -3,11 +3,13 @@ package com.guardswift.core.tasks.activity;
 import android.util.Log;
 
 import com.google.android.gms.location.DetectedActivity;
+import com.google.common.collect.Maps;
 import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.parse.ParseModule;
-import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
+
+import java.util.Map;
 
 public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
 
@@ -18,36 +20,50 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
     private static final String TAG = ArriveWhenNotInVehicleStrategy.class.getSimpleName();
 
     private final GSTask task;
+
+
+    private static Map<String, ArriveOnStillTimer> arriveOnStillTimerMap = Maps.newConcurrentMap();
     private ArriveOnStillTimer arriveOnStillTimer;
 
-    public ArriveWhenNotInVehicleStrategy(final GSTask task) {
-        this.task = task;
-        this.arriveOnStillTimer = new ArriveOnStillTimer(task, new TriggerArrival() {
 
-            @Override
-            public void trigger() {
-                // if it is aborted it is because
-                if (!task.isAborted()) {
-                    arriveIfNear();
-                }
+
+    public static TaskActivityStrategy getInstance(GSTask task) {
+        return new ArriveWhenNotInVehicleStrategy(task);
+    }
+
+    private ArriveWhenNotInVehicleStrategy(final GSTask task) {
+        this.task = task;
+
+        if (task.getObjectId() != null) {
+            ArriveOnStillTimer arriveOnStillTimer = arriveOnStillTimerMap.get(task.getObjectId());
+            if (arriveOnStillTimer == null) {
+                arriveOnStillTimer = new ArriveOnStillTimer(task, new TriggerArrival() {
+
+                    @Override
+                    public void trigger() {
+                        arriveIfNear();
+                    }
+                });
+
+                arriveOnStillTimerMap.put(task.getObjectId(), arriveOnStillTimer);
             }
-        });
+
+            this.arriveOnStillTimer = arriveOnStillTimer;
+        }
     }
 
     private void arriveIfNear() {
-        float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getClient().getPosition());
+        float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getPosition());
 
         Log.d(TAG, "distanceToClient: " + distanceToClient);
 
-        if (distanceToClient < 75) {
+        if (distanceToClient < task.getRadius()) {
             task.getAutomationStrategy().automaticArrival();
         }
     }
 
     @Override
     public void handleActivityInsideGeofence(DetectedActivity activity) {
-        Log.d(TAG, "handleActivityInsideGeofence");
-        Log.d(TAG, "task.isArrived(): " + task.isArrived());
         if (activity == null || task.isArrived()) {
             return;
         }

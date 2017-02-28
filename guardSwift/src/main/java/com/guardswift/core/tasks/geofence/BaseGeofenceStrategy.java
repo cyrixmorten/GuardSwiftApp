@@ -1,6 +1,5 @@
 package com.guardswift.core.tasks.geofence;
 
-import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -19,7 +18,7 @@ abstract class BaseGeofenceStrategy implements TaskGeofenceStrategy {
 
     protected final GSTask task;
 
-    public BaseGeofenceStrategy(GSTask task) {
+    protected BaseGeofenceStrategy(GSTask task) {
         this.task = task;
     }
 

@@ -44,8 +44,6 @@ public class ActiveCircuitUnitsFragment extends AbstractTasksRecycleFragment<Cir
 
     @Inject
     CircuitStartedCache circuitStartedCache;
-    @Inject
-    CircuitUnitController controller;
 
 
     @Override

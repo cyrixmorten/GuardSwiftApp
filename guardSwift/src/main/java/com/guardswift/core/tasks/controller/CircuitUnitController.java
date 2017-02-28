@@ -28,14 +28,18 @@ public class CircuitUnitController extends BaseTaskController {
 
     private static final String TAG = CircuitUnitController.class.getSimpleName();
 
-    private final Context ctx;
-    private final GSTasksCache tasksCache;
 
+    private static CircuitUnitController instance;
+    public static CircuitUnitController getInstance() {
+        if (instance == null) {
+            instance = new CircuitUnitController();
+        }
 
-    public CircuitUnitController() {
-        this.ctx = GuardSwiftApplication.getInstance();
-        this.tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
+        return instance;
     }
+
+
+    private CircuitUnitController() {}
 
     @Override
     public boolean canPerformAutomaticAction(ACTION action, GSTask task) {
@@ -49,6 +53,9 @@ public class CircuitUnitController extends BaseTaskController {
     }
 
     public GSTask performAction(ACTION action, final GSTask task, final boolean automatic) {
+
+        Context ctx = GuardSwiftApplication.getInstance();
+        GSTasksCache tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
 
         Log.e(TAG, "invoking action: " + action.toString());
 

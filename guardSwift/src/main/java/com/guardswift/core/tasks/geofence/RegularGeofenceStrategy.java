@@ -3,13 +3,11 @@ package com.guardswift.core.tasks.geofence;
 import android.content.Context;
 import android.location.Location;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.location.DetectedActivity;
 import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
-import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -28,8 +26,11 @@ public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
 
     private static final String TAG = RegularGeofenceStrategy.class.getSimpleName();
 
+    public static TaskGeofenceStrategy getInstance(GSTask task) {
+        return new RegularGeofenceStrategy(task);
+    }
 
-    public RegularGeofenceStrategy(GSTask task) {
+    private RegularGeofenceStrategy(GSTask task) {
         super(task);
     }
 
@@ -39,12 +40,12 @@ public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
 
         if (!task.isArrived()) {
 
-            Location guardLoaction = LocationModule.Recent.getLastKnownLocation();
+            Location guardLocation = LocationModule.Recent.getLastKnownLocation();
             ParseGeoPoint clientLocation = task.getPosition();
 
-            float distanceMeters = ParseModule.distanceBetweenMeters(guardLoaction, clientLocation);
+            float distanceMeters = ParseModule.distanceBetweenMeters(guardLocation, clientLocation);
 
-            if (distanceMeters < 75f) {
+            if (distanceMeters < task.getRadius()) {
                 DetectedActivity lastActivity = ActivityDetectionModule.Recent.getDetectedActivity();
                 task.getActivityStrategy().handleActivityInsideGeofence(lastActivity);
             }
@@ -58,13 +59,8 @@ public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
 
         DetectedActivity activity = ActivityDetectionModule.Recent.getDetectedActivity();
         if (activity.getType() == DetectedActivity.IN_VEHICLE) {
-//            Location locationWithSpeed = LocationModule.Recent.getLastKnownLocationWithSpeed();
-//            if (locationWithSpeed != null && locationWithSpeed.getSpeed() > 1.4f) {
             task.getAutomationStrategy().automaticDeparture();
-//            }
         }
-
-//        Log.e(TAG, "exitGeofence: " + ActivityDetectionModule.getNameFromType(activity.getType()) + " speed: " + locationWithSpeed.getSpeed());
     }
 
 
@@ -90,12 +86,6 @@ public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
 
         final ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(context);
         locationProvider.getLastKnownLocation()
-                .doOnError(new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Crashlytics.logException(throwable);
-                    }
-                })
                 .onErrorReturn(new Func1<Throwable, Location>() {
                     @Override
                     public Location call(Throwable throwable) {

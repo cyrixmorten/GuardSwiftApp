@@ -8,8 +8,11 @@ import com.google.android.gms.location.DetectedActivity;
 public class NoActivityStrategy implements TaskActivityStrategy {
 
 
-    public NoActivityStrategy() {
+    public static NoActivityStrategy getInstance() {
+        return  new NoActivityStrategy();
     }
+
+    private NoActivityStrategy() {}
 
     @Override
     public void handleActivityInsideGeofence(DetectedActivity activity) {

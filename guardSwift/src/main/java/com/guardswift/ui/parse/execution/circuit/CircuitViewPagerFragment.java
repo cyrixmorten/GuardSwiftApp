@@ -315,13 +315,15 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
         if (activity instanceof MainActivity) {
             messagesDrawer = ((MainActivity) activity).getMessagesDrawer();
 
-            messagesDrawer.removeAllStickyFooterItems();
-            messagesDrawer.addStickyFooterItem(addMessageItem());
+            if (messagesDrawer != null) {
+                messagesDrawer.removeAllStickyFooterItems();
+                messagesDrawer.addStickyFooterItem(addMessageItem());
 
-            messagesDrawer.getDrawerLayout().setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                messagesDrawer.getDrawerLayout().setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
-            if (enableMessagesDrawer()) {
-                loadMessages();
+                if (enableMessagesDrawer()) {
+                    loadMessages();
+                }
             }
         }
     }

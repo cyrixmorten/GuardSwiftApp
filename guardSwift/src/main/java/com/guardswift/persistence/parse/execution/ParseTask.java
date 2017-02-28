@@ -23,8 +23,6 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
 import org.json.JSONObject;
 
 import java.util.Date;
@@ -63,6 +61,7 @@ public class ParseTask extends BaseTask {
     public static final String timeStarted = "timeStarted";
     public static final String timeEnded = "timeEnded";
 
+    public static final String original = "original";
 
     public static class STATUS {
         public static String PENDING = "pending";
@@ -84,7 +83,7 @@ public class ParseTask extends BaseTask {
     @Override
     public TaskGeofenceStrategy getGeofenceStrategy() {
         if (this.getTaskType() == TASK_TYPE.ALARM) {
-            return new AlarmGeofenceStrategy(this);
+            return AlarmGeofenceStrategy.getInstance(this);
         }
         return null;
     }
@@ -92,7 +91,7 @@ public class ParseTask extends BaseTask {
     @Override
     public TaskActivityStrategy getActivityStrategy() {
         if (this.getTaskType() == TASK_TYPE.ALARM) {
-            return new NoActivityStrategy();
+            return NoActivityStrategy.getInstance();
         }
         return null;
     }
@@ -100,7 +99,7 @@ public class ParseTask extends BaseTask {
     @Override
     public TaskAutomationStrategy getAutomationStrategy() {
         if (this.getTaskType() == TASK_TYPE.ALARM) {
-            return new FinishOnDepartureAutomationStrategy(this);
+            return FinishOnDepartureAutomationStrategy.getInstance(this);
         }
         return null;
     }
@@ -109,7 +108,7 @@ public class ParseTask extends BaseTask {
     @Override
     public TaskController getController() {
         if (this.getTaskType() == TASK_TYPE.ALARM) {
-            return new AlarmController();
+            return AlarmController.getInstance();
         }
         return null;
     }
@@ -325,6 +324,11 @@ public class ParseTask extends BaseTask {
     }
 
     @Override
+    public int getRadius() {
+        return GSTask.DEFAULT_RADIUS_ALARM;
+    }
+
+    @Override
     public ParseGeoPoint getPosition() {
         return getParseGeoPoint(ParseTask.position);
     }
@@ -333,41 +337,17 @@ public class ParseTask extends BaseTask {
         return getDate(timeStarted);
     }
 
-    public Date getTimeEnded() {
-        return getDate(timeEnded);
-    }
 
     private void setTimeStartedNow() {
         put(CircuitUnit.timeStarted, new Date());
     }
 
-    private void setTimeStarted(Date timeStarted) {
-        put(CircuitUnit.timeStarted, timeStarted);
-    }
 
     private void setTimeEndedNow() {
         put(CircuitUnit.timeEnded, new Date());
     }
 
-    private void setTimeEnded(Date timeEnded) {
-        put(CircuitUnit.timeEnded, timeEnded);
-    }
-
-    public String getTimeStartString() {
-        if (getTimeStarted() == null) {
-            return "";
-        }
-
-        DateTime dt = new DateTime(getTimeStarted());
-        return dt.toString(DateTimeFormat.shortTime());
-    }
-
-    public String getTimeEndString() {
-        if (getTimeEnded() == null) {
-            return "";
-        }
-
-        DateTime dt = new DateTime(getTimeEnded());
-        return dt.toString(DateTimeFormat.shortTime());
+    public String getOriginal() {
+        return getStringSafe(original, "");
     }
 }

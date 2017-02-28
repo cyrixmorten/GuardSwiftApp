@@ -1,0 +1,21 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=FA:4D:89:B5:CA:FC:A3:E8:33:38:4B:EA:EE:AA:1D:D8:2E:95:82:4C%3Bcom.guardswift.ui.activity
+
+    You can also add your credentials to an existing key, using this line:
+    FA:4D:89:B5:CA:FC:A3:E8:33:38:4B:EA:EE:AA:1D:D8:2E:95:82:4C;com.guardswift.ui.activity
+
+    Alternatively, follow the directions here:
+    https://developers.google.com/maps/documentation/android/start#get-key
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
+        AIzaSyBuSqlNo5WZ6IHDlY7O8E9KjguAG9eMtck
+    </string>
+</resources>

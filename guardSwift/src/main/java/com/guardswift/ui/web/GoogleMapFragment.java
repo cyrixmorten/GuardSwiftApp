@@ -17,25 +17,15 @@ public class GoogleMapFragment extends SupportMapFragment {
 	private static final String SUPPORT_MAP_BUNDLE_KEY = "MapOptions";
 	private static final String TAG = GoogleMapFragment.class.getSimpleName();
 
-	public static final String FRAGMENT_MAPOPTIONS_TAG = "childfragment:map:options";
-
-	public static int NAVIGATION_INDEX = 0;
-
-	public static interface OnGoogleMapFragmentListener {
-		void onMapReady(GoogleMap map);
-	}
-
-	private OnGoogleMapFragmentListener mCallback;
+	private OnMapReadyCallback mCallback;
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		// setRetainInstance(true);
 	}
 
 	public static GoogleMapFragment newInstance() {
-		GoogleMapFragment mapFragment = new GoogleMapFragment();
-		return mapFragment;
+		return new GoogleMapFragment();
 	}
 
 	public static GoogleMapFragment newInstance(GoogleMapOptions options) {
@@ -51,12 +41,12 @@ public class GoogleMapFragment extends SupportMapFragment {
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
 		try {
-			mCallback = (OnGoogleMapFragmentListener) activity;
+			mCallback = (OnMapReadyCallback) activity;
 		} catch (ClassCastException e) {
 			Fragment fragment = getParentFragment();
 			if (fragment != null) {
 				try {
-					mCallback = (OnGoogleMapFragmentListener) fragment;
+					mCallback = (OnMapReadyCallback) fragment;
 				} catch (ClassCastException e1) {
 					throw new ClassCastException(fragment.getClass().getName()
 							+ " must implement OnGoogleMapFragmentListener");
@@ -70,10 +60,6 @@ public class GoogleMapFragment extends SupportMapFragment {
 
 	}
 
-	// public void setOnGoogleMapFragmentListener(OnGoogleMapFragmentListener
-	// mapListener) {
-	// this.mCallback = mapListener;
-	// }
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
