@@ -95,15 +95,12 @@ public class GSTasksCache extends Preferences {
     }
 
     public GSTask getLastSelected() {
-        Log.w(TAG, "getLastSelected");
         String lastSelectedTaskType = getString(LAST_SELECTED_TASK_TYPE);
 
-        Log.d(TAG, "lastSelectedTaskType: " + lastSelectedTaskType);
         for (GSTask task: new TaskFactory().getTasks()) {
             List<GSTask.TASK_TYPE> types = task.getPossibleTaskTypes();
             for (GSTask.TASK_TYPE type: types) {
                 boolean matchTaskType = type.toString().equals(lastSelectedTaskType);
-                Log.d(TAG, "type: " + type);
                 if (matchTaskType) {
                     return (GSTask) task.getCache().getSelected();
                 }

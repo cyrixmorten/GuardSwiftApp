@@ -5,6 +5,7 @@ import android.location.Location;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.guardswift.BuildConfig;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.activity.ArriveWhenNotInVehicleStrategy;
@@ -572,8 +573,9 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
 
     public boolean isWithinScheduledTime() {
 
-//        if (BuildConfig.DEBUG)
-//            return true;
+        if (BuildConfig.DEBUG) {
+            return true;
+        }
 
         DateTime timeStartOrg = new DateTime(getTimeStart());
         DateTime timeEndOrg = new DateTime(getTimeEnd());
