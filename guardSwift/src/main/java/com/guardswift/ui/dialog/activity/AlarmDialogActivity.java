@@ -6,14 +6,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
+import com.guardswift.core.tasks.controller.AlarmController;
 import com.guardswift.persistence.cache.task.TaskCache;
 import com.guardswift.persistence.parse.execution.ParseTask;
-import com.guardswift.core.tasks.controller.AlarmController;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.notification.AlarmNotification;
@@ -151,19 +152,28 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
         Log.d(TAG, "createAndShowAlarmDialog");
 
-        String alarmBody =
-                alarm.getClientName() + "\n" +
-                        alarm.getFullAddress() + "\n" +
-                        getText(R.string.security_level) + ": " + alarm.getPriority();
+        String formattedDate = android.text.format.DateUtils.formatDateTime(AlarmDialogActivity.this,
+                alarm.getCreatedAt().getTime(),
+                DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR);
 
+        String alarmHeader = alarm.getCentralName() + "\n" + formattedDate + "\n\n";
+//                alarm.getClientName() + "\n" +
+//                        alarm.getFullAddress() + "\n" +
+//                        getText(R.string.security_level) + ": " + alarm.getPriority();
+
+        String alarmBody = "";
         if (alarm.isAborted()) {
             String canceled = "--- " + getString(R.string.canceled).toUpperCase() + " ---";
-            alarmBody = canceled + "\n\n" + alarmBody + "\n\n" + canceled;
+            alarmBody = canceled + "\n\n";
         }
+        alarmBody += alarm.getOriginal();
 
-        Log.d(TAG, "alarmBody: " + alarmBody);
+        String alarmMessage = alarmHeader + alarmBody;
 
-        new CommonDialogsBuilder.MaterialDialogs(AlarmDialogActivity.this).ok(R.string.alarm, alarmBody, new MaterialDialog.SingleButtonCallback() {
+
+        Log.d(TAG, "alarmBody: " + alarmMessage);
+
+        new CommonDialogsBuilder.MaterialDialogs(AlarmDialogActivity.this).ok(R.string.alarm, alarmMessage, new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 if (alarm.isPending()) {
