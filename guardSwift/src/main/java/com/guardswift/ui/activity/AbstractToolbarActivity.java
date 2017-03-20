@@ -51,7 +51,9 @@ public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity
 			}
 		}
 
-		getSupportFragmentManager().beginTransaction().replace(R.id.content, getFragment()).commit();
+		if (getFragment() != null) {
+			getSupportFragmentManager().beginTransaction().replace(R.id.content, getFragment()).commit();
+		}
 	}
 
 

@@ -23,7 +23,6 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.Device;
-import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
@@ -136,7 +135,10 @@ public class ParseModule {
     public void logoutDueToInactivity() {
         Guard guard = GuardSwiftApplication.getLastActiveGuard();
 
-        String message = context.getString(R.string.inactivity_logout_message, guard.getName());
+        String message = context.getString(R.string.inactivity_logout_message_guard);
+        if (guard != null) {
+            message = context.getString(R.string.inactivity_logout_message_guard, guard.getName());
+        }
 
         logout(null, null, message, true);
     }

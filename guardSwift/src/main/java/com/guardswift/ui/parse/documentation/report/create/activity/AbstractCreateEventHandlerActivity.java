@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
@@ -21,12 +20,10 @@ import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventViewPagerFragment;
 import com.guardswift.util.Analytics;
 import com.guardswift.util.ToastHelper;
 import com.parse.FindCallback;
-import com.parse.GetCallback;
 import com.parse.ParseException;
 
 import org.joda.time.DateTime;
@@ -112,7 +109,7 @@ public abstract class AbstractCreateEventHandlerActivity extends
 
 //        mGuard = guardCache.getLoggedIn();
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null || fragment == null) {
             fragment = AddEventViewPagerFragment.newInstance(this, getClient());
             getSupportFragmentManager()
                     .beginTransaction()

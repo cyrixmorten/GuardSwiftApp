@@ -392,7 +392,8 @@
     <string name="missing_supervisions">Mangler tilsyn</string>
     <string name="confirm_finish_missing_supervisions">Der mangler stadig %1$d tilsyn.\n\nSikker på du vil afslutte denne opgave?</string>
     <string name="add_new">Tilføj ny</string>
-    <string name="inactivity_logout_message">%1$s blev logget af grundet inaktivitet</string>
+    <string name="inactivity_logout_message_guard">%1$s blev logget af grundet inaktivitet</string>
+    <string name="inactivity_logout_message">Logget af grundet inaktivitet</string>
     <string name="info">Info</string>
     <string name="alarm_original_text">Vis alarm besked</string>
     <string name="title_activity_maps">Map</string>
