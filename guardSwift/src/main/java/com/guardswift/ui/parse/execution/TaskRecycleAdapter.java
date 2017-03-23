@@ -188,12 +188,10 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     public static class AlarmTaskViewHolder extends TaskViewHolder<ParseTask> {
 
-        @Bind(R.id.info)
-        TextView vInfo;
-//        @Bind(R.id.timeStart)
-//        TextView vTimeStart;
-//        @Bind(R.id.timeEnd)
-//        TextView vTimeEnd;
+        @Bind(R.id.tv_central)
+        TextView vCentral;
+        @Bind(R.id.tv_date)
+        TextView vDate;
 
 
         public AlarmTaskViewHolder(View v, RemoveItemCallback removeItemCallback) {
@@ -216,20 +214,32 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         }
 
-        @Override
-        public void onActionAbort(Context context, ParseTask task) {
-            super.onActionAbort(context, task);
-            collapseFooter();
+        public void abort(final Context context, final ParseTask task) {
+            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_aborted, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                    AlarmTaskViewHolder.super.onActionAbort(context, task);
+                }
+            }).show();
         }
 
         @Override
         public void onActionFinish(final Context context, final ParseTask task) {
+
+            if (task.isAccepted()) {
+                abort(context, task);
+                return;
+            }
+
+            // arrived
             new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_finished), new MaterialDialog.SingleButtonCallback() {
-                @Override
-                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                    AlarmTaskViewHolder.super.onActionFinish(context, task);
-                }
-            }).show();
+                        @Override
+                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                            AlarmTaskViewHolder.super.onActionFinish(context, task);
+                        }
+                    }
+            ).show();
+
         }
 
 
@@ -296,6 +306,14 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     vBtnFinished.setVisibility(View.GONE);
                 }
 
+                if (task.isAccepted()) {
+                    vBtnFinished.setText(context.getString(R.string.onActionAbort));
+                }
+
+                if (task.isAborted() || task.isFinished()) {
+                    vBtnArrived.setVisibility(View.GONE);
+                }
+
                 String description = context.getText(R.string.security_level) + ": " + alarmTask.getPriority() + "\n" +
                         context.getText(R.string.keybox) + ": " + alarmTask.getKeybox() + "\n" +
                         context.getText(R.string.remarks) + ": " + alarmTask.getRemarks();
@@ -312,10 +330,9 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 String centralName = alarmTask.getCentralName();
 
 
-
-                vInfo.setText(
-                        new SpannableStringBuilder(centralName)
-                                .append(" ")
+                vCentral.setText(centralName);
+                vDate.setText(
+                        new SpannableStringBuilder()
                                 .append(DateFormat.getDateFormat(context).format(alarmTask.getCreatedAt()))
                                 .append(" ")
                                 .append(DateFormat.getTimeFormat(context).format(alarmTask.getCreatedAt()))
@@ -356,6 +373,8 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
             }
         }
+
+
     }
 
     public static class RegularTaskViewHolder extends TaskViewHolder<CircuitUnit> {
@@ -700,7 +719,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         BootstrapButton vBtnArrived;
         @Bind(R.id.task_state_accepted)
         BootstrapButton vBtnAccepted;
-//        @Bind(R.id.task_state_aborted)
+        //        @Bind(R.id.task_state_aborted)
 //        BootstrapButton vBtnAborted;
         @Bind(R.id.task_state_finished)
         BootstrapButton vBtnFinished;
@@ -798,12 +817,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         @Override
         public void onActionAbort(final Context context, final T task) {
-            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_aborted, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
-                @Override
-                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                    performTaskAction(context, task, ACTION.ABORT);
-                }
-            }).show();
+            performTaskAction(context, task, ACTION.ABORT);
         }
 
         @Override
@@ -909,7 +923,6 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
 
-
         public void setTaskState(Context context, GSTask task) {
             GSTask.TASK_STATE state = task.getTaskState();
             updateTaskState(context, state);
@@ -924,11 +937,15 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             tintBackgroundColor(this.cardview, color, 50);
         }
 
+        public void removeTask() {
+            if (removeItemCallback != null) {
+                removeItemCallback.removeAt(getAdapterPosition());
+            }
+        }
+
         public void updateTaskState(Context context, GSTask.TASK_STATE fromState, GSTask.TASK_STATE toState) {
-            if (toState == GSTask.TASK_STATE.FINISHED) {
-                if (removeItemCallback != null) {
-                    removeItemCallback.removeAt(getAdapterPosition());
-                }
+            if (toState == GSTask.TASK_STATE.FINISHED || toState == GSTask.TASK_STATE.ABORTED) {
+                removeTask();
                 return;
             }
             updateTaskState(context, fromState, toState, false, true);
@@ -1257,10 +1274,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
             View taskPlannedTimesView = LayoutInflater.
                     from(parent.getContext()).
-                    inflate(R.layout.gs_view_task_planned_times, parent, false);
-
-            LinearLayout timesLayout = ButterKnife.findById(taskPlannedTimesView, R.id.layout_time_start_end);
-            timesLayout.setVisibility(View.GONE);
+                    inflate(R.layout.gs_view_task_central_and_date, parent, false);
 
             contentBody.addView(taskPlannedTimesView, 0);
 

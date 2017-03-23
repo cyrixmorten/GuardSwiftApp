@@ -1,7 +1,6 @@
 package com.guardswift.persistence.parse.documentation.event;
 
 import android.content.Context;
-import android.location.Location;
 import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
@@ -10,7 +9,6 @@ import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.FingerprintingModule;
-import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.documentation.eventlog.context.LogContextStrategy;
 import com.guardswift.core.documentation.eventlog.context.LogCurrentActivityStrategy;
 import com.guardswift.core.documentation.eventlog.context.LogCurrentGuardStrategy;
@@ -25,8 +23,6 @@ import com.guardswift.core.documentation.eventlog.task.TaskRegularLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskReportIdLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskStaticLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskTypeLogStrategy;
-import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.core.parse.ParseModule;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
@@ -37,9 +33,7 @@ import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
-import com.guardswift.util.GeocodedAddress;
 import com.parse.GetCallback;
-import com.parse.ParseACL;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -51,17 +45,13 @@ import com.parse.SaveCallback;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import bolts.Capture;
-import bolts.Continuation;
 import bolts.Task;
 import dk.alexandra.positioning.wifi.AccessPoint;
 
@@ -379,20 +369,20 @@ public class EventLog extends ExtendedParseObject {
 
             Log.e(TAG, "Save event " + eventLog.getEvent());
 
-            Log.w(TAG, "1) Geocode start");
-            LocationModule.reverseGeocodedAddress(context).continueWith(new Continuation<GeocodedAddress, Object>() {
-                @Override
-                public Object then(Task<GeocodedAddress> task) throws Exception {
-                    Log.w(TAG, "2) Geocode done");
-                    final Capture<GeocodedAddress> geocodedAddress = new Capture<>();
-                    if (!task.isFaulted()) {
-                        geocodedAddress.set(task.getResult());
-                        eventLog.put(EventLog.geocodedAddress, task.getResult().toJSON());
-                    } else {
-                        // error reverse geocoding address
-                        // fall-thru as reverse geocoding is not strictly needed
-                        new HandleException(context, TAG, "reverseGeocodeAddress", task.getError());
-                    }
+//            Log.w(TAG, "1) Geocode start");
+//            LocationModule.reverseGeocodedAddress(context).continueWith(new Continuation<GeocodedAddress, Object>() {
+//                @Override
+//                public Object then(Task<GeocodedAddress> task) throws Exception {
+//                    Log.w(TAG, "2) Geocode done");
+//                    final Capture<GeocodedAddress> geocodedAddress = new Capture<>();
+//                    if (!task.isFaulted()) {
+//                        geocodedAddress.set(task.getResult());
+//                        eventLog.put(EventLog.geocodedAddress, task.getResult().toJSON());
+//                    } else {
+//                        // error reverse geocoding address
+//                        // fall-thru as reverse geocoding is not strictly needed
+//                        new HandleException(context, TAG, "reverseGeocodeAddress", task.getError());
+//                    }
 
 
                     Log.w(TAG, "3) Save event");
@@ -410,7 +400,8 @@ public class EventLog extends ExtendedParseObject {
                         public void done(ParseException e) {
                             Log.w(TAG, "5) Save event - saved");
 
-                            updateGuardInfo(geocodedAddress.get());
+//                            updateGuardInfo(geocodedAddress.get());
+                            updateGuardInfo();
 
                             if (savedCallback != null) {
                                 savedCallback.done(eventLog, e);
@@ -418,14 +409,14 @@ public class EventLog extends ExtendedParseObject {
                         }
                     });
 
-                    return null;
-                }
-            });
+//                    return null;
+//                }
+//            });
 
         }
 
         // Assert: eventlog is saved online
-        private void updateGuardInfo(GeocodedAddress reverseGeocodedAddress) {
+        private void updateGuardInfo() {
             Log.w(TAG, "6) Update guard");
             Guard guard = eventLog.getGuard();
             if (guard == null) {
@@ -433,7 +424,7 @@ public class EventLog extends ExtendedParseObject {
             }
 
             guard.setPosition(eventLog.getPosition());
-            guard.setLastGeocodedAddress(reverseGeocodedAddress);
+//            guard.setLastGeocodedAddress(reverseGeocodedAddress);
             guard.setLastEvent(eventLog);
             guard.pinThenSaveEventually();
         }

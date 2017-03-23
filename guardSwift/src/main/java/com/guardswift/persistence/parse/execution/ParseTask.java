@@ -65,6 +65,8 @@ public class ParseTask extends BaseTask {
 
     public static final String original = "original";
 
+    public static final String knownStatus = "knownStatus";
+
     public static class STATUS {
         public static String PENDING = "pending";
         public static String ACCEPTED = "accepted";
@@ -292,6 +294,9 @@ public class ParseTask extends BaseTask {
         setTimeEndedNow();
         setStatus(STATUS.ABORTED);
         setGuardCurrent();
+
+        // prevent abort notification to be broadcast by server
+        addUnique(ParseTask.knownStatus, STATUS.ABORTED);
     }
 
     public void setFinished() {

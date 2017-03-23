@@ -125,6 +125,8 @@ public class ParseModule {
             if (saveCallback != null) {
                 saveCallback.done(null);
             }
+            GuardLoginActivity.start(withMessage);
+            clearData();
         }
 
     }

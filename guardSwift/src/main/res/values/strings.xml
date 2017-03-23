@@ -311,7 +311,7 @@
     <string name="copying_to_report">Kopierer %1$s til rapport</string>
     <string name="please_select_event_type">Vælg venligst en hændelse</string>
     <string name="confirm_action">Bekræft handling</string>
-    <string name="mark_aborted">Afbrudt opgave hos %1$s</string>
+    <string name="mark_aborted">Afbryd opgave hos %1$s</string>
     <string name="title_activity_checkpoint">CheckpointActivity</string>
     <string name="client_contacts">Kontaktpersoner</string>
     <string name="tip_click_contact_to_call">Tip: klik på kontaktperson for at ringe op</string>

@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import bolts.Task;
 import bolts.TaskCompletionSource;
@@ -86,6 +87,7 @@ public class LocationModule {
         lastKnownLocationObservable
                 .subscribeOn(Schedulers.trampoline())
                 .observeOn(Schedulers.newThread())
+                .timeout(5, TimeUnit.SECONDS)
                 .flatMap(new Func1<Location, Observable<List<Address>>>() {
                     @Override
                     public Observable<List<Address>> call(Location location) {

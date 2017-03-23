@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.text.format.DateUtils;
+import android.text.format.DateFormat;
 import android.util.Log;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -61,19 +61,6 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
     }
 
-//    public static void start(final Context context, String alarmId) {
-//
-//        Log.d(TAG, "START " + alarmId);
-//
-//
-//        Intent i = new Intent(context, AlarmDialogActivity.class);
-//
-//        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        i.putExtra(EXTRA_ALARM_ID, alarmId);
-//        context.startActivity(i);
-//
-//    }
-
 
     @Override
     protected void onCreate(Bundle bundle) {
@@ -81,35 +68,6 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
         Log.d(TAG, "onCreate");
         createAndShowAlarmDialog(alarm);
-
-//        ParseQuery<ParseTask> alarmQuery;
-//        String alarmId = "No alarmId";
-//        if (getIntent().hasExtra(EXTRA_ALARM_ID)) {
-//            alarmId = getIntent().getStringExtra(EXTRA_ALARM_ID);
-//            Log.d(TAG, "Using alarmId");
-//            alarmQuery = new AlarmQueryBuilder(true).matchingObjectId(alarmId).build();
-//        } else {
-//            Log.d(TAG, "No alarmId");
-//            alarmQuery = new AlarmQueryBuilder(true)
-//                    .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ABORTED)
-//                    .sortByTimeStarted()
-//                    .build();
-//        }
-//
-//        final String finalAlarmId = alarmId;
-//        alarmQuery.getFirstInBackground(new GetCallback<ParseTask>() {
-//            @Override
-//            public void done(ParseTask alarm, ParseException e) {
-//                if (e != null || alarm == null) {
-//                    new HandleException(TAG, "Find alarm " + finalAlarmId, e);
-//                    AlarmDialogActivity.this.finish();
-//                    return;
-//                }
-//
-//                createAndShowAlarmDialog(alarm);
-//            }
-//        });
-
     }
 
 
@@ -152,20 +110,19 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
         Log.d(TAG, "createAndShowAlarmDialog");
 
-        String formattedDate = android.text.format.DateUtils.formatDateTime(AlarmDialogActivity.this,
-                alarm.getCreatedAt().getTime(),
-                DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR);
+//        String formattedDate = android.text.format.DateUtils.formatDateTime(AlarmDialogActivity.this,
+//                alarm.getCreatedAt().getTime(),
+//                DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR);
 
-        String alarmHeader = alarm.getCentralName() + "\n" + formattedDate + "\n\n";
-//                alarm.getClientName() + "\n" +
-//                        alarm.getFullAddress() + "\n" +
-//                        getText(R.string.security_level) + ": " + alarm.getPriority();
+        String formattedTime = DateFormat.getTimeFormat(this).format(alarm.getCreatedAt());
+        String alarmHeader =  alarm.getCentralName() + " " + formattedTime + "\n\n";
 
         String alarmBody = "";
         if (alarm.isAborted()) {
             String canceled = "--- " + getString(R.string.canceled).toUpperCase() + " ---";
             alarmBody = canceled + "\n\n";
         }
+
         alarmBody += alarm.getOriginal();
 
         String alarmMessage = alarmHeader + alarmBody;

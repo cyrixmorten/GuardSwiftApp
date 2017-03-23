@@ -23,7 +23,7 @@ public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapt
 
 	public ClientAdapter(final ParseQueryAdapter.QueryFactory<Client> factory, RecyclerViewClickListener clientClicked) {
 		super(factory);
-		this.clientClicked = clientClicked;
+		ClientAdapter.clientClicked = clientClicked;
 	}
 
 
@@ -51,6 +51,13 @@ public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapt
 		public void onClick(View view) {
 			clientClicked.recyclerViewListClicked(view, this.getAdapterPosition());
 		}
+	}
+
+	@Override
+	public void onDetatch() {
+		ClientAdapter.clientClicked = null;
+
+		super.onDetatch();
 	}
 
 	@Override
