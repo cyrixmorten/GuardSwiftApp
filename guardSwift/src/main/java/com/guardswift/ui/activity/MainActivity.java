@@ -14,10 +14,10 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
-import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.util.Device;
+import com.guardswift.util.Sounds;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 
@@ -43,11 +43,14 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
     @Inject
     ParseModule parseModule;
     @Inject
-    Device device;
-    @Inject
     FragmentManager fm;
     @Inject
     MainNavigationDrawer navigationDrawer;
+
+    @Inject
+    Device device;
+    @Inject
+    Sounds sounds;
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
@@ -90,6 +93,8 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
 
     }
 
+
+
     @Override
     public void onBackPressed() {
         if (messagesDrawer.isDrawerOpen()) {
@@ -109,9 +114,12 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
     @Override
     protected void onResume() {
         super.onResume();
-        Guard guard = GuardSwiftApplication.getLastActiveGuard();
-        String lastActive = guard != null ? guard.getName() : "N/A";
-        Log.d(TAG, "GUARD: " + lastActive);
+
+        // 4.5.0: Prevent alarm sound from continuously playing
+        // Can happen when multiple alarms overlap
+        if (sounds.isPlayingAlarmSound()) {
+            sounds.stopAlarm();
+        }
     }
 
     private void setActionBarTitle(final String title, final String subtitle) {
@@ -186,7 +194,9 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy");
+        messagesDrawer = null;
         navigationDrawer = null;
+
         try {
             super.onDestroy();
         } catch (NullPointerException npe) {

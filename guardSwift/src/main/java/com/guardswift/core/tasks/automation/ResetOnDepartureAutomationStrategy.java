@@ -45,13 +45,15 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
             // task is locked for arrivals
             return;
         }
-        Context context = GuardSwiftApplication.getInstance();
-        TaskController controller = task.getController();
-        if (controller.canPerformAutomaticAction(TaskController.ACTION.ARRIVE, task)) {
-            Log.w(TAG, "automaticArrival " + task.getTaskType() + " " + task.getClientName());
-            Sounds.getInstance(context).playNotification(R.raw.arrived);
-            controller.performAutomaticAction(TaskController.ACTION.ARRIVE, task);
-            startLockTimer();
+        if (task.isWithinScheduledTime()) {
+            Context context = GuardSwiftApplication.getInstance();
+            TaskController controller = task.getController();
+            if (controller.canPerformAutomaticAction(TaskController.ACTION.ARRIVE, task)) {
+                Log.w(TAG, "automaticArrival " + task.getTaskType() + " " + task.getClientName());
+                Sounds.getInstance(context).playNotification(R.raw.arrived);
+                controller.performAutomaticAction(TaskController.ACTION.ARRIVE, task);
+                startLockTimer();
+            }
         }
 
     }

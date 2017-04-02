@@ -71,11 +71,7 @@ public class ParseLoginActivity extends InjectingAppCompatActivity {
 					}
 				});
 
-		if (BuildConfig.DEBUG) {
-        mUsernameView.setText("vagtdk");
-			mPasswordView.setText("vdk");
-			attemptLogin();
-		}
+
 
 	}
 

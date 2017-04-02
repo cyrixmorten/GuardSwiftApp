@@ -269,8 +269,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
             tracker = analytics.newTracker(R.xml.app_tracker);
 
-            if (BuildConfig.DEBUG)
-                analytics.setDryRun(true);
+            analytics.setDryRun(BuildConfig.DEBUG);
         }
         return tracker;
     }

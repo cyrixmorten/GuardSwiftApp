@@ -71,7 +71,7 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
         Log.d(TAG, "Activity: " + ActivityDetectionModule.getNameFromType(activity.getType()));
 
         if (activity.getType() != DetectedActivity.IN_VEHICLE) {
-            if (activity.getType() == DetectedActivity.STILL || activity.getType() == DetectedActivity.TILTING) {
+            if (activity.getType() == DetectedActivity.STILL) {
                 // We want to ensure that the guard is not just waiting for a red light or crossroads inside vehicle, delaying arrival
                 if (!arriveOnStillTimer.running()) {
                     arriveOnStillTimer.start();

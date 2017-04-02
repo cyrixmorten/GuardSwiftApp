@@ -47,7 +47,7 @@ public class Sounds {
 	@Inject
 	public Sounds(@ForApplication Context c) {
 		// class
-		this.context = c;
+		this.context = c.getApplicationContext();
 		mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
 		// remeber what the user's volume was set to before we change it.

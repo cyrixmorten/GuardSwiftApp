@@ -227,7 +227,6 @@ public class EventLog extends ExtendedParseObject {
 
 //            eventLog.put(EventLog.task_type, task.getTaskType().toString());
             eventLog.put(EventLog.task_event, event_type.toString());
-            eventCode(task.getEventCode());
 
 
             return this;
@@ -253,40 +252,16 @@ public class EventLog extends ExtendedParseObject {
             double probability = checkpoint.getLastProbability();
             double distance = checkpoint.getLastDistance();
 
-//            if (!automatic) {
             eventLog.put(EventLog.checkpoint, checkpoint);
             eventLog.put(EventLog.checkpoint_name, checkpoint.getLocation());
             eventLog.put(EventLog.checkpoint_probability, probability);
             eventLog.put(EventLog.checkpoint_distance, distance);
-//            }
 
-//            ClientLocation checkpointGuess = ClientLocation.Recent.getNearCheckpoint();
-//            if (checkpointGuess != null) {
-//                eventLog.put(EventLog.checkpoint_guess, checkpointGuess);
-//                eventLog.put(EventLog.checkpoint_guess_name, checkpointGuess.getLocations());
-//                eventLog.put(EventLog.checkpoint_guess_probability, checkpointGuess.getLastProbability());
-//                eventLog.put(EventLog.checkpoint_guess_distance, checkpointGuess.getLastDistance());
-//            }
-
-
-//            String remarks = (automatic) ? context.getString(R.string.automatic_event).toUpperCase() : "";
-//            remarks += "\nEst. Afst: " + String.format("%.2f", distance) + "\nSands: " + String.format("%.2f", probability);
 
             event(context.getString(R.string.event_checkpoint));
             location(checkpoint.getLocation());
-//            remarks(remarks);
-            eventCode(EventLog.EventCodes.CIRCUITUNIT_CHECKPOINT_ARRIVED);
             automatic(automatic);
 
-
-//            Map<String, String> dimensions = new HashMap<>();
-//            if (eventLog.getClient() != null)
-//                dimensions.put("client", eventLog.getClient().getName());
-//            dimensions.put("symbolic", checkpoint.getLocations());
-//            dimensions.put("estimatedDistance", String.valueOf(distance));
-//            dimensions.put("probability", String.valueOf(probability));
-//            dimensions.put("automatic", String.valueOf(automatic));
-//            ParseAnalytics.trackEventInBackground("checkpoint", dimensions);
 
             return this;
         }
@@ -548,6 +523,7 @@ public class EventLog extends ExtendedParseObject {
     public static final String clientLocation = "clientLocation";
     public static final String remarks = "remarks";
     public static final String isExtra = "isExtra";
+    public static final String withinSchedule = "withinSchedule";
     // gps
     public static final String clientDistanceMeters = TaskClientLogStrategy.clientDistanceMeters;
     public static final String provider = "provider";

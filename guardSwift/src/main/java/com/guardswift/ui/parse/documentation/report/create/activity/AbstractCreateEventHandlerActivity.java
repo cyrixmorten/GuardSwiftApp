@@ -5,12 +5,10 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.text.format.DateFormat;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.data.EventTypeCache;
@@ -22,13 +20,9 @@ import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventViewPagerFragment;
 import com.guardswift.util.Analytics;
-import com.guardswift.util.ToastHelper;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 
-import org.joda.time.DateTime;
-
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -146,28 +140,31 @@ public abstract class AbstractCreateEventHandlerActivity extends
     }
 
     private void verifyEventTimestampAndSave() {
-        if (taskCache.getLastSelected().isWithinScheduledTime()) {
-            saveEvent(new Date());
-            return;
-        }
+        // 4.5.0: Timestamp for written events not shown in report
+        saveEvent(new Date());
 
-        ToastHelper.toast(this, getString(R.string.verify_event_time));
-
-        final DateTime timestamp = new DateTime();
-        RadialTimePickerDialogFragment timePickerDialog = RadialTimePickerDialogFragment
-                .newInstance(new RadialTimePickerDialogFragment.OnTimeSetListener() {
-                                 @Override
-                                 public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-                                     final Calendar cal = Calendar.getInstance();
-                                     cal.setTime(timestamp.toDate());
-                                     cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                                     cal.set(Calendar.MINUTE, minute);
-
-                                     saveEvent(cal.getTime());
-                                 }
-                             }, timestamp.getHourOfDay(), timestamp.getMinuteOfHour(),
-                        DateFormat.is24HourFormat(this));
-        timePickerDialog.show(this.getSupportFragmentManager(), "FRAG_TAG_TIME_PICKER");
+//        if (taskCache.getLastSelected().isWithinScheduledTime()) {
+//            saveEvent(new Date());
+//            return;
+//        }
+//
+//        ToastHelper.toast(this, getString(R.string.verify_event_time));
+//
+//        final DateTime timestamp = new DateTime();
+//        RadialTimePickerDialogFragment timePickerDialog = RadialTimePickerDialogFragment
+//                .newInstance(new RadialTimePickerDialogFragment.OnTimeSetListener() {
+//                                 @Override
+//                                 public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+//                                     final Calendar cal = Calendar.getInstance();
+//                                     cal.setTime(timestamp.toDate());
+//                                     cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+//                                     cal.set(Calendar.MINUTE, minute);
+//
+//                                     saveEvent(cal.getTime());
+//                                 }
+//                             }, timestamp.getHourOfDay(), timestamp.getMinuteOfHour(),
+//                        DateFormat.is24HourFormat(this));
+//        timePickerDialog.show(this.getSupportFragmentManager(), "FRAG_TAG_TIME_PICKER");
     }
 
     @Override

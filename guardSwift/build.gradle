@@ -1,23 +1,18 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven {
-            url 'https://maven.parse.com/repo'
-        }
         flatDir {
             dirs 'aars' //this way we can findFrom the .aar file in libs folder
         }
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
-        classpath 'com.parse.tools:gradle:1.1'
 //        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.16.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
         classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 
-apply plugin: 'com.parse'
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'io.fabric'
@@ -29,8 +24,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 22 // 23 require runtime permissions!!
-        versionCode 448
-        versionName "4.4.8"
+        versionCode 450
+        versionName "4.5.0"
 
         // Enabling multidex support.
         multiDexEnabled true
