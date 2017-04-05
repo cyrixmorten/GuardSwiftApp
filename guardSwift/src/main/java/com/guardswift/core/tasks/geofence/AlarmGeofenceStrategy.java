@@ -113,7 +113,7 @@ public class AlarmGeofenceStrategy extends BaseGeofenceStrategy {
 
     private ParseQuery<ParseObject> geofenceQuery(int withinKm, Location fromLocation) {
         return new ParseTask().getQueryBuilder(true)
-                .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ACCEPTED, ParseTask.STATUS.ARRIVED)
+                .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ACCEPTED)
                 .within(withinKm, fromLocation)
                 .buildAsParseObject();
     }
