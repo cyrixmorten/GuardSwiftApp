@@ -400,6 +400,8 @@
     <string name="automatic_arrival_area">Automatisk ankomst</string>
     <string name="arrival_radius_desc_regular">Gående tilsyn (grøn)</string>
     <string name="arrival_radius_desc_raid">Kørende tilsyn (blå)</string>
+    <string name="outside_schedule">Udenfor planlagt tidsrum</string>
+    <string name="arrived_outside_schedule">Du har meldt ankommet udenfor det planlagte tidsrum.\n\nTidspunktet vil blive skrevet til rapporten, men tilsynet bliver ikke markeret som ankommet.</string>
 
 
 </resources>

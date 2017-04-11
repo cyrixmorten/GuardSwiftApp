@@ -38,11 +38,7 @@ public class CircuitUnitController extends BaseTaskController {
 
     private CircuitUnitController() {}
 
-    @Override
-    public boolean canPerformAutomaticAction(ACTION action, GSTask task) {
-        // 4.5.0: Always allow arrival but write in event that it was outside scheduled
-        return super.canPerformAutomaticAction(action, task);
-    }
+
 
     public GSTask performAction(ACTION action, final GSTask task, final boolean automatic) {
 

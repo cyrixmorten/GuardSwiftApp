@@ -415,6 +415,26 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @Override
+        public void onActionArrive(final Context context, final CircuitUnit task) {
+            if (task.isWithinScheduledTime()) {
+                super.onActionArrive(context, task);
+            } else {
+                // Show dialog explaining that time is outside scheduled
+                new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.outside_schedule, R.string.arrived_outside_schedule, new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        addArrivalEvent(context, task, new GetCallback<CircuitUnit>() {
+                            @Override
+                            public void done(CircuitUnit task, ParseException e) {
+                                update(context, task);
+                            }
+                        });
+                    }
+                }).show();
+            }
+        }
+
+        @Override
         public void onActionAbort(Context context, CircuitUnit task) {
             super.onActionAbort(context, task);
             collapseFooter();
@@ -436,7 +456,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 missingArrivalTimestampDialog(context, new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        addArrivalTimeDialog(context, task, new GetCallback<CircuitUnit>() {
+                        addArrivalEvent(context, task, new GetCallback<CircuitUnit>() {
                             @Override
                             public void done(CircuitUnit object, ParseException e) {
                                 RegularTaskViewHolder.super.onActionFinish(context, task);
@@ -472,7 +492,9 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             }
         }
 
-        private void addArrivalTimeDialog(final Context context, final CircuitUnit task, final GetCallback<CircuitUnit> callback) {
+
+
+        private void addArrivalEvent(final Context context, final CircuitUnit task, final GetCallback<CircuitUnit> callback) {
             final DateTime timestamp = new DateTime();
             RadialTimePickerDialogFragment timePickerDialog = RadialTimePickerDialogFragment
                     .newInstance(new RadialTimePickerDialogFragment.OnTimeSetListener() {
@@ -482,6 +504,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                                          cal.setTime(new Date());
                                          cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
                                          cal.set(Calendar.MINUTE, minute);
+
 
                                          new EventLog.Builder(context)
                                                  .taskPointer(task, GSTask.EVENT_TYPE.ARRIVE)
@@ -944,7 +967,18 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         public void updateTaskState(Context context, GSTask.TASK_STATE fromState, GSTask.TASK_STATE toState) {
-            if (toState == GSTask.TASK_STATE.FINISHED || toState == GSTask.TASK_STATE.ABORTED) {
+
+            boolean fromActiveState = fromState == GSTask.TASK_STATE.PENDING || fromState == GSTask.TASK_STATE.ACCEPTED || fromState == GSTask.TASK_STATE.ARRIVED;
+            boolean toFinishedState = toState == GSTask.TASK_STATE.FINISHED || toState == GSTask.TASK_STATE.ABORTED;
+
+            boolean fromFinishedState = fromState == GSTask.TASK_STATE.FINISHED || fromState == GSTask.TASK_STATE.ABORTED;
+            boolean toActiveState = toState == GSTask.TASK_STATE.PENDING || toState == GSTask.TASK_STATE.ACCEPTED || toState == GSTask.TASK_STATE.ARRIVED;
+
+            if (fromActiveState && toFinishedState) {
+                removeTask();
+                return;
+            }
+            if (fromFinishedState && toActiveState) {
                 removeTask();
                 return;
             }
@@ -971,7 +1005,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 //                    break;
                 case FINISHED:
                     bootstrapActionButtonSelect(context, this.vBtnFinished, colorRes);
-                    bootstrapActionDisableAll();
+//                    bootstrapActionDisableAll();
                     break;
             }
         }

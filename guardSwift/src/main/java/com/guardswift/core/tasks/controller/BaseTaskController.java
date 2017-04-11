@@ -1,7 +1,6 @@
 package com.guardswift.core.tasks.controller;
 
 import com.guardswift.eventbus.EventBusController;
-import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.ui.GuardSwiftApplication;
 
