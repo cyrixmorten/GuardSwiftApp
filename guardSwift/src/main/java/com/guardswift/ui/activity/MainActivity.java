@@ -2,8 +2,6 @@ package com.guardswift.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -15,6 +13,8 @@ import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.ui.drawer.MainNavigationDrawer;
+import com.guardswift.ui.drawer.ToolbarFragmentFragmentDrawerCallback;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.util.Device;
 import com.guardswift.util.Sounds;
@@ -27,11 +27,9 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
-public class MainActivity extends InjectingAppCompatActivity implements MainNavigationDrawer.MainNavigationDrawerCallback {
+public class MainActivity extends InjectingAppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
-
-    private static final String TAG_FRAGMENT_CONTENT = "TAG_FRAGMENT_CONTENT";
 
     public static final String SELECT_ALARMS = "SELECT_ALARMS";
 
@@ -56,6 +54,7 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
     Toolbar toolbar;
 
     private Drawer messagesDrawer;
+    private ToolbarFragmentFragmentDrawerCallback mainDrawerCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +80,16 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
             setSelectionFromIntent();
 
 
-            Drawer drawer = navigationDrawer.initNavigationDrawer(this, toolbar, this);
+            mainDrawerCallback = new ToolbarFragmentFragmentDrawerCallback(this, toolbar, R.id.content);
+            mainDrawerCallback.setActionCallback(new ToolbarFragmentFragmentDrawerCallback.SelectActionCallback() {
+                public void selectAction(long action) {
+                    if (action == MainNavigationDrawer.DRAWER_LOGOUT) {
+                        showLogoutDialog();
+                    }
+                }
+            });
+
+            Drawer drawer = navigationDrawer.initNavigationDrawer(this, toolbar, mainDrawerCallback);
 
             messagesDrawer = new DrawerBuilder()
                     .withActivity(this)
@@ -106,7 +114,7 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
 
     private void setSelectionFromIntent() {
         if (getIntent().hasExtra(SELECT_ALARMS)) {
-            selectItem(AlarmsViewPagerFragment.newInstance(), R.string.alarms);
+            mainDrawerCallback.selectItem(AlarmsViewPagerFragment.newInstance(), R.string.alarms);
             navigationDrawer.getDrawer().closeDrawer();
         }
     }
@@ -122,15 +130,7 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
         }
     }
 
-    private void setActionBarTitle(final String title, final String subtitle) {
-        new Handler().post(new Runnable() {
-            @Override
-            public void run() {
-                toolbar.setTitle(title);
-                toolbar.setSubtitle(subtitle);
-            }
-        });
-    }
+
 
 
     // http://stackoverflow.com/questions/10216937/how-do-i-create-a-help-overlay-like-you-see-in-a-few-android-apps-and-ics
@@ -196,6 +196,7 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
         Log.d(TAG, "onDestroy");
         messagesDrawer = null;
         navigationDrawer = null;
+        mainDrawerCallback = null;
 
         try {
             super.onDestroy();
@@ -203,6 +204,7 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
             // https://code.google.com/p/android/issues/detail?id=216157
             Log.e(TAG, "NPE: Bug workaround");
         }
+
     }
 
 
@@ -230,49 +232,6 @@ public class MainActivity extends InjectingAppCompatActivity implements MainNavi
     }
 
 
-    @Override
-    public void selectItem(Fragment fragment) {
-        fm.beginTransaction().replace(R.id.content, fragment).commit();
-    }
-
-    @Override
-    public void selectItem(Fragment fragment, String title) {
-        setActionBarTitle(title, "");
-        replaceFragment(fragment);
-    }
-
-    @Override
-    public void selectItem(Fragment fragment, String title, String subtitle) {
-        setActionBarTitle(title, subtitle);
-        replaceFragment(fragment);
-    }
-
-    @Override
-    public void selectItem(Fragment fragment, int titleResource) {
-        setActionBarTitle(getString(titleResource), "");
-        replaceFragment(fragment);
-    }
-
-    @Override
-    public void logout() {
-        showLogoutDialog();
-    }
-
-    // delay a bit to allow navigation drawer to close before loading
-    private void replaceFragment(final Fragment fragment) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!MainActivity.this.isFinishing()) {
-                    // commitAllowingStateLoss is a bit brutal
-                    // but as state loss errors are happening very rarely plus we are not
-                    // storing state on any of the fragments it is assumed
-                    // to be ok to do here.
-                    fm.beginTransaction().replace(R.id.content, fragment).commitNowAllowingStateLoss();
-                }
-            }
-        }, 500);
-    }
 
     public Drawer getDrawer() {
         return navigationDrawer.getDrawer();

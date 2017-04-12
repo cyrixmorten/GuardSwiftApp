@@ -10,6 +10,14 @@ public class GenericToolbarActivity extends AbstractToolbarActivity {
     private static String subtitle;
     private static Fragment fragment;
 
+    public static void start(Context context, int title, Fragment fragment) {
+        GenericToolbarActivity.start(context, context.getString(title), "", fragment);
+    }
+
+    public static void start(Context context, int title, int subtitle, Fragment fragment) {
+        GenericToolbarActivity.start(context, context.getString(title), context.getString(subtitle), fragment);
+    }
+
     public static void start(Context context, String title, String subtitle, Fragment fragment) {
         GenericToolbarActivity.title = title;
         GenericToolbarActivity.subtitle = subtitle;

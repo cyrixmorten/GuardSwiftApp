@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.text.InputType;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -32,29 +32,25 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingActivityModule.ForActivity;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.eventbus.events.MissingInternetEvent;
-import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.persistence.parse.data.Installation;
 import com.guardswift.rest.GuardSwiftWeb;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
+import com.guardswift.ui.drawer.GuardLoginNavigationDrawer;
 import com.guardswift.util.Device;
 import com.guardswift.util.GSIntents;
-import com.guardswift.util.OpenLocalPDF;
 import com.guardswift.util.ToastHelper;
-import com.parse.CountCallback;
-import com.parse.DeleteCallback;
-import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
-import com.parse.ParseObject;
+import com.parse.ParseInstallation;
 import com.parse.ParseSession;
 import com.parse.ParseUser;
 import com.squareup.picasso.Picasso;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
@@ -62,7 +58,6 @@ import javax.inject.Inject;
 
 import bolts.Continuation;
 import bolts.Task;
-import bolts.TaskCompletionSource;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -94,6 +89,9 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     ParseModule parseModule;
     @Inject
     CircuitStartedCache circuitsStartedCache;
+
+    @Inject
+    GuardLoginNavigationDrawer navigationDrawer;
 
     // UI references.
 //    @Bind(R.id.switch_receive_alarms)
@@ -127,7 +125,8 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     @Bind(R.id.version)
     TextView version;
 
-
+    @Bind(R.id.toolbar)
+    Toolbar toolbar;
 //    private DownloadUpdate mDownloadTask;
 
     @Override
@@ -155,6 +154,9 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         setContentView(R.layout.activity_guard_login);
         ButterKnife.bind(this);
 
+        setSupportActionBar(toolbar);
+
+        navigationDrawer.initNavigationDrawer(this, toolbar, R.id.content);
 
         hasGooglePlayServices();
 //        registerUpdateDownloadedReceiver();
@@ -169,6 +171,21 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
         if (getIntent().hasExtra("MESSAGE")) {
             new CommonDialogsBuilder.MaterialDialogs(this).ok(R.string.info, getIntent().getStringExtra("MESSAGE")).show();
+        }
+    }
+
+    private void updateToolbarTitle() {
+        ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+
+        String deviceName = installation.getString(Installation.NAME);
+        String smsTo = installation.getString(Installation.SMS_TO);
+
+        if (deviceName != null && !deviceName.isEmpty()) {
+            toolbar.setTitle(deviceName);
+        }
+
+        if (smsTo != null && !smsTo.isEmpty()) {
+            toolbar.setSubtitle(smsTo);
         }
     }
 //
@@ -362,12 +379,14 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
     private void loginSuccess(final Guard guard) {
-        checkMobileNumber(guard).continueWithTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
-                return GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard);
-            }
-        }).onSuccess(new Continuation<Void, Void>() {
+        GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard)
+//        checkMobileNumber(guard).continueWithTask(new Continuation<Void, Task<Void>>() {
+//            @Override
+//            public Task<Void> then(Task<Void> task) throws Exception {
+//                return GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard);
+//            }
+//        })
+        .onSuccess(new Continuation<Void, Void>() {
             @Override
             public Void then(Task<Void> task) throws Exception {
                 parseModule.login(guard);
@@ -413,53 +432,53 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-    // TODO: Hardcoded countrycode +45
-    private Task<Void> checkMobileNumber(final Guard guard) {
-
-        final TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
-
-        if (!guard.canAccessAlarms() || !guard.getMobile().isEmpty()) {
-            return Task.forResult(null);
-        }
-
-        final String[] mobile = {"+45"};
-        new MaterialDialog.Builder(GuardLoginActivity.this)
-                .title(R.string.mobile_number)
-                .content(this.getString(R.string.enter_mobile_number, guard.getName()))
-                .inputType(InputType.TYPE_CLASS_PHONE)
-                .input(null, mobile[0], new MaterialDialog.InputCallback() {
-                    @Override
-                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        String editTextString = input.toString();
-
-                        if (!editTextString.startsWith("+45") || editTextString.length() != 11) {
-                            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
-                        } else {
-                            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
-                        }
-
-                        mobile[0] = editTextString;
-                    }
-                })
-                .alwaysCallInputCallback()
-                .negativeText(android.R.string.cancel)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        guard.setMobile(mobile[0]);
-                        guard.pinThenSaveEventually();
-                    }
-                })
-                .onAny(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        taskCompletionSource.setResult(null);
-                    }
-                })
-                .show();
-
-        return taskCompletionSource.getTask();
-    }
+//    // TODO: Hardcoded countrycode +45
+//    private Task<Void> checkMobileNumber(final Guard guard) {
+//
+//        final TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
+//
+//        if (!guard.canAccessAlarms() || !guard.getMobile().isEmpty()) {
+//            return Task.forResult(null);
+//        }
+//
+//        final String[] mobile = {"+45"};
+//        new MaterialDialog.Builder(GuardLoginActivity.this)
+//                .title(R.string.mobile_number)
+//                .content(this.getString(R.string.enter_mobile_number, guard.getName()))
+//                .inputType(InputType.TYPE_CLASS_PHONE)
+//                .input(null, mobile[0], new MaterialDialog.InputCallback() {
+//                    @Override
+//                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+//                        String editTextString = input.toString();
+//
+//                        if (!editTextString.startsWith("+45") || editTextString.length() != 11) {
+//                            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
+//                        } else {
+//                            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
+//                        }
+//
+//                        mobile[0] = editTextString;
+//                    }
+//                })
+//                .alwaysCallInputCallback()
+//                .negativeText(android.R.string.cancel)
+//                .onPositive(new MaterialDialog.SingleButtonCallback() {
+//                    @Override
+//                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//                        guard.setMobile(mobile[0]);
+//                        guard.pinThenSaveEventually();
+//                    }
+//                })
+//                .onAny(new MaterialDialog.SingleButtonCallback() {
+//                    @Override
+//                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//                        taskCompletionSource.setResult(null);
+//                    }
+//                })
+//                .show();
+//
+//        return taskCompletionSource.getTask();
+//    }
 
     private boolean hasGooglePlayServices() {
         int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
@@ -558,6 +577,8 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         if (!device.hasGpsAndNetworkEnabled()) {
             showMissingLocationsDialog();
         }
+
+        updateToolbarTitle();
 
         super.onPostResume();
     }

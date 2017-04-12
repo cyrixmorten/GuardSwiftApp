@@ -16,7 +16,9 @@ public class ToastHelper {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                if (context != null) {
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

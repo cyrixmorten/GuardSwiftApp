@@ -203,7 +203,7 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
                             guardNotification.setChecked(enable);
 
-                            // if current guard, update last active entry
+                            // if current installation, update last active entry
                             if (guard.equals(GuardSwiftApplication.getLoggedIn())) {
                                 GuardSwiftApplication.saveCurrentGuardAsLastActive();
                             }

@@ -3,16 +3,14 @@ package com.guardswift.core.exceptions;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
-import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.activity.ParseLoginActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.parse.ParseException;
+import com.parse.ui.ParseLoginBuilder;
 
 public class ParseErrorHandler {
 
@@ -41,14 +39,11 @@ public class ParseErrorHandler {
         //
         // startActivityForResult(new ParseLoginBuilder(getActivity()).build(), 0);
 
-        if (context == null || !(context instanceof Activity)) {
-            Context ctx = GuardSwiftApplication.getInstance();
-            ctx.startActivity(new Intent(ctx, ParseLoginActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-        } else {
+        if (context != null && context instanceof Activity) {
             new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.session_expired, context.getString(R.string.session_expired_message), new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                    context.startActivity(new Intent(context, ParseLoginActivity.class));
+                    ((Activity)context).startActivityForResult(new ParseLoginBuilder(context).build(), 0);
                 }
             });
         }

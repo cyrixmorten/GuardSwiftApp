@@ -43,10 +43,10 @@ public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity
 		if (actionBar != null) {
 			actionBar.setDefaultDisplayHomeAsUpEnabled(true);
 			actionBar.setDisplayHomeAsUpEnabled(true);
-			if (getToolbarTitle() != null) {
+			if (getToolbarTitle() != null && !getToolbarTitle().isEmpty()) {
 				actionBar.setTitle(getToolbarTitle());
 			}
-			if (getToolbarSubTitle() != null) {
+			if (getToolbarSubTitle() != null && !getToolbarSubTitle().isEmpty()) {
 				actionBar.setSubtitle(getToolbarSubTitle());
 			}
 		}

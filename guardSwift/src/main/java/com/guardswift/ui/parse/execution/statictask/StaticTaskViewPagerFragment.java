@@ -68,7 +68,7 @@ public class StaticTaskViewPagerFragment extends AbstractTabsViewPagerFragment {
 //        if (getArguments().getBoolean(CREATE_REPORT)) {
 //            ClientListFragment clientSelection = ClientListFragment.newInstance();
 //            clientSelection.setTargetFragment(this, CLIENT_SELECTION);
-////            if (getActivity() != null && getActivity() instanceof MainNavigationDrawer.MainNavigationDrawerCallback) {
+////            if (getActivity() != null && getActivity() instanceof MainNavigationDrawer.FragmentDrawerCallback) {
 ////                ((MainActivity)getActivity()).selectItem(, R.string.static_guarding_reports);
 //            getChildFragmentManager().beginTransaction().replace(R.id.content, clientSelection).addToBackStack(null).commit();
 ////            }

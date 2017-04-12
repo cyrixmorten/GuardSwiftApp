@@ -244,7 +244,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         }
     }
 
-    public void startServices() {
+    private void startServices() {
         Log.d(TAG, "startServices");
 
         ActivityRecognitionService.start(this);

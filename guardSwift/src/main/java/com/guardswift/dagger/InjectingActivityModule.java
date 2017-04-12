@@ -28,7 +28,6 @@ import com.guardswift.ui.activity.GSTaskCreateReportActivity;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.activity.MainActivity;
-import com.guardswift.ui.activity.ParseLoginActivity;
 import com.guardswift.ui.dialog.activity.AbstractDialogActivity;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
 import com.guardswift.ui.dialog.activity.CheckpointsDialogActivity;
@@ -62,8 +61,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Module(addsTo = InjectingApplicationModule.class, injects = {
         // Abstract
         AbstractToolbarActivity.class,
-        // Login Parse
-        ParseLoginActivity.class,
         // Login Guard
         GuardLoginActivity.class,
         // Main

@@ -3,28 +3,27 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--<PreferenceCategory-->
-        <!--android:title="@string/name">-->
+        <!--android:title="@string/device_name">-->
 
         <EditTextPreference
-            android:title="@string/name"
-            android:key="guard_name"
+            android:title="@string/device_name"
+            android:key="installation_device_name"
             android:inputType="text"
-            android:dialogTitle="@string/name" />
+            android:dialogTitle="@string/device_name" />
 
 
     <!--</PreferenceCategory>-->
 
     <!--<PreferenceCategory-->
-        <!--android:title="@string/mobile_number">-->
+        <!--android:title="@string/connect_to_mobile">-->
 
         <EditTextPreference
-            android:title="@string/mobile_number"
-            android:key="guard_mobile_number"
+            android:title="@string/connect_to_mobile"
+            android:key="installation_sms_to"
             android:inputType="phone"
             android:dialogTitle="@string/mobile_number" />
 
     <!--</PreferenceCategory>-->
-
 
 
 
