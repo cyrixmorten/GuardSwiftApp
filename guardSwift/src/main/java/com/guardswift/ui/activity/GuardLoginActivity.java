@@ -2,10 +2,8 @@ package com.guardswift.ui.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -394,8 +392,15 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                     handleFailedLogin("updateAllClasses", task.getError());
                 }
 
-                showProgress(false);
-                mGuardIdView.setText("");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mLoginStatusView.setVisibility(View.GONE);
+                        mLoginFormView.setVisibility(View.VISIBLE);
+                        mGuardIdView.setText("");
+                    }
+                });
+
 
                 return task;
             }
@@ -583,6 +588,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
         updateToolbarTitle();
 
+
         super.onPostResume();
     }
 
@@ -611,48 +617,40 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     /**
      * Shows the progress UI and hides the login form.
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
 
+        Log.d(TAG, "showProgress 1: " + show);
         if (mLoginFormView == null || mLoginStatusView == null) {
             return;
         }
+        Log.d(TAG, "showProgress 2: " + show);
 
+        int shortAnimTime = getResources().getInteger(
+                android.R.integer.config_shortAnimTime);
 
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(
-                    android.R.integer.config_shortAnimTime);
+        mLoginStatusView.setVisibility(View.VISIBLE);
+        mLoginStatusView.animate().setDuration(shortAnimTime)
+                .alpha(show ? 1 : 0)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        Log.d(TAG, "onAnimationEnd mLoginStatusView");
+                        mLoginStatusView.setVisibility(show ? View.VISIBLE
+                                : View.GONE);
+                    }
+                });
 
-            mLoginStatusView.setVisibility(View.VISIBLE);
-            mLoginStatusView.animate().setDuration(shortAnimTime)
-                    .alpha(show ? 1 : 0)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mLoginStatusView.setVisibility(show ? View.VISIBLE
-                                    : View.GONE);
-                        }
-                    });
-
-            mLoginFormView.setVisibility(View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime)
-                    .alpha(show ? 0 : 1)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mLoginFormView.setVisibility(show ? View.GONE
-                                    : View.VISIBLE);
-                        }
-                    });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mLoginStatusView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mLoginFormView.setVisibility(View.VISIBLE);
+        mLoginFormView.animate().setDuration(shortAnimTime)
+                .alpha(show ? 0 : 1)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        Log.d(TAG, "onAnimationEnd mLoginFormView");
+                        mLoginFormView.setVisibility(show ? View.GONE
+                                : View.VISIBLE);
+                    }
+                });
     }
 
 //    private class FetchLatestVersion extends AsyncTask<Void, Void, Integer> {

@@ -139,7 +139,7 @@ public class CircuitUnitCheckpointsFragment extends InjectingListFragment {
         checkpointNames = mCircuitUnit.getCheckpointsNamesAsArray();
 
         mFingerprints = fingerprintIO.loadFingerprints(mCircuitUnit);
-        mWifiManager = (WifiManager) getActivity().getSystemService(Context.WIFI_SERVICE);
+        mWifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         mAdapter = new CheckpointAdapter(getActivity(), R.layout.view_adapter_item_checkpoint, checkpoints, Arrays.asList(checkpointNames));
 

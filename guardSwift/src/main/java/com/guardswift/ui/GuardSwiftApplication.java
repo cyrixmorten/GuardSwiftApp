@@ -42,6 +42,7 @@ import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.persistence.parse.misc.Message;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
+import com.guardswift.util.ToastHelper;
 import com.parse.DeleteCallback;
 import com.parse.Parse;
 import com.parse.ParseACL;
@@ -410,7 +411,10 @@ public class GuardSwiftApplication extends InjectingApplication {
                                         bootstrapParseObjectsLocally(activity, guard);
                                     }
                                 }).cancelable(false).show();
+                            } else {
+                                ToastHelper.toast(activity, getString(R.string.error_an_error_occured));
                             }
+
 
 //                            throw task.getError();
                         }
