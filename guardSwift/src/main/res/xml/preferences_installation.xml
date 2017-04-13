@@ -1,30 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--<PreferenceCategory-->
-        <!--android:title="@string/device_name">-->
-
-        <EditTextPreference
-            android:title="@string/device_name"
-            android:key="installation_device_name"
-            android:inputType="text"
-            android:dialogTitle="@string/device_name" />
+    <EditTextPreference
+        android:dialogTitle="@string/device_name"
+        android:inputType="text"
+        android:key="installation_name"
+        android:title="@string/device_name" />
 
 
-    <!--</PreferenceCategory>-->
-
-    <!--<PreferenceCategory-->
-        <!--android:title="@string/connect_to_mobile">-->
-
-        <EditTextPreference
-            android:title="@string/connect_to_mobile"
-            android:key="installation_sms_to"
-            android:inputType="phone"
-            android:dialogTitle="@string/mobile_number" />
-
-    <!--</PreferenceCategory>-->
-
+    <EditTextPreference
+        android:dialogTitle="@string/mobile_number"
+        android:inputType="phone"
+        android:key="installation_mobile_number"
+        android:title="@string/connect_to_mobile" />
 
 
 </PreferenceScreen>

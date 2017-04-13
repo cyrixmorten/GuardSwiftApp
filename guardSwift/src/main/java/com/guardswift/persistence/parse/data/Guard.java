@@ -11,6 +11,7 @@ import com.guardswift.util.GeocodedAddress;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseSession;
@@ -21,6 +22,8 @@ import java.util.Date;
 
 @ParseClassName("Guard")
 public class Guard extends ExtendedParseObject implements Positioned {
+
+
 
     public static class Query {
 
@@ -47,6 +50,7 @@ public class Guard extends ExtendedParseObject implements Positioned {
     private static final String guardId = "guardId";
     private static final String name = "name";
     private static final String session = "session";
+    private static final String installation = "installation";
     private static final String mobileNumber = "mobileNumber";
 
     private static final String alarmNotify = "alarmNotify";
@@ -205,6 +209,10 @@ public class Guard extends ExtendedParseObject implements Positioned {
 
     public void setSession(ParseSession session) {
         put(Guard.session, session);
+    }
+
+    public void setInstallation() {
+        put(Guard.installation, ParseInstallation.getCurrentInstallation());
     }
 
     public void setMobile(String mobile) {

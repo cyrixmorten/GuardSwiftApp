@@ -20,8 +20,8 @@ import static com.mikepenz.iconics.Iconics.TAG;
 // https://github.com/Gericop/Android-Support-Preference-V7-Fix
 public class InstallationPreferencesFragment extends PreferenceFragmentCompat {
 
-    private static final String PREF_DEVICE_NAME = "installation_device_name";
-    private static final String PREF_SMS_TO = "installation_sms_to";
+    private static final String PREF_DEVICE_NAME = "installation_name";
+    private static final String PREF_DEVICE_MOBILE_NUMBER = "installation_mobile_number";
 
     ParseInstallation installation;
     SharedPreferences pref;
@@ -32,24 +32,24 @@ public class InstallationPreferencesFragment extends PreferenceFragmentCompat {
             if (key.equals(PREF_DEVICE_NAME)) {
                 installation.put(Installation.NAME, prefs.getString(key, ""));
             }
-            if (key.equals(PREF_SMS_TO)) {
+            if (key.equals(PREF_DEVICE_MOBILE_NUMBER)) {
 
                 // TODO: cleanup and make shareable
                 String mobile = prefs.getString(key, "").replaceAll(" ", "").trim();
                 if (mobile.isEmpty()) {
-                    installation.put(Installation.SMS_TO, mobile);
-                    pref.edit().putString(PREF_SMS_TO, "").apply();
+                    installation.put(Installation.MOBILE_NUMBER, mobile);
+                    pref.edit().putString(PREF_DEVICE_MOBILE_NUMBER, "").apply();
                 } else {
                     // TODO: Hardcoded danish country code
                     if (!mobile.startsWith("+45")) {
                         mobile = "+45" + mobile;
-                        pref.edit().putString(PREF_SMS_TO, mobile).apply();
+                        pref.edit().putString(PREF_DEVICE_MOBILE_NUMBER, mobile).apply();
                     } else if (mobile.length() != 11) {
                         ToastHelper.toast(getContext(), getContext().getString(R.string.invalid_mobile_number));
-                        pref.edit().putString(PREF_SMS_TO, "").apply();
+                        pref.edit().putString(PREF_DEVICE_MOBILE_NUMBER, "").apply();
                         return;
                     } else {
-                        installation.put(Installation.SMS_TO, mobile);
+                        installation.put(Installation.MOBILE_NUMBER, mobile);
                     }
                 }
             }
@@ -112,7 +112,7 @@ public class InstallationPreferencesFragment extends PreferenceFragmentCompat {
         installation = ParseInstallation.getCurrentInstallation();
         pref.edit()
                 .putString(PREF_DEVICE_NAME, installation.getString(Installation.NAME))
-                .putString(PREF_SMS_TO, installation.getString(Installation.SMS_TO))
+                .putString(PREF_DEVICE_MOBILE_NUMBER, installation.getString(Installation.MOBILE_NUMBER))
                 .apply();
 
     }
@@ -120,10 +120,10 @@ public class InstallationPreferencesFragment extends PreferenceFragmentCompat {
 
     private void update() {
         EditTextPreference deviceName = (EditTextPreference) findPreference(PREF_DEVICE_NAME);
-        EditTextPreference smsTo = (EditTextPreference) findPreference(PREF_SMS_TO);
+        EditTextPreference smsTo = (EditTextPreference) findPreference(PREF_DEVICE_MOBILE_NUMBER);
 
         PreferenceHelper.setPreferenceSummary(pref, deviceName, PREF_DEVICE_NAME, getString(R.string.click_here_to_enter, getString(R.string.device_name)).toLowerCase());
-        PreferenceHelper.setPreferenceSummary(pref, smsTo, PREF_SMS_TO, getString(R.string.click_here_to_enter, getString(R.string.mobile_number).toLowerCase()), getString(R.string.installation_send_to_description));
+        PreferenceHelper.setPreferenceSummary(pref, smsTo, PREF_DEVICE_MOBILE_NUMBER, getString(R.string.click_here_to_enter, getString(R.string.mobile_number).toLowerCase()), getString(R.string.installation_send_to_description));
     }
 
 

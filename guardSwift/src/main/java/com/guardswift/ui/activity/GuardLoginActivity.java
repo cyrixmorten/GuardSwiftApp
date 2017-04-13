@@ -178,7 +178,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
 
         String deviceName = installation.getString(Installation.NAME);
-        String smsTo = installation.getString(Installation.SMS_TO);
+        String smsTo = installation.getString(Installation.MOBILE_NUMBER);
 
         if (deviceName != null && !deviceName.isEmpty()) {
             toolbar.setTitle(deviceName);
@@ -427,6 +427,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                 }
 
                 guard.setSession(session);
+                guard.setInstallation();
             }
         });
     }

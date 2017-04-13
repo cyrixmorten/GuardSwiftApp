@@ -6,5 +6,5 @@ package com.guardswift.persistence.parse.data;
 
 public class Installation {
     public static final String NAME = "name";
-    public static final String SMS_TO = "smsTo";
+    public static final String MOBILE_NUMBER = "mobileNumber";
 }
