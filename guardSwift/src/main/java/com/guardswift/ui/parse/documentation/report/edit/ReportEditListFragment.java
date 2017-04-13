@@ -26,6 +26,8 @@ import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
+import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandler;
+import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.view.DownloadReport;
 import com.guardswift.util.GSIntents;
 import com.parse.GetCallback;
@@ -65,6 +67,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+        setRetainInstance(true);
 
         super.onCreate(savedInstanceState);
     }
@@ -82,7 +85,6 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         inflater.inflate(R.menu.task_report, menu);
 
         pdfMenu = menu.findItem(R.id.menu_pdf);
-        pdfMenu.setEnabled(false);
         pdfMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
@@ -156,15 +158,14 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
                 if (task instanceof StaticTask) {
                     final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
-                    ((StaticTask) task).addReportEntry(context, "", new GetCallback<EventLog>() {
+                    ((StaticTask) task).addReportEntry(context, "", null, new GetCallback<EventLog>() {
                         @Override
                         public void done(EventLog eventLog, ParseException e) {
                             if (e != null) {
-                                new HandleException(TAG, "create new static report entry", e);
+                                new HandleException(TAG, "Create new static report entry", e);
                             }
 
-//                          Does not work as intended, not updating list entry when returning
-//                          UpdateEventHandlerActivity.newInstance(getContext(), eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS);
+                            UpdateEventHandlerActivity.newInstance(getContext(), eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS);
 
                             dialog.dismiss();
                         }
