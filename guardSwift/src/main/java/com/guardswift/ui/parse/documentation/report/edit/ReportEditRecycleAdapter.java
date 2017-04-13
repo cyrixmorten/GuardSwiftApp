@@ -20,7 +20,6 @@ import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandler;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
 import com.guardswift.ui.view.card.EventLogCard;
-import com.guardswift.util.ToastHelper;
 import com.parse.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
@@ -89,28 +88,28 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
         eventLogCard.setEventLog(eventLog);
 
         // STATIC REPORTS ONLY HAS REMARKS
-        if (isStaticReport || isExtraTimeEvent) {
+        if (isStaticReport) {
             eventLogCard.setCopyToReportEnabled(false);
-            eventLogCard.setDeletable(false);
+            eventLogCard.setDeletable(true);
             eventLogCard.setEditable(false);
             eventLogCard.setTimestamped(true);
-            eventLogCard.setHeaderVisibility(isExtraTimeEvent ? VISIBLE : GONE);
+            eventLogCard.setHeaderVisibility(VISIBLE);
             eventLogCard.setEventVisibility(GONE);
             eventLogCard.setAmountVisibility(GONE);
             eventLogCard.setPeopleVisibility(GONE);
             eventLogCard.setLocationsVisibility(GONE);
-            eventLogCard.setRemarksVisibility(View.VISIBLE);
+            eventLogCard.setRemarksVisibility(VISIBLE);
         } else {
             eventLogCard.setCopyToReportEnabled(false);
             eventLogCard.setDeletable(true);
             eventLogCard.setEditable(true);
             eventLogCard.setTimestamped(true);
             eventLogCard.setHeaderVisibility(VISIBLE);
-            eventLogCard.setEventVisibility(View.VISIBLE);
-            eventLogCard.setAmountVisibility(View.VISIBLE);
-            eventLogCard.setPeopleVisibility(View.VISIBLE);
-            eventLogCard.setLocationsVisibility(View.VISIBLE);
-            eventLogCard.setRemarksVisibility(View.VISIBLE);
+            eventLogCard.setEventVisibility(VISIBLE);
+            eventLogCard.setAmountVisibility(VISIBLE);
+            eventLogCard.setPeopleVisibility(isExtraTimeEvent ? GONE : VISIBLE);
+            eventLogCard.setLocationsVisibility(isExtraTimeEvent ? GONE : VISIBLE);
+            eventLogCard.setRemarksVisibility(VISIBLE);
         }
 
 
@@ -160,10 +159,9 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
                                                   {
                                                       @Override
                                                       public void onClick(View view) {
-                                                          new CommonDialogsBuilder.MaterialDialogs(activity).okCancel(R.string.delete, activity.getString(R.string.confirm_delete, eventLog.getEvent()), new MaterialDialog.SingleButtonCallback() {
+                                                          new CommonDialogsBuilder.MaterialDialogs(activity).okCancel(R.string.delete, activity.getString(R.string.confirm_delete, eventLog.getSummaryString()), new MaterialDialog.SingleButtonCallback() {
                                                               @Override
                                                               public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                                                                  ToastHelper.toast(activity, "delete: " + eventLog.getEvent());
                                                                   eventLog.deleteEventually();
                                                                   notifyItemRemoved(getItems().indexOf(eventLog));
                                                                   getItems().remove(eventLog);
@@ -207,14 +205,6 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
         eventLogCard.onRemarksClickListener(new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View view) {
-                                                    if (isStaticReport && eventLogCard.hasRemarks()) {
-                                                        // only allow edit if empty
-                                                        return;
-                                                    }
-                                                    if (isExtraTimeEvent) {
-                                                        // no edit allowed of extra time events
-                                                        return;
-                                                    }
                                                     UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS);
                                                 }
                                             }
