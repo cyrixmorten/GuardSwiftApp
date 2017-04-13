@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -13,7 +16,6 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
-import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
@@ -24,12 +26,14 @@ import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
-import com.guardswift.util.ToastHelper;
+import com.guardswift.ui.parse.documentation.report.view.DownloadReport;
+import com.guardswift.util.GSIntents;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
+import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -55,6 +59,46 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     private FloatingActionButton fab;
     private boolean loading;
 
+    private String reportId;
+    private MenuItem pdfMenu;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
+
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onDestroyOptionsMenu() {
+        super.onDestroyOptionsMenu();
+
+        pdfMenu = null;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+
+        inflater.inflate(R.menu.task_report, menu);
+
+        pdfMenu = menu.findItem(R.id.menu_pdf);
+        pdfMenu.setEnabled(false);
+        pdfMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                new DownloadReport(getContext()).execute(reportId, new DownloadReport.CompletedCallback() {
+                    @Override
+                    public void done(File file, Error e) {
+                        GSIntents.openPDF(getContext(), file);
+                    }
+                });
+                return false;
+            }
+        });
+
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
     @Override
     protected ExtendedParseObject getObjectInstance() {
         return new EventLog();
@@ -62,7 +106,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
     @Override
     protected ParseQueryAdapter.QueryFactory<EventLog> createNetworkQueryFactory() {
-        final String reportId = (gsTasksCache.getLastSelected() != null) ? gsTasksCache.getLastSelected().getReportId() : "";
+        reportId = (gsTasksCache.getLastSelected() != null) ? gsTasksCache.getLastSelected().getReportId() : "";
         return new ParseQueryAdapter.QueryFactory<EventLog>() {
             @Override
             public ParseQuery<EventLog> create() {
@@ -80,6 +124,9 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
             public void onLoaded(List<EventLog> objects, Exception e) {
                 showFloadingActionButton(1000);
                 loading = false;
+                if (pdfMenu != null) {
+                    pdfMenu.setEnabled(!objects.isEmpty());
+                }
             }
 
             @Override

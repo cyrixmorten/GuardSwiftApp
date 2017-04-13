@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
+import com.guardswift.R;
+
 import java.io.File;
 
 /**
@@ -22,6 +24,12 @@ public class GSIntents {
     }
 
     public static void openPDF(Context context, File file) {
+
+        if (context != null && file == null) {
+            ToastHelper.toast(context, context.getString(R.string.error_downloading_file));
+            return;
+        }
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(
                 Uri.fromFile(file),

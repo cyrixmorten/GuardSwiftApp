@@ -20,7 +20,6 @@ import com.parse.ParseUser;
 
 import org.json.JSONObject;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -118,8 +117,13 @@ public class Report extends ExtendedParseObject implements GSReport {
             return this;
         }
 
+        public QueryBuilder matching(String reportId) {
+            query.whereEqualTo(Report.reportId, reportId);
+            return this;
+        }
+
         public QueryBuilder matching(GSTask task) {
-            query.whereEqualTo(reportId, task.getReportId());
+            query.whereEqualTo(Report.reportId, task.getReportId());
             return this;
         }
 

@@ -2,14 +2,12 @@ package com.guardswift.core.tasks.controller;
 
 import android.content.Context;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.ui.activity.GSTaskCreateReportActivity;
-import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.util.ToastHelper;
+import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.ui.activity.GSTaskCreateReportActivity;
 
 public class AlarmController extends BaseTaskController {
 
@@ -32,8 +30,6 @@ public class AlarmController extends BaseTaskController {
     public GSTask performAction(ACTION action, GSTask alarm, boolean automatic) {
 
         Context ctx = GuardSwiftApplication.getInstance();
-
-        final String clientName = alarm.getClient().getName();
 
         EventLog.Builder event = null;
 
@@ -86,7 +82,6 @@ public class AlarmController extends BaseTaskController {
                         .automatic(automatic)
                         .eventCode(EventLog.EventCodes.ALARM_ABORT);
 
-
                 break;
 
             case FINISH:
@@ -99,7 +94,8 @@ public class AlarmController extends BaseTaskController {
                         .automatic(automatic)
                         .eventCode(EventLog.EventCodes.ALARM_FINISHED);
 
-                ToastHelper.toast(ctx, ctx.getString(R.string.alarm_finished_at_client, clientName));
+//                ToastHelper.toast(ctx, ctx.getString(R.string.alarm_finished_at_client, clientName));
+
 
                 break;
 

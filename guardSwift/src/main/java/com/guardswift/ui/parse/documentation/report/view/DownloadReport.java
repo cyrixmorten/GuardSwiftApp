@@ -1,13 +1,19 @@
 package com.guardswift.ui.parse.documentation.report.view;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.BuildConfig;
+import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.rest.GuardSwiftServer;
+import com.parse.GetCallback;
+import com.parse.ParseException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,15 +40,47 @@ public class DownloadReport {
 
     private static String TAG = DownloadReport.class.getSimpleName();
 
-    private Report report;
-    private CompletedCallback callback;
 
-    public DownloadReport(Report report, CompletedCallback callback) {
-        this.report = report;
-        this.callback = callback;
+    private Context context;
+    private Dialog dialog;
+
+    public DownloadReport(Context context) {
+        this.context = context;
     }
 
-    public void execute() {
+    private void showDialog() {
+        if (context == null) {
+            return;
+        }
+        dialog = new MaterialDialog.Builder(context)
+                .title(R.string.working)
+                .content(R.string.fetching_report)
+                .progress(true, 0)
+                .show();
+    }
+
+    private void dismissDialog() {
+        if (dialog != null) {
+            dialog.dismiss();
+            dialog = null;
+        }
+    }
+
+    public void execute(String reportId, final CompletedCallback callback) {
+        Report.getQueryBuilder(false).matching(reportId).build().getFirstInBackground(new GetCallback<Report>() {
+            @Override
+            public void done(Report report, ParseException e) {
+                execute(report, callback);
+            }
+        });
+    }
+
+    public void execute(Report report, final CompletedCallback callback) {
+
+        if (report == null) {
+            callback.done(null, new Error("Report is null"));
+            return;
+        }
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(GuardSwiftServer.API_URL)
@@ -50,13 +88,11 @@ public class DownloadReport {
 
         GuardSwiftServer.API guardSwift = retrofit.create(GuardSwiftServer.API.class);
 
-        Log.d(TAG, "FETCH REPORT");
-
         guardSwift.report(report.getObjectId()).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    new DownloadFileAsyncTask().execute(response.body().byteStream());
+                    new DownloadFileAsyncTask(callback).execute(response.body().byteStream());
                 } else {
                     callback.done(null, new Error("Error generating report"));
                 }
@@ -78,7 +114,18 @@ public class DownloadReport {
                 Environment.DIRECTORY_DOCUMENTS), appDirectoryName);
         final String filename = "report.pdf";
 
+        CompletedCallback callback;
 
+        DownloadFileAsyncTask(CompletedCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            showDialog();
+        }
 
         @Override
         protected File doInBackground(InputStream... params) {
@@ -137,7 +184,7 @@ public class DownloadReport {
 
             callback.done(file, null);
 
-
+            dismissDialog();
         }
     }
 }

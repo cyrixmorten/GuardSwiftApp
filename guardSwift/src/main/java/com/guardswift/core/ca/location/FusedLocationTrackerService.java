@@ -1,36 +1,27 @@
 package com.guardswift.core.ca.location;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationRequest;
 import com.google.common.collect.Lists;
-import com.guardswift.core.ca.ActivityDetectionModule;
+import com.guardswift.core.ca.GeofencingModule;
+import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
 import com.guardswift.eventbus.EventBusController;
-import com.guardswift.core.ca.LocationModule;
-import com.guardswift.core.ca.GeofencingModule;
-import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
-import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.GSTasksCache;
-import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Util;
 import com.parse.ParseGeoPoint;
 
@@ -232,8 +223,6 @@ public class FusedLocationTrackerService extends InjectingService {
 
         float distance = Util.distanceMeters(mLastGeofenceRebuildLocation, location);
         boolean triggerByDistance = distance >= DISTANCE_METERS_FOR_GEOFENCEREBUILD;
-
-        Log.d(TAG, "rebuildGeofences: " + triggerByDistance);
 
         if (triggerByDistance) {
             mLastGeofenceRebuildLocation = location;

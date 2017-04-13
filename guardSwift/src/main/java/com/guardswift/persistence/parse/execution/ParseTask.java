@@ -11,6 +11,7 @@ import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.core.tasks.geofence.AlarmGeofenceStrategy;
 import com.guardswift.core.tasks.geofence.TaskGeofenceStrategy;
 import com.guardswift.persistence.cache.task.BaseTaskCache;
+import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
@@ -75,8 +76,10 @@ public class ParseTask extends BaseTask {
         public static String FINISHED = "finished";
     }
 
-    public ParseTask() {
+    GSTasksCache tasksCache;
 
+    public ParseTask() {
+        tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
     }
 
     @Override
@@ -297,12 +300,16 @@ public class ParseTask extends BaseTask {
 
         // prevent abort notification to be broadcast by server
         addUnique(ParseTask.knownStatus, STATUS.ABORTED);
+
+        tasksCache.removeGeofence(this);
     }
 
     public void setFinished() {
         setTimeEndedNow();
         setStatus(STATUS.FINISHED);
         setGuardCurrent();
+
+        tasksCache.removeGeofence(this);
     }
 
     @Override

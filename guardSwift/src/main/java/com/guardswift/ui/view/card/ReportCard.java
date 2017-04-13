@@ -1,6 +1,5 @@
 package com.guardswift.ui.view.card;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.text.format.DateUtils;
@@ -12,13 +11,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.ui.parse.documentation.report.view.DownloadReport;
 import com.guardswift.util.GSIntents;
-import com.guardswift.util.ToastHelper;
 
 import java.io.File;
 
@@ -167,33 +164,12 @@ public class ReportCard extends LinearLayout {
         btnFetchReport.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                final Dialog dialog = new MaterialDialog.Builder(getContext())
-                        .title(R.string.working)
-                        .content(R.string.fetching_report)
-                        .progress(true, 0)
-                        .build();
-
-                dialog.show();
-
-                new DownloadReport(report, new DownloadReport.CompletedCallback() {
+                new DownloadReport(getContext()).execute(report, new DownloadReport.CompletedCallback() {
                     @Override
                     public void done(File file, Error e) {
-
-                        dialog.dismiss();
-
-                        if (getContext() == null) {
-                            return;
-                        }
-
-                        if (e != null || file == null) {
-                            ToastHelper.toast(getContext(), getContext().getString(R.string.error_downloading_file));
-                            return;
-                        }
                         GSIntents.openPDF(getContext(), file);
-
                     }
-                }).execute();
+                });
             }
         });
 

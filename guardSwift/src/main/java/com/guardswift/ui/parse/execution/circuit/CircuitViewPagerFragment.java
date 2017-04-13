@@ -20,7 +20,6 @@ import android.widget.EditText;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.guardswift.R;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.parse.data.Guard;
@@ -44,7 +43,6 @@ import com.parse.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -328,7 +326,13 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
         }
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
 
+        messagesDrawer = null;
+        messagesMenu = null;
+    }
 
     @Override
     protected Map<String, Fragment> getTabbedFragments() {

@@ -371,7 +371,20 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         updateClassTotal.set(tasks.size());
 
-        return Task.whenAll(tasks)
+        Task<Void> resultTask = Task.forResult(null);
+
+        for (final Task syncTask: tasks) {
+            resultTask = resultTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
+                @Override
+                public Task<Void> then(Task<Void> task) throws Exception {
+                    return syncTask;
+                }
+            });
+        }
+        
+
+//        return Task.whenAll(tasks)
+        return resultTask
                 .onSuccess(new Continuation<Void, Void>() {
                     @Override
                     public Void then(Task<Void> task) throws Exception {
