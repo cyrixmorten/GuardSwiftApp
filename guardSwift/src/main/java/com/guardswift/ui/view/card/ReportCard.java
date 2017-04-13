@@ -92,14 +92,9 @@ public class ReportCard extends LinearLayout {
             if (eventLog.getEventCode() == EventLog.EventCodes.STATIC_OTHER) {
                 tv.setText(eventLog.getRemarks());
             } else {
-                tv.setText(
-                        eventLog.getEvent() + " " +
-                                eventLog.getAmount() + " " +
-                                eventLog.getPeople() + " " +
-                                eventLog.getLocations() + " " +
-                                eventLog.getRemarks()
-                );
+                tv.setText(eventLog.getSummaryString());
             }
+
             layoutEvents.addView(tv);
 
         }
