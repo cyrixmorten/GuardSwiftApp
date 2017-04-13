@@ -351,17 +351,19 @@ public class GuardSwiftApplication extends InjectingApplication {
 
             tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
             tasks.add(circuitUnit.onSuccess(updateClassSuccess));
-        }
 
-        if (guard.canAccessDistrictTasks()) {
-            Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory.getDistrictWatchStarted().updateAllAsync();
-            Task<List<ParseObject>> districtWatchClient = parseObjectFactory.getDistrictWatchClient().updateAllAsync();
             Task<List<ParseObject>> message = parseObjectFactory.getMessage().updateAllAsync();
-
-            tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
-            tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
             tasks.add(message.onSuccess(updateClassSuccess));
         }
+
+//        if (guard.canAccessDistrictTasks()) {
+//            Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory.getDistrictWatchStarted().updateAllAsync();
+//            Task<List<ParseObject>> districtWatchClient = parseObjectFactory.getDistrictWatchClient().updateAllAsync();
+//
+//
+//            tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
+//            tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
+//        }
 
         if (guard.canAccessAlarms()) {
             Task<List<ParseObject>> alarms = parseObjectFactory.getTask().updateAllAsync();
@@ -371,12 +373,12 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         updateClassTotal.set(tasks.size());
 
-        Task<Void> resultTask = Task.forResult(null);
+        Task<List<ParseObject>> resultTask = Task.forResult(null);
 
-        for (final Task syncTask: tasks) {
-            resultTask = resultTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
+        for (final Task<List<ParseObject>> syncTask: tasks) {
+            resultTask = resultTask.onSuccessTask(new Continuation<List<ParseObject>, Task<List<ParseObject>>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<List<ParseObject>> then(Task<List<ParseObject>> task) throws Exception {
                     return syncTask;
                 }
             });
@@ -385,20 +387,9 @@ public class GuardSwiftApplication extends InjectingApplication {
 
 //        return Task.whenAll(tasks)
         return resultTask
-                .onSuccess(new Continuation<Void, Void>() {
+                .continueWithTask(new Continuation<List<ParseObject>, Task<List<ParseObject>>>() {
                     @Override
-                    public Void then(Task<Void> task) throws Exception {
-                        Log.d(TAG, "Bootstrap success");
-
-                        parseObjectsBootstrapped = true;
-                        startServices();
-
-                        return null;
-                    }
-                })
-                .continueWithTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<List<ParseObject>> then(Task<List<ParseObject>> task) throws Exception {
 
                         // no matter what happens e.g. success/error, the dialog should be dismissed
                         if (updateDialog != null) {
@@ -421,11 +412,23 @@ public class GuardSwiftApplication extends InjectingApplication {
                                 }).cancelable(false).show();
                             }
 
-                            throw task.getError();
+//                            throw task.getError();
                         }
 
 
                         return task;
+                    }
+                })
+                .onSuccess(new Continuation<List<ParseObject>, Void>() {
+                    @Override
+                    public Void then(Task<List<ParseObject>> task) throws Exception {
+
+                        Log.d(TAG, "Bootstrap success");
+
+                        parseObjectsBootstrapped = true;
+                        startServices();
+
+                        return null;
                     }
                 });
     }

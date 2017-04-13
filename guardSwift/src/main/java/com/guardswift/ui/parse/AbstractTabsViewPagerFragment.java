@@ -5,7 +5,6 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -46,8 +45,6 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 
     protected abstract Map<String, Fragment> getTabbedFragments();
 
-    private ViewPager.SimpleOnPageChangeListener changeListener;
-
     public FloatingActionButton getFloatingActionButton() {
         return floatingActionButton;
     }
@@ -60,6 +57,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
      * The pager adapter, which provides the pages to the view pager widget.
      */
     public TasksPagerAdapter mPagerAdapter;
+    private ViewPager.SimpleOnPageChangeListener changeListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -161,7 +159,16 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        changeListener = null;
+    }
+
+
+    @Override
     public void onDestroy() {
+        mPagerAdapter = null;
         ButterKnife.unbind(this);
         try {
             super.onDestroy();

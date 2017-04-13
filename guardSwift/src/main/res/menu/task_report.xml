@@ -6,6 +6,6 @@
         android:id="@+id/menu_pdf"
         android:menuCategory="secondary"
         android:orderInCategory="1"
-        android:title="@string/pdf"
+        android:title="@string/download_pdf"
         app:showAsAction="always" />
 </menu>

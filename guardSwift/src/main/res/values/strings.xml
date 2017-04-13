@@ -355,7 +355,7 @@
     <string name="error_downloading_file">Kunne ikke hente filen</string>
     <string name="missing_arrival_time">Mangler ankomst tidspunkt</string>
     <string name="please_enter_arrival_time">Der er ikke meldt ankommet for denne opgave, indtast venligst tidspunkt for ankomst.</string>
-    <string name="fetch_pdf">Hent PDF</string>
+    <string name="download_pdf">Hent PDF</string>
     <string name="copy">kopier</string>
     <string name="copy_report">Kopier rapport</string>
     <string name="confirm_copy_report">Dette vil kopiere alle hændelserne til dagens rapport?</string>
@@ -410,7 +410,6 @@
     <string name="click_here_to_enter">Klik her for at tilføje %1$s</string>
     <string name="installation_send_to_description">Det valgte mobil nummer vil modtage SMS med alarm meldinger når den seneste vægter der loggede på denne enhed er registreret til at modtage alarmer</string>
     <string name="guard_mobile_description">Personlig tildelt mobil nummer til modtagelse af opkald og SMS\'er</string>
-    <string name="pdf">PDF</string>
 
 
 </resources>

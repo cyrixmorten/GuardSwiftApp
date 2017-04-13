@@ -61,6 +61,22 @@ import dk.alexandra.positioning.wifi.AccessPoint;
 public class EventLog extends ExtendedParseObject {
 
 
+    private String withSpace(String str) {
+        if (str.isEmpty()) {
+            return "";
+        }
+
+        return str + " ";
+    }
+
+    public String getSummaryString() {
+        return withSpace(getEvent()) +
+                withSpace(getAmountString()) +
+                withSpace(getPeople()) +
+                withSpace(getLocations()) +
+                withSpace(getRemarks());
+    }
+
     public static class Recent {
         private static EventLog selected;
 
@@ -360,29 +376,29 @@ public class EventLog extends ExtendedParseObject {
 //                    }
 
 
-                    Log.w(TAG, "3) Save event");
-                    eventLog.pinThenSaveEventually(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (pinnedCallback != null) {
-                                pinnedCallback.done(eventLog, e);
-                            }
-                            EventBusController.postUIUpdate(eventLog);
-                            Log.w(TAG, "4) Save event - pinned");
-                        }
-                    }, new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            Log.w(TAG, "5) Save event - saved");
+            Log.w(TAG, "3) Save event");
+            eventLog.pinThenSaveEventually(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (pinnedCallback != null) {
+                        pinnedCallback.done(eventLog, e);
+                    }
+                    EventBusController.postUIUpdate(eventLog);
+                    Log.w(TAG, "4) Save event - pinned");
+                }
+            }, new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    Log.w(TAG, "5) Save event - saved");
 
 //                            updateGuardInfo(geocodedAddress.get());
-                            updateGuardInfo();
+                    updateGuardInfo();
 
-                            if (savedCallback != null) {
-                                savedCallback.done(eventLog, e);
-                            }
-                        }
-                    });
+                    if (savedCallback != null) {
+                        savedCallback.done(eventLog, e);
+                    }
+                }
+            });
 
 //                    return null;
 //                }
@@ -474,8 +490,6 @@ public class EventLog extends ExtendedParseObject {
 
             return jsonObject;
         }
-
-
 
 
 //        public Builder locationTrackerUrl(String result) {
@@ -643,7 +657,7 @@ public class EventLog extends ExtendedParseObject {
             return this;
         }
 
-        public QueryBuilder matchingEventTypes(String ...eventTypes) {
+        public QueryBuilder matchingEventTypes(String... eventTypes) {
             List<String> events = Lists.newArrayList(eventTypes);
             if (!events.isEmpty())
                 query.whereContainedIn(EventLog.eventType, events);
@@ -690,7 +704,6 @@ public class EventLog extends ExtendedParseObject {
         }
 
 
-
         public QueryBuilder matchingReportId(String reportId) {
             query.whereEqualTo(EventLog.reportId, reportId);
             return this;
@@ -721,12 +734,18 @@ public class EventLog extends ExtendedParseObject {
     public boolean isReportEvent() {
         int eventCode = getEventCode();
         switch (eventCode) {
-            case EventCodes.ALARM_OTHER: return true;
-            case EventCodes.CIRCUITUNIT_OTHER: return true;
-            case EventCodes.DISTRICTWATCH_OTHER: return true;
-            case EventCodes.STATIC_OTHER: return true;
-            case EventCodes.CIRCUITUNIT_EXTRA_TIME: return true;
-            default: return false;
+            case EventCodes.ALARM_OTHER:
+                return true;
+            case EventCodes.CIRCUITUNIT_OTHER:
+                return true;
+            case EventCodes.DISTRICTWATCH_OTHER:
+                return true;
+            case EventCodes.STATIC_OTHER:
+                return true;
+            case EventCodes.CIRCUITUNIT_EXTRA_TIME:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -1019,7 +1038,7 @@ public class EventLog extends ExtendedParseObject {
 //    }
 
     public String getEvent() {
-        return has(event) ? getString(event) : "";
+        return getStringSafe(event);
     }
 
     public EventType getEventType() {
@@ -1049,6 +1068,14 @@ public class EventLog extends ExtendedParseObject {
         return 0;
     }
 
+    public String getAmountString() {
+        if (getAmount() > 0) {
+            return String.valueOf(getAmount());
+        }
+
+        return "";
+    }
+
 //    private void setClientLocation(String location) {
 //        if (location != null) {
 //            put(EventLog.location, location);
@@ -1058,11 +1085,11 @@ public class EventLog extends ExtendedParseObject {
 //    }
 
     public String getLocations() {
-        return getString(clientLocation);
+        return getStringSafe(clientLocation);
     }
 
     public String getPeople() {
-        return getString(people);
+        return getStringSafe(people);
     }
 
 //    private void setRemarks(String remarks) {
@@ -1074,26 +1101,11 @@ public class EventLog extends ExtendedParseObject {
 //    }
 
     public String getRemarks() {
-        return (has(remarks)) ? getString(remarks) : "";
+        return getStringSafe(remarks);
     }
-
-//    private void setPosition(ParseGeoPoint clientPosition) {
-//        put(EventLog.clientPosition, clientPosition);
-//    }
 
     public ParseGeoPoint getPosition() {
         return getParseGeoPoint(position);
-    }
-
-    public void setSummary(String columnName, JSONArray summary, Date timeStarted, Date timeEnded) {
-        put(columnName, summary);
-        put(EventLog.timeStarted, timeStarted);
-        put(EventLog.timeEnded, timeEnded);
-
-//        String startString = Util.dateFormatHourMinutes().format(timeStarted);
-//        String endString = Util.dateFormatHourMinutes().format(timeEnded);
-//
-//        put(EventLog.remarks, "Log for " + startString + " til " + endString)
     }
 
     public Date getDeviceTimestamp() {

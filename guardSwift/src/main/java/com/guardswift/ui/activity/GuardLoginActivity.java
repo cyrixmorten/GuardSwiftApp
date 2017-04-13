@@ -386,9 +386,24 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 //                return GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard);
 //            }
 //        })
+        .continueWithTask(new Continuation<Void, Task<Void>>() {
+            @Override
+            public Task<Void> then(Task<Void> task) throws Exception {
+                if (task.isFaulted()) {
+                    Log.w(TAG, "Failed to bootstrap");
+                    handleFailedLogin("updateAllClasses", task.getError());
+                }
+
+                showProgress(false);
+                mGuardIdView.setText("");
+
+                return task;
+            }
+        })
         .onSuccess(new Continuation<Void, Void>() {
             @Override
             public Void then(Task<Void> task) throws Exception {
+
                 parseModule.login(guard);
 
                 GuardSwiftApplication.saveCurrentGuardAsLastActive();
@@ -397,18 +412,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
                 Intent intent = new Intent(context, MainActivity.class);
                 context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
-
-                return null;
-            }
-        }).continueWith(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task<Void> task) throws Exception {
-                if (task.isFaulted()) {
-                    handleFailedLogin("updateAllClasses", task.getError());
-                }
-
-                showProgress(false);
-                mGuardIdView.setText("");
 
                 return null;
             }
@@ -525,7 +528,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
         Guard guard = GuardSwiftApplication.getLastActiveGuard();
         String lastActive = guard != null ? guard.getName() : "N/A";
-        Log.d(TAG, "GUARD: " + lastActive);
 //        new FetchLatestVersion(this).execute();
 
         super.onResume();
@@ -612,8 +614,10 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
 
-        if (mLoginFormView == null || mLoginStatusView == null)
+        if (mLoginFormView == null || mLoginStatusView == null) {
             return;
+        }
+
 
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in

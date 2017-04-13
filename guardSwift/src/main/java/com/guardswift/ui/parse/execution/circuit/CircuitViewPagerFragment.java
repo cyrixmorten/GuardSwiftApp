@@ -40,6 +40,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 
+import java.lang.ref.WeakReference;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
 
     Map<String, Fragment> fragmentMap = Maps.newLinkedHashMap();
 
-    private Drawer messagesDrawer;
+    WeakReference<Drawer> messagesDrawerWeakReference;
     private MenuItem messagesMenu;
 
 
@@ -164,7 +165,7 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_messages) {
-            messagesDrawer.openDrawer();
+            messagesDrawerWeakReference.get().openDrawer();
             GuardSwiftApplication.hasReadGroups.add(getGroupId());
             ActionItemBadge.update(messagesMenu, Integer.MIN_VALUE);
         }
@@ -228,12 +229,12 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
     private void addMessageDialog() {
         openMessageDialog(null, null);
     }
+
     private void editMessageDialog(OverflowMenuDrawerItem drawerItem, Message message) {
         openMessageDialog(drawerItem, message);
     }
 
     private void openMessageDialog(final OverflowMenuDrawerItem drawerItem, final Message editMessage) {
-
         final boolean editMode = drawerItem != null && editMessage != null;
 
         MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
@@ -242,6 +243,9 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
                 .input(getString(R.string.message), (editMode) ? editMessage.getMessage() : getString(R.string.input_empty), new MaterialDialog.InputCallback() {
                     @Override
                     public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+
+                        Drawer messagesDrawer = messagesDrawerWeakReference.get();
+
                         String editTextString = input.toString();
                         if (!editTextString.isEmpty()) {
                             if (editMode) {
@@ -264,18 +268,24 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
 
         EditText editText = dialog.getInputEditText();
 
-        editText.setSingleLine(true);
-//        editText.setLines(4); // desired number of lines
-        editText.setHorizontallyScrolling(false);
-        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        if (editText != null) {
+            editText.setSingleLine(true);
+//          editText.setLines(4); // desired number of lines
+            editText.setHorizontallyScrolling(false);
+            editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        }
 
         dialog.show();
     }
 
     private void deleteMessageDialog(final OverflowMenuDrawerItem drawerItem, final Message message) {
+
         new CommonDialogsBuilder.MaterialDialogs(getActivity()).yesNo(R.string.confirm_delete_message, message.getMessage(), new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                Drawer messagesDrawer = messagesDrawerWeakReference.get();
+
                 int position = messagesDrawer.getPosition(drawerItem);
                 messagesDrawer.removeItemByPosition(position);
 
@@ -287,22 +297,23 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
 
 
     private void loadMessages() {
+        final Drawer messagesDrawer = messagesDrawerWeakReference.get();
 
-            messagesDrawer.removeAllItems();
+        messagesDrawer.removeAllItems();
 
-            Message.getQueryBuilder(true, getGroupId()).build().addDescendingOrder(Message.createdAt).findInBackground(new FindCallback<Message>() {
-                @Override
-                public void done(List<Message> messages, ParseException e) {
-                    if (messagesDrawer == null || getActivity() == null) {
-                        return;
-                    }
-
-                    for (Message message : messages) {
-                        messagesDrawer.addItem(createMessageItem(message));
-                    }
-
+        Message.getQueryBuilder(true, getGroupId()).build().addDescendingOrder(Message.createdAt).findInBackground(new FindCallback<Message>() {
+            @Override
+            public void done(List<Message> messages, ParseException e) {
+                if (messagesDrawer == null || getActivity() == null) {
+                    return;
                 }
-            });
+
+                for (Message message : messages) {
+                    messagesDrawer.addItem(createMessageItem(message));
+                }
+
+            }
+        });
     }
 
     @Override
@@ -311,9 +322,11 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
 
         Activity activity = getActivity();
         if (activity instanceof MainActivity) {
-            messagesDrawer = ((MainActivity) activity).getMessagesDrawer();
+            Drawer messagesDrawer = ((MainActivity) activity).getMessagesDrawer();
 
             if (messagesDrawer != null) {
+                messagesDrawerWeakReference = new WeakReference<>(messagesDrawer);
+
                 messagesDrawer.removeAllStickyFooterItems();
                 messagesDrawer.addStickyFooterItem(addMessageItem());
 
@@ -330,8 +343,12 @@ public class CircuitViewPagerFragment extends AbstractTabsViewPagerFragment {
     public void onDestroyView() {
         super.onDestroyView();
 
-        messagesDrawer = null;
+        Log.d(TAG, "onDestroyView");
+
+        messagesDrawerWeakReference = null;
         messagesMenu = null;
+        fragmentMap = null;
+
     }
 
     @Override

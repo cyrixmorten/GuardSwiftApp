@@ -49,7 +49,7 @@ public class DownloadReport {
     }
 
     private void showDialog() {
-        if (context == null) {
+        if (context == null || (dialog != null && dialog.isShowing())) {
             return;
         }
         dialog = new MaterialDialog.Builder(context)
@@ -67,6 +67,8 @@ public class DownloadReport {
     }
 
     public void execute(String reportId, final CompletedCallback callback) {
+        showDialog();
+
         Report.getQueryBuilder(false).matching(reportId).build().getFirstInBackground(new GetCallback<Report>() {
             @Override
             public void done(Report report, ParseException e) {
@@ -76,6 +78,7 @@ public class DownloadReport {
     }
 
     public void execute(Report report, final CompletedCallback callback) {
+        showDialog();
 
         if (report == null) {
             callback.done(null, new Error("Report is null"));
@@ -96,12 +99,16 @@ public class DownloadReport {
                 } else {
                     callback.done(null, new Error("Error generating report"));
                 }
+
+                dismissDialog();
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 new HandleException("Report PDF", "Error generating PDF", t);
                 callback.done(null, new Error("Error connecting to server"));
+
+                dismissDialog();
             }
         });
     }
@@ -120,12 +127,6 @@ public class DownloadReport {
             this.callback = callback;
         }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-            showDialog();
-        }
 
         @Override
         protected File doInBackground(InputStream... params) {
@@ -183,8 +184,6 @@ public class DownloadReport {
             super.onPostExecute(file);
 
             callback.done(file, null);
-
-            dismissDialog();
         }
     }
 }
