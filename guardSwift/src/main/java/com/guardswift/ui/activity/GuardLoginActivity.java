@@ -1,7 +1,5 @@
 package com.guardswift.ui.activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -66,12 +64,14 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 
 public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     private static final String TAG = GuardLoginActivity.class.getSimpleName();
 
-    public final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     @Inject
     @ForActivity
@@ -80,7 +80,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     Device device;
     @Inject
     ParseObjectFactory parseObjectFactory;
-    //	@Inject LocationsModule locationModule;
     @Inject
     EventBus eventBus;
     @Inject
@@ -90,16 +89,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     @Inject
     GuardLoginNavigationDrawer navigationDrawer;
-
-    // UI references.
-//    @Bind(R.id.switch_receive_alarms)
-//    Switch mReceiveAlarms;
-//    @Bind(R.id.layout_alarm_group)
-//    RelativeLayout mLayoutAlarmGroup;
-//    @Bind(R.id.spinner_signed_alarm_group)
-//    Spinner mAlarmGroupSigned;
-//    @Bind(R.id.spinner_responsible_alarm_group)
-//    Spinner mAlarmGroupResponsible;
 
 
     @Bind(R.id.imageView)
@@ -125,7 +114,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
-//    private DownloadUpdate mDownloadTask;
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -157,7 +145,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         navigationDrawer.initNavigationDrawer(this, toolbar, R.id.content);
 
         hasGooglePlayServices();
-//        registerUpdateDownloadedReceiver();
 
         version.setText(device.getVersionName());
         loadBanner();
@@ -186,81 +173,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
             toolbar.setSubtitle(smsTo);
         }
     }
-//
-//    public MaterialDialog updateDownloadingProgress;
-//    private long enqueue;
-//    private DownloadManager dm;
-//    private BroadcastReceiver updateDownloadReceiver;
-//
-//    private void registerUpdateDownloadedReceiver() {
-//        updateDownloadReceiver = new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(Context context, Intent intent) {
-//                String action = intent.getAction();
-//                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-////                    long downloadId = intent.getLongExtra(
-////                            DownloadManager.EXTRA_DOWNLOAD_ID, 0);
-//                    DownloadManager.Query query = new DownloadManager.Query();
-//                    query.setFilterById(enqueue);
-//                    Cursor c = dm.query(query);
-//                    if (c.moveToFirst()) {
-//                        Log.d(TAG, "DownloadMsg: " + statusMessage(c));
-//                        int columnIndex = c
-//                                .getColumnIndex(DownloadManager.COLUMN_STATUS);
-//                        if (DownloadManager.STATUS_SUCCESSFUL == c
-//                                .getInt(columnIndex)) {
-//
-//                            String uriString = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-//                            Log.d(TAG, "Downloaded: " + uriString);
-//
-//                            launchInstaller(new File(uriString));
-//
-//                            if (updateDownloadingProgress != null) {
-//                                updateDownloadingProgress.cancel();
-//                                updateDownloadingProgress = null;
-//                            }
-//
-//                        }
-//                    }
-//                }
-//            }
-//        };
-//
-//        registerReceiver(updateDownloadReceiver, new IntentFilter(
-//                DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-//    }
-//
-//    private String statusMessage(Cursor c) {
-//        String msg = "???";
-//
-//        switch (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
-//            case DownloadManager.STATUS_FAILED:
-//                msg = "Download failed!";
-//                break;
-//
-//            case DownloadManager.STATUS_PAUSED:
-//                msg = "Download paused!";
-//                break;
-//
-//            case DownloadManager.STATUS_PENDING:
-//                msg = "Download pending!";
-//                break;
-//
-//            case DownloadManager.STATUS_RUNNING:
-//                msg = "Download in progress!";
-//                break;
-//
-//            case DownloadManager.STATUS_SUCCESSFUL:
-//                msg = "Download complete!";
-//                break;
-//
-//            default:
-//                msg = "Download is nowhere in sight";
-//                break;
-//        }
-//
-//        return (msg);
-//    }
 
     private void loadBanner() {
         String logo = ParseUser.getCurrentUser().getString("logoUrl");
@@ -269,7 +181,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     @OnClick(R.id.sign_in_button)
     public void login(BootstrapButton button) {
-//        parseModule.clearData();
         attemptLogin();
     }
 
@@ -391,23 +302,14 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                     Log.w(TAG, "Failed to bootstrap");
                     handleFailedLogin("updateAllClasses", task.getError());
                 }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mLoginStatusView.setVisibility(View.GONE);
-                        mLoginFormView.setVisibility(View.VISIBLE);
-                        mGuardIdView.setText("");
-                    }
-                });
-
-
                 return task;
             }
         })
         .onSuccess(new Continuation<Void, Void>() {
             @Override
             public Void then(Task<Void> task) throws Exception {
+
+                mGuardIdView.setText("");
 
                 parseModule.login(guard);
 
@@ -441,53 +343,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-//    // TODO: Hardcoded countrycode +45
-//    private Task<Void> checkMobileNumber(final Guard guard) {
-//
-//        final TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
-//
-//        if (!guard.canAccessAlarms() || !guard.getMobile().isEmpty()) {
-//            return Task.forResult(null);
-//        }
-//
-//        final String[] mobile = {"+45"};
-//        new MaterialDialog.Builder(GuardLoginActivity.this)
-//                .title(R.string.mobile_number)
-//                .content(this.getString(R.string.enter_mobile_number, guard.getName()))
-//                .inputType(InputType.TYPE_CLASS_PHONE)
-//                .input(null, mobile[0], new MaterialDialog.InputCallback() {
-//                    @Override
-//                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-//                        String editTextString = input.toString();
-//
-//                        if (!editTextString.startsWith("+45") || editTextString.length() != 11) {
-//                            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(false);
-//                        } else {
-//                            dialog.getActionButton(DialogAction.POSITIVE).setEnabled(true);
-//                        }
-//
-//                        mobile[0] = editTextString;
-//                    }
-//                })
-//                .alwaysCallInputCallback()
-//                .negativeText(android.R.string.cancel)
-//                .onPositive(new MaterialDialog.SingleButtonCallback() {
-//                    @Override
-//                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-//                        guard.setMobile(mobile[0]);
-//                        guard.pinThenSaveEventually();
-//                    }
-//                })
-//                .onAny(new MaterialDialog.SingleButtonCallback() {
-//                    @Override
-//                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-//                        taskCompletionSource.setResult(null);
-//                    }
-//                })
-//                .show();
-//
-//        return taskCompletionSource.getTask();
-//    }
 
     private boolean hasGooglePlayServices() {
         int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
@@ -502,22 +357,12 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     @Override
     public void onBackPressed() {
-//        if (Guard.Recent.getSelected() != null) {
-//            showProgress(false);
-//        } else {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
-        // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         super.onBackPressed();
-//        }
     }
 
-//    public void onEventMainThread(DataSyncEvent ev) {
-//        String message = getString(R.string.login_progress_synchronizing,
-//                ev.missingUpdates, ev.totalUpdates);
-//        mLoginStatusMessageView.setText(message);
-//    }
 
     @Override
     protected void onResume() {
@@ -532,8 +377,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         });
 
         Guard guard = GuardSwiftApplication.getLastActiveGuard();
-        String lastActive = guard != null ? guard.getName() : "N/A";
-//        new FetchLatestVersion(this).execute();
 
         super.onResume();
     }
@@ -588,123 +431,34 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
         updateToolbarTitle();
 
+        showProgress(false);
 
         super.onPostResume();
     }
 
-    @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-//        unregisterReceiver(updateDownloadReceiver);
-//        if (mDownloadTask != null) {
-//            MaterialDialog dialog = mDownloadTask.working_dialog;
-//            if (dialog != null) {
-//                dialog.cancel();
-//            }
-//        }
-        super.onDestroy();
-    }
 
     /**
      * Shows the progress UI and hides the login form.
      */
     private void showProgress(final boolean show) {
 
-        Log.d(TAG, "showProgress 1: " + show);
         if (mLoginFormView == null || mLoginStatusView == null) {
             return;
         }
-        Log.d(TAG, "showProgress 2: " + show);
 
-        int shortAnimTime = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
-
-        mLoginStatusView.setVisibility(View.VISIBLE);
-        mLoginStatusView.animate().setDuration(shortAnimTime)
-                .alpha(show ? 1 : 0)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        Log.d(TAG, "onAnimationEnd mLoginStatusView");
-                        mLoginStatusView.setVisibility(show ? View.VISIBLE
-                                : View.GONE);
-                    }
-                });
-
-        mLoginFormView.setVisibility(View.VISIBLE);
-        mLoginFormView.animate().setDuration(shortAnimTime)
-                .alpha(show ? 0 : 1)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        Log.d(TAG, "onAnimationEnd mLoginFormView");
-                        mLoginFormView.setVisibility(show ? View.GONE
-                                : View.VISIBLE);
-                    }
-                });
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "showLogin");
+                mLoginFormView.setVisibility(show ? GONE : VISIBLE);
+                mLoginStatusView.setVisibility(show ? VISIBLE : GONE);
+            }
+        });
     }
 
-//    private class FetchLatestVersion extends AsyncTask<Void, Void, Integer> {
-//
-//        private WeakReference<Activity> mActRef;
-//
-//        public FetchLatestVersion(Activity activity) {
-//            mActRef = new WeakReference<Activity>(activity);
-//        }
-//
-//        @Override
-//        protected Integer doInBackground(Void... param) {
-//
-//            String inputLine = "-1";
-//            BufferedReader in = null;
-//            try {
-//                URL update_url = new URL(UPDATE_VERSIONCHECK_URL);
-//                in = new BufferedReader(new InputStreamReader(
-//                        update_url.openStream()));
-//
-//                if ((inputLine = in.readLine()) != null) {
-//                    return Integer.parseInt(inputLine);
-//                }
-//
-//            } catch (Exception e) {
-//                new HandleException(TAG, "Version check" + e.getMessage(), e);
-//            } finally {
-//                try {
-//                    if (in != null) {
-//                        in.close();
-//                    }
-//                } catch (IOException e) {
-//                    new HandleException(TAG, "Version check: " + e.getMessage(), e);
-//                }
-//            }
-//            return -1;
-//
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Integer result) {
-//            if (result > device.getVersionCode()) {
-//                showDownloadOption();
-//            }
-//
-//            Log.d(TAG, "versioncheck complete. latest: " + result + " current: " + device.getVersionCode());
-//        }
-//
-//
-//    }
 
     private void showDownloadOption() {
-
-//            findViewById(R.id.new_update).setVisibility(View.VISIBLE);
 
         if (isFinishing())
             return;
@@ -723,212 +477,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                 .show();
     }
 
-
-//    //    @OnClick(R.id.button_download)
-//    public void update(Button button) {
-//        if (mDownloadTask != null
-//                && mDownloadTask.getStatus() == STATUS.RUNNING) {
-//            mDownloadTask.cancel(true);
-//        }
-//
-//        mDownloadTask = new DownloadUpdate();
-//        mDownloadTask.execute();
-//
-////        dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-////        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(UPDATE_DOWNLOAD_URL));
-////        enqueue = dm.enqueue(request);
-//
-////        showDownloadProgress();
-////        monitorDownloadProgress();
-//    }
-
-
-//    private void showDownloadProgress() {
-//        updateDownloadingProgress = new MaterialDialog.Builder(GuardLoginActivity.this)
-//                .title(R.string.downloading_update)
-//                .content(R.string.please_wait)
-//                .progress(false, 0)
-//                .cancelable(false)
-//                .negativeText(android.R.string.cancel)
-//                .callback(new MaterialDialog.ButtonCallback() {
-//                    @Override
-//                    public void onNegative(MaterialDialog dialog) {
-//                        dm.remove(enqueue);
-//                        Toast.makeText(getApplicationContext(), getString(R.string.download_canceled), Toast.LENGTH_LONG).show();
-//                    }
-//                })
-//                .show();
-//    }
-
-//    private void monitorDownloadProgress() {
-//        new Thread(new Runnable() {
-//
-//            @Override
-//            public void run() {
-//
-//                boolean downloading = true;
-//
-//                while (downloading) {
-//
-//                    DownloadManager.Query q = new DownloadManager.Query();
-//                    q.setFilterById(enqueue);
-//
-//                    Cursor cursor = dm.query(q);
-//                    cursor.moveToFirst();
-//                    int bytes_downloaded = cursor.getInt(cursor
-//                            .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-//                    int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-//
-//                    if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-//
-//                        String uriString = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
-//                        launchInstaller(new File(uriString));
-//
-//                        if (updateDownloadingProgress != null) {
-//                            updateDownloadingProgress.cancel();
-//                            updateDownloadingProgress = null;
-//                        }
-//
-//                        downloading = false;
-//                    }
-//
-//                    final int dl_progress = (int) ((bytes_downloaded * 100l) / bytes_total);
-//                    Log.d(TAG, "Progress: " + dl_progress);
-//
-//                    runOnUiThread(new Runnable() {
-//
-//                        @Override
-//                        public void run() {
-//
-//                            updateDownloadingProgress.setProgress(dl_progress);
-//
-//                        }
-//                    });
-//
-//                    cursor.close();
-//                }
-//
-//            }
-//        }).start();
-//    }
-
-//    private class DownloadUpdate extends AsyncTask<Void, Integer, File> {
-//
-//        public MaterialDialog working_dialog;
-//
-//        private String toastMsg = "";
-//
-//        @Override
-//        protected void onPreExecute() {
-//            working_dialog = new MaterialDialog.Builder(GuardLoginActivity.this)
-//                    .title(R.string.downloading_update)
-//                    .content(R.string.please_wait)
-//                    .progress(true, 0)
-//                    .cancelable(false)
-//                    .negativeText(android.R.string.cancel)
-//                    .callback(new MaterialDialog.ButtonCallback() {
-//                        @Override
-//                        public void onNegative(MaterialDialog dialog) {
-//                            DownloadUpdate.this.cancel(true);
-//                            Toast.makeText(getApplicationContext(), getString(R.string.download_canceled), Toast.LENGTH_LONG).show();
-//                        }
-//                    })
-//                    .show();
-//        }
-//
-//        @Override
-//        protected File doInBackground(Void... param) {
-//
-//            String filename = "guardswift.apk";
-//
-//
-//            File myFilesDir = new File(Environment
-//                    .getExternalStorageDirectory().getAbsolutePath()
-//                    + "/Download");
-////            File file = new File(context.getFilesDir(), "update.apk");
-//            File file = new File(myFilesDir, filename);
-//
-//            if (file.exists()) {
-//                file.delete();
-//            }
-//
-//            if ((myFilesDir.mkdirs() || myFilesDir.isDirectory())) {
-//
-//                HttpURLConnection c = null;
-//
-//                try {
-//
-//                    URL url = new URL(UPDATE_DOWNLOAD_URL);
-//                    c = (HttpURLConnection) url.openConnection();
-//                    c.setRequestMethod("GET");
-////                    c.setDoOutput(true);
-//                    c.connect();
-//
-//                    InputStream is = c.getInputStream();
-////                    FileOutputStream fos = openFileOutput("update.apk", Context.MODE_PRIVATE);
-//                    FileOutputStream fos = new FileOutputStream(myFilesDir
-//                            + "/" + filename);
-//
-//                    byte[] buffer = new byte[1024];
-//                    int len1 = 0;
-//                    int total = 0;
-//                    int length = c.getContentLength();
-//                    while ((len1 = is.read(buffer)) != -1) {
-//                        total += len1;
-//                        int progress = (int) (total * 100 / length);
-//                        publishProgress(progress);
-//                        Log.d(TAG, "progress: " + progress + "/" + total);
-//
-//                        fos.write(buffer, 0, len1);
-//                    }
-//                    fos.close();
-//                    is.close();
-//                } catch (Exception e) {
-//                    new HandleException(GuardLoginActivity.this, TAG, "download update", e);
-//                    toastMsg = context
-//                            .getString(R.string.title_internet_missing);
-//                }
-//            }
-//
-//            return file;
-//        }
-//
-//        @Override
-//        protected void onProgressUpdate(Integer... values) {
-//            super.onProgressUpdate(values);
-//            if (working_dialog != null && !working_dialog.isIndeterminateProgress()) {
-//                working_dialog.setProgress(values[0]);
-//            }
-//        }
-//
-//        @Override
-//        protected void onPostExecute(File file) {
-//
-//            if (!toastMsg.isEmpty() && context != null) {
-//                Toast.makeText(context, toastMsg, Toast.LENGTH_LONG).show();
-//            } else {
-//                launchInstaller(file);
-//            }
-//
-//            removeWorkingDialog();
-//        }
-//
-//        private void removeWorkingDialog() {
-//            if (working_dialog != null && working_dialog.isShowing()) {
-//                working_dialog.dismiss();
-//                working_dialog = null;
-//            }
-//        }
-//
-//    }
-//
-//    public void launchInstaller(File apkFile) {
-//        Intent intent = new Intent(Intent.ACTION_VIEW);
-//        intent.setDataAndType(Uri.fromFile(apkFile),
-//                "application/vnd.android.package-archive");
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivityForResult(intent, 0);
-//    }
 
     private MaterialDialog missingLocationsDialog;
 
