@@ -83,9 +83,9 @@ public class ReportCard extends LinearLayout {
 
         layoutEvents.removeAllViews();
         for (EventLog eventLog : report.getEventLogs()) {
-            if (!eventLog.isReportEvent()) {
-                continue;
-            }
+//            if (!eventLog.isReportEvent()) {
+//                continue;
+//            }
 
             TextView tv = new TextView(getContext());
 

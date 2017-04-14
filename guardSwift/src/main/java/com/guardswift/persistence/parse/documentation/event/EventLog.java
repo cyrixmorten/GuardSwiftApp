@@ -1,6 +1,7 @@
 package com.guardswift.persistence.parse.documentation.event;
 
 import android.content.Context;
+import android.text.format.DateFormat;
 import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
@@ -33,6 +34,7 @@ import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
+import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.GetCallback;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
@@ -70,7 +72,11 @@ public class EventLog extends ExtendedParseObject {
     }
 
     public String getSummaryString() {
-        return withSpace(getEvent()) +
+
+        String timestamp = DateFormat.getTimeFormat(GuardSwiftApplication.getInstance()).format(getDeviceTimestamp());
+
+        return withSpace(timestamp) +
+                withSpace(getEvent()) +
                 withSpace(getAmountString()) +
                 withSpace(getPeople()) +
                 withSpace(getLocations()) +
