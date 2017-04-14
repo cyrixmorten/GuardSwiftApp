@@ -408,7 +408,7 @@
     <string name="device_name">Navn på enhed</string>
     <string name="connect_to_mobile">Tilknyt mobil nummer</string>
     <string name="click_here_to_enter">Klik her for at tilføje %1$s</string>
-    <string name="installation_send_to_description">Det valgte mobil nummer vil modtage SMS med alarm meldinger når den seneste vægter der loggede på denne enhed er registreret til at modtage alarmer</string>
+    <string name="installation_send_to_description">Det valgte mobil nummer vil modtage SMS med alarm meldinger, når den seneste vægter der loggede på enheden er registreret til at modtage alarmer</string>
     <string name="guard_mobile_description">Personlig tildelt mobil nummer til modtagelse af opkald og SMS\'er</string>
 
 
