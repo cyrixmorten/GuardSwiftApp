@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule.ForApplication;
+import com.guardswift.ui.GuardSwiftApplication;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -30,6 +31,10 @@ public class Device {
 	public Device(@ForApplication Context context) {
 		super();
 		this.context = context;
+	}
+
+	public Device() {
+		this.context = GuardSwiftApplication.getInstance();
 	}
 
 	public boolean isRunningOnEmulator() {

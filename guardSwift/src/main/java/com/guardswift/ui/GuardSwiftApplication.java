@@ -41,6 +41,7 @@ import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.persistence.parse.misc.Message;
+import com.guardswift.persistence.parse.misc.Update;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.ToastHelper;
 import com.parse.DeleteCallback;
@@ -186,6 +187,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         ParseObject.registerSubclass(EventRemark.class);
         ParseObject.registerSubclass(Guard.class);
         ParseObject.registerSubclass(Message.class);
+        ParseObject.registerSubclass(Update.class);
 
         ParseObject.registerSubclass(Tracker.class);
 

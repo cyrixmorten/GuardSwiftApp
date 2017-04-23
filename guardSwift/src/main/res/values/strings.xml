@@ -160,8 +160,8 @@
     <string name="no_contacts_found">Ingen kontakpersoner fundet</string>
     <string name="missing_description">Beskrivelse mangler</string>
     <string name="title_alarm">Alarm</string>
-    <string name="update">Opdatering</string>
-    <string name="new_update_available">Der findes en ny opdatering.\n\nÅben GMail for at hente nu?</string>
+    <string name="new_update_available">Ny opdatering tilgængelig</string>
+    <string name="current_and_latest_version">Nuværende version %1$s\nNyeste version: %2$s</string>
     <string name="downloading_update">Henter opdatering…</string>
     <string name="download_canceled">Download afbrudt</string>
     <string name="error_loading">Fejl under indlæsning</string>
@@ -410,6 +410,9 @@
     <string name="click_here_to_enter">Klik her for at tilføje %1$s</string>
     <string name="installation_send_to_description">Det valgte mobil nummer vil modtage SMS med alarm meldinger, når den seneste vægter der loggede på enheden er registreret til at modtage alarmer</string>
     <string name="guard_mobile_description">Personlig tildelt mobil nummer til modtagelse af opkald og SMS\'er</string>
+    <string name="install_update">Hent nu</string>
+    <string name="later">Senere</string>
+    <string name="file_not_found">Filen kunne ikke findes</string>
 
 
 </resources>

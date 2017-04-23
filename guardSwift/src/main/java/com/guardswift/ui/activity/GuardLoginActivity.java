@@ -2,6 +2,7 @@ package com.guardswift.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -33,21 +34,23 @@ import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.Installation;
-import com.guardswift.rest.GuardSwiftWeb;
+import com.guardswift.persistence.parse.misc.Update;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.drawer.GuardLoginNavigationDrawer;
 import com.guardswift.util.Device;
-import com.guardswift.util.GSIntents;
 import com.guardswift.util.ToastHelper;
 import com.parse.GetCallback;
+import com.parse.GetFileCallback;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseInstallation;
 import com.parse.ParseSession;
 import com.parse.ParseUser;
+import com.parse.ProgressCallback;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -58,11 +61,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -248,7 +246,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
 
     /**
-     * Updates Guards on Local Datastore and tries to locate Guard
+     * Update Guards on Local Datastore and tries to locate Guard
      *
      * @param guardId
      */
@@ -299,7 +297,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
             @Override
             public Task<Void> then(Task<Void> task) throws Exception {
                 if (task.isFaulted()) {
-                    Log.w(TAG, "Failed to bootstrap");
                     handleFailedLogin("updateAllClasses", task.getError());
                 }
                 return task;
@@ -364,59 +361,99 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-    @Override
-    protected void onResume() {
 
-        checkForNewUpdate(new VersionCheckCallback() {
+    private void checkForNewUpdates() {
+        new Update.QueryBuilder(false).build().addDescendingOrder(Update.versionNumber).findInBackground()
+                .continueWith(new Continuation<List<Update>, Object>() {
             @Override
-            public void newVersionAvailable(boolean newUpdate) {
-                if (newUpdate) {
-                    showDownloadOption();
+            public Object then(Task<List<Update>> task) throws Exception {
+                if (task.isFaulted()) {
+                    new HandleException(TAG, "Fetch updates", task.getError());
+                    return null;
                 }
-            }
-        });
 
-        Guard guard = GuardSwiftApplication.getLastActiveGuard();
-
-        super.onResume();
-    }
-
-    private interface VersionCheckCallback {
-        void newVersionAvailable(boolean result);
-    }
-
-    private void checkForNewUpdate(final VersionCheckCallback callback) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(GuardSwiftWeb.API_URL)
-                .build();
-
-        GuardSwiftWeb.API guardSwift = retrofit.create(GuardSwiftWeb.API.class);
-
-        guardSwift.version().enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        String latestversion = response.body().string();
-
-                        boolean higherVersion = Integer.parseInt(latestversion) > device.getVersionCode();
-
-                        callback.newVersionAvailable(higherVersion);
-
-                    } catch (IOException e) {
-                        new HandleException(TAG, "Version check response", e);
-                    }
+                boolean hasNew = false;
+                List<Update> updates = task.getResult();
+                for (Update update: updates) {
+                    hasNew = hasNew || update.isNewerThanInstalled();
                 }
-            }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                new HandleException(TAG, "Error at version check", t);
+                if (hasNew) {
+                    showDownloadOption(updates);
+                }
 
-                callback.newVersionAvailable(false);
+                return null;
             }
         });
     }
+
+
+    private void showDownloadOption(List<Update> updates) {
+
+        if (isFinishing() || updates.isEmpty())
+            return;
+
+        final Update targetUpdate = updates.get(0);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                new MaterialDialog.Builder(GuardLoginActivity.this)
+                        .title(R.string.new_update_available)
+                        .positiveText(R.string.install_update)
+                        .negativeText(R.string.later)
+                        .content(getString(R.string.current_and_latest_version, device.getVersionName(), targetUpdate.getVersionName()))
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                downloadAndInstall(targetUpdate);
+                            }
+                        })
+                        .show();
+            }
+        });
+    }
+
+    private void downloadAndInstall(Update update) {
+        ParseFile apkFile = update.getUpdateFile();
+        if (apkFile == null) {
+            ToastHelper.toast(this, getString(R.string.file_not_found));
+            return;
+        }
+
+        final MaterialDialog downloadDialog = new MaterialDialog.Builder(this)
+                .title(R.string.downloading_update)
+                .content(R.string.please_wait)
+                .progress(false, 100, false)
+                .show();
+
+        ProgressCallback progressCallback = new ProgressCallback() {
+            @Override
+            public void done(Integer percentDone) {
+                  downloadDialog.setProgress(percentDone);
+            }
+        };
+
+        apkFile.getFileInBackground(new GetFileCallback() {
+            @Override
+            public void done(File file, ParseException e) {
+                if (e != null) {
+                    new HandleException(TAG, "Failed to download update", e);
+                    return;
+                }
+
+
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // without this flag android returned a intent error!
+                context.startActivity(intent);
+
+                downloadDialog.dismiss();
+
+            }
+        }, progressCallback);
+    }
+
 
 
     @Override
@@ -427,11 +464,14 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
         if (!device.hasGpsAndNetworkEnabled()) {
             showMissingLocationsDialog();
+        } else {
+            checkForNewUpdates();
         }
 
         updateToolbarTitle();
 
         showProgress(false);
+
 
         super.onPostResume();
     }
@@ -458,24 +498,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-    private void showDownloadOption() {
 
-        if (isFinishing())
-            return;
-
-        new MaterialDialog.Builder(GuardLoginActivity.this)
-                .title(R.string.update)
-                .positiveText(android.R.string.ok)
-                .negativeText(android.R.string.cancel)
-                .content(R.string.new_update_available)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        GSIntents.openGmail(GuardLoginActivity.this);
-                    }
-                })
-                .show();
-    }
 
 
     private MaterialDialog missingLocationsDialog;

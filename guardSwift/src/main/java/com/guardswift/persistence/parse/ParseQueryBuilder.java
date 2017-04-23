@@ -16,8 +16,19 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
 	protected final boolean fromLocalDatastore;
 	protected ParseQuery<T> query;
 
+	private boolean publicRead = false;
+
+
 	public ParseQueryBuilder(String pin, boolean fromLocalDatastore,
 			ParseQuery<T> query) {
+		this.pin = pin;
+		this.fromLocalDatastore = fromLocalDatastore;
+		this.query = query;
+	}
+
+	public ParseQueryBuilder(String pin, boolean fromLocalDatastore,
+							 ParseQuery<T> query, boolean publicRead) {
+		this.publicRead = publicRead;
 		this.pin = pin;
 		this.fromLocalDatastore = fromLocalDatastore;
 		this.query = query;
@@ -52,7 +63,9 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
 	}
 
 	public ParseQuery<T> build() {
-		query.whereEqualTo("owner", ParseUser.getCurrentUser());
+		if (!publicRead) {
+			query.whereEqualTo("owner", ParseUser.getCurrentUser());
+		}
 		query.whereNotEqualTo("archive", true);
 		setFromLocalDatastore();
 		return query;
