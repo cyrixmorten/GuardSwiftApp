@@ -2,7 +2,6 @@ package com.guardswift.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -40,6 +39,7 @@ import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.drawer.GuardLoginNavigationDrawer;
 import com.guardswift.util.Device;
 import com.guardswift.util.ToastHelper;
+import com.guardswift.util.UpdateApp;
 import com.parse.GetCallback;
 import com.parse.GetFileCallback;
 import com.parse.ParseException;
@@ -442,11 +442,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                     return;
                 }
 
-
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.fromFile(file), "application/vnd.android.package-archive");
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // without this flag android returned a intent error!
-                context.startActivity(intent);
+                UpdateApp.fromFile(file);
 
                 downloadDialog.dismiss();
 
