@@ -55,7 +55,7 @@ public class TaskClientLogStrategy implements LogTaskStrategy {
         Location location = LocationModule.Recent.getLastKnownLocation();
         if (client != null && location != null) {
             ParseGeoPoint clientPosition = client.getPosition();
-//                double distanceKm = ParseModule.distanceBetweenKilomiters(location, clientPosition);
+//                double distanceKm = ParseModule.distanceBetweenKilometers(location, clientPosition);
             float distanceMeters = ParseModule.distanceBetweenMeters(location, clientPosition);
             toParseObject.put(TaskClientLogStrategy.clientDistanceMeters, distanceMeters);
         }

@@ -33,6 +33,8 @@ import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 import com.guardswift.ui.parse.data.client.ClientDetailsFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
+import com.guardswift.ui.parse.data.tracker.TrackerListFragment;
+import com.guardswift.ui.parse.data.tracker.TrackerMapFragment;
 import com.guardswift.ui.parse.documentation.eventlog.AbstractEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.CircuitUnitEventFragment;
 import com.guardswift.ui.parse.documentation.eventlog.DistrictWatchClientEventFragment;
@@ -93,6 +95,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		GuardListFragment.class,
 		ClientListFragment.class,
 		ClientDetailsFragment.class,
+		TrackerListFragment.class,
+		TrackerMapFragment.class,
 		// - Execution
 		AbstractTasksRecycleFragment.class,
 		// -- Alarm

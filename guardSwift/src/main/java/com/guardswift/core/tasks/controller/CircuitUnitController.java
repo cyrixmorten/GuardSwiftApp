@@ -149,17 +149,19 @@ public class CircuitUnitController extends BaseTaskController {
         }
 
 
-        circuitUnit.pinThenSaveEventually(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e != null) {
-                    new HandleException(TAG, "Failed to pinThenSaveEventually", e);
-                }
-                EventBusController.postUIUpdate(circuitUnit);
-            }
-        });
 
         if (event != null) {
+
+            circuitUnit.pinThenSaveEventually(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e != null) {
+                        new HandleException(TAG, "Failed to pinThenSaveEventually", e);
+                    }
+                    EventBusController.postUIUpdate(circuitUnit);
+                }
+            });
+
             event.saveAsync();
         }
 

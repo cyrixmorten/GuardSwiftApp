@@ -18,6 +18,8 @@ import com.guardswift.ui.parse.documentation.report.view.DownloadReport;
 import com.guardswift.util.GSIntents;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.Date;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -30,6 +32,9 @@ public class ReportCard extends LinearLayout {
 
     @Bind(R.id.layout_events)
     LinearLayout layoutEvents;
+
+    @Bind(R.id.tv_week)
+    TextView tvWeek;
 
     @Bind(R.id.tv_date)
     TextView tvDate;
@@ -100,9 +105,16 @@ public class ReportCard extends LinearLayout {
         }
 
         tvGuardName.setText(report.getGuardName());
+
+        Date date = report.getDeviceTimestamp();
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        int weekNo = c.get(Calendar.WEEK_OF_YEAR);
+        tvWeek.setText(getContext().getString(R.string.week_number, weekNo));
         tvDate.setText(DateUtils.formatDateTime(
                 getContext(),
-                report.getDeviceTimestamp().getTime(),
+                date.getTime(),
                 DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR));
 
 //        String taskTypeName = report.getString(TaskTypeLogStrategy.taskTypeName);

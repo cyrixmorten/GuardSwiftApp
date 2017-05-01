@@ -177,7 +177,6 @@ public class GeofencingModule {
 //        Log.d(TAG, "matchGeofencedWithDetectedActivity: " + ActivityDetectionModule.getNameFromType(detectedActivity.getType()));
 
         Set<GSTask> allWithinGeofence = tasksCache.getWithinGeofence();
-//        Log.d(TAG, "matchGeofencedWithDetectedActivity within geofence: " + allWithinGeofence);
         for (GSTask task : allWithinGeofence) {
             task.getActivityStrategy().handleActivityInsideGeofence(detectedActivity);
         }

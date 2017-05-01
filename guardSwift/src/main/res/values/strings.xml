@@ -413,6 +413,13 @@
     <string name="install_update">Hent nu</string>
     <string name="later">Senere</string>
     <string name="file_not_found">Filen kunne ikke findes</string>
+    <string name="minutes">minutter</string>
+    <string name="title_drawer_gps_history">GPS historik</string>
+    <string name="hours">timer</string>
+    <string name="hour">time</string>
+    <string name="minute">minut</string>
+    <string name="seconds">sekunder</string>
+    <string name="week_number">Uge %1$d</string>
 
 
 </resources>

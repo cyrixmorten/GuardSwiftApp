@@ -10,6 +10,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.TypefaceProvider;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
@@ -21,6 +22,7 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
+import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.Guard;
@@ -310,7 +312,7 @@ public class GuardSwiftApplication extends InjectingApplication {
             updateDialog.show();
         }
 
-        Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
+        final Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
             @Override
             public List<ParseObject> then(Task<List<ParseObject>> task) throws Exception {
 
@@ -336,59 +338,31 @@ public class GuardSwiftApplication extends InjectingApplication {
         };
 
 
-        ArrayList<Task<List<ParseObject>>> tasks = new ArrayList<>();
-
-
-        Task<List<ParseObject>> eventTypes = parseObjectFactory.getEventType().updateAllAsync();
-        tasks.add(eventTypes.onSuccess(updateClassSuccess));
-
-        Task<List<ParseObject>> clients = parseObjectFactory.getClient().updateAllAsync();
-        tasks.add(clients.onSuccess(updateClassSuccess));
-
-        Task<List<ParseObject>> guards = parseObjectFactory.getGuard().updateAllAsync();
-        tasks.add(guards.onSuccess(updateClassSuccess));
-
+        ArrayList<ExtendedParseObject> updateClasses = Lists.newArrayList();
+        updateClasses.add(parseObjectFactory.getEventType());
+        updateClasses.add(parseObjectFactory.getClient());
+        updateClasses.add(parseObjectFactory.getGuard());
         if (guard.canAccessRegularTasks()) {
-            Task<List<ParseObject>> circuitStartedTask = parseObjectFactory.getCircuitStarted().updateAllAsync();
-            Task<List<ParseObject>> circuitUnit = parseObjectFactory.getCircuitUnit().updateAllAsync();
-
-            tasks.add(circuitStartedTask.onSuccess(updateClassSuccess));
-            tasks.add(circuitUnit.onSuccess(updateClassSuccess));
-
-            Task<List<ParseObject>> message = parseObjectFactory.getMessage().updateAllAsync();
-            tasks.add(message.onSuccess(updateClassSuccess));
+            updateClasses.add(parseObjectFactory.getCircuitStarted());
+            updateClasses.add(parseObjectFactory.getMessage());
         }
-
-//        if (guard.canAccessDistrictTasks()) {
-//            Task<List<ParseObject>> districtWatchStartedTask = parseObjectFactory.getDistrictWatchStarted().updateAllAsync();
-//            Task<List<ParseObject>> districtWatchClient = parseObjectFactory.getDistrictWatchClient().updateAllAsync();
-//
-//
-//            tasks.add(districtWatchStartedTask.onSuccess(updateClassSuccess));
-//            tasks.add(districtWatchClient.onSuccess(updateClassSuccess));
-//        }
-
         if (guard.canAccessAlarms()) {
-            Task<List<ParseObject>> alarms = parseObjectFactory.getTask().updateAllAsync();
-
-            tasks.add(alarms.onSuccess(updateClassSuccess));
+            updateClasses.add(parseObjectFactory.getTask());
         }
 
-        updateClassTotal.set(tasks.size());
+        updateClassTotal.set(updateClasses.size());
 
         Task<List<ParseObject>> resultTask = Task.forResult(null);
 
-        for (final Task<List<ParseObject>> syncTask: tasks) {
+        for (final ExtendedParseObject parseClass: updateClasses) {
             resultTask = resultTask.onSuccessTask(new Continuation<List<ParseObject>, Task<List<ParseObject>>>() {
                 @Override
                 public Task<List<ParseObject>> then(Task<List<ParseObject>> task) throws Exception {
-                    return syncTask;
+                    return parseClass.updateAllAsync().onSuccess(updateClassSuccess);
                 }
             });
         }
-        
 
-//        return Task.whenAll(tasks)
         return resultTask
                 .continueWithTask(new Continuation<List<ParseObject>, Task<List<ParseObject>>>() {
                     @Override

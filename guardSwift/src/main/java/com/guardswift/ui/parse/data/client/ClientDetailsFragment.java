@@ -16,7 +16,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,8 +88,6 @@ public class ClientDetailsFragment extends InjectingFragment implements
     private List<View> mDetailsViews;
 
 
-    @Bind(R.id.mapContainer)
-    RelativeLayout mapContainer;
     //    @Bind(R.id.button_navigation)
 //    Button startNavigationButton;
     @Bind(R.id.contactsContainer)
@@ -225,7 +222,7 @@ public class ClientDetailsFragment extends InjectingFragment implements
                         GoogleMapFragment mapFragment = GoogleMapFragment
                                 .newInstance();
                         fm.beginTransaction()
-                                .replace(R.id.mapContainer, mapFragment, "map")
+                                .replace(R.id.layout_map, mapFragment, "map")
                                 .commitAllowingStateLoss();
                     }
                 }

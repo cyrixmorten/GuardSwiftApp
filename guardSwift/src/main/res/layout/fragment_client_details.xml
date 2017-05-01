@@ -34,14 +34,13 @@
                 android:showDividers="end">
 
                 <LinearLayout
-                    android:id="@+id/mapContainerWrapper"
                     android:layout_width="match_parent"
                     android:layout_height="150dp"
                     android:baselineAligned="false"
                     android:orientation="vertical">
 
                     <RelativeLayout
-                        android:id="@+id/mapContainer"
+                        android:id="@+id/layout_map"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
                 </LinearLayout>

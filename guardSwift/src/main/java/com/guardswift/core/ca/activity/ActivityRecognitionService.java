@@ -1,12 +1,11 @@
 package com.guardswift.core.ca.activity;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
@@ -44,6 +43,8 @@ import rx.schedulers.Schedulers;
 public class ActivityRecognitionService extends InjectingService {
     private static final String TAG = ActivityRecognitionService.class.getSimpleName();
 
+    PowerManager.WakeLock wl;
+
     private static final int INACTIVITY_TIMEOUT_MINUTES = 60;
 
     private Subscription filteredActivitySubscription;
@@ -62,7 +63,13 @@ public class ActivityRecognitionService extends InjectingService {
     public void onCreate() {
         super.onCreate();
         this.logoutOnStill = new TriggerTask();
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+        wl.acquire();
     }
+
 
     private static boolean mIsRunning;
     private static boolean mJustStarted;
@@ -114,7 +121,6 @@ public class ActivityRecognitionService extends InjectingService {
     /**
      * Manual restart of service
      * http://stackoverflow.com/questions/24077901/how-to-create-an-always-running-background-service
-     * @param rootIntent
      */
 //    @Override
 //    public void onTaskRemoved(Intent rootIntent) {
@@ -149,6 +155,8 @@ public class ActivityRecognitionService extends InjectingService {
 
         releaseTextToSpeech();
         unsubscribeActivityUpdates();
+
+        wl.release();
 
         super.onDestroy();
     }

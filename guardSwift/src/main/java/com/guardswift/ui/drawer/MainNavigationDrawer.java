@@ -27,6 +27,7 @@ import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.data.client.ClientDetailsFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
+import com.guardswift.ui.parse.data.tracker.TrackerListFragment;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.ui.parse.execution.circuit.CircuitViewPagerFragment;
 import com.guardswift.ui.parse.execution.districtwatch.DistrictwatchViewPagerFragment;
@@ -401,6 +402,13 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                 GenericToolbarActivity.start(context, R.string.title_drawer_guards, GuardListFragment.newInstance());
+                return false;
+            }
+        }));
+        dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_gps_history)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                GenericToolbarActivity.start(context, R.string.title_drawer_gps_history, TrackerListFragment.newInstance());
                 return false;
             }
         }));

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -44,6 +45,8 @@ public class FusedLocationTrackerService extends InjectingService {
     private static int LOCATION_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY;
 
 
+    PowerManager.WakeLock wl;
+
     public FusedLocationTrackerService() {
     }
 
@@ -60,6 +63,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
     public static void stop(Context context) {
         context.stopService(new Intent(context, FusedLocationTrackerService.class));
+
     }
 
     private static final int DISTANCE_METERS_FOR_GEOFENCEREBUILD = 1500;
@@ -83,8 +87,15 @@ public class FusedLocationTrackerService extends InjectingService {
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "GPSTrackerService onCreate");
         super.onCreate();
+
+        Log.d(TAG, "GPSTrackerService onCreate");
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+        wl.acquire();
+
     }
 
     @Override
@@ -102,7 +113,6 @@ public class FusedLocationTrackerService extends InjectingService {
     /**
      * Manual restart of service
      * http://stackoverflow.com/questions/24077901/how-to-create-an-always-running-background-service
-     * @param rootIntent
      */
 //    @Override
 //    public void onTaskRemoved(Intent rootIntent) {
@@ -131,6 +141,7 @@ public class FusedLocationTrackerService extends InjectingService {
         if (hasGooglePlayServices()) {
             unsubscribeLocationUpdates();
         }
+        wl.release();
         super.onDestroy();
     }
 

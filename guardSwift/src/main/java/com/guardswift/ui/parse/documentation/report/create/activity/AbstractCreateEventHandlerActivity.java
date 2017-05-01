@@ -222,6 +222,11 @@ public abstract class AbstractCreateEventHandlerActivity extends
     @Override
     protected void onPostResume() {
         super.onPostResume();
+
+        if (getClient() == null) {
+            finish();
+        }
+
         if (actionBar != null) {
             actionBar.setSubtitle(getClient().getFullAddress());
         }

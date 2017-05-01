@@ -2,11 +2,11 @@ package com.guardswift.persistence.parse.documentation.gps;
 
 import android.content.Context;
 import android.location.Location;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.location.DetectedActivity;
+import com.google.gson.Gson;
 import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
@@ -14,7 +14,9 @@ import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.util.FileIO;
+import com.parse.GetDataCallback;
 import com.parse.ParseClassName;
+import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -32,7 +34,6 @@ import java.util.Date;
 import bolts.Continuation;
 import bolts.Task;
 import bolts.TaskCompletionSource;
-import de.greenrobot.event.util.AsyncExecutor;
 
 @ParseClassName("Tracker")
 public class Tracker extends ExtendedParseObject {
@@ -148,9 +149,6 @@ public class Tracker extends ExtendedParseObject {
 
     }
 
-    public Guard getGuard() {
-        return (Guard) getParseObject(guard);
-    }
 
 
     @Override
@@ -162,10 +160,8 @@ public class Tracker extends ExtendedParseObject {
     private int previousActivityType = Integer.MAX_VALUE;
 
     public void appendLocation(final Context context, @NonNull final Location location) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            if (location.isFromMockProvider()) {
-                return;
-            }
+        if (location.isFromMockProvider()) {
+            return;
         }
 
         int currentActivityType = ActivityDetectionModule.Recent.getDetectedActivityType();
@@ -204,6 +200,7 @@ public class Tracker extends ExtendedParseObject {
 
         @Override
         public ParseQuery<Tracker> build() {
+            query.include(Tracker.guard);
             return super.build();
         }
 
@@ -211,7 +208,56 @@ public class Tracker extends ExtendedParseObject {
             query.whereEqualTo(Tracker.guard, guard);
             return this;
         }
+
+        public QueryBuilder matching(Date date) {
+            query.whereEqualTo(Tracker.sampleStart, date);
+            return this;
+        }
     }
 
+    public Guard getGuard() {
+        return (Guard) getLDSFallbackParseObject(Tracker.guard);
+    }
 
+    public String getGuardName() {
+        return getGuard() != null ? getGuard().getName() : "";
+    }
+
+    public Date getDateStart() {
+        return getDate(Tracker.sampleStart);
+    }
+
+    public Date getDateEnd() {
+        return getDate(Tracker.sampleEnd);
+    }
+
+    public int getMinutes() {
+        return getInt(Tracker.sampleMinutes);
+    }
+
+    public interface DownloadTrackerDataCallback {
+        void done(TrackerData[] trackerData, Exception e);
+    }
+    public void downloadTrackerData(final DownloadTrackerDataCallback callback, ProgressCallback progressCallback) {
+        if (!has(Tracker.gpsFile)) {
+            callback.done(null, new ParseException(ParseException.OBJECT_NOT_FOUND, "No gps data"));
+            return;
+        }
+
+        getParseFile(Tracker.gpsFile).getDataInBackground(new GetDataCallback() {
+            @Override
+            public void done(byte[] data, ParseException e) {
+                if (e != null) {
+                    callback.done(null, e);
+                }
+
+                try {
+                    TrackerData[] trackerDataArray = new Gson().fromJson(FileIO.decompress(data), TrackerData[].class);
+                    callback.done(trackerDataArray, null);
+                } catch (IOException e1) {
+                    callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Unable to parse GPS data"));
+                }
+            }
+        }, progressCallback);
+    }
 }

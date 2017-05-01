@@ -6,6 +6,7 @@ import android.location.Location;
 import android.util.Log;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.core.ca.LocationModule;
@@ -274,7 +275,7 @@ public class ParseModule {
 
     public static DistanceStrings distanceBetweenString(
             Location deviceLocation, ParseGeoPoint targetGeoPoint) {
-        double distance = distanceBetweenKilomiters(deviceLocation, targetGeoPoint);
+        double distance = distanceBetweenKilometers(deviceLocation, targetGeoPoint);
         if (distance == -1) {
             return null;
         }
@@ -318,6 +319,23 @@ public class ParseModule {
         return distanceBetweenMeters(deviceLocation, client.getPosition());
     }
 
+    public static float distanceBetweenMeters(LatLng fromLatLng,
+                                              LatLng toLatLng) {
+        if (fromLatLng == null || toLatLng == null) {
+            return Float.MAX_VALUE;
+        }
+
+        Location from = new Location("fromLocation");
+        from.setLatitude(fromLatLng.latitude);
+        from.setLongitude(fromLatLng.longitude);
+
+        Location to = new Location("toLocation");
+        to.setLatitude(toLatLng.latitude);
+        to.setLongitude(toLatLng.longitude);
+
+        return from.distanceTo(to);
+    }
+
     public static float distanceBetweenMeters(Location deviceLocation,
                                               ParseGeoPoint targetGeoPoint) {
         if (deviceLocation == null || targetGeoPoint == null) {
@@ -332,7 +350,7 @@ public class ParseModule {
         return deviceLocation.distanceTo(targetLocation);
     }
 
-    public static double distanceBetweenKilomiters(Location deviceLocation,
+    public static double distanceBetweenKilometers(Location deviceLocation,
                                                    ParseGeoPoint targetGeoPoint) {
         if (deviceLocation == null || targetGeoPoint == null)
             return -1;
