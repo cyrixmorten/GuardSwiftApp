@@ -13,7 +13,7 @@ abstract class BaseNavigationDrawer {
     abstract Drawer initNavigationDrawer(FragmentActivity activity, Toolbar toolbar, final FragmentDrawerCallback fragmentDrawerCallback);
 
     public Drawer initNavigationDrawer(FragmentActivity activity, Toolbar toolbar, int viewId) {
-        return initNavigationDrawer(activity, toolbar, new ToolbarFragmentFragmentDrawerCallback(activity, toolbar, viewId));
+        return initNavigationDrawer(activity, toolbar, new ToolbarFragmentDrawerCallback(activity, toolbar, viewId));
     }
 
 

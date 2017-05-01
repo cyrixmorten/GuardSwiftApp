@@ -17,6 +17,7 @@ import com.guardswift.dagger.InjectingActivityModule;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
+import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
@@ -128,6 +129,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         CommonDrawerItems commonDrawerItems = new CommonDrawerItems(activity);
         navigationDrawer.addItems(commonDrawerItems.thisDevice());
         navigationDrawer.addItems(getGuardDataDrawerItem());
+        navigationDrawer.addItems(getAdminItems());
         addTaskItems();
 
 
@@ -286,10 +288,8 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         return circuitItems.toArray(new IDrawerItem[circuitItems.size()]);
     }
 
-    private List<IDrawerItem> alarmItems;
-
     private IDrawerItem[] getAlarmsDrawerItems() {
-        alarmItems = Lists.newArrayList();
+        List<IDrawerItem> alarmItems = Lists.newArrayList();
         IDrawerItem alarmHeader = new SectionDrawerItem().withName(R.string.title_drawer_alarms);
         alarmItems.add(alarmHeader);
 
@@ -405,6 +405,18 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                 return false;
             }
         }));
+
+        return dataItems.toArray(new IDrawerItem[dataItems.size()]);
+    }
+
+    private IDrawerItem[] getAdminItems() {
+        if (!guardCache.getLoggedIn().hasRole(Guard.Role.ADMIN)) {
+            return new IDrawerItem[]{};
+        }
+
+        List<IDrawerItem> dataItems = Lists.newArrayList();
+        IDrawerItem dataHeader = new SectionDrawerItem().withName(R.string.title_drawer_data);
+        dataItems.add(dataHeader);
         dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_gps_history)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
@@ -414,7 +426,6 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         }));
         return dataItems.toArray(new IDrawerItem[dataItems.size()]);
     }
-
 
     private IDrawerItem getLogoutDrawerItem() {
         return new PrimaryDrawerItem().withIdentifier(DRAWER_LOGOUT).withName(context.getString(R.string.title_drawer_logout)).withIcon(FontAwesome.Icon.faw_sign_out);

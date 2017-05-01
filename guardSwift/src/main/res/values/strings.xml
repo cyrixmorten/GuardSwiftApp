@@ -291,6 +291,7 @@
     <string name="task_description">Runderingsbeskrivelse</string>
     <string name="event_history">Hændelseshistorik</string>
     <string name="title_drawer_data">Data</string>
+    <string name="title_drawer_admin">Administrator</string>
     <string name="client_info">Kundeinformation</string>
     <string name="navigate_previous">Forrige</string>
     <string name="add_person">Tilføj person</string>

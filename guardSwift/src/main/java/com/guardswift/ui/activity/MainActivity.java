@@ -14,7 +14,7 @@ import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.drawer.MainNavigationDrawer;
-import com.guardswift.ui.drawer.ToolbarFragmentFragmentDrawerCallback;
+import com.guardswift.ui.drawer.ToolbarFragmentDrawerCallback;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.util.Device;
 import com.guardswift.util.Sounds;
@@ -54,7 +54,7 @@ public class MainActivity extends InjectingAppCompatActivity {
     Toolbar toolbar;
 
     private Drawer messagesDrawer;
-    private ToolbarFragmentFragmentDrawerCallback mainDrawerCallback;
+    private ToolbarFragmentDrawerCallback mainDrawerCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +80,8 @@ public class MainActivity extends InjectingAppCompatActivity {
             setSelectionFromIntent();
 
 
-            mainDrawerCallback = new ToolbarFragmentFragmentDrawerCallback(this, toolbar, R.id.content);
-            mainDrawerCallback.setActionCallback(new ToolbarFragmentFragmentDrawerCallback.SelectActionCallback() {
+            mainDrawerCallback = new ToolbarFragmentDrawerCallback(this, toolbar, R.id.content);
+            mainDrawerCallback.setActionCallback(new ToolbarFragmentDrawerCallback.SelectActionCallback() {
                 public void selectAction(long action) {
                     if (action == MainNavigationDrawer.DRAWER_LOGOUT) {
                         showLogoutDialog();

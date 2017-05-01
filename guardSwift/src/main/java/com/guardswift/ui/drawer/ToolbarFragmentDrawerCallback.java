@@ -10,7 +10,7 @@ import android.support.v7.widget.Toolbar;
  */
 
 
-public class ToolbarFragmentFragmentDrawerCallback implements FragmentDrawerCallback {
+public class ToolbarFragmentDrawerCallback implements FragmentDrawerCallback {
 
     public interface SelectActionCallback {
         void selectAction(long action);
@@ -21,7 +21,7 @@ public class ToolbarFragmentFragmentDrawerCallback implements FragmentDrawerCall
     private SelectActionCallback actionCallback;
     private int viewId = 0;
 
-    public ToolbarFragmentFragmentDrawerCallback(FragmentActivity activity, Toolbar toolbar, int viewId) {
+    public ToolbarFragmentDrawerCallback(FragmentActivity activity, Toolbar toolbar, int viewId) {
         this.activity = activity;
         this.toolbar = toolbar;
 
@@ -56,7 +56,7 @@ public class ToolbarFragmentFragmentDrawerCallback implements FragmentDrawerCall
                     // to be ok to do here.
                     activity.getSupportFragmentManager()
                             .beginTransaction()
-                            .replace(ToolbarFragmentFragmentDrawerCallback.this.viewId, fragment)
+                            .replace(ToolbarFragmentDrawerCallback.this.viewId, fragment)
                             .commitNowAllowingStateLoss();
                 }
             }

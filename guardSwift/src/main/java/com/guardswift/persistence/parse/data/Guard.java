@@ -23,7 +23,7 @@ import java.util.Date;
 @ParseClassName("Guard")
 public class Guard extends ExtendedParseObject implements Positioned {
 
-
+    public enum Role {ADMIN}
 
     public static class Query {
 
@@ -69,6 +69,7 @@ public class Guard extends ExtendedParseObject implements Positioned {
     private static final String accessRegular = "accessRegular";
     private static final String accessDistrict = "accessDistrict";
     private static final String accessStatic = "accessStatic";
+    private static final String roles = "roles";
 
     @Override
     public String getParseClassName() {
@@ -249,6 +250,10 @@ public class Guard extends ExtendedParseObject implements Positioned {
 
     public void enableAlarmSMS(boolean enable) {
         put(Guard.alarmSMS, enable);
+    }
+
+    public boolean hasRole(Role role) {
+        return has(Guard.roles) && getList(Guard.roles).contains(role.toString());
     }
 
 }
