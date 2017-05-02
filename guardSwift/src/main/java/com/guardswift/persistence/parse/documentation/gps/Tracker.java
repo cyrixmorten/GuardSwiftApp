@@ -27,7 +27,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Minutes;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
@@ -79,9 +78,6 @@ public class Tracker extends ExtendedParseObject {
 
     }
 
-    public static boolean deleteLocalFile() {
-        return new File(LOCAL_GPS_FILE_NAME).delete();
-    }
 
     private String readGPSFileAsJSONArrayString(Context context) throws IOException {
         String string = FileIO.readFromFile(context, LOCAL_GPS_FILE_NAME);
@@ -101,19 +97,23 @@ public class Tracker extends ExtendedParseObject {
 
                 return saveInBackground();
             }
-        }).continueWithTask(new Continuation<Void, Task<Void>>() {
+        }).continueWith(new Continuation<Void, Void>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Void then(Task<Void> task) throws Exception {
                 if (task.isFaulted()) {
                     new HandleException(context, TAG, "Error saving GPS file", task.getError());
                     return null;
                 }
 
-                deleteLocalFile();
+                boolean deleted = context.deleteFile(LOCAL_GPS_FILE_NAME);
+
+                Log.d(TAG, "Deleted GPS file: " + deleted);
+
 
                 return null;
             }
         });
+
 
     }
 
@@ -138,15 +138,38 @@ public class Tracker extends ExtendedParseObject {
                 return saveGPSParseFile(context, file, progressCallback);
             }
         } catch (IllegalStateException e) {
-            Log.e(TAG, "Get local file name", e);
+            new HandleException(context, TAG, "Get local file name", e);
             taskResult.setError(e);
         } catch (IOException e) {
-            Log.e(TAG, "Read local file", e);
+            new HandleException(context, TAG, "Read local file", e);
             taskResult.setError(e);
         }
 
         return taskResult.getTask();
 
+    }
+
+    public void downloadTrackerData(final DownloadTrackerDataCallback callback, ProgressCallback progressCallback) {
+        if (!has(Tracker.gpsFile)) {
+            callback.done(null, new ParseException(ParseException.OBJECT_NOT_FOUND, "No gps data"));
+            return;
+        }
+
+        getParseFile(Tracker.gpsFile).getDataInBackground(new GetDataCallback() {
+            @Override
+            public void done(byte[] data, ParseException e) {
+                if (e != null) {
+                    callback.done(null, e);
+                }
+
+                try {
+                    TrackerData[] trackerDataArray = new Gson().fromJson(FileIO.decompress(data), TrackerData[].class);
+                    callback.done(trackerDataArray, null);
+                } catch (IOException e1) {
+                    callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Unable to parse GPS data"));
+                }
+            }
+        }, progressCallback);
     }
 
 
@@ -238,26 +261,5 @@ public class Tracker extends ExtendedParseObject {
     public interface DownloadTrackerDataCallback {
         void done(TrackerData[] trackerData, Exception e);
     }
-    public void downloadTrackerData(final DownloadTrackerDataCallback callback, ProgressCallback progressCallback) {
-        if (!has(Tracker.gpsFile)) {
-            callback.done(null, new ParseException(ParseException.OBJECT_NOT_FOUND, "No gps data"));
-            return;
-        }
 
-        getParseFile(Tracker.gpsFile).getDataInBackground(new GetDataCallback() {
-            @Override
-            public void done(byte[] data, ParseException e) {
-                if (e != null) {
-                    callback.done(null, e);
-                }
-
-                try {
-                    TrackerData[] trackerDataArray = new Gson().fromJson(FileIO.decompress(data), TrackerData[].class);
-                    callback.done(trackerDataArray, null);
-                } catch (IOException e1) {
-                    callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Unable to parse GPS data"));
-                }
-            }
-        }, progressCallback);
-    }
 }

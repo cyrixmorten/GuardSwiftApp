@@ -129,9 +129,8 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         CommonDrawerItems commonDrawerItems = new CommonDrawerItems(activity);
         navigationDrawer.addItems(commonDrawerItems.thisDevice());
         navigationDrawer.addItems(getGuardDataDrawerItem());
-        navigationDrawer.addItems(getAdminItems());
         addTaskItems();
-
+        navigationDrawer.addItems(getAdminItems());
 
         return navigationDrawer;
     }
@@ -415,7 +414,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         }
 
         List<IDrawerItem> dataItems = Lists.newArrayList();
-        IDrawerItem dataHeader = new SectionDrawerItem().withName(R.string.title_drawer_data);
+        IDrawerItem dataHeader = new SectionDrawerItem().withName(R.string.title_drawer_admin);
         dataItems.add(dataHeader);
         dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_gps_history)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override

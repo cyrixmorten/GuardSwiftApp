@@ -19,6 +19,7 @@ import com.parse.ParseSession;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.List;
 
 @ParseClassName("Guard")
 public class Guard extends ExtendedParseObject implements Positioned {
@@ -253,7 +254,18 @@ public class Guard extends ExtendedParseObject implements Positioned {
     }
 
     public boolean hasRole(Role role) {
-        return has(Guard.roles) && getList(Guard.roles).contains(role.toString());
+        if (!has(Guard.roles)) {
+            return false;
+        }
+
+        List<String> roles = getList(Guard.roles);
+        for (String guardRole: roles) {
+            if (guardRole.toLowerCase().equals(role.name().toLowerCase())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }
