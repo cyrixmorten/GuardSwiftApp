@@ -57,7 +57,7 @@ import javax.inject.Inject;
 
 import bolts.Continuation;
 import bolts.Task;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
@@ -89,28 +89,28 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     GuardLoginNavigationDrawer navigationDrawer;
 
 
-    @Bind(R.id.imageView)
+    @BindView(R.id.imageView)
     ImageView bannerImageView;
 
 
-    @Bind(R.id.login_form)
+    @BindView(R.id.login_form)
     View mLoginFormView;
-    @Bind(R.id.guardid)
+    @BindView(R.id.guardid)
     EditText mGuardIdView;
-    @Bind(R.id.sign_in_button)
+    @BindView(R.id.sign_in_button)
     BootstrapButton mSignInButton;
 
-    @Bind(R.id.login_status)
+    @BindView(R.id.login_status)
     View mLoginStatusView;
-    @Bind(R.id.login_status_message)
+    @BindView(R.id.login_status_message)
     TextView mLoginStatusMessageView;
 
-    @Bind(R.id.development_badge)
+    @BindView(R.id.development_badge)
     View development_badge;
-    @Bind(R.id.version)
+    @BindView(R.id.version)
     TextView version;
 
-    @Bind(R.id.toolbar)
+    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     @Override

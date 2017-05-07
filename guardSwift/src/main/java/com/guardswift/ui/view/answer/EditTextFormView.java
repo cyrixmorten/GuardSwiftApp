@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 import com.guardswift.R;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -66,13 +66,13 @@ public class EditTextFormView extends LinearLayout implements Answer {
         }
 
     }
-    @Bind(R.id.tv)
+    @BindView(R.id.tv)
     TextView formDescription;
 
-    @Bind(R.id.edittext)
+    @BindView(R.id.edittext)
     EditText editText;
 
-//    @Bind(R.id.submit_button)
+//    @BindView(R.id.submit_button)
 //    Button saveButton;
 
     private OnClickListener saveClickListener;

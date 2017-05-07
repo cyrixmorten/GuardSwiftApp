@@ -3,7 +3,6 @@ package com.guardswift.ui.parse.documentation.report.create.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,7 +22,6 @@ import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.common.UpdateFloatingActionButton;
 import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
-import com.guardswift.util.ToastHelper;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
@@ -34,9 +32,10 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 
 public class AddEventTypeFragment extends InjectingListFragment implements EventEntryFragment, UpdateFloatingActionButton {
 
@@ -64,9 +63,11 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 
 	private EventTypeParseAdapter mAdapter;
 
-//    @Bind(R.id.header) TextView tv_header;
-    @Bind(R.id.btn_footer)
+//    @BindView(R.id.header) TextView tv_header;
+    @BindView(R.id.btn_footer)
     FloatingActionButton footerButton;
+
+    private Unbinder unbinder;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -81,7 +82,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 		View rootView = inflater.inflate(R.layout.gs_listview_selectable_fab,
 				container, false);
 
-		ButterKnife.bind(this, rootView);
+		unbinder = ButterKnife.bind(this, rootView);
 
 		// mAdapter = new AddEventTypeAdapter(getActivity());
 		mAdapter = new EventTypeParseAdapter(getActivity(),
@@ -190,7 +191,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
     @Override
 	public void onDestroyView() {
 		super.onDestroyView();
-		ButterKnife.unbind(this);
+		unbinder.unbind();
 	}
 
     @OnClick(R.id.btn_footer)

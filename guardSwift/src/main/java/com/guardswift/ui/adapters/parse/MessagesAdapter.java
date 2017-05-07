@@ -35,13 +35,13 @@
 //        this.guard = guard;
 //    }
 //
-//    @Bind(R.id.relativeTime)
+//    @BindView(R.id.relativeTime)
 //    TextView relativeTime;
-//    @Bind(R.id.author)
+//    @BindView(R.id.author)
 //    TextView author;
-//    @Bind(R.id.info)
+//    @BindView(R.id.info)
 //    TextView info;
-//    @Bind(R.id.button_mark_read)
+//    @BindView(R.id.button_mark_read)
 //    BootstrapButton button_mark_read;
 //
 //    @Override

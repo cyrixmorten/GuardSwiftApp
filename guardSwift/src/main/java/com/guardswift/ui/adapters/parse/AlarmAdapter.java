@@ -42,44 +42,44 @@
 //        this.controller = new AlarmController(context);
 //    }
 //
-//    @Bind(R.id.tv_queMsg) TextView queMsg;
-//    @Bind(R.id.securityLevel)
+//    @BindView(R.id.tv_queMsg) TextView queMsg;
+//    @BindView(R.id.securityLevel)
 //    TextView securityLevel;
-//    @Bind(R.id.zone)
+//    @BindView(R.id.zone)
 //    TextView zone;
-//    @Bind(R.id.alarmType)
+//    @BindView(R.id.alarmType)
 //    TextView alarmType;
-//    @Bind(R.id.clientAddress)
+//    @BindView(R.id.clientAddress)
 //    TextView clientAddress;
-//    @Bind(R.id.clientAddress2)
+//    @BindView(R.id.clientAddress2)
 //    TextView clientAddress2;
-//    @Bind(R.id.clientName)
+//    @BindView(R.id.clientName)
 //    TextView clientName;
-//    @Bind(R.id.alarmDate)
+//    @BindView(R.id.alarmDate)
 //    TextView alarmDate;
-//    @Bind(R.id.alarmTime)
+//    @BindView(R.id.alarmTime)
 //    TextView alarmTime;
-//    @Bind(R.id.distanceValue)
+//    @BindView(R.id.distanceValue)
 //    TextView distanceValue;
-//    @Bind(R.id.distanceType)
+//    @BindView(R.id.distanceType)
 //    TextView distanceType;
 //
-////    @Bind(R.id.timeIcon)
+////    @BindView(R.id.timeIcon)
 ////    FontAwesomeText timeIcon;
 //
-//    @Bind(R.id.sharedText)
+//    @BindView(R.id.sharedText)
 //    BootstrapButton sharedText;
-//    @Bind(R.id.button_forward)
+//    @BindView(R.id.button_forward)
 //    BootstrapButton btnForward;
-//    @Bind(R.id.button_mark_accepted)
+//    @BindView(R.id.button_mark_accepted)
 //    BootstrapButton btnAccept;
-//    @Bind(R.id.button_mark_arrived)
+//    @BindView(R.id.button_mark_arrived)
 //    BootstrapButton btnArrived;
-//    @Bind(R.id.button_mark_finished)
+//    @BindView(R.id.button_mark_finished)
 //    BootstrapButton btnFinished;
-//    @Bind(R.id.button_cancel_arrived)
+//    @BindView(R.id.button_cancel_arrived)
 //    BootstrapButton btnAbort;
-//    @Bind(R.id.button_add_event)
+//    @BindView(R.id.button_add_event)
 //    BootstrapButton btnAddEvent;
 //
 //    @Override

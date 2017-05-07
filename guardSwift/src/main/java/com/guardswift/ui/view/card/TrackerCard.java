@@ -18,25 +18,25 @@ import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.util.Date;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class TrackerCard extends LinearLayout {
 
 
-    @Bind(R.id.tv_date_start)
+    @BindView(R.id.tv_date_start)
     TextView tvDateStart;
 
 
-    @Bind(R.id.tv_guard_name)
+    @BindView(R.id.tv_guard_name)
     TextView tvGuardName;
 
-    @Bind(R.id.tv_minutes)
+    @BindView(R.id.tv_minutes)
     TextView tvMinutes;
 
 
 
-    @Bind(R.id.card)
+    @BindView(R.id.card)
     CardView card;
 
 

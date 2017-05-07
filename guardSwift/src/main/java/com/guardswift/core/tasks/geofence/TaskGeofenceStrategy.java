@@ -1,6 +1,7 @@
 package com.guardswift.core.tasks.geofence;
 
-import com.guardswift.persistence.parse.execution.GSTask;
+import android.location.Location;
+
 import com.parse.FindCallback;
 import com.parse.ParseObject;
 
@@ -21,7 +22,7 @@ public interface TaskGeofenceStrategy {
 
     int getGeofenceRadius();
 
-    Task<List<ParseObject>> queryGeofencedTasks(int withinKm);
-    void queryGeofencedTasks(int withinKm, FindCallback<ParseObject> callback);
+    Task<List<ParseObject>> queryGeofencedTasks(int withinKm, Location fromLocation);
+    void queryGeofencedTasks(int withinKm, Location fromLocation, FindCallback<ParseObject> callback);
 
 }

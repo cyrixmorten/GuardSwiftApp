@@ -1,6 +1,7 @@
 package com.guardswift.core.ca;
 
 import android.content.Context;
+import android.location.Location;
 import android.util.Log;
 
 import com.google.android.gms.location.DetectedActivity;
@@ -189,7 +190,7 @@ public class GeofencingModule {
 
     }
 
-    public Task<Set<ParseObject>> queryAllGeofenceTasks(int withinKm) {
+    public Task<Set<ParseObject>> queryAllGeofenceTasks(int withinKm, Location fromLocation) {
 
 //        Log.d(TAG, "queryAllGeofenceTasks withinKm: " + withinKm);
 
@@ -206,7 +207,7 @@ public class GeofencingModule {
         for (final GSTask gsTask : allGSTasks) {
             Log.d(TAG, "queryAllGeofenceTasks: " + gsTask.getTaskType());
 
-            Task<List<ParseObject>> geofencedTasks = gsTask.getGeofenceStrategy().queryGeofencedTasks(withinKm);
+            Task<List<ParseObject>> geofencedTasks = gsTask.getGeofenceStrategy().queryGeofencedTasks(withinKm, fromLocation);
             geofencedTasks.onSuccess(new Continuation<List<ParseObject>, Object>() {
                 @Override
                 public Object then(Task<List<ParseObject>> listTask) throws Exception {

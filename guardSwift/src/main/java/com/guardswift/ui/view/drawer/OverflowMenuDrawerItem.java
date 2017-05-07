@@ -10,7 +10,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.guardswift.R;
-import com.mikepenz.fastadapter.utils.ViewHolderFactory;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.model.BaseDescribeableDrawerItem;
@@ -117,16 +116,10 @@ public class OverflowMenuDrawerItem extends BaseDescribeableDrawerItem<OverflowM
     }
 
     @Override
-    public ViewHolderFactory getFactory() {
-        return new ItemFactory();
+    public ViewHolder getViewHolder(View v) {
+        return new ViewHolder(v);
     }
 
-
-    public static class ItemFactory implements ViewHolderFactory<ViewHolder> {
-        public ViewHolder create(View v) {
-            return new ViewHolder(v);
-        }
-    }
 
     public static class ViewHolder extends BaseViewHolder {
         //protected ImageButton ibOverflow;

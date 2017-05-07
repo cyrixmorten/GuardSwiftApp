@@ -22,25 +22,28 @@ import com.guardswift.ui.view.slidingtab.SlidingTabLayout;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 
     protected static final String TAG = AbstractTabsViewPagerFragment.class
             .getSimpleName();
 
+    private Unbinder unbinder;
+
     public AbstractTabsViewPagerFragment() {
     }
 
 
-    @Bind(R.id.tabs)
+    @BindView(R.id.tabs)
     public SlidingTabLayout tabs;
-    @Bind(R.id.pager)
+    @BindView(R.id.pager)
     public ViewPager mViewPager;
-    @Bind(R.id.coordinator)
+    @BindView(R.id.coordinator)
     public CoordinatorLayout coordinatorLayout;
-    @Bind(R.id.fab)
+    @BindView(R.id.fab)
     public FloatingActionButton floatingActionButton;
 
     protected abstract Map<String, Fragment> getTabbedFragments();
@@ -75,7 +78,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
         View rootView = inflater.inflate(R.layout.viewpager_slidingtab_fab,
                 container, false);
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
         mViewPager.setAdapter(mPagerAdapter);
 
@@ -169,7 +172,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
     @Override
     public void onDestroy() {
         mPagerAdapter = null;
-        ButterKnife.unbind(this);
+        unbinder.unbind();
         try {
             super.onDestroy();
         } catch (NullPointerException npe) {

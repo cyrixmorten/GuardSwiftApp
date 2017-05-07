@@ -42,12 +42,16 @@ import java.util.Locale;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import de.greenrobot.event.EventBus;
+
 
 public class ClientDetailsFragment extends InjectingFragment implements
         OnMapReadyCallback {
+
+    private Unbinder unbinder;
 
     private interface ClientPositionDetails {
 
@@ -88,11 +92,11 @@ public class ClientDetailsFragment extends InjectingFragment implements
     private List<View> mDetailsViews;
 
 
-    //    @Bind(R.id.button_navigation)
+    //    @BindView(R.id.button_navigation)
 //    Button startNavigationButton;
-    @Bind(R.id.contactsContainer)
+    @BindView(R.id.contactsContainer)
     LinearLayout detailsContainer;
-//    @Bind(R.id.button_messages)
+//    @BindView(R.id.button_messages)
 //    BootstrapButton button_messages;
 
     @Override
@@ -186,7 +190,7 @@ public class ClientDetailsFragment extends InjectingFragment implements
         View rootView = inflater.inflate(R.layout.fragment_client_details,
                 container, false);
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
 //        if (!(getActivity() instanceof AbstractTaskDetailsActivity)) {
 //            startNavigationButton.setVisibility(View.GONE);
@@ -355,7 +359,7 @@ public class ClientDetailsFragment extends InjectingFragment implements
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
+        unbinder.unbind();
     }
 
     @Override

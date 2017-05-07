@@ -84,22 +84,22 @@
 //        this.only_visited = only_visited;
 //    }
 //
-//    @Bind(R.id.clientName)
+//    @BindView(R.id.clientName)
 //    TextView clientName;
-//    @Bind(R.id.address)
+//    @BindView(R.id.address)
 //    TextView address;
-//    @Bind(R.id.type)
+//    @BindView(R.id.type)
 //    TextView type;
-//    @Bind(R.id.distanceValue)
+//    @BindView(R.id.distanceValue)
 //    TextView distanceValue;
-//    @Bind(R.id.distanceType)
+//    @BindView(R.id.distanceType)
 //    TextView distanceType;
-//    @Bind(R.id.timesArrived)
+//    @BindView(R.id.timesArrived)
 //    TextView timesArrived;
 //
-//    @Bind(R.id.button_arrived)
+//    @BindView(R.id.button_arrived)
 //    BootstrapButton arrived;
-//    @Bind(R.id.button_add_event)
+//    @BindView(R.id.button_add_event)
 //    Button addEvent;
 //
 //    @Override

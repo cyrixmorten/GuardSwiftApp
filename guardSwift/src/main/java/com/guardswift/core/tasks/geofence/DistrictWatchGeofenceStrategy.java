@@ -11,6 +11,7 @@ import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -171,44 +172,12 @@ public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
     }
 
     @Override
-    public void queryGeofencedTasks(final int radiusKm, final FindCallback<ParseObject> callback) {
-        if (LocationModule.Recent.getLastKnownLocation() != null) {
-            geofenceQuery(radiusKm, LocationModule.Recent.getLastKnownLocation()).findInBackground(callback);
-            return;
+    public void queryGeofencedTasks(final int radiusKm, Location fromLocation, final FindCallback<ParseObject> callback) {
+        if (fromLocation != null) {
+            geofenceQuery(radiusKm, fromLocation).findInBackground(callback);
+        } else {
+            callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Missing location for geofencing district"));
         }
-
-        final Context context = GuardSwiftApplication.getInstance();
-
-
-        ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(context);
-        locationProvider.getLastKnownLocation()
-                .doOnError(new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Crashlytics.logException(throwable);
-                    }
-                })
-                .onErrorReturn(new Func1<Throwable, Location>() {
-                    @Override
-                    public Location call(Throwable throwable) {
-                        return LocationModule.Recent.getLastKnownLocation();
-                    }
-                })
-                .subscribe(new Action1<Location>() {
-                    @Override
-                    public void call(Location location) {
-                        if (location == null) {
-                            callback.done(new ArrayList<ParseObject>(), null);
-                            return;
-                        }
-                        geofenceQuery(radiusKm, location).findInBackground(callback);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        new HandleException(context, TAG, "getLastKnownLocation",  throwable);
-                    }
-                });
     }
 
     private ParseQuery<ParseObject> geofenceQuery(int withinRadiusKm, Location fromLocation) {

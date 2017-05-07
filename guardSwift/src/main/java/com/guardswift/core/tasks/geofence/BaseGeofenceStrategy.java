@@ -1,5 +1,7 @@
 package com.guardswift.core.tasks.geofence;
 
+import android.location.Location;
+
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -34,7 +36,7 @@ abstract class BaseGeofenceStrategy implements TaskGeofenceStrategy {
      * @param callback
      */
     @Override
-    public void queryGeofencedTasks(int withinKm, FindCallback<ParseObject> callback) {
+    public void queryGeofencedTasks(int withinKm, Location fromLocation, FindCallback<ParseObject> callback) {
         callback.done(new ArrayList<ParseObject>(), null);
     }
     /*
@@ -76,9 +78,9 @@ abstract class BaseGeofenceStrategy implements TaskGeofenceStrategy {
      * @return
      */
     @Override
-    public Task<List<ParseObject>> queryGeofencedTasks(int radiusKm) {
-        final TaskCompletionSource<List<ParseObject>> successful = new TaskCompletionSource<List<ParseObject>>();
-        queryGeofencedTasks(radiusKm, new FindCallback<ParseObject>() {
+    public Task<List<ParseObject>> queryGeofencedTasks(int radiusKm, Location fromLocation) {
+        final TaskCompletionSource<List<ParseObject>> successful = new TaskCompletionSource<>();
+        queryGeofencedTasks(radiusKm, fromLocation, new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
                 if (e != null) {

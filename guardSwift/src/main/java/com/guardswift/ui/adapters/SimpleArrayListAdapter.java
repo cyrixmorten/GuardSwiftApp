@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class SimpleArrayListAdapter extends ArrayAdapter<String> {
@@ -38,8 +38,8 @@ public class SimpleArrayListAdapter extends ArrayAdapter<String> {
         this.onLongClickListener = onLongClickListener;
     }
 
-	@Bind(android.R.id.text1) TextView text;
-//	@Bind(R.id.star) FontAwesomeText star;
+	@BindView(android.R.id.text1) TextView text;
+//	@BindView(R.id.star) FontAwesomeText star;
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {

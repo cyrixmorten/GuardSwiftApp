@@ -20,7 +20,7 @@ import com.guardswift.ui.view.answer.EditTextFormView;
 
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -115,26 +115,26 @@ public class QuestionCardView extends LinearLayout implements Question {
 
     }
 
-    @Bind(R.id.cardview)
+    @BindView(R.id.cardview)
     CardView cardview;
 
-    @Bind(R.id.cardview_question_layout)
+    @BindView(R.id.cardview_question_layout)
     RelativeLayout question_layout;
 
-    @Bind(R.id.cardview_answer_layout)
+    @BindView(R.id.cardview_answer_layout)
     LinearLayout answer_layout;
 
-    @Bind(R.id.cardview_question_tv)
+    @BindView(R.id.cardview_question_tv)
     TextView tv_question;
 
-    @Bind(R.id.cardview_buttons)
+    @BindView(R.id.cardview_buttons)
     LinearLayout buttons;
 
 
-    @Bind(R.id.cardview_button_yes)
+    @BindView(R.id.cardview_button_yes)
     Button button_yes;
 
-    @Bind(R.id.cardview_button_no)
+    @BindView(R.id.cardview_button_no)
     Button button_no;
 
     private boolean showAnswersOnYesClicked = true;

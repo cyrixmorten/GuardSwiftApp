@@ -71,26 +71,26 @@
 //		// Empty constructor required for DialogFragment
 //	}
 //
-//    @Bind(R.id.tv_queMsg) TextView queMsg;
-//	@Bind(R.id.alarmType) TextView alarmType;
-//	@Bind(R.id.securityLevel) TextView securityLevel;
-//    @Bind(R.id.zone) TextView zone;
-//	@Bind(R.id.clientAddress) TextView clientAddress;
-//	@Bind(R.id.clientAddress2) TextView clientAddress2;
-//	@Bind(R.id.clientName) TextView clientName;
-//	@Bind(R.id.alarmDate) TextView alarmDate;
-//	@Bind(R.id.alarmTime) TextView alarmTime;
-//	@Bind(R.id.distanceValue) TextView distanceValue;
-//	@Bind(R.id.distanceType) TextView distanceType;
+//    @BindView(R.id.tv_queMsg) TextView queMsg;
+//	@BindView(R.id.alarmType) TextView alarmType;
+//	@BindView(R.id.securityLevel) TextView securityLevel;
+//    @BindView(R.id.zone) TextView zone;
+//	@BindView(R.id.clientAddress) TextView clientAddress;
+//	@BindView(R.id.clientAddress2) TextView clientAddress2;
+//	@BindView(R.id.clientName) TextView clientName;
+//	@BindView(R.id.alarmDate) TextView alarmDate;
+//	@BindView(R.id.alarmTime) TextView alarmTime;
+//	@BindView(R.id.distanceValue) TextView distanceValue;
+//	@BindView(R.id.distanceType) TextView distanceType;
 //
-//    @Bind(R.id.tv_not_logged_in) TextView notLoggedInMsg;
+//    @BindView(R.id.tv_not_logged_in) TextView notLoggedInMsg;
 //
-////	@Bind(R.id.sharedText) BootstrapButton sharedText;
-////	@Bind(R.id.button_mark_accepted) BootstrapButton btnAccept;
-////	@Bind(R.id.button_mark_arrived) BootstrapButton btnArrived;
-////	@Bind(R.id.button_mark_finished) BootstrapButton btnFinished;
-////	@Bind(R.id.button_cancel_arrived) BootstrapButton btnAbort;
-////	@Bind(R.id.button_add_event) BootstrapButton btnAddEvent;
+////	@BindView(R.id.sharedText) BootstrapButton sharedText;
+////	@BindView(R.id.button_mark_accepted) BootstrapButton btnAccept;
+////	@BindView(R.id.button_mark_arrived) BootstrapButton btnArrived;
+////	@BindView(R.id.button_mark_finished) BootstrapButton btnFinished;
+////	@BindView(R.id.button_cancel_arrived) BootstrapButton btnAbort;
+////	@BindView(R.id.button_add_event) BootstrapButton btnAddEvent;
 //
 //	private ContextThemeWrapper themedContext;
 //

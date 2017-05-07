@@ -38,24 +38,24 @@
 //        this.tasksCache = new GSTasksCache(context);
 //    }
 //
-//    @Bind(R.id.linearLayout_times)
+//    @BindView(R.id.linearLayout_times)
 //    LinearLayout timesLayout;
 //
-//    @Bind(R.id.taskTypeDesc)
+//    @BindView(R.id.taskTypeDesc)
 //    TextView taskTypeDesc;
-//    @Bind(R.id.clientAddress)
+//    @BindView(R.id.clientAddress)
 //    TextView clientAddress;
-//    @Bind(R.id.clientName)
+//    @BindView(R.id.clientName)
 //    TextView clientName;
-//    @Bind(R.id.clientNumber)
+//    @BindView(R.id.clientNumber)
 //    TextView clientNumber;
-//    @Bind(R.id.timeStart)
+//    @BindView(R.id.timeStart)
 //    TextView timeStart;
-//    @Bind(R.id.timeEnd)
+//    @BindView(R.id.timeEnd)
 //    TextView timeEnd;
-//    @Bind(R.id.distanceValue)
+//    @BindView(R.id.distanceValue)
 //    TextView distanceValue;
-//    @Bind(R.id.distanceType)
+//    @BindView(R.id.distanceType)
 //    TextView distanceType;
 //
 //

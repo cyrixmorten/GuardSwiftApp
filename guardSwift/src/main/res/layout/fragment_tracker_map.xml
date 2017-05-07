@@ -32,20 +32,12 @@
             </LinearLayout>
 
 
-            <LinearLayout
-                android:id="@+id/layout_timeline"
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/chart"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:orientation="vertical"
-                android:padding="@dimen/small_padding">
+                android:layout_height="150dp">
 
-                <Button
-                    android:id="@+id/btn_next"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:enabled="false"
-                    android:text="next"/>
-            </LinearLayout>
+            </com.github.mikephil.charting.charts.LineChart>
 
         </LinearLayout>
     </FrameLayout>

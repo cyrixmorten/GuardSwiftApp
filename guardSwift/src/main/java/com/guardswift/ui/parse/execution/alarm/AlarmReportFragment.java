@@ -90,10 +90,10 @@
 //    }
 //
 //
-//    @Bind(R.id.layout_questions)
+//    @BindView(R.id.layout_questions)
 //    LinearLayout layout_questions;
 //
-//    @Bind(R.id.layout_internal)
+//    @BindView(R.id.layout_internal)
 //    LinearLayout layout_internal;
 //
 //    private List<QuestionCardView> questionCards = Lists.newArrayList();

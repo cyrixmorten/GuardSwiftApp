@@ -13,7 +13,7 @@ import com.parse.ParseQueryAdapter;
 
 import java.util.Date;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class EventAdapter extends ParseQueryAdapter<EventLog> {
@@ -26,15 +26,14 @@ public class EventAdapter extends ParseQueryAdapter<EventLog> {
 
 	}
 
-	@Bind(R.id.event) TextView eventTextView;
-	@Bind(R.id.location) TextView locationTextView;
-	@Bind(R.id.time) TextView timeTextView;
-    @Bind(R.id.amountLayout)
-    LinearLayout amountLayout;
-	@Bind(R.id.amount) TextView amountTextView;
-	@Bind(R.id.guard) TextView guard;
-	@Bind(R.id.remarks) TextView remarks;
-	@Bind(R.id.relativeTime) TextView relativeTime;
+	@BindView(R.id.event) TextView eventTextView;
+	@BindView(R.id.location) TextView locationTextView;
+	@BindView(R.id.time) TextView timeTextView;
+    @BindView(R.id.amountLayout) LinearLayout amountLayout;
+	@BindView(R.id.amount) TextView amountTextView;
+	@BindView(R.id.guard) TextView guard;
+	@BindView(R.id.remarks) TextView remarks;
+	@BindView(R.id.relativeTime) TextView relativeTime;
 
 	@Override
 	public View getItemView(EventLog event, View v, ViewGroup parent) {

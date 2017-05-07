@@ -8,7 +8,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.view.ContextThemeWrapper;
+import android.view.ContextThemeWrapper;
 import android.support.v7.widget.CardView;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
@@ -68,7 +68,8 @@ import java.util.List;
 import bolts.Continuation;
 import bolts.Task;
 import bolts.TaskCompletionSource;
-import butterknife.Bind;
+import butterknife.BindView;
+import butterknife.BindViews;
 import butterknife.ButterKnife;
 
 import static com.guardswift.core.tasks.controller.TaskController.ACTION;
@@ -92,11 +93,11 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     public static class StaticTaskViewHolder extends TaskViewHolder<StaticTask> {
 
-        @Bind(R.id.timeStart)
+        @BindView(R.id.timeStart)
         TextView vTimeStart;
-        @Bind(R.id.timeEnd)
+        @BindView(R.id.timeEnd)
         TextView vTimeEnd;
-        @Bind(R.id.aTvClock)
+        @BindView(R.id.aTvClock)
         AwesomeTextView iconClock;
 
         public StaticTaskViewHolder(View v) {
@@ -188,9 +189,9 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     public static class AlarmTaskViewHolder extends TaskViewHolder<ParseTask> {
 
-        @Bind(R.id.tv_central)
+        @BindView(R.id.tv_central)
         TextView vCentral;
-        @Bind(R.id.tv_date)
+        @BindView(R.id.tv_date)
         TextView vDate;
 
 
@@ -379,13 +380,13 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     public static class RegularTaskViewHolder extends TaskViewHolder<CircuitUnit> {
 
-        @Bind(R.id.info)
+        @BindView(R.id.info)
         TextView vInfo;
-        @Bind(R.id.layout_info)
+        @BindView(R.id.layout_info)
         LinearLayout vInfoLayout;
-        @Bind(R.id.timeStart)
+        @BindView(R.id.timeStart)
         TextView vTimeStart;
-        @Bind(R.id.timeEnd)
+        @BindView(R.id.timeEnd)
         TextView vTimeEnd;
 
 
@@ -672,9 +673,9 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     public static class DistrictWatchTaskViewHolder extends TaskViewHolder<DistrictWatchClient> {
 
-        @Bind(R.id.timesVisited_actual)
+        @BindView(R.id.timesVisited_actual)
         TextView vTimesVisited_actual;
-        @Bind(R.id.timesVisited_expected)
+        @BindView(R.id.timesVisited_expected)
         TextView vTimesVisited_expected;
 
         public DistrictWatchTaskViewHolder(View itemView, RemoveItemCallback removeItemCallback) {
@@ -690,7 +691,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         @Override
         public void onActionArrive(final Context context, final DistrictWatchClient task) {
-            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
+            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived), new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
 
@@ -732,53 +733,53 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
     static class TaskViewHolder<T extends BaseTask> extends PositionedViewHolder implements TaskActionCallback<T> {
 
 
-        @Bind(R.id.cardview)
+        @BindView(R.id.cardview)
         CardView cardview;
 
-        @Bind({R.id.content_colorBorder_top, R.id.content_colorBorder_bottom})
+        @BindViews({R.id.content_colorBorder_top, R.id.content_colorBorder_bottom})
         List<ImageView> vColorBorders;
 
-        @Bind(R.id.task_state_arrived)
+        @BindView(R.id.task_state_arrived)
         BootstrapButton vBtnArrived;
-        @Bind(R.id.task_state_accepted)
+        @BindView(R.id.task_state_accepted)
         BootstrapButton vBtnAccepted;
-        //        @Bind(R.id.task_state_aborted)
+        //        @BindView(R.id.task_state_aborted)
 //        BootstrapButton vBtnAborted;
-        @Bind(R.id.task_state_finished)
+        @BindView(R.id.task_state_finished)
         BootstrapButton vBtnFinished;
 
-        @Bind(R.id.content_header)
+        @BindView(R.id.content_header)
         LinearLayout vContentHeader;
-        @Bind(R.id.content_body)
+        @BindView(R.id.content_body)
         LinearLayout vContentBody;
-        @Bind(R.id.content_footer)
+        @BindView(R.id.content_footer)
         LinearLayout vContentFooter;
 
-        @Bind(R.id.clientNumber)
+        @BindView(R.id.clientNumber)
         TextView vClientNumber;
-        @Bind(R.id.clientName)
+        @BindView(R.id.clientName)
         TextView vName;
-        @Bind(R.id.clientAddress)
+        @BindView(R.id.clientAddress)
         TextView vAddress;
-        @Bind(R.id.taskTypeDesc)
+        @BindView(R.id.taskTypeDesc)
         TextView vTaskDesc;
-        @Bind(R.id.tv_guard_name)
+        @BindView(R.id.tv_guard_name)
         TextView tvGuardName;
 
         // footer buttons
-        @Bind(R.id.btn_view_report)
+        @BindView(R.id.btn_view_report)
         Button vBtnViewReport;
-        @Bind(R.id.btn_new_event)
+        @BindView(R.id.btn_new_event)
         Button vBtnAddNewEvent;
-        @Bind(R.id.btn_extra_time)
+        @BindView(R.id.btn_extra_time)
         Button vBtnAddExtraTime;
-        @Bind(R.id.btn_report_history)
+        @BindView(R.id.btn_report_history)
         Button vBtnReportHistory;
-        @Bind(R.id.btn_task_description)
+        @BindView(R.id.btn_task_description)
         Button vBtnTaskdescription;
-        @Bind(R.id.btn_client_info)
+        @BindView(R.id.btn_client_info)
         Button vBtnClientContacts;
-        @Bind(R.id.btn_checkpoints)
+        @BindView(R.id.btn_checkpoints)
         Button vBtnCheckpoints;
 
 
@@ -824,7 +825,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         @Override
         public void onActionArrive(final Context context, final T task) {
 
-            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
+            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived), new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
                     performTaskAction(context, task, ACTION.ARRIVE).onSuccess(new Continuation<GSTask, Object>() {

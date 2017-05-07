@@ -18,46 +18,43 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
 import com.guardswift.util.GeocodedAddress;
-import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 
 import java.util.Date;
 
 import bolts.Continuation;
 import bolts.Task;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
-/**
- * Created by cyrix on 11/21/15.
- */
+
 public class GuardRecycleAdapter extends ParseRecyclerQueryAdapter<Guard, GuardRecycleAdapter.GuardViewHolder> {
 
     public static class GuardViewHolder extends PositionedViewHolder {
 
 
-        @Bind(R.id.name)
+        @BindView(R.id.name)
         TextView name;
-        @Bind(R.id.onlinestatus)
+        @BindView(R.id.onlinestatus)
         AwesomeTextView onlinestatus; // isOnline
 
-        @Bind(R.id.layout_last_seen)
+        @BindView(R.id.layout_last_seen)
         LinearLayout vLayoutLastSeen;
-        @Bind(R.id.geocoded_address)
+        @BindView(R.id.geocoded_address)
         TextView vGeoCodedAddress; // lastGeocodedAddress
-        @Bind(R.id.time)
+        @BindView(R.id.time)
         TextView vTime; // lastLocationUpdate
 
-        @Bind(R.id.layout_recent_event)
+        @BindView(R.id.layout_recent_event)
         LinearLayout vLayoutRecentActivity;
-        @Bind(R.id.event)
+        @BindView(R.id.event)
         TextView vEvent; // lastEvent
-        @Bind(R.id.client_name)
+        @BindView(R.id.client_name)
         TextView vClientName;
-        @Bind(R.id.client_address)
+        @BindView(R.id.client_address)
         TextView vClientAddress;
 
-        @Bind(R.id.no_activity_registered)
+        @BindView(R.id.no_activity_registered)
         TextView vNoActivity;
 
         public GuardViewHolder(View itemView) {

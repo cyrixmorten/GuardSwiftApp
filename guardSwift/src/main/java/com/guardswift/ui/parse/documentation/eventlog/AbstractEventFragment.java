@@ -40,9 +40,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 
 public abstract class AbstractEventFragment extends InjectingListFragment {
 
@@ -61,9 +62,9 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
     private EventAdapter mAdapter;
 
 
-    @Bind(R.id.btn_header)
+    @BindView(R.id.btn_header)
     Button btn_addevent;
-    @Bind(R.id.loading)
+    @BindView(R.id.loading)
     ProgressBar loading;
 
     abstract ParseQuery<EventLog> getEventLogQuery(List<String> filterEvents, boolean excludePerimiterEvents, boolean excludeAutomaticEvent);
@@ -83,6 +84,8 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
     private Integer[] filterIndexes = new Integer[0];
 
     private Client mClient;
+
+    private Unbinder unbinder;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -252,7 +255,7 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
                 false);
 
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
         Bundle arguments = getArguments();
 
@@ -395,7 +398,7 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
+        unbinder.unbind();
     }
 
     public void onEventMainThread(UpdateUIEvent ev) {

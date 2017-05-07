@@ -12,7 +12,7 @@ import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
 import com.parse.ParseQueryAdapter;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapter.ClientViewHolder> {
@@ -29,13 +29,13 @@ public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapt
 
 	public static class ClientViewHolder extends PositionedViewHolder implements View.OnClickListener {
 
-		@Bind(R.id.clientName)
+		@BindView(R.id.clientName)
 		TextView clientName;
 
-		@Bind(R.id.clientNumber)
+		@BindView(R.id.clientNumber)
 		TextView clientNumber;
 
-		@Bind(R.id.clientAddress)
+		@BindView(R.id.clientAddress)
 		TextView clientAddress;
 
 		public ClientViewHolder(View itemView) {

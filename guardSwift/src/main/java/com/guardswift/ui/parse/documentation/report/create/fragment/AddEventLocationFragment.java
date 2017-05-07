@@ -1,10 +1,8 @@
 package com.guardswift.ui.parse.documentation.report.create.fragment;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -15,7 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -32,10 +29,6 @@ import com.guardswift.ui.common.UpdateFloatingActionButton;
 import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
 import com.guardswift.util.Device;
 import com.guardswift.util.StringUtil;
-import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.mikepenz.google_material_typeface_library.GoogleMaterial;
-import com.mikepenz.iconics.IconicsDrawable;
-import com.mikepenz.materialdrawer.icons.MaterialDrawerFont;
 import com.parse.ParseException;
 import com.parse.SaveCallback;
 
@@ -45,14 +38,17 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 
 public class AddEventLocationFragment extends InjectingListFragment implements EventEntryFragment, UpdateFloatingActionButton {
 
     protected static final String TAG = AddEventLocationFragment.class
             .getSimpleName();
+
+    private Unbinder unbinder;
 
     public static AddEventLocationFragment newInstance(Client client) {
 
@@ -108,7 +104,7 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
         mAdapter.notifyDataSetInvalidated();
     }
 
-    @Bind(R.id.btn_footer)
+    @BindView(R.id.btn_footer)
     FloatingActionButton footerButton;
 
     @Override
@@ -118,7 +114,7 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
                 R.layout.gs_listview_selectable_fab, container,
                 false);
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
         setListAdapter(mAdapter);
 
@@ -328,7 +324,7 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
+        unbinder.unbind();
     }
 
     @Override

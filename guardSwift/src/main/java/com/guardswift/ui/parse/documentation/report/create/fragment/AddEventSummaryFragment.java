@@ -20,8 +20,6 @@ import com.guardswift.ui.view.card.EventLogCard;
 
 import javax.inject.Inject;
 
-import butterknife.ButterKnife;
-
 public class AddEventSummaryFragment extends InjectingFragment implements
 		EventEntryFragment {
 
@@ -107,7 +105,6 @@ public class AddEventSummaryFragment extends InjectingFragment implements
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
-		ButterKnife.unbind(this);
 	}
 
 	@Override

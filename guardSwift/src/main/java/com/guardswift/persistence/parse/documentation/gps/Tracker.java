@@ -2,7 +2,6 @@ package com.guardswift.persistence.parse.documentation.gps;
 
 import android.content.Context;
 import android.location.Location;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.location.DetectedActivity;
@@ -18,6 +17,7 @@ import com.parse.GetDataCallback;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
@@ -40,10 +40,12 @@ public class Tracker extends ExtendedParseObject {
     private static String TAG = Tracker.class.getSimpleName();
 
     private static final String guard = "guard";
+    private static final String installation = "installation";
     private static final String sampleStart = "start";
     private static final String sampleEnd = "end";
     private static final String sampleMinutes = "minutes";
     private static final String clientTimestamp = "clientTimestamp";
+
 
     private static final String gpsFile = "gpsFile";
 
@@ -73,6 +75,7 @@ public class Tracker extends ExtendedParseObject {
         tracker.put(Tracker.guard, guard);
         tracker.put(Tracker.clientTimestamp, ended.toDate());
         tracker.put(owner, ParseUser.getCurrentUser());
+        tracker.put(installation, ParseInstallation.getCurrentInstallation());
 
         return tracker.upload(context, progressCallback);
 
@@ -86,6 +89,9 @@ public class Tracker extends ExtendedParseObject {
     }
 
     private Task<Void> saveGPSParseFile(final Context context, final ParseFile file, ProgressCallback progressCallback) {
+
+        // Add location before saving (to mark ending postion + time in case of still period)
+        appendLocation(context);
 
         Task<Void> saveFileTask = file.saveInBackground(progressCallback);
 
@@ -182,7 +188,10 @@ public class Tracker extends ExtendedParseObject {
 
     private int previousActivityType = Integer.MAX_VALUE;
 
-    public void appendLocation(final Context context, @NonNull final Location location) {
+    public void appendLocation(final Context context) {
+
+        Location location = LocationModule.Recent.getLastKnownLocation();
+
         if (location.isFromMockProvider()) {
             return;
         }

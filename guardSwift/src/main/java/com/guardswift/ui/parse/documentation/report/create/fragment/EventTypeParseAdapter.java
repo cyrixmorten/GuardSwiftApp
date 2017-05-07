@@ -9,7 +9,7 @@ import com.guardswift.R;
 import com.guardswift.persistence.parse.data.EventType;
 import com.parse.ParseQueryAdapter;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class EventTypeParseAdapter extends ParseQueryAdapter<EventType> {
@@ -22,7 +22,7 @@ public class EventTypeParseAdapter extends ParseQueryAdapter<EventType> {
 		super(context, queryFactory);
 	}
 
-	@Bind(R.id.text) TextView text;
+	@BindView(R.id.text) TextView text;
 
 	@Override
 	public View getItemView(EventType object, View v, ViewGroup parent) {

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 
@@ -113,7 +114,13 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                                 CircuitStarted circuitStarted = (CircuitStarted) item.getTag();
                                 if (circuitStarted != null && clickedCircuitStarted.getObjectId().equals(circuitStarted.getObjectId())) {
                                     Log.w(TAG, "Clicked " + circuitStarted.getName());
-                                    fragmentDrawerCallback.selectItem(CircuitViewPagerFragment.newInstance(context, circuitStarted), circuitStarted.getName());
+
+                                    String dateSubtitle = DateUtils.formatDateTime(
+                                            context,
+                                            circuitStarted.getCreatedAt().getTime(),
+                                            DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE);
+
+                                    fragmentDrawerCallback.selectItem(CircuitViewPagerFragment.newInstance(context, circuitStarted), circuitStarted.getName(), dateSubtitle);
                                     return false; // close drawer
                                 }
                             }

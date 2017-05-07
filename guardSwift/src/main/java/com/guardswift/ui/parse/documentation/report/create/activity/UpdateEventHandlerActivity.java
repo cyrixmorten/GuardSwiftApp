@@ -39,7 +39,7 @@ import com.parse.SaveCallback;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class UpdateEventHandlerActivity extends InjectingAppCompatActivity implements UpdateEventHandler {
@@ -144,13 +144,13 @@ public class UpdateEventHandlerActivity extends InjectingAppCompatActivity imple
 
     ActionBar actionBar;
 
-    @Bind(R.id.toolbar)
+    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    @Bind(R.id.content)
+    @BindView(R.id.content)
     LinearLayout container;
 
-    @Bind(R.id.footer)
+    @BindView(R.id.footer)
     LinearLayout footer;
 
 
@@ -171,6 +171,7 @@ public class UpdateEventHandlerActivity extends InjectingAppCompatActivity imple
 
         actionBar = getSupportActionBar();
         if (actionBar != null) {
+            //noinspection RestrictedApi
             actionBar.setDefaultDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }

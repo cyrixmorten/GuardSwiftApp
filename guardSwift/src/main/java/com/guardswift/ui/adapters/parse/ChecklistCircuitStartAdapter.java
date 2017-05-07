@@ -32,7 +32,7 @@
 //
 //	}
 //
-//	@Bind(R.id.item)
+//	@BindView(R.id.item)
 //    CheckedTextView item;
 //
 //	@Override

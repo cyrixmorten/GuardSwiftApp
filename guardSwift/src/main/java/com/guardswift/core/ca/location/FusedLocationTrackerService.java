@@ -52,12 +52,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
     public static void start(Context context) {
         Log.e(TAG, "startGPSTrackerService");
-        context.startService(new Intent(context, FusedLocationTrackerService.class));
-    }
-
-    public static void start(Context context, int priority) {
-        Log.e(TAG, "startGPSTrackerService");
-        LOCATION_PRIORITY = priority;
+        // always rebuild geofence on startup
         context.startService(new Intent(context, FusedLocationTrackerService.class));
     }
 
@@ -72,7 +67,7 @@ public class FusedLocationTrackerService extends InjectingService {
     private Subscription locationSubscription;
 
 
-    private Location mLastGeofenceRebuildLocation;
+
     private Location mLastUIUpdateLocation;
 
     private Tracker tracker;
@@ -137,13 +132,13 @@ public class FusedLocationTrackerService extends InjectingService {
     @Override
     public void onDestroy() {
         Log.i(TAG, "Stopping GPSTrackerService");
-        mLastGeofenceRebuildLocation = null;
         if (hasGooglePlayServices()) {
             unsubscribeLocationUpdates();
         }
         wl.release();
         super.onDestroy();
     }
+
 
 
     public void unsubscribeLocationUpdates() {
@@ -211,15 +206,14 @@ public class FusedLocationTrackerService extends InjectingService {
                     public void call(Location location) {
 
                         if (guardCache.isLoggedIn()) {
+
                             LocationModule.Recent.setLastKnownLocation(location);
 
-                            if (!rebuildGeofencesIfDistanceThresholdReached(location)) {
-                                updateUIIfDistanceThresholdReached(location);
-                                inspectDistanceToGeofencedTasks(location);
-                            }
+                            rebuildGeofencesIfDistanceThresholdReached(location);
+                            inspectDistanceToGeofencedTasks(location);
+                            updateUIIfDistanceThresholdReached(location);
 
-
-                            tracker.appendLocation(getApplicationContext(), location);
+                            tracker.appendLocation(getApplicationContext());
 
 
                         } else {
@@ -230,20 +224,21 @@ public class FusedLocationTrackerService extends InjectingService {
     }
 
 
-    private boolean rebuildGeofencesIfDistanceThresholdReached(Location location) {
+    private void rebuildGeofencesIfDistanceThresholdReached(Location location) {
 
-        float distance = Util.distanceMeters(mLastGeofenceRebuildLocation, location);
-        boolean triggerByDistance = distance >= DISTANCE_METERS_FOR_GEOFENCEREBUILD;
+        Location lastGeofenceRebuildLocation = RegisterGeofencesIntentService.getLastRebuildLocation();
 
-        if (triggerByDistance) {
-            mLastGeofenceRebuildLocation = location;
-
-            RegisterGeofencesIntentService.start(getApplicationContext());
-
-            return true;
+        if (lastGeofenceRebuildLocation == null || RegisterGeofencesIntentService.isRebuildingGeofence()) {
+            return;
         }
 
-        return false;
+        float distance = Util.distanceMeters(lastGeofenceRebuildLocation, location);
+        boolean triggerByDistance = distance >= DISTANCE_METERS_FOR_GEOFENCEREBUILD;
+
+
+        if (triggerByDistance) {
+            RegisterGeofencesIntentService.start(getApplicationContext(), false);
+        }
     }
 
 
@@ -258,6 +253,10 @@ public class FusedLocationTrackerService extends InjectingService {
     }
 
     private void inspectDistanceToGeofencedTasks(Location location) {
+
+        if (RegisterGeofencesIntentService.isRebuildingGeofence()) {
+            return;
+        }
 
         Set<GSTask> geofencedTasks = tasksCache.getAllGeofencedTasks();
 

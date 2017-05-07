@@ -71,15 +71,12 @@ public class ActivityRecognitionService extends InjectingService {
     }
 
 
-    private static boolean mIsRunning;
     private static boolean mJustStarted;
 
     private TextToSpeech ttobj;
 
     public static void start(Context context) {
         mJustStarted = true;
-        Log.i(TAG, "STARTING - already started: " + mIsRunning);
-//        if (!mIsRunning)
         context.startService(new Intent(context, ActivityRecognitionService.class));
     }
 
@@ -95,7 +92,6 @@ public class ActivityRecognitionService extends InjectingService {
 
         if (hasGooglePlayServices()) {
 
-            mIsRunning = true;
 
             releaseTextToSpeech();
             ttobj = new TextToSpeech(getApplicationContext(),
@@ -150,8 +146,6 @@ public class ActivityRecognitionService extends InjectingService {
     @Override
     public void onDestroy() {
         Log.i(TAG, "Stopping " + TAG);
-
-        mIsRunning = false;
 
         releaseTextToSpeech();
         unsubscribeActivityUpdates();

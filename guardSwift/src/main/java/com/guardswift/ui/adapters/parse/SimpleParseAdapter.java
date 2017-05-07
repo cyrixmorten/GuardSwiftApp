@@ -25,7 +25,7 @@
 //		this.textCol = textCol;
 //	}
 //
-//	@Bind(R.id.text) TextView text;
+//	@BindView(R.id.text) TextView text;
 //
 //	@Override
 //	public View getItemView(T object, View v, ViewGroup parent) {

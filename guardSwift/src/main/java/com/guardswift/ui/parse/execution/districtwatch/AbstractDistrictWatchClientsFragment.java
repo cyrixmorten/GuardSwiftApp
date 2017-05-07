@@ -193,11 +193,11 @@
 //		super.onCreate(savedInstanceState);
 //	}
 //
-//	@Bind(R.id.swipe_container) SwipeRefreshLayout mSwipeRefresher;
-//	// @Bind(R.id.loading) ProgressBar mLoading;
+//	@BindView(R.id.swipe_container) SwipeRefreshLayout mSwipeRefresher;
+//	// @BindView(R.id.loading) ProgressBar mLoading;
 //
-////	@Bind(R.id.footer) RelativeLayout mFooter;
-////	@Bind(R.id.footerShadow) View mFooterShadow;
+////	@BindView(R.id.footer) RelativeLayout mFooter;
+////	@BindView(R.id.footerShadow) View mFooterShadow;
 //
 //	@Override
 //	public View onCreateView(LayoutInflater inflater, ViewGroup container,

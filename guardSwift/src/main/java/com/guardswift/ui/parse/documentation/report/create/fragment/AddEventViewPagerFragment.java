@@ -32,8 +32,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 public class AddEventViewPagerFragment extends InjectingFragment {
 
@@ -41,6 +42,8 @@ public class AddEventViewPagerFragment extends InjectingFragment {
 
 
     private int PAGES_COUNT = 0;
+
+    private Unbinder unbinder;
 
     public static AddEventViewPagerFragment newInstance(Context context, Client client) {
 
@@ -60,13 +63,13 @@ public class AddEventViewPagerFragment extends InjectingFragment {
     @Inject
     EventTypeCache eventTypeCache;
 
-    @Bind(R.id.pager)
+    @BindView(R.id.pager)
     public ViewPager mPager;
 
-    @Bind(R.id.coordinator)
+    @BindView(R.id.coordinator)
     CoordinatorLayout coordinatorLayout;
 
-    @Bind(R.id.fab)
+    @BindView(R.id.fab)
     FloatingActionButton floatingActionButton;
 
     /**
@@ -89,7 +92,7 @@ public class AddEventViewPagerFragment extends InjectingFragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.viewpager_fab, container, false);
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
         mPagerAdapter = new ScreenSlidePagerAdapter(getChildFragmentManager());
         mPager.setAdapter(mPagerAdapter);
@@ -180,7 +183,7 @@ public class AddEventViewPagerFragment extends InjectingFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
+        unbinder.unbind();
         if (mPager != null) {
             mPager.removeOnPageChangeListener(mDetailOnPageChangeListener);
         }

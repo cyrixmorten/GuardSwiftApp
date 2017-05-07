@@ -67,16 +67,16 @@
 //		// Empty constructor required for DialogFragment
 //	}
 //
-//	@Bind(R.id.eventType) Spinner eventType;
-//	@Bind(R.id.eventAmount) Spinner eventAmount;
-//	@Bind(R.id.eventClientLocation) Spinner eventClientLocation;
-//	@Bind(R.id.eventNewClientLocation) EditText eventNewClientLocation;
-//	@Bind(R.id.eventRemarks) EditText eventRemarks;
+//	@BindView(R.id.eventType) Spinner eventType;
+//	@BindView(R.id.eventAmount) Spinner eventAmount;
+//	@BindView(R.id.eventClientLocation) Spinner eventClientLocation;
+//	@BindView(R.id.eventNewClientLocation) EditText eventNewClientLocation;
+//	@BindView(R.id.eventRemarks) EditText eventRemarks;
 //
-//	@Bind(R.id.addEventLayout) LinearLayout addEventLayout;
-//	@Bind(R.id.loadingContent) ProgressBar loadingContent;
+//	@BindView(R.id.addEventLayout) LinearLayout addEventLayout;
+//	@BindView(R.id.loadingContent) ProgressBar loadingContent;
 //
-//	@Bind(R.id.eventClientLocationLayout) LinearLayout eventClientLocationLayout;
+//	@BindView(R.id.eventClientLocationLayout) LinearLayout eventClientLocationLayout;
 //
 //	private final int elementsToLoad = 2;
 //	private int loadedCounter;

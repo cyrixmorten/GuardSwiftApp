@@ -8,8 +8,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,11 +33,15 @@ import com.guardswift.persistence.parse.documentation.gps.TrackerData;
 import com.guardswift.ui.web.GoogleMapFragment;
 import com.parse.ProgressCallback;
 
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.guardswift.R.id.chart;
 
 public class TrackerMapFragment extends InjectingFragment implements OnMapReadyCallback {
 
@@ -42,8 +53,8 @@ public class TrackerMapFragment extends InjectingFragment implements OnMapReadyC
         return fragment;
     }
 
-    @Bind(R.id.btn_next)
-    Button nextButton;
+    @BindView(chart)
+    LineChart mChart;
 
     private GoogleMap googleMap;
     private Tracker tracker;
@@ -58,6 +69,7 @@ public class TrackerMapFragment extends InjectingFragment implements OnMapReadyC
 
         addMapFragment();
 
+        setRetainInstance(true);
 
         return rootView;
     }
@@ -111,46 +123,99 @@ public class TrackerMapFragment extends InjectingFragment implements OnMapReadyC
                         return;
                     }
 
-                    // load whole track
+                    addGraphData(trackerDataArray);
+
                     googleMap.clear();
+
                     List<LatLng> positions = getTrack(trackerDataArray);
                     addPolyLines(googleMap, positions);
                     zoomFit(googleMap, positions);
-
-                    nextButton.setEnabled(true);
-
-                    final int step = 10;
-                    final int[] startIndex = {0};
-                    nextButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-
-                            int maxIndex = trackerDataArray.length;
-                            int targetEndIndex = startIndex[0] + step;
-                            int endIndex = targetEndIndex <= maxIndex ? targetEndIndex : maxIndex;
-
-                            List<TrackerData> track = Lists.newArrayList();
-                            track.addAll(Arrays.asList(trackerDataArray).subList(startIndex[0], endIndex));
-
-                            googleMap.clear();
-                            List<LatLng> positions = getTrack(track.toArray(new TrackerData[0]));
-                            addPolyLines(googleMap, positions);
-                            zoomFit(googleMap, positions);
-
-                            startIndex[0] += step;
-
-                            if (startIndex[0] > maxIndex) {
-                                startIndex[0] = 0;
-                            }
-
-                        }
-                    });
 
 
                 }
             });
         }
     }
+
+    private void addGraphData(TrackerData[] trackerDataArray) {
+
+        List<Entry> still = Lists.newArrayList();
+        List<Entry> walking = Lists.newArrayList();
+        List<Entry> running = Lists.newArrayList();
+        List<Entry> driving = Lists.newArrayList();
+        List<Entry> other = Lists.newArrayList();
+
+        for (TrackerData trackerData : trackerDataArray) {
+
+            Entry entry = new Entry(trackerData.getTime(), trackerData.getSpeed());
+
+            Log.d(TAG, entry.toString());
+
+            switch (trackerData.getActivityType()) {
+                case DetectedActivity.STILL: still.add(entry); break;
+                case DetectedActivity.ON_FOOT:
+                case DetectedActivity.WALKING: walking.add(entry); break;
+                case DetectedActivity.RUNNING: running.add(entry); break;
+                case DetectedActivity.IN_VEHICLE: driving.add(entry); break;
+                case DetectedActivity.ON_BICYCLE:
+                case DetectedActivity.TILTING:
+                case DetectedActivity.UNKNOWN: other.add(entry); break;
+            }
+        }
+
+        Log.d(TAG, "Still: " + still.size());
+        Log.d(TAG, "Walking: " + walking.size());
+        Log.d(TAG, "Running: " + running.size());
+        Log.d(TAG, "Driving: " + driving.size());
+        Log.d(TAG, "Other: " + other.size());
+
+        LineDataSet stillDataSet = new LineDataSet(still, "Still"); // add entries to dataset
+        stillDataSet.setColor(Color.BLUE);
+//        dataSet.setValueTextColor(...); // styling, ...
+
+        LineDataSet walkingDataSet = new LineDataSet(walking, "Walking"); // add entries to dataset
+        walkingDataSet.setColor(Color.CYAN);
+
+        LineDataSet runningDataSet = new LineDataSet(walking, "Running"); // add entries to dataset
+        runningDataSet.setColor(Color.YELLOW);
+
+        LineDataSet drivingDataSet = new LineDataSet(walking, "Driving"); // add entries to dataset
+        drivingDataSet.setColor(Color.RED);
+//        drivingDataSet.setFillDrawable(ContextCompat.getDrawable(this, R.drawable.fade_red));
+
+
+
+        LineDataSet otherDataSet = new LineDataSet(walking, "Other"); // add entries to dataset
+        otherDataSet.setColor(Color.MAGENTA);
+
+        LineData lineData = new LineData(stillDataSet, walkingDataSet, runningDataSet, drivingDataSet, otherDataSet);
+//        lineData.setValueFormatter(new IValueFormatter() {
+//            @Override
+//            public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+//                Log.d(TAG, "Format: " + entry.toString());
+//                return String.valueOf(value);
+//            }
+//        });
+        mChart.setData(lineData);
+        mChart.getDescription().setEnabled(false);
+        mChart.getAxisRight().setEnabled(false);
+        mChart.setDragEnabled(false);
+        mChart.setScaleEnabled(false);
+        mChart.setDrawGridBackground(false);
+        XAxis xAxis = mChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setValueFormatter(new IAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                SimpleDateFormat sdf = new SimpleDateFormat("mm:HH", Locale.getDefault());
+
+                return sdf.format(new Date((long)value));
+            }
+        });
+        mChart.invalidate(); // refresh
+    }
+
+
 
     private void addPolyLines(GoogleMap googleMap, List<LatLng> positions) {
         PolylineOptions options = new PolylineOptions().width(5).color(Color.RED);
@@ -172,33 +237,21 @@ public class TrackerMapFragment extends InjectingFragment implements OnMapReadyC
 
             float distance = 0;
             if (index > 0) {
-                previous = positions.get(index-1);
+                previous = positions.get(index - 1);
                 distance = ParseModule.distanceBetweenMeters(previous, next);
             }
 
-            boolean skipped = false;
-
-            if (previous != null) {
-
-                if (distance > 1000) {
-                    skipped = true;
-                }
-
-                Log.d(TAG, "distance: " + distance);
-            }
-
-            if (!skipped) {
+            if (trackerData.getActivityType() == DetectedActivity.IN_VEHICLE) {
                 distanceTraveled += distance;
-                positions.add(next);
-                index++;
-            } else {
-                Log.d(TAG, "skipped");
             }
+
+            positions.add(next);
+            index++;
 
 
         }
 
-        Log.d(TAG, "Total disatance: " + distanceTraveled);
+        Log.d(TAG, "Total distance: " + distanceTraveled);
 
 
         return positions;

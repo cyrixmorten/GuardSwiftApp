@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 
 import com.guardswift.R;
@@ -14,13 +13,11 @@ import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.ParseTask;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ReportEditActivity extends InjectingAppCompatActivity {
@@ -36,7 +33,7 @@ public class ReportEditActivity extends InjectingAppCompatActivity {
         context.startActivity(new Intent(context, ReportEditActivity.class));
     }
 
-    @Bind(R.id.toolbar)
+    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
 

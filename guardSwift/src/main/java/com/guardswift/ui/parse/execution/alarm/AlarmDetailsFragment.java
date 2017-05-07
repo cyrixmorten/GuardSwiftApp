@@ -54,7 +54,7 @@
 //    private List<View> mDetailsViews;
 //
 //
-//    @Bind(R.id.detailsContainer)
+//    @BindView(R.id.detailsContainer)
 //    LinearLayout detailsContainer;
 //
 //    @Override

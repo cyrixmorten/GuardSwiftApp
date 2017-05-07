@@ -12,7 +12,7 @@ import com.guardswift.persistence.parse.data.client.ClientContact;
 
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ClientContactsAdapter extends RecyclerView.Adapter<ClientContactsAdapter.ClientContactViewHolder> {
@@ -32,13 +32,13 @@ public class ClientContactsAdapter extends RecyclerView.Adapter<ClientContactsAd
 
 	public static class ClientContactViewHolder extends RecyclerView.ViewHolder {
 
-		@Bind(R.id.tvName)
+		@BindView(R.id.tvName)
 		TextView contactName;
 
-		@Bind(R.id.tvPhoneNumber)
+		@BindView(R.id.tvPhoneNumber)
 		TextView contactPhoneNumber;
 
-		@Bind(R.id.tvDescription)
+		@BindView(R.id.tvDescription)
 		TextView contactDescription;
 
 		public ClientContactViewHolder(View itemView) {

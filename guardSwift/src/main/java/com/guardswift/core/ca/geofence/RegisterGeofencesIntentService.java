@@ -14,16 +14,11 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.common.collect.Lists;
 import com.guardswift.core.ca.GeofencingModule;
 import com.guardswift.core.ca.LocationModule;
-import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingIntentService;
+import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.cache.task.GSTasksCache;
-import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.TaskFactory;
-import com.parse.FindCallback;
-import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -67,6 +62,8 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 //    public static final String ADD = "com.guardswift.services.action.ADD";
 //    public static final String REMOVE = "com.guardswift.services.action.REMOVE";
 
+    private static Location mLastGeofenceRebuildLocation;
+    private static boolean mRebuildInProgress;
 
     private ReactiveLocationProvider mReactiveLocationProvider;
     private Subscription mAddGeofencesSubscription;
@@ -75,9 +72,14 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
 //    private static GSTask task_type;
 
-    public static void start(Context context) {
+    public static void start(Context context, boolean force) {
         // relying on previously set task_type
-        Log.d(TAG, "START");
+        Log.d(TAG, "START forced: " + force);
+
+        if (force) {
+            RegisterGeofencesIntentService.mLastGeofenceRebuildLocation = null;
+        }
+
         context.startService(new Intent(context, RegisterGeofencesIntentService.class));
     }
 
@@ -120,7 +122,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                     @Override
                     public void run() throws Exception {
 //                        validateTaskState(deviceLocation);
-                        rebuildGeofenceForTasks();
+                        rebuildGeofenceForTasks(deviceLocation);
                     }
                 });
             }
@@ -128,6 +130,13 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
     }
 
+    public static Location getLastRebuildLocation() {
+        return mLastGeofenceRebuildLocation;
+    }
+
+    public static boolean isRebuildingGeofence() {
+        return mRebuildInProgress;
+    }
 
 //    /**
 //     * If the device has been moved while guardswift has been shut down or
@@ -167,12 +176,15 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void rebuildGeofenceForTasks() {
+    private void rebuildGeofenceForTasks(final Location location) {
 
-        Log.d(TAG, "rebuildGeofenceForTasks");
+        Log.d(TAG, "rebuildGeofenceForTasks: " + location);
+
+        mLastGeofenceRebuildLocation = location;
+        mRebuildInProgress = true;
 
         int withinKm = 2;
-        geofencingModule.queryAllGeofenceTasks(withinKm).onSuccess(new Continuation<Set<ParseObject>, Object>() {
+        geofencingModule.queryAllGeofenceTasks(withinKm, location).onSuccess(new Continuation<Set<ParseObject>, Object>() {
             @Override
             public Object then(Task<Set<ParseObject>> taskObject) throws Exception {
                 List<ParseObject> tasks = Lists.newCopyOnWriteArrayList(taskObject.getResult());
@@ -192,7 +204,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                     String message = "Geofence task size limit reached for user " + ParseUser.getCurrentUser().getUsername() + " at " + LocationModule.Recent.getLastKnownLocation().toString() + " with " + tasks.size() + " tasks";
                     new HandleException(getBaseContext(), TAG, "100+ geofences", new IllegalStateException(message));
                     Crashlytics.log(message);
-                    tasks = tasks.subList(0, 100);
+                    tasks = tasks.subList(0, 99);
                 }
 
                 List<GSTask> geofencedTasks = Lists.newArrayList();
@@ -220,8 +232,14 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
             @Override
             public Task<Void> then(Task<Object> task) throws Exception {
                 if (task.isFaulted()) {
-                    Log.e(TAG, "Query geofences", task.getError());
+                    new HandleException(getBaseContext(), TAG, "Failed to build geofences", task.getError());
+                } else {
+                    EventBusController.postUIUpdate(location);
                 }
+
+                mRebuildInProgress = false;
+
+
                 return null;
             }
         });

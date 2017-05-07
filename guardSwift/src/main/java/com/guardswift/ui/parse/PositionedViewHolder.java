@@ -16,7 +16,7 @@ import com.guardswift.persistence.parse.Positioned;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.ParseGeoPoint;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -24,9 +24,9 @@ import butterknife.ButterKnife;
  */
 public class PositionedViewHolder extends RecyclerView.ViewHolder {
 
-        @Bind(R.id.tv_distance_text)
+        @BindView(R.id.tv_distance_text)
         public AwesomeTextView vDistanceText;
-        @Bind(R.id.tv_distance_icon)
+        @BindView(R.id.tv_distance_icon)
         public AwesomeTextView vDistanceIcon;
 
         public PositionedViewHolder(View v) {

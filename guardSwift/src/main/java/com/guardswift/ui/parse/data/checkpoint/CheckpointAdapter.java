@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import dk.alexandra.positioning.wifi.PositionEstimate;
 
@@ -56,17 +56,17 @@ public class CheckpointAdapter extends
         notifyDataSetInvalidated();
     }
 
-    @Bind(R.id.qualityIcon)
+    @BindView(R.id.qualityIcon)
     AwesomeTextView qualityIcon;
-    @Bind(R.id.item)
+    @BindView(R.id.item)
     CheckedTextView item;
-    @Bind(R.id.progress1)
+    @BindView(R.id.progress1)
     ProgressBar progress1;
-    @Bind(R.id.progress2)
+    @BindView(R.id.progress2)
     ProgressBar progress2;
-    @Bind(R.id.layout_estimated)
+    @BindView(R.id.layout_estimated)
     LinearLayout estLayout;
-    @Bind(R.id.tv_est_distance)
+    @BindView(R.id.tv_est_distance)
     TextView estDistance;
 
     @Override

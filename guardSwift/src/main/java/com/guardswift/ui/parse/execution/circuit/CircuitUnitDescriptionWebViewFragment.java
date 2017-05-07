@@ -19,8 +19,9 @@ import com.guardswift.ui.GuardSwiftApplication;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 public class CircuitUnitDescriptionWebViewFragment extends InjectingFragment {
 
@@ -43,9 +44,11 @@ public class CircuitUnitDescriptionWebViewFragment extends InjectingFragment {
     @Inject
     CircuitUnitCache circuitUnitCache;
 
+    @BindView(R.id.webView) WebView webView;
+
     private CircuitUnit mCircuitUnit;
 
-    @Bind(R.id.webView) WebView webView;
+    private Unbinder unbinder;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +65,7 @@ public class CircuitUnitDescriptionWebViewFragment extends InjectingFragment {
         View rootView = inflater.inflate(R.layout.webview,
                 container, false);
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
         WebSettings settings = webView.getSettings();
         settings.setDefaultTextEncodingName("utf-8");
@@ -108,7 +111,7 @@ public class CircuitUnitDescriptionWebViewFragment extends InjectingFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
+        unbinder.unbind();
     }
 
 

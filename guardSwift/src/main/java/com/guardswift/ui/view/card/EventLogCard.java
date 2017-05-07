@@ -21,7 +21,7 @@ import com.guardswift.persistence.parse.documentation.event.EventLog;
 
 import java.util.Date;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.beardedhen.androidbootstrap.font.FontAwesome.FA_REMOVE;
@@ -32,55 +32,55 @@ import static com.beardedhen.androidbootstrap.font.FontAwesome.FA_REMOVE;
 public class EventLogCard extends LinearLayout {
 
 
-    @Bind(R.id.card_header)
+    @BindView(R.id.card_header)
     RelativeLayout layoutCardHeader;
 
-    @Bind(R.id.card_body)
+    @BindView(R.id.card_body)
     LinearLayout layoutCardBody;
 
-    @Bind(R.id.tvTitle)
+    @BindView(R.id.tvTitle)
     TextView tvTitle;
 
-    @Bind(R.id.layoutDelete)
+    @BindView(R.id.layoutDelete)
     LinearLayout layoutDelete;
 
-    @Bind(R.id.btnDelete)
+    @BindView(R.id.btnDelete)
     AwesomeTextView btnDelete;
 
-    @Bind(R.id.btn_copy_to_report)
+    @BindView(R.id.btn_copy_to_report)
     Button btnCopyToReport;
 
-    @Bind(R.id.tv_guard_name)
+    @BindView(R.id.tv_guard_name)
     TextView tvGuardName;
 
-    @Bind(R.id.tv_timestamp)
+    @BindView(R.id.tv_timestamp)
     TextView tvTimestamp;
 
-    @Bind(R.id.layout_event)
+    @BindView(R.id.layout_event)
     LinearLayout layoutEvent;
 
     CardView cardEvent;
     TextView tvEvent;
 
-    @Bind(R.id.layout_amount)
+    @BindView(R.id.layout_amount)
     LinearLayout layoutAmount;
 
     CardView cardAmount;
     TextView tvAmount;
 
-    @Bind(R.id.layout_people)
+    @BindView(R.id.layout_people)
     LinearLayout layoutPeople;
 
     CardView cardPeople;
     TextView tvPeople;
 
-    @Bind(R.id.layout_locations)
+    @BindView(R.id.layout_locations)
     LinearLayout layoutLocations;
 
     CardView cardLocations;
     TextView tvLocations;
 
-    @Bind(R.id.layout_remarks)
+    @BindView(R.id.layout_remarks)
     LinearLayout layoutRemarks;
 
     CardView cardRemarks;

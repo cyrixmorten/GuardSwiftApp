@@ -11,7 +11,7 @@ import com.guardswift.R;
 
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class SimpleMultichoiceArrayAdapter extends ArrayAdapter<String> {
@@ -26,7 +26,7 @@ public class SimpleMultichoiceArrayAdapter extends ArrayAdapter<String> {
         this.checkedItems = checkedItems;
 	}
 
-	@Bind(R.id.item)
+	@BindView(R.id.item)
     CheckedTextView item;
 
 	@Override

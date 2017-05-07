@@ -254,8 +254,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         ActivityRecognitionService.start(this);
         FusedLocationTrackerService.start(this);
-//        WiFiPositioningService.start(this);
-        RegisterGeofencesIntentService.start(this);
+        RegisterGeofencesIntentService.start(getInstance(), true);
     }
 
     public void stopServices() {
@@ -344,6 +343,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         updateClasses.add(parseObjectFactory.getGuard());
         if (guard.canAccessRegularTasks()) {
             updateClasses.add(parseObjectFactory.getCircuitStarted());
+            updateClasses.add(parseObjectFactory.getCircuitUnit());
             updateClasses.add(parseObjectFactory.getMessage());
         }
         if (guard.canAccessAlarms()) {
@@ -406,6 +406,7 @@ public class GuardSwiftApplication extends InjectingApplication {
                         Log.d(TAG, "Bootstrap success");
 
                         parseObjectsBootstrapped = true;
+
                         startServices();
 
                         return null;

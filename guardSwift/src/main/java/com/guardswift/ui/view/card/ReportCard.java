@@ -21,7 +21,7 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -30,26 +30,26 @@ import butterknife.ButterKnife;
 public class ReportCard extends LinearLayout {
 
 
-    @Bind(R.id.layout_events)
+    @BindView(R.id.layout_events)
     LinearLayout layoutEvents;
 
-    @Bind(R.id.tv_week)
+    @BindView(R.id.tv_week)
     TextView tvWeek;
 
-    @Bind(R.id.tv_date)
+    @BindView(R.id.tv_date)
     TextView tvDate;
 
-    @Bind(R.id.tv_guard_name)
+    @BindView(R.id.tv_guard_name)
     TextView tvGuardName;
 
-    @Bind(R.id.btn_fetch_pdf)
+    @BindView(R.id.btn_fetch_pdf)
     Button btnFetchReport;
 
-//    @Bind(R.id.btn_copy)
+//    @BindView(R.id.btn_copy)
 //    Button btnCopy;
 
 
-    @Bind(R.id.card)
+    @BindView(R.id.card)
     CardView card;
 
 

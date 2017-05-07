@@ -28,7 +28,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public abstract class AbstractCreateEventHandlerActivity extends
@@ -51,12 +51,12 @@ public abstract class AbstractCreateEventHandlerActivity extends
 //    @Inject
 //    LocalData localData;
 
-    @Bind(R.id.toolbar)
+    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    @Bind(R.id.btn_previous)
+    @BindView(R.id.btn_previous)
     Button btnPrevious;
-    @Bind(R.id.btn_next)
+    @BindView(R.id.btn_next)
     Button btnNext;
 
     @Inject

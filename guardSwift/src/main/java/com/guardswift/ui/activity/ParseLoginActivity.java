@@ -43,12 +43,12 @@
 //	private String mUsername;
 //
 //	// UI references.
-////	@Bind(R.id.devicename) EditText mDevicenameView;
-//	@Bind(R.id.username) EditText mUsernameView;
-//	@Bind(R.id.password) EditText mPasswordView;
-//	@Bind(R.id.login_form) View mLoginFormView;
-//	@Bind(R.id.login_status) View mLoginStatusView;
-//	@Bind(R.id.login_status_message) TextView mLoginStatusMessageView;
+////	@BindView(R.id.devicename) EditText mDevicenameView;
+//	@BindView(R.id.username) EditText mUsernameView;
+//	@BindView(R.id.password) EditText mPasswordView;
+//	@BindView(R.id.login_form) View mLoginFormView;
+//	@BindView(R.id.login_status) View mLoginStatusView;
+//	@BindView(R.id.login_status_message) TextView mLoginStatusMessageView;
 //
 //	@Override
 //	protected void onCreate(Bundle savedInstanceState) {

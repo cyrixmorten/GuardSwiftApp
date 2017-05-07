@@ -40,11 +40,14 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 public class AddEventPeopleFragment extends InjectingListFragment implements EventEntryFragment, UpdateFloatingActionButton {
 
     protected static final String TAG = AddEventPeopleFragment.class
             .getSimpleName();
+
+    private Unbinder unbinder;
 
     public static AddEventPeopleFragment newInstance(Client client) {
 
@@ -108,7 +111,7 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
                 R.layout.gs_listview_selectable_fab, container,
                 false);
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
         setListAdapter(mAdapter);
 
@@ -308,7 +311,7 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
+        unbinder.unbind();
     }
 
     @Override

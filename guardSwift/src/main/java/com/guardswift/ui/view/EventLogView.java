@@ -1,24 +1,17 @@
 package com.guardswift.ui.view;
 
 import android.content.Context;
-import android.support.v7.widget.CardView;
 import android.text.format.DateUtils;
-import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.documentation.report.Report;
-import com.guardswift.util.ToastHelper;
 
-import java.util.List;
-
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -27,22 +20,22 @@ import butterknife.ButterKnife;
 public class EventLogView extends LinearLayout {
 
 
-    @Bind(R.id.event_timestamp)
+    @BindView(R.id.event_timestamp)
     TextView tvTimetamp;
 
-    @Bind(R.id.event_type)
+    @BindView(R.id.event_type)
     TextView tvEventtype;
 
-    @Bind(R.id.event_amount)
+    @BindView(R.id.event_amount)
     TextView tvAmount;
 
-    @Bind(R.id.event_people)
+    @BindView(R.id.event_people)
     TextView tvPeople;
 
-    @Bind(R.id.event_locations)
+    @BindView(R.id.event_locations)
     TextView tvLocations;
 
-    @Bind(R.id.event_remarks)
+    @BindView(R.id.event_remarks)
     TextView tvRemarks;
 
 

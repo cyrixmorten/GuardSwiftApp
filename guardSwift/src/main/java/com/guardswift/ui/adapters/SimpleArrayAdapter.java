@@ -9,7 +9,7 @@ import android.widget.TextView;
 
 import com.guardswift.R;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class SimpleArrayAdapter extends ArrayAdapter<String> {
@@ -22,7 +22,7 @@ public class SimpleArrayAdapter extends ArrayAdapter<String> {
 		this.values = values;
 	}
 
-	@Bind(R.id.text) TextView text;
+	@BindView(R.id.text) TextView text;
 
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {

@@ -47,9 +47,10 @@ import javax.inject.Inject;
 
 import bolts.Continuation;
 import bolts.Task;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 
 public class ReportSummaryFragment extends InjectingFragment implements FragmentVisibilityListener {
 
@@ -81,32 +82,34 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
     private List<ClientContact> clientReceivers = Lists.newArrayList();
 
 
-    @Bind(R.id.cardview)
+    @BindView(R.id.cardview)
     CardView card;
 
-    @Bind(R.id.progress_layout)
+    @BindView(R.id.progress_layout)
     RelativeLayout progress_layout;
 
-    @Bind(R.id.tv_title)
+    @BindView(R.id.tv_title)
     TextView tvTitle;
 
-    @Bind(R.id.tv_date)
+    @BindView(R.id.tv_date)
     TextView tvDate;
 
-    @Bind(R.id.tv_guard_name)
+    @BindView(R.id.tv_guard_name)
     TextView tvGuardName;
 
-    @Bind(R.id.tv_guard_id)
+    @BindView(R.id.tv_guard_id)
     TextView tvGuardId;
 
-    @Bind(R.id.layout_timed_remarks)
+    @BindView(R.id.layout_timed_remarks)
     LinearLayout layoutRemarks;
 
-    @Bind(R.id.layout_client_receivers)
+    @BindView(R.id.layout_client_receivers)
     LinearLayout layoutClientReceivers;
 
-    @Bind(R.id.btn_send_report)
+    @BindView(R.id.btn_send_report)
     Button btnSendReport;
+
+    private Unbinder unbinder;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -124,11 +127,18 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
                 R.layout.gs_card_report_summary, container,
                 false);
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
         update();
 
         return rootView;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        unbinder.unbind();
     }
 
     private void update() {

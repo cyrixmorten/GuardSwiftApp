@@ -40,7 +40,7 @@
 //	private String[] values;
 //	private ArrayAdapter<String> mAdapter;
 //
-//	@Bind(R.id.header) TextView header;
+//	@BindView(R.id.header) TextView header;
 //
 //	@Override
 //	public void onCreate(Bundle savedInstanceState) {
@@ -48,7 +48,7 @@
 //		super.onCreate(savedInstanceState);
 //	}
 //
-//	@Bind(R.id.btn_footer)
+//	@BindView(R.id.btn_footer)
 //    BootstrapButton footerButton;
 //
 //	@Override

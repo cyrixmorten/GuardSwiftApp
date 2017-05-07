@@ -11,7 +11,7 @@ import android.widget.RelativeLayout;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity {
@@ -19,10 +19,10 @@ public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity
 	private static final String TAG = AbstractToolbarActivity.class.getSimpleName();
 
 
-	@Bind(R.id.toolbar)
+	@BindView(R.id.toolbar)
 	Toolbar toolbar;
 
-	@Bind(R.id.content)
+	@BindView(R.id.content)
 	RelativeLayout content;
 
 	protected abstract Fragment getFragment();

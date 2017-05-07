@@ -32,7 +32,7 @@
 //
 //	}
 //
-//	@Bind(R.id.item) TextView item;
+//	@BindView(R.id.item) TextView item;
 //
 //	@Override
 //	public View getItemView(ChecklistCircuitEnding object, View v,

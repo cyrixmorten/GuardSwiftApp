@@ -14,16 +14,10 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.guardswift.R;
-import com.guardswift.dagger.InjectingFragment;
-import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.cache.task.CircuitUnitCache;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
-import com.guardswift.ui.GuardSwiftApplication;
 
-import javax.inject.Inject;
-
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 public class WebViewFragment extends Fragment {
 
@@ -42,10 +36,12 @@ public class WebViewFragment extends Fragment {
     }
 
 
-    @Bind(R.id.webView)
+    @BindView(R.id.webView)
     WebView webView;
-    @Bind(R.id.progress)
+    @BindView(R.id.progress)
     ProgressBar progress;
+
+    private Unbinder unbinder;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,7 +54,7 @@ public class WebViewFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.webview, container, false);
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -106,7 +102,7 @@ public class WebViewFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
+        unbinder.unbind();
     }
 
 

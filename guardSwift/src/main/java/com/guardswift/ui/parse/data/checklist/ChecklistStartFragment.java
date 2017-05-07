@@ -34,8 +34,8 @@
 //	}
 //
 //
-//	@Bind(R.id.checklist_header) TextView header;
-//	@Bind(R.id.checklist_subheader) TextView subheader;
+//	@BindView(R.id.checklist_header) TextView header;
+//	@BindView(R.id.checklist_subheader) TextView subheader;
 //
 //	@Override
 //	public void onCreate(Bundle savedInstanceState) {

@@ -43,15 +43,18 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 
 public class AddEventRemarkFragment extends InjectingFragment implements
         EventEntryFragment {
 
     protected static final String TAG = AddEventRemarkFragment.class
             .getSimpleName();
+
+    private Unbinder unbinder;
 
     public static AddEventRemarkFragment newInstance(Client client, EventType eventType) {
 
@@ -76,21 +79,21 @@ public class AddEventRemarkFragment extends InjectingFragment implements
 
     private ParseQueryAdapter<EventRemark> mAdapter;
 
-    @Bind(R.id.edittext)
+    @BindView(R.id.edittext)
     MultiAutoCompleteTextView remarkEditText;
-    //	@Bind(R.id.check_save_to_list) CheckedTextView check_save_to_list;
+    //	@BindView(R.id.check_save_to_list) CheckedTextView check_save_to_list;
 //
-//	@Bind(R.id.layout_previous_remarks) LinearLayout layout_previous_remarks;
-    @Bind(R.id.progressBar)
+//	@BindView(R.id.layout_previous_remarks) LinearLayout layout_previous_remarks;
+    @BindView(R.id.progressBar)
     ProgressBar progress;
-    @Bind(R.id.list_previous_remarks)
+    @BindView(R.id.list_previous_remarks)
     ListView prevous_remarks_list;
-    @Bind(R.id.btn_clear)
+    @BindView(R.id.btn_clear)
     ImageView btnClear;
-//    @Bind(R.id.header)
+//    @BindView(R.id.header)
 //    TextView header;
-//	@Bind(R.id.list_empty_previous_remarks) TextView prevous_remarks_list_empty;
-//	@Bind(R.id.tv_client_location) TextView client_and_location;
+//	@BindView(R.id.list_empty_previous_remarks) TextView prevous_remarks_list_empty;
+//	@BindView(R.id.tv_client_location) TextView client_and_location;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -98,7 +101,7 @@ public class AddEventRemarkFragment extends InjectingFragment implements
         View rootView = inflater.inflate(R.layout.fragment_event_remark, container,
                 false);
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
 //        header.setText(getString(R.string.remark).toUpperCase());
 
@@ -343,7 +346,7 @@ public class AddEventRemarkFragment extends InjectingFragment implements
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ButterKnife.unbind(this);
+        unbinder.unbind();
 
         Log.e(TAG, "onDestroyView");
     }

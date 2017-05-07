@@ -23,7 +23,7 @@ import com.mikepenz.materialdrawer.DrawerBuilder;
 
 import javax.inject.Inject;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -50,7 +50,7 @@ public class MainActivity extends InjectingAppCompatActivity {
     @Inject
     Sounds sounds;
 
-    @Bind(R.id.toolbar)
+    @BindView(R.id.toolbar)
     Toolbar toolbar;
 
     private Drawer messagesDrawer;

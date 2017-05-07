@@ -26,8 +26,9 @@ import java.util.List;
 
 import bolts.Continuation;
 import bolts.Task;
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 
 /**
  * Abstract fragment for displaying recycled ParseObjects
@@ -40,6 +41,8 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
     protected static final String TAG = AbstractTasksRecycleFragment.class
             .getSimpleName();
+
+    private Unbinder unbinder;
 
 
     /**
@@ -75,7 +78,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
     }
 
 
-    @Bind(R.id.list)
+    @BindView(R.id.list)
     protected SuperRecyclerView mRecycleView;
 
 
@@ -140,13 +143,14 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
         }
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_recycle_tasks,
                 container, false);
 
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
         // must be after ButterKnife.bind as it may rely on CoordinatorLayout
         mAdapter = createRecycleAdapter();
         mAdapter.setFromLocalDataStore(true);
@@ -230,8 +234,9 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
     @Override
     public void onDestroyView() {
-        ButterKnife.unbind(this);
         super.onDestroyView();
+
+        unbinder.unbind();
     }
 
 
