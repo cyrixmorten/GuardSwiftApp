@@ -421,6 +421,22 @@
     <string name="minute">minut</string>
     <string name="seconds">sekunder</string>
     <string name="week_number">Uge %1$d</string>
+    <string name="guardswift_running_notification_title">GuardSwift Kører</string>
+    <string name="guardswift_running_notification_message">Husk venligst at logge af</string>
+    <string name="timespan">%1$s - %2$s</string>
+    <string name="shown_timespan">Viste tidsrum: </string>
+    <string name="latlng">Latitude: %1$f Longitude: %2$f</string>
+    <string name="position">Position</string>
+    <string name="activity">Aktivitet</string>
+    <string name="activity_in_vehicle">Kører bil</string>
+    <string name="activity_on_bicycle">På cykel</string>
+    <string name="activity_on_foot">Gående</string>
+    <string name="activity_still">Stilestående</string>
+    <string name="activity_unknown">Ukendt</string>
+    <string name="activity_tilting">Tilter</string>
+    <string name="click_route">Klik på rute</string>
+    <string name="km_h">km/t</string>
+    <string name="date">Dato</string>
 
 
 </resources>

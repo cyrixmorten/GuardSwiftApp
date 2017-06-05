@@ -20,7 +20,7 @@ import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.common.UpdateFloatingActionButton;
+import com.guardswift.ui.helpers.UpdateFloatingActionButton;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
@@ -119,11 +119,16 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
     @Override
     protected ParseRecyclerQueryAdapter<EventLog, ReportEditRecycleAdapter.ReportViewHolder> createRecycleAdapter() {
-        ReportEditRecycleAdapter adaper = new ReportEditRecycleAdapter(getActivity(), createNetworkQueryFactory());
+        ReportEditRecycleAdapter adapter = new ReportEditRecycleAdapter(getActivity(), createNetworkQueryFactory());
 
-        adaper.addOnQueryLoadListener(new ParseRecyclerQueryAdapter.OnQueryLoadListener<EventLog>() {
+        adapter.addOnQueryLoadListener(new ParseRecyclerQueryAdapter.OnQueryLoadListener<EventLog>() {
             @Override
             public void onLoaded(List<EventLog> objects, Exception e) {
+                if (e != null) {
+                    new HandleException(TAG, "Load adapter", e);
+                    return;
+                }
+
                 showFloadingActionButton(1000);
                 loading = false;
                 if (pdfMenu != null) {
@@ -136,7 +141,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
                 loading = true;
             }
         });
-        return adaper;
+        return adapter;
     }
 
     @Override

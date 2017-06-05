@@ -27,7 +27,7 @@ public class CommonDialogsBuilder {
             this.fragmentManager = fragmentManager;
         }
 
-        public NumberPickerBuilder enterEventAmount(String eventType, NumberPickerDialogFragment.NumberPickerDialogHandler numberPickerDialogHandler) {
+        public NumberPickerBuilder enterEventAmount(String eventType, NumberPickerDialogFragment.NumberPickerDialogHandlerV2 numberPickerDialogHandler) {
 
     //        String eventName = eventType.getName().toLowerCase().substring(0, 8);
     //        eventName += (eventName.length() == 7) ? "&#8230;" : "";

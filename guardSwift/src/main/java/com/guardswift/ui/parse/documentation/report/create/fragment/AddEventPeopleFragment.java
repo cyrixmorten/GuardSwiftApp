@@ -25,11 +25,14 @@ import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.data.client.Person;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.adapters.SimpleMultichoiceArrayAdapter;
-import com.guardswift.ui.common.UpdateFloatingActionButton;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
+import com.guardswift.ui.helpers.UpdateFloatingActionButton;
+import com.guardswift.ui.menu.MenuItemBuilder;
+import com.guardswift.ui.menu.MenuItemIcons;
 import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
 import com.guardswift.util.Device;
 import com.guardswift.util.StringUtil;
+import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.parse.ParseException;
 import com.parse.SaveCallback;
 
@@ -122,13 +125,17 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        new AddEntryMenuItem().create(getContext(), menu, new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                addPerson();
-                return false;
-            }
-        });
+        new MenuItemBuilder(getContext())
+                .icon(MenuItemIcons.createWithFontAwesomeIcon(getContext(), FontAwesome.Icon.faw_plus_circle))
+                .showAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+                .addToMenu(menu, R.string.add_new, new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        addPerson();
+                        return false;
+                    }
+                });
+
 
         super.onCreateOptionsMenu(menu, inflater);
     }

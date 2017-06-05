@@ -37,7 +37,6 @@ import com.guardswift.ui.parse.documentation.report.create.activity.CircuitUnitC
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.DistrictWatchClientCreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
-import com.guardswift.ui.parse.documentation.report.edit.ReportEditActivity;
 import com.guardswift.ui.parse.execution.circuit.TaskDescriptionActivity;
 
 import java.lang.annotation.Documented;
@@ -83,9 +82,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
         CreateEventHandlerActivity.class,
         CircuitUnitCreateEventHandlerActivity.class,
         DistrictWatchClientCreateEventHandlerActivity.class,
-        CreateEventHandlerActivity.class,
-        // Report
-        ReportEditActivity.class}, library = true)
+        CreateEventHandlerActivity.class}, library = true)
 public class InjectingActivityModule {
     private final AppCompatActivity mActivity;
     private final Injector mInjector;

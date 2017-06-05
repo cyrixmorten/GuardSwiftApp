@@ -77,8 +77,6 @@ public class MainActivity extends InjectingAppCompatActivity {
 //                GuardSwiftApplication.getInstance().startServices();
 //            }
 
-            setSelectionFromIntent();
-
 
             mainDrawerCallback = new ToolbarFragmentDrawerCallback(this, toolbar, R.id.content);
             mainDrawerCallback.setActionCallback(new ToolbarFragmentDrawerCallback.SelectActionCallback() {
@@ -96,6 +94,8 @@ public class MainActivity extends InjectingAppCompatActivity {
                     .withDrawerGravity(Gravity.END)
                     .withCloseOnClick(false)
                     .append(drawer);
+
+            setSelectionFromIntent();
 
         }
 

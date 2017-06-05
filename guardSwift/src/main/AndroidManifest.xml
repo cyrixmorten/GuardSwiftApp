@@ -3,11 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.guardswift">
 
-    <!--
-        <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="22" />
-    -->
 
     <permission
         android:name="com.guardswift.permission.MAPS_RECEIVE"
@@ -16,6 +11,9 @@
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
+
+    <!-- Opt out of Doze mode -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <!-- Keep services running -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -49,10 +47,6 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-    <!--
-  IMPORTANT: Change "com.parse.tutorials.pushnotifications.permission.C2D_MESSAGE" in the lines below
-  to match your app's package name + ".permission.C2D_MESSAGE".
-    -->
 
     <permission
         android:name="com.guardswift.permission.C2D_MESSAGE"
@@ -60,14 +54,7 @@
 
     <uses-permission android:name="com.guardswift.permission.C2D_MESSAGE" />
 
-    <!--
-    <android:uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18" />
-    -->
-    <!-- <android:uses-permission -->
-    <!-- android:name="android.permission.READ_EXTERNAL_STORAGE" -->
-    <!-- android:maxSdkVersion="18" /> -->
+
     <application
         android:name=".ui.GuardSwiftApplication"
         android:allowBackup="true"
@@ -100,7 +87,7 @@
             android:configChanges="keyboardHidden"
             android:label="@string/app_name"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.parse.ui.ParseLoginActivity"
             android:label="@string/app_name"
@@ -124,7 +111,7 @@
             android:excludeFromRecents="true"
             android:label="@string/title_guard_login"
             android:screenOrientation="portrait"
-            android:taskAffinity=".activity.GuardLoginActivity"></activity>
+            android:taskAffinity=".activity.GuardLoginActivity" />
         <activity
             android:name=".ui.dialog.activity.CheckpointsDialogActivity"
             android:excludeFromRecents="true"
@@ -136,10 +123,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.activity.MainActivity" />
         </activity>
-        <activity
-            android:name=".ui.parse.documentation.report.edit.ReportEditActivity"
-            android:parentActivityName=".ui.activity.MainActivity"
-            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.parse.documentation.report.create.activity.CircuitUnitCreateEventHandlerActivity"
             android:label="@string/title_event_add"
@@ -243,7 +226,8 @@
         <activity
             android:name=".ui.parse.data.checkpoint.CheckpointActivity"
             android:label="@string/title_activity_checkpoint" />
-        <activity android:name=".ui.activity.GenericToolbarActivity" />
+        <activity android:name=".ui.activity.GenericToolbarActivity"
+            android:screenOrientation="portrait"/>
 
         <service android:name=".firebase.AlarmReceiver">
             <intent-filter>
@@ -269,7 +253,7 @@
 
         <activity
             android:name=".ui.activity.MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
     </application>
 
 </manifest>

@@ -14,7 +14,14 @@
         <item name="colorPrimary">@color/bootstrap_brand_secondary_border</item>
         <item name="colorPrimaryDark">@color/bootstrap_gray_light</item>
     </style>
-    <style name="AppTheme" parent="AppBaseTheme" />
+
+    <style name="AppTheme" parent="AppBaseTheme" >
+        <item name="android:windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="ActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:displayOptions">homeAsUp</item>
+    </style>
 
     <style name="AppTheme.Light.Dialog" parent="@style/Theme.AppCompat.Light.Dialog" />
 

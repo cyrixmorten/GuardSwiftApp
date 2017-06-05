@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.google.common.collect.Lists;
 import com.parse.FindCallback;
@@ -41,18 +42,18 @@ import java.util.List;
 
 
 /**
- *  NEARLY IDENTICAL REPLACEMENT FOR ParseQueryAdapter ON ListView.
- *  REQUIRES THAT YOU SUBCLASS TO CREATE ViewHolder, onBindViewHolder(), and onCreateViewHolder
- *  AS ENFORCED BY THE RECYCLERVIEW PATTERN.
+ * NEARLY IDENTICAL REPLACEMENT FOR ParseQueryAdapter ON ListView.
+ * REQUIRES THAT YOU SUBCLASS TO CREATE ViewHolder, onBindViewHolder(), and onCreateViewHolder
+ * AS ENFORCED BY THE RECYCLERVIEW PATTERN.
+ * <p>
+ * TESTED SUCCESSFULLY with RecyclerView v7:21.0.3
+ * AND with SuperRecyclerView by Malinskiy
  *
- *  TESTED SUCCESSFULLY with RecyclerView v7:21.0.3
- *  AND with SuperRecyclerView by Malinskiy
- *  @ https://github.com/Malinskiy/SuperRecyclerView
- *  SHOULD WORK WITH UltimateRecyclerView
+ * @ https://github.com/Malinskiy/SuperRecyclerView
+ * SHOULD WORK WITH UltimateRecyclerView
  */
 public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends RecyclerView.ViewHolder>
-        extends RecyclerView.Adapter<U>
-{
+        extends RecyclerView.Adapter<U> {
     /**
      * START My own tweaks
      */
@@ -65,6 +66,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
     public void onAttatch(Context context) {
         this.context = context;
     }
+
     public void onDetatch() {
         this.context = null;
     }
@@ -126,7 +128,8 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
     public ParseRecyclerQueryAdapter(final String className, final boolean hasStableIds) {
         this(new QueryFactory<T>() {
 
-            @Override public ParseQuery<T> create() {
+            @Override
+            public ParseQuery<T> create() {
                 return ParseQuery.getQuery(className);
             }
         }, hasStableIds);
@@ -136,7 +139,8 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
     public ParseRecyclerQueryAdapter(final Class<T> clazz, final boolean hasStableIds) {
         this(new QueryFactory<T>() {
 
-            @Override public ParseQuery<T> create() {
+            @Override
+            public ParseQuery<T> create() {
                 return ParseQuery.getQuery(clazz);
             }
         }, hasStableIds);
@@ -156,15 +160,18 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
         return super.getItemId(position);
     }
 
-    @Override public int getItemCount() {
+    @Override
+    public int getItemCount() {
         return mItems.size();
     }
 
-    public T getItem(int position) { return mItems.get(position); }
+    public T getItem(int position) {
+        return mItems.get(position);
+    }
 
-    public List<T> getItems() { return mItems; }
-
-
+    public List<T> getItems() {
+        return mItems;
+    }
 
 
     /**
@@ -181,27 +188,40 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
         dispatchOnLoading();
         final ParseQuery<T> query = mFactory.create();
         onFilterQuery(query);
-        query.findInBackground(new FindCallback<T>() {;
+        query.findInBackground(new FindCallback<T>() {
+            ;
 
-            @Override public void done(
+            @Override
+            public void done(
                     List<T> queriedItems,
                     @Nullable ParseException e) {
 
-                if (postProcessor != null) {
-                    queriedItems = postProcessor.postProcess(queriedItems);
+                if (queriedItems != null && e == null) {
+                    Log.d("QueryAdapter", "queriedItems: " + queriedItems.size());
+
+                    if (postProcessor != null) {
+                        queriedItems = postProcessor.postProcess(queriedItems);
+                    }
+
+                    showResults(queriedItems);
                 }
 
-                if (e == null) {
-                    mItems.clear();
-                    mItems.addAll(queriedItems);
-                    notifyDataSetChanged();
+                if (e != null) {
+                    Log.e("QueryAdapter", "Adapter load", e);
                 }
+
                 dispatchOnLoaded(queriedItems, e);
-                fireOnDataSetChanged();
             }
         });
     }
 
+    public synchronized void showResults(List<T> results) {
+        mItems.clear();
+        mItems.addAll(results);
+
+        notifyDataSetChanged();
+        fireOnDataSetChanged();
+    }
 
 
     public interface OnDataSetChangedListener {
@@ -220,7 +240,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
         }
     }
 
-    protected synchronized void  fireOnDataSetChanged() {
+    protected synchronized void fireOnDataSetChanged() {
         for (int i = 0; i < mDataSetListeners.size(); i++) {
             mDataSetListeners.get(i).onDataSetChanged();
         }

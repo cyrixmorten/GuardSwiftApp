@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.List;
 
 @ParseClassName("Report")
-public class Report extends ExtendedParseObject implements GSReport {
+public class Report extends ExtendedParseObject {
 
 
     public static final String reportId = "reportId";
@@ -59,25 +59,25 @@ public class Report extends ExtendedParseObject implements GSReport {
     }
 
 
-    public synchronized void add(EventLog eventLog) {
-        increment(eventCount);
-        addUnique(eventLogs, eventLog);
-    }
-
-    public synchronized void remove(EventLog eventLog) {
-        increment(eventCount, -1);
-        addUnique(eventLogs, eventLog);
-    }
-
-    public synchronized void addEntry(JSONObject jsonObject) {
-        increment(eventCount);
-        add(reportEntries, jsonObject);
-    }
-
-    @Override
-    public void extraTimeSpent(int minutes) {
-        put(extraTimeSpent, minutes);
-    }
+//    public synchronized void add(EventLog eventLog) {
+//        increment(eventCount);
+//        addUnique(eventLogs, eventLog);
+//    }
+//
+//    public synchronized void remove(EventLog eventLog) {
+//        increment(eventCount, -1);
+//        addUnique(eventLogs, eventLog);
+//    }
+//
+//    public synchronized void addEntry(JSONObject jsonObject) {
+//        increment(eventCount);
+//        add(reportEntries, jsonObject);
+//    }
+//
+//    @Override
+//    public void extraTimeSpent(int minutes) {
+//        put(extraTimeSpent, minutes);
+//    }
 
     @Override
     public String getParseClassName() {

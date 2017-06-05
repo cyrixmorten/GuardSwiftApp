@@ -1,4 +1,4 @@
-package com.guardswift.ui.common;
+package com.guardswift.ui.helpers;
 
 import android.content.Context;
 import android.support.design.widget.FloatingActionButton;

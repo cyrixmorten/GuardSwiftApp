@@ -3,7 +3,6 @@ package com.guardswift.ui.parse.documentation.report.edit;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +24,8 @@ import com.parse.ParseQueryAdapter;
 import org.joda.time.DateTime;
 
 import java.lang.ref.WeakReference;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Calendar;
 
 import static android.view.View.GONE;
@@ -84,7 +85,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
         final boolean isStaticReport = getItemViewType(position) == GSTask.TASK_TYPE.STATIC.ordinal();
 
         final EventLogCard eventLogCard = holder.eventLogCard;
-                
+
         eventLogCard.setEventLog(eventLog);
 
         // STATIC REPORTS ONLY HAS REMARKS
@@ -113,7 +114,6 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
         }
 
 
-
         eventLogCard.onEventClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -125,18 +125,20 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
         eventLogCard.onAmountClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                new CommonDialogsBuilder.BetterPicks(activity.getSupportFragmentManager()).enterEventAmount(eventLog.getEvent(), new NumberPickerDialogFragment.NumberPickerDialogHandler() {
-                    @Override
-                    public void onDialogNumberSet(int reference, int number, double decimal, boolean isNegative, double fullNumber) {
-//                        ((TextView) view).setText(String.valueOf(number));
-                        // update locally
-                        eventLog.setAmount(number);
-                        // update card
-                        eventLogCard.setEventLog(eventLog);
-                        // save online
-                        eventLog.pinThenSaveEventually();
-                    }
-                }).show();
+                new CommonDialogsBuilder.BetterPicks(activity.getSupportFragmentManager())
+                        .enterEventAmount(eventLog.getEvent(),
+                                new NumberPickerDialogFragment.NumberPickerDialogHandlerV2() {
+                                    @Override
+                                    public void onDialogNumberSet(int reference, BigInteger number, double decimal, boolean isNegative, BigDecimal fullNumber) {
+                                        // update locally
+                                        eventLog.setAmount(number.intValue());
+                                        // update card
+                                        eventLogCard.setEventLog(eventLog);
+                                        // save online
+                                        eventLog.pinThenSaveEventually();
+                                    }
+                                })
+                        .show();
             }
         });
 
@@ -156,49 +158,53 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
 
         eventLogCard.onDeleteClickListener(new View.OnClickListener()
 
-                                                  {
-                                                      @Override
-                                                      public void onClick(View view) {
-                                                          new CommonDialogsBuilder.MaterialDialogs(activity).okCancel(R.string.delete, activity.getString(R.string.confirm_delete, eventLog.getSummaryString()), new MaterialDialog.SingleButtonCallback() {
-                                                              @Override
-                                                              public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                                                                  eventLog.deleteEventually();
-                                                                  notifyItemRemoved(getItems().indexOf(eventLog));
-                                                                  getItems().remove(eventLog);
-                                                              }
-                                                          }).show();
-                                                      }
-                                                  }
+                                           {
+                                               @Override
+                                               public void onClick(View view) {
+                                                   new CommonDialogsBuilder.MaterialDialogs(activity).okCancel(R.string.delete, activity.getString(R.string.confirm_delete, eventLog.getSummaryString()), new MaterialDialog.SingleButtonCallback() {
+                                                       @Override
+                                                       public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+
+                                                           notifyItemRemoved(getItems().indexOf(eventLog));
+                                                           getItems().remove(eventLog);
+
+                                                           eventLog.deleteEventually();
+                                                       }
+                                                   }).show();
+                                               }
+                                           }
 
         );
 
         eventLogCard.onTimestampClickListener(new View.OnClickListener()
 
-                                                     {
-                                                         @Override
-                                                         public void onClick(View view) {
-                                                             final DateTime timestamp = new DateTime(eventLog.getDeviceTimestamp());
-                                                             RadialTimePickerDialogFragment timePickerDialog = RadialTimePickerDialogFragment
-                                                                     .newInstance(new RadialTimePickerDialogFragment.OnTimeSetListener() {
-                                                                                      @Override
-                                                                                      public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-                                                                                          final Calendar cal = Calendar.getInstance();
-                                                                                          cal.setTime(timestamp.toDate());
-                                                                                          cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                                                                                          cal.set(Calendar.MINUTE, minute);
-                                                                                          // update locally
-                                                                                          eventLog.setDeviceTimestamp(cal.getTime());
-                                                                                          // update card
-                                                                                          eventLogCard.setEventLog(eventLog);
-                                                                                          // update online
-                                                                                          eventLog.pinThenSaveEventually();
+                                              {
+                                                  @Override
+                                                  public void onClick(View view) {
+                                                      final DateTime timestamp = new DateTime(eventLog.getDeviceTimestamp());
 
-                                                                                      }
-                                                                                  }, timestamp.getHourOfDay(), timestamp.getMinuteOfHour(),
-                                                                             DateFormat.is24HourFormat(activity));
-                                                             timePickerDialog.show(activity.getSupportFragmentManager(), "FRAG_TAG_TIME_PICKER");
-                                                         }
-                                                     }
+                                                      RadialTimePickerDialogFragment timePickerDialog = new RadialTimePickerDialogFragment()
+                                                              .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
+                                                              .setOnTimeSetListener(new RadialTimePickerDialogFragment.OnTimeSetListener() {
+                                                                  @Override
+                                                                  public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+                                                                      final Calendar cal = Calendar.getInstance();
+                                                                      cal.setTime(timestamp.toDate());
+                                                                      cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                                                                      cal.set(Calendar.MINUTE, minute);
+                                                                      // update locally
+                                                                      eventLog.setDeviceTimestamp(cal.getTime());
+                                                                      // update card
+                                                                      eventLogCard.setEventLog(eventLog);
+                                                                      // update online
+                                                                      eventLog.pinThenSaveEventually();
+                                                                  }
+                                                              })
+                                                              .setThemeDark()
+                                                              .setForced24hFormat();
+                                                      timePickerDialog.show(activity.getSupportFragmentManager(), "FRAG_TAG_TIME_PICKER");
+                                                  }
+                                              }
 
         );
 

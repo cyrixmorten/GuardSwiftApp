@@ -227,7 +227,7 @@ public class AddEventRemarkFragment extends InjectingFragment implements
 
 //        mAdapter = new SimpleParseAdapter<>(getActivity(), EventRemark.remark, new ParseQueryAdapter.QueryFactory<EventRemark>() {
 //            @Override
-//            public ParseQuery<EventRemark> create() {
+//            public ParseQuery<EventRemark> createWithFontAwesomeIcon() {
 //                return EventRemark.getQueryBuilder(false)
 //                        .matching(client).matching(eventType)
 //                        .build();

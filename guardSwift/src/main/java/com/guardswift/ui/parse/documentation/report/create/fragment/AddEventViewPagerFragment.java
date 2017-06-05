@@ -23,7 +23,7 @@ import com.guardswift.persistence.cache.data.EventTypeCache;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.common.UpdateFloatingActionButtonPageChangeListener;
+import com.guardswift.ui.helpers.UpdateFloatingActionButtonPageChangeListener;
 import com.guardswift.ui.parse.documentation.report.create.activity.AbstractCreateEventHandlerActivity;
 import com.guardswift.util.ToastHelper;
 

@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.LocationRequest;
@@ -33,6 +34,7 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -177,22 +179,12 @@ public class FusedLocationTrackerService extends InjectingService {
 
         locationSubscription = locationProvider.getUpdatedLocation(request)
                 .observeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
-//                .doOnError(new Action1<Throwable>() {
-//                    @Override
-//                    public void call(Throwable throwable) {
-//                        new HandleException(TAG, "Location error", throwable);
-//                        Crashlytics.logException(throwable);
-//                    }
-//                })
-                .onErrorReturn(new Func1<Throwable, Location>() {
+                .onErrorResumeNext(new Func1<Throwable, Observable<Location>>() {
                     @Override
-                    public Location call(Throwable throwable) {
+                    public Observable<Location> call(Throwable throwable) {
                         Location location = new android.location.Location("");
                         location.setAccuracy(100); // do not let past filter
-
-                        new HandleException(TAG, "Location error", throwable);
-
-                        return location;
+                        return Observable.just(location);
                     }
                 })
                 .filter(new Func1<Location, Boolean>() {
@@ -219,6 +211,12 @@ public class FusedLocationTrackerService extends InjectingService {
                         } else {
                             stopSelf();
                         }
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Crashlytics.logException(throwable);
+                        new HandleException(TAG, "Error on Fused Location observable", throwable);
                     }
                 });
     }

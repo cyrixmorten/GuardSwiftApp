@@ -2,73 +2,142 @@ package com.guardswift.ui.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
+import com.sothree.slidinguppanel.ScrollableViewHelper;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity {
+import static com.guardswift.ui.activity.GenericToolbarActivity.fragment;
 
-	private static final String TAG = AbstractToolbarActivity.class.getSimpleName();
+public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity implements SlidingPanelActivity {
 
+    private static final String TAG = AbstractToolbarActivity.class.getSimpleName();
 
-	@BindView(R.id.toolbar)
-	Toolbar toolbar;
+    private final String FRAGMENT_TAG = "abstract:toolbar:fragment";
 
-	@BindView(R.id.content)
-	RelativeLayout content;
+    @BindView(R.id.sliding_layout)
+    SlidingUpPanelLayout mLayout;
 
-	protected abstract Fragment getFragment();
-	protected abstract String getToolbarTitle();
-	protected abstract String getToolbarSubTitle();
+    @BindView(R.id.sliding_title)
+    TextView mSlideTitle;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		Log.d(TAG, "onCreate");
-		setContentView(R.layout.gs_activity_toolbar);
+    @BindView(R.id.sliding_subtitle)
+    TextView mSlideSubTitle;
 
-		ButterKnife.bind(this);
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
-		setSupportActionBar(toolbar);
+    @BindView(R.id.content)
+    RelativeLayout content;
 
-		ActionBar actionBar = getSupportActionBar();
-		if (actionBar != null) {
-			actionBar.setDefaultDisplayHomeAsUpEnabled(true);
-			actionBar.setDisplayHomeAsUpEnabled(true);
-			if (getToolbarTitle() != null && !getToolbarTitle().isEmpty()) {
-				actionBar.setTitle(getToolbarTitle());
-			}
-			if (getToolbarSubTitle() != null && !getToolbarSubTitle().isEmpty()) {
-				actionBar.setSubtitle(getToolbarSubTitle());
-			}
-		}
+    private SlidingUpPanelLayout.PanelState mPanelDefaultState = SlidingUpPanelLayout.PanelState.HIDDEN;
 
-		if (getFragment() != null) {
-			getSupportFragmentManager().beginTransaction().replace(R.id.content, getFragment()).commit();
-		}
-	}
+    protected abstract Fragment getFragment();
 
+    protected abstract String getToolbarTitle();
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-			case android.R.id.home:
-				finish();
-				return true;
-		}
+    protected abstract String getToolbarSubTitle();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
+        setContentView(R.layout.gs_activity_toolbar);
+
+        ButterKnife.bind(this);
+        setupToolbar();
+
+        FragmentManager fm = getSupportFragmentManager();
+
+        Fragment contentFragment;
+        if (savedInstanceState == null) {
+            contentFragment = getFragment();
+        } else {
+            contentFragment = fm.findFragmentByTag(FRAGMENT_TAG);
+        }
 
 
-		return super.onOptionsItemSelected(item);
-	}
+        if (contentFragment != null) {
+            fm.beginTransaction().replace(R.id.content, contentFragment, FRAGMENT_TAG).commitNow();
+        }
+
+        mLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+    }
+
+    private void setupToolbar() {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar == null) {
+            setSupportActionBar(toolbar);
+            actionBar = getSupportActionBar();
+            actionBar.setDefaultDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        if (getToolbarTitle() != null && !getToolbarTitle().isEmpty()) {
+            actionBar.setTitle(getToolbarTitle());
+        }
+        if (getToolbarSubTitle() != null && !getToolbarSubTitle().isEmpty()) {
+            actionBar.setSubtitle(getToolbarSubTitle());
+        }
+    }
+
+    public SlidingUpPanelLayout getSlidingPanelLayout() {
+        return mLayout;
+    }
+
+    @Override
+    public void setSlidingTitle(String title, String subtitle) {
+        mSlideTitle.setText(title);
+        mSlideSubTitle.setText(subtitle);
+    }
+
+    public void setSlidingContent(Fragment fragment) {
+        getSupportFragmentManager().beginTransaction().replace(R.id.sliding_layout_body, fragment).commitNow();
+    }
+
+    public void setSlidingScrollView(View scrollView) {
+        mLayout.setVerticalScrollBarEnabled(true);
+        mLayout.setScrollableView(scrollView);
+    }
+
+    @Override
+    public void setSlidingStateOnBackpressed(SlidingUpPanelLayout.PanelState state) {
+        mPanelDefaultState = state;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
 
 
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        if (mLayout != null &&
+                (mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
+            mLayout.setPanelState(mPanelDefaultState);
+        } else {
+            super.onBackPressed();
+        }
+    }
 
 }

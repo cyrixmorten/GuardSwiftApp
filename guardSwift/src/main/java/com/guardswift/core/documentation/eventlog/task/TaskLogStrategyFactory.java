@@ -14,7 +14,7 @@ public class TaskLogStrategyFactory implements LogTaskFactory {
         logStrategies.add(new TaskLogStrategy());
         logStrategies.add(new TaskStaticLogStrategy());
         logStrategies.add(new TaskRegularLogStrategy());
-        logStrategies.add(new TaskDistrictWatchLogStrategy());
+//        logStrategies.add(new TaskDistrictWatchLogStrategy());
         logStrategies.add(new TaskTypeLogStrategy());
         logStrategies.add(new TaskTypeDescLogStrategy());
         logStrategies.add(new TaskClientLogStrategy());

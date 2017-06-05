@@ -1,5 +1,13 @@
 package com.guardswift.persistence.parse.documentation.gps;
 
+import android.content.Context;
+import android.text.format.DateFormat;
+
+import com.guardswift.R;
+import com.guardswift.util.Util;
+
+import java.util.Date;
+
 public class TrackerData {
 
     private long time;
@@ -69,4 +77,22 @@ public class TrackerData {
                 ", provider='" + provider + '\'' +
                 '}';
     }
+
+    public int getSpeedKmH() {
+        return Math.round(getSpeed() * 3.6f);
+    }
+
+    public String getHumanReadableLongDate(Context context) {
+        return DateFormat.getLongDateFormat(context).format(getTime()) + " " + Util.dateFormatHourMinutes().format(new Date(getTime()));
+    }
+
+    public String getHumanReadableSpeed(Context context) {
+        return getSpeedKmH() + " " + context.getString(R.string.km_h);
+    }
+
+    public String getHumanReadableAltitude(Context context) {
+        return String.valueOf(getLatitude()) + " " + context.getString(R.string.meters);
+    }
+
+
 }

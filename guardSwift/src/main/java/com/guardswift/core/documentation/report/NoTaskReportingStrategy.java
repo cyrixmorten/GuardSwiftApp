@@ -1,14 +1,11 @@
 package com.guardswift.core.documentation.report;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.parse.ParseException;
-import com.parse.SaveCallback;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -34,7 +31,7 @@ public class NoTaskReportingStrategy implements TaskReportingStrategy {
                     Exception error = reportTask.getError();
                     if (error instanceof ParseException && ((ParseException) error).getCode() != ParseException.OBJECT_NOT_FOUND) {
                         // it is expected that new reports are not found, any other errors, however, are reported
-                        new HandleException(TAG, "findReport", error);
+                        new HandleException(TAG, "FindReport", error);
 
                         return reportTask;
                     } else {
@@ -66,31 +63,31 @@ public class NoTaskReportingStrategy implements TaskReportingStrategy {
     public Task<Report> getReport() {
         return findReport(true);
     }
-
-    @Override
-    public void addUnique(Context context, final EventLog eventLog, SaveCallback saveCallback) {
-        // do nothing        ;
-    }
-
-    @Override
-    public void remove(Context context, final EventLog eventLog, final SaveCallback saveCallback) {
-        findReport(false).onSuccess(new Continuation<Report, Object>() {
-            @Override
-            public Object then(Task<Report> reportTask) throws Exception {
-                // Report found or created
-                Report report = reportTask.getResult();
-
-                report.remove(eventLog);
-
-                report.pinThenSaveEventually(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        Log.w(TAG, "Pinned " + e);
-                    }
-                }, saveCallback);
-
-                return null;
-            }
-        });
-    }
+//
+//    @Override
+//    public void addUnique(Context context, final EventLog eventLog, SaveCallback saveCallback) {
+//        // do nothing        ;
+//    }
+//
+//    @Override
+//    public void remove(Context context, final EventLog eventLog, final SaveCallback saveCallback) {
+//        findReport(false).onSuccess(new Continuation<Report, Object>() {
+//            @Override
+//            public Object then(Task<Report> reportTask) throws Exception {
+//                // Report found or created
+//                Report report = reportTask.getResult();
+//
+//                report.remove(eventLog);
+//
+//                report.pinThenSaveEventually(new SaveCallback() {
+//                    @Override
+//                    public void done(ParseException e) {
+//                        Log.w(TAG, "Pinned " + e);
+//                    }
+//                }, saveCallback);
+//
+//                return null;
+//            }
+//        });
+//    }
 }

@@ -18,7 +18,7 @@ public class TaskStaticLogStrategy implements LogTaskStrategy {
 
             StaticTask staticTask = (StaticTask)task;
 
-            toParseObject.put(TaskStaticLogStrategy.staticTask, staticTask);
+            toParseObject.put(TaskStaticLogStrategy.staticTask, ParseObject.createWithoutData(StaticTask.class, staticTask.getObjectId()));
 
         }
 

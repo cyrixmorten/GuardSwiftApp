@@ -45,7 +45,7 @@ public class GeocodedAddress {
             hasData = true;
 
         } catch (JSONException e) {
-            new HandleException(TAG, "create from json", e);
+            new HandleException(TAG, "createWithFontAwesomeIcon from json", e);
             hasData = false;
         }
     }

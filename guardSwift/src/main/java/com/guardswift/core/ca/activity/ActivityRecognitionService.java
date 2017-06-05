@@ -1,5 +1,7 @@
 package com.guardswift.core.ca.activity;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -16,13 +18,17 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.guardswift.BuildConfig;
+import com.guardswift.R;
+import com.guardswift.core.Constants;
 import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.GeofencingModule;
 import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.util.TriggerTask;
 
 import java.util.ArrayList;
@@ -34,6 +40,7 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
+import rx.Observable;
 import rx.Subscription;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -68,6 +75,18 @@ public class ActivityRecognitionService extends InjectingService {
         wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         wl.acquire();
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        Notification notification = new Notification.Builder(this)
+                .setContentTitle(this.getText(R.string.guardswift_running_notification_title))
+                .setContentText(this.getText(R.string.guardswift_running_notification_message))
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .build();
+
+        this.startForeground(Constants.ONGOING_NOTIFICATION_ID, notification);
     }
 
 
@@ -168,21 +187,15 @@ public class ActivityRecognitionService extends InjectingService {
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(getApplicationContext());
         filteredActivitySubscription = locationProvider.getDetectedActivity(0)
                 .observeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
-                .doOnError(new Action1<Throwable>() {
+                .onErrorResumeNext(new Func1<Throwable, Observable<ActivityRecognitionResult>>() {
                     @Override
-                    public void call(Throwable throwable) {
-                        String message = "Error on activitySubscription: " + throwable.getMessage();
-                        Log.e(TAG, message, throwable);
-                        Crashlytics.logException(throwable);
-                    }
-                }).onErrorReturn(new Func1<Throwable, ActivityRecognitionResult>() {
-                    @Override
-                    public ActivityRecognitionResult call(Throwable throwable) {
+                    public Observable<ActivityRecognitionResult> call(Throwable throwable) {
                         List<DetectedActivity> list = new ArrayList<DetectedActivity>();
                         list.add(new DetectedActivity(DetectedActivity.UNKNOWN, 0));
-                        return new ActivityRecognitionResult(list, System.currentTimeMillis(), SystemClock.elapsedRealtime());
+                        return Observable.just(new ActivityRecognitionResult(list, System.currentTimeMillis(), SystemClock.elapsedRealtime()));
                     }
-                }).filter(new Func1<ActivityRecognitionResult, Boolean>() {
+                })
+                .filter(new Func1<ActivityRecognitionResult, Boolean>() {
                     @Override
                     public Boolean call(ActivityRecognitionResult activityRecognitionResult) {
 
@@ -232,8 +245,16 @@ public class ActivityRecognitionService extends InjectingService {
                         mJustStarted = false;
 
 
-                        logoutOnInactivity(currentDetectedActivity);
+//                        logoutOnInactivity(currentDetectedActivity);
 
+                        // Save activity to log
+
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Crashlytics.logException(throwable);
+                        new HandleException(TAG, "Error on Activity observable", throwable);
                     }
                 });
     }

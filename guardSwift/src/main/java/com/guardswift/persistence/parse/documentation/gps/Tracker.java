@@ -192,7 +192,7 @@ public class Tracker extends ExtendedParseObject {
 
         Location location = LocationModule.Recent.getLastKnownLocation();
 
-        if (location.isFromMockProvider()) {
+        if (location == null || location.isFromMockProvider()) {
             return;
         }
 

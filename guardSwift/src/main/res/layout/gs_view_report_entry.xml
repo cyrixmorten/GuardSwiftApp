@@ -34,7 +34,7 @@
             android:layout_alignParentTop="true"
             android:singleLine="true"
             android:ellipsize="end"
-            tools:text="Person antruffet lalalallalalalalalallalalalalalalalallalala"
+            tools:text="Person antruffet"
             />
 
         <TextView

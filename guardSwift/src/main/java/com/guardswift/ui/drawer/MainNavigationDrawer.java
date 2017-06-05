@@ -26,7 +26,6 @@ import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
-import com.guardswift.ui.parse.data.client.ClientDetailsFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
 import com.guardswift.ui.parse.data.tracker.TrackerListFragment;
@@ -37,7 +36,6 @@ import com.guardswift.ui.parse.execution.statictask.StaticTaskViewPagerFragment;
 import com.guardswift.ui.preferences.AlarmNotificationPreferencesFragment;
 import com.guardswift.ui.preferences.GuardPreferencesFragment;
 import com.guardswift.util.Analytics;
-import com.guardswift.util.ToastHelper;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
@@ -392,14 +390,6 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                 ClientListFragment clientListFragment = ClientListFragment.newInstance(Client.SORT_BY.NAME);
-                clientListFragment.setOnClientSelectedListener(new ClientListFragment.OnClientSelectedListener() {
-                    @Override
-                    public void clientSelected(Client client) {
-                        ToastHelper.toast(MainNavigationDrawer.this.context, client.getName());
-                        GenericToolbarActivity.start(MainNavigationDrawer.this.context, client.getName(), client.getFullAddress(), ClientDetailsFragment.newInstance(client));
-
-                    }
-                });
                 GenericToolbarActivity.start(context, R.string.title_drawer_clients, clientListFragment);
                 return false;
             }

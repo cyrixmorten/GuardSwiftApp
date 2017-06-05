@@ -36,6 +36,8 @@ import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -342,9 +344,9 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
 
                         .setFragmentManager(getActivity().getSupportFragmentManager())
                         .setStyleResId(R.style.BetterPickersDialogFragment_Light)
-                        .addNumberPickerDialogHandler(new NumberPickerDialogFragment.NumberPickerDialogHandler() {
+                        .addNumberPickerDialogHandler(new NumberPickerDialogFragment.NumberPickerDialogHandlerV2() {
                             @Override
-                            public void onDialogNumberSet(int reference, int number, double decimal, boolean isNegative, double fullNumber) {
+                            public void onDialogNumberSet(int reference, BigInteger number, double decimal, boolean isNegative, BigDecimal fullNumber) {
                                 amount.setText(String.valueOf(number));
                             }
                         })

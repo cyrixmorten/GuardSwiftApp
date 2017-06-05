@@ -1,4 +1,4 @@
-package com.guardswift.ui.common;
+package com.guardswift.ui.helpers;
 
 import android.view.View;
 

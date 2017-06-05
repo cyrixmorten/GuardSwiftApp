@@ -6,9 +6,9 @@ import android.support.v4.app.Fragment;
 
 public class GenericToolbarActivity extends AbstractToolbarActivity {
 
-    private static String title;
-    private static String subtitle;
-    private static Fragment fragment;
+    protected static String title;
+    protected static String subtitle;
+    protected static Fragment fragment;
 
     public static void start(Context context, int title, Fragment fragment) {
         GenericToolbarActivity.start(context, context.getString(title), "", fragment);

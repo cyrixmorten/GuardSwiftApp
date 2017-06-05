@@ -8,12 +8,12 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.view.ContextThemeWrapper;
 import android.support.v7.widget.CardView;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +48,7 @@ import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
 import com.guardswift.ui.parse.data.checkpoint.CheckpointActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
-import com.guardswift.ui.parse.documentation.report.edit.ReportEditActivity;
+import com.guardswift.ui.parse.documentation.report.edit.ReportEditViewPagerFragment;
 import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 import com.guardswift.ui.parse.execution.circuit.TaskDescriptionActivity;
 import com.guardswift.util.AnimationHelper;
@@ -128,14 +128,17 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                                     loadingDialog.cancel();
                                     new CommonDialogsBuilder.MaterialDialogs(context).missingInternetContent().show();
 
-                                    new HandleException(context, TAG, "Failed to create static task", error);
+                                    new HandleException(context, TAG, "Failed to createWithFontAwesomeIcon static task", error);
                                     return null;
                                 }
 
                                 task.addReportEntry(context, context.getString(R.string.started), null, new GetCallback<EventLog>() {
                                     @Override
                                     public void done(EventLog object, ParseException e) {
-                                        ReportEditActivity.start(context, task);
+                                        GenericToolbarActivity.start(context,
+                                                context.getString(R.string.title_report),
+                                                task.getClient().getFullAddress(),
+                                                ReportEditViewPagerFragment.newInstance(task));
 
                                         loadingDialog.cancel();
                                     }
@@ -148,7 +151,10 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     }
                 }).show();
             } else {
-                ReportEditActivity.start(context, task);
+                GenericToolbarActivity.start(context,
+                        context.getString(R.string.title_report),
+                        task.getClient().getFullAddress(),
+                        ReportEditViewPagerFragment.newInstance(task));
             }
 
         }
@@ -251,7 +257,10 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             vBtnViewReport.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ReportEditActivity.start(context, task);
+                    GenericToolbarActivity.start(context,
+                            context.getString(R.string.title_report),
+                            task.getClient().getFullAddress(),
+                            ReportEditViewPagerFragment.newInstance(task));
                 }
             });
 
@@ -497,29 +506,32 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         private void addArrivalEvent(final Context context, final CircuitUnit task, final GetCallback<CircuitUnit> callback) {
             final DateTime timestamp = new DateTime();
-            RadialTimePickerDialogFragment timePickerDialog = RadialTimePickerDialogFragment
-                    .newInstance(new RadialTimePickerDialogFragment.OnTimeSetListener() {
-                                     @Override
-                                     public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-                                         final Calendar cal = Calendar.getInstance();
-                                         cal.setTime(new Date());
-                                         cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                                         cal.set(Calendar.MINUTE, minute);
+
+            RadialTimePickerDialogFragment timePickerDialog = new RadialTimePickerDialogFragment()
+                    .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
+                    .setOnTimeSetListener(new RadialTimePickerDialogFragment.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
+                            final Calendar cal = Calendar.getInstance();
+                            cal.setTime(new Date());
+                            cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                            cal.set(Calendar.MINUTE, minute);
 
 
-                                         new EventLog.Builder(context)
-                                                 .taskPointer(task, GSTask.EVENT_TYPE.ARRIVE)
-                                                 .event(context.getString(R.string.event_arrived))
-                                                 .automatic(false)
-                                                 .deviceTimeStamp(cal.getTime())
-                                                 .eventCode(EventLog.EventCodes.CIRCUITUNIT_ARRIVED).saveAsync();
+                            new EventLog.Builder(context)
+                                    .taskPointer(task, GSTask.EVENT_TYPE.ARRIVE)
+                                    .event(context.getString(R.string.event_arrived))
+                                    .automatic(false)
+                                    .deviceTimeStamp(cal.getTime())
+                                    .eventCode(EventLog.EventCodes.CIRCUITUNIT_ARRIVED).saveAsync();
 
 
-                                         callback.done(task, null);
+                            callback.done(task, null);
+                        }
+                    })
+                    .setThemeDark()
+                    .setForced24hFormat();
 
-                                     }
-                                 }, timestamp.getHourOfDay(), timestamp.getMinuteOfHour(),
-                            DateFormat.is24HourFormat(context));
             timePickerDialog.show(fragmentManager, "FRAG_TAG_ARRIVAL_TIME_PICKER");
         }
 
@@ -569,7 +581,10 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             vBtnViewReport.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ReportEditActivity.start(context, task);
+                    GenericToolbarActivity.start(context,
+                            context.getString(R.string.title_report),
+                            task.getClient().getFullAddress(),
+                            ReportEditViewPagerFragment.newInstance(task));
                 }
             });
 

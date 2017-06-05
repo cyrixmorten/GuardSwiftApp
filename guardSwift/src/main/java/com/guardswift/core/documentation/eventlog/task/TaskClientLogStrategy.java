@@ -6,7 +6,6 @@ import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.execution.GSTask;
-import com.parse.Parse;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 
@@ -38,7 +37,7 @@ public class TaskClientLogStrategy implements LogTaskStrategy {
     }
 
     private void logClientInfo(Client client, ParseObject toParseObject) {
-        toParseObject.put(TaskClientLogStrategy.client, client);
+        toParseObject.put(TaskClientLogStrategy.client, ParseObject.createWithoutData(Client.class, client.getObjectId()));
         if (client.has(Client.name))
             toParseObject.put(TaskClientLogStrategy.clientName, client.getName());
         toParseObject.put(TaskClientLogStrategy.clientAddress, client.getAddressName());

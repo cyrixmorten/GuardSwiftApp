@@ -24,7 +24,7 @@ import com.guardswift.core.documentation.eventlog.task.TaskRegularLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskReportIdLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskStaticLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskTypeLogStrategy;
-import com.guardswift.eventbus.EventBusController;
+import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.data.EventType;
@@ -383,18 +383,25 @@ public class EventLog extends ExtendedParseObject {
 
 
             Log.w(TAG, "3) Save event");
-            eventLog.pinThenSaveEventually(new SaveCallback() {
+            eventLog.pinThenSaveEventually(PIN_NEW, new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
+                    if (e != null) {
+                        new HandleException(TAG, "Pinning new EventLog", e);
+                    }
+
                     if (pinnedCallback != null) {
                         pinnedCallback.done(eventLog, e);
                     }
-                    EventBusController.postUIUpdate(eventLog);
                     Log.w(TAG, "4) Save event - pinned");
                 }
             }, new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
+                    if (e != null) {
+                        new HandleException(TAG, "Saving new EventLog", e);
+                    }
+
                     Log.w(TAG, "5) Save event - saved");
 
 //                            updateGuardInfo(geocodedAddress.get());
@@ -404,7 +411,7 @@ public class EventLog extends ExtendedParseObject {
                         savedCallback.done(eventLog, e);
                     }
                 }
-            });
+            }, true);
 
 //                    return null;
 //                }
@@ -422,8 +429,10 @@ public class EventLog extends ExtendedParseObject {
 
             guard.setPosition(eventLog.getPosition());
 //            guard.setLastGeocodedAddress(reverseGeocodedAddress);
-            guard.setLastEvent(eventLog);
-            guard.pinThenSaveEventually();
+
+            // makes it impossible to unpin eventlog
+//            guard.setLastEvent(ParseObject.createWithoutData(EventLog.class, eventLog.getObjectId()));
+            guard.saveEventually();
         }
 
 

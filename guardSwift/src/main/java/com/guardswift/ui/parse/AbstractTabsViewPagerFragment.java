@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingFragment;
-import com.guardswift.ui.common.UpdateFloatingActionButtonPageChangeListener;
+import com.guardswift.ui.helpers.UpdateFloatingActionButtonPageChangeListener;
 import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
 import com.guardswift.ui.view.slidingtab.SlidingTabLayout;
 

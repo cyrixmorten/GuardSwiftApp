@@ -2,8 +2,11 @@ package com.guardswift.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
@@ -18,9 +21,8 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
@@ -69,6 +71,8 @@ import static android.view.View.VISIBLE;
 public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     private static final String TAG = GuardLoginActivity.class.getSimpleName();
+
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
 
     @Inject
@@ -142,7 +146,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
         navigationDrawer.initNavigationDrawer(this, toolbar, R.id.content);
 
-        hasGooglePlayServices();
+
 
         version.setText(device.getVersionName());
         loadBanner();
@@ -154,6 +158,24 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
         if (getIntent().hasExtra("MESSAGE")) {
             new CommonDialogsBuilder.MaterialDialogs(this).ok(R.string.info, getIntent().getStringExtra("MESSAGE")).show();
+        }
+
+        if (savedInstanceState == null) {
+            hasGooglePlayServices();
+            ignoreBatteryOptimizations();
+        }
+    }
+
+    private void ignoreBatteryOptimizations() {
+        Intent intent = new Intent();
+        String packageName = context.getPackageName();
+        PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setData(Uri.parse("package:" + packageName));
+                context.startActivity(intent);
+            }
         }
     }
 
@@ -342,12 +364,17 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
 
     private boolean hasGooglePlayServices() {
-        int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
-        if (result != ConnectionResult.SUCCESS) {
-            Crashlytics.log("GooglePlayServices: " + result);
-            GooglePlayServicesUtil.showErrorDialogFragment(result, this, 10);
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int result = googleAPI.isGooglePlayServicesAvailable(this);
+        if(result != ConnectionResult.SUCCESS) {
+            if(googleAPI.isUserResolvableError(result)) {
+                googleAPI.getErrorDialog(this, result,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            }
+
             return false;
         }
+
         return true;
     }
 

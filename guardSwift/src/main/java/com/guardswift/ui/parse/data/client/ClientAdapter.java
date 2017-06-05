@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import com.guardswift.R;
 import com.guardswift.persistence.parse.data.client.Client;
-import com.guardswift.ui.common.RecyclerViewClickListener;
+import com.guardswift.ui.helpers.RecyclerViewClickListener;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
 import com.parse.ParseQueryAdapter;

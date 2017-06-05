@@ -2,7 +2,6 @@ package com.guardswift.core.documentation.eventlog.task;
 
 import com.guardswift.persistence.parse.execution.GSTask;
 import com.guardswift.persistence.parse.execution.ParseTask;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.parse.ParseObject;
 
 // TODO Will replace Circuit, District and Static tasks
@@ -20,7 +19,7 @@ public class TaskLogStrategy implements LogTaskStrategy {
 
             ParseTask parseTask = (ParseTask)task;
 
-            toParseObject.put(TaskLogStrategy.task, parseTask);
+            toParseObject.put(TaskLogStrategy.task, ParseObject.createWithoutData(ParseTask.class, parseTask.getObjectId()));
         }
     }
 

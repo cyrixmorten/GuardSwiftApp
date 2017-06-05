@@ -18,6 +18,9 @@ import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventH
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
 import com.guardswift.ui.view.card.EventLogCard;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import javax.inject.Inject;
 
 public class AddEventSummaryFragment extends InjectingFragment implements
@@ -68,13 +71,15 @@ public class AddEventSummaryFragment extends InjectingFragment implements
 		eventLogCard.onAmountClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(final View view) {
-				new CommonDialogsBuilder.BetterPicks(getActivity().getSupportFragmentManager()).enterEventAmount(parentActivity.getEventType(), new NumberPickerDialogFragment.NumberPickerDialogHandler() {
-					@Override
-					public void onDialogNumberSet(int reference, int number, double decimal, boolean isNegative, double fullNumber) {
-						((AddEventHandler) getActivity()).setAmount(number);
-						((TextView)view).setText(String.valueOf(number));
-					}
-				}).show();
+				new CommonDialogsBuilder.BetterPicks(getActivity().getSupportFragmentManager()).enterEventAmount(parentActivity.getEventType(),
+						new NumberPickerDialogFragment.NumberPickerDialogHandlerV2() {
+							@Override
+							public void onDialogNumberSet(int reference, BigInteger number, double decimal, boolean isNegative, BigDecimal fullNumber) {
+								((AddEventHandler) getActivity()).setAmount(number.intValue());
+								((TextView)view).setText(String.valueOf(number));
+							}
+						}
+				).show();
 			}
 		});
 

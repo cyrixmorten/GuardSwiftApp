@@ -1,7 +1,7 @@
 package com.guardswift.core.documentation.eventlog.task;
 
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.parse.ParseObject;
 
 /**
@@ -25,7 +25,7 @@ public class TaskRegularLogStrategy implements LogTaskStrategy {
 
             CircuitUnit circuitUnit = (CircuitUnit) task;
 
-            toParseObject.put(TaskRegularLogStrategy.circuitUnit, circuitUnit);
+            toParseObject.put(TaskRegularLogStrategy.circuitUnit, ParseObject.createWithoutData(CircuitUnit.class, circuitUnit.getObjectId()));
             toParseObject.put(TaskRegularLogStrategy.timeStart, circuitUnit.getTimeStart());
             toParseObject.put(TaskRegularLogStrategy.timeStartString, circuitUnit.getTimeStartString());
             toParseObject.put(TaskRegularLogStrategy.timeEnd, circuitUnit.getTimeEnd());

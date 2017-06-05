@@ -28,6 +28,8 @@ import bolts.TaskCompletionSource;
 public abstract class ExtendedParseObject extends ParseObject {
 
 
+    public static final String PIN_NEW = "NEW_OBJECT_PIN";
+
     // TODO get rid of this and use bolts Tasks instead
     public interface DataStoreCallback<T extends ParseObject> {
         void success(List<T> objects);
@@ -189,28 +191,33 @@ public abstract class ExtendedParseObject extends ParseObject {
 
 
     public void pinThenSaveEventually() {
-        pinThenSaveEventually(null, null, false);
+        pinThenSaveEventually(getPin(), null, null, false);
     }
 
     public void pinThenSaveEventually(boolean postUIUpdate) {
-        pinThenSaveEventually(null, null, postUIUpdate);
+        pinThenSaveEventually(getPin(), null, null, postUIUpdate);
     }
 
     public void pinThenSaveEventually(final SaveCallback pinned) {
-        pinThenSaveEventually(pinned, null, false);
+        pinThenSaveEventually(getPin(), pinned, null, false);
     }
 
     public void pinThenSaveEventually(final SaveCallback pinned, final SaveCallback saved) {
-        pinThenSaveEventually(pinned, saved, false);
+        pinThenSaveEventually(getPin(), pinned, saved, false);
     }
 
-    public void pinThenSaveEventually(final SaveCallback pinned, final SaveCallback saved, final boolean postUIUpdate) {
-        Log.d(TAG, "pinThenSaveEventually: " + getPin());
+    public void pinThenSaveEventually(String pin, SaveCallback pinned, SaveCallback saved) {
+        pinThenSaveEventually(pin, pinned, saved, false);
+    }
 
-        this.pinInBackground(getPin(), new SaveCallback() {
+    public void pinThenSaveEventually(final String pin, final SaveCallback pinned, final SaveCallback saved, final boolean postUIUpdate) {
+
+        Log.d(TAG, "pinThenSaveEventually: " + pin);
+
+
+        this.pinInBackground(pin, new SaveCallback() {
             @Override
             public void done(ParseException e) {
-
                 if (e != null) {
                     new HandleException(TAG, "pinThenSaveEventually failed to pin", e);
                 }
@@ -220,26 +227,31 @@ public abstract class ExtendedParseObject extends ParseObject {
                 }
 
                 if (postUIUpdate) {
-                    Log.d(TAG, "postUIUpdate");
                     EventBusController.postUIUpdate(ExtendedParseObject.this);
                 }
 
-                ExtendedParseObject.this.saveInBackground(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if (e != null) {
-                            new HandleException(TAG, "pinThenSaveEventually fallback to saveEventually", e);
-                            ExtendedParseObject.this.saveEventually(saved);
-                            return;
-                        }
+                ExtendedParseObject.this.saveEventually(saved);
 
-                        if (saved != null) {
-                            saved.done(null);
-                        }
-                    }
-                });
+                if (pin.equals(PIN_NEW)) {
+                    ExtendedParseObject.this.unpinInBackground(PIN_NEW);
+                }
+//                ExtendedParseObject.this.saveInBackground(new SaveCallback() {
+//                    @Override
+//                    public void done(ParseException e) {
+//                        if (e != null) {
+//                            new HandleException(TAG, "pinThenSaveEventually fallback to saveEventually", e);
+//                            ExtendedParseObject.this.saveEventually(saved);
+//                            return;
+//                        }
+//
+//                        if (saved != null) {
+//                            saved.done(null);
+//                        }
+//                    }
+//                });
             }
         });
+
     }
 
     public <T extends ParseObject> void pinUpdate(final T object, final DataStoreCallback<T> callback) {
