@@ -1,6 +1,7 @@
 package com.guardswift.core.ca.activity;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -62,6 +63,8 @@ public class ActivityRecognitionService extends InjectingService {
     @Inject
     ParseModule parseModule;
 
+    private Notification notification;
+
     public ActivityRecognitionService() {
 
     }
@@ -76,19 +79,29 @@ public class ActivityRecognitionService extends InjectingService {
 
         wl.acquire();
 
+        this.startForeground(Constants.FUSED_LOCATION_NOTIFICATION_ID, createForegroundNotification(getString(R.string.activity_still)));
+    }
+
+    private Notification createForegroundNotification(String contentText) {
+
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        Notification notification = new Notification.Builder(this)
-                .setContentTitle(this.getText(R.string.guardswift_running_notification_title))
-                .setContentText(this.getText(R.string.guardswift_running_notification_message))
+        return new Notification.Builder(this)
+                .setOngoing(true)
+                .setContentTitle(getText(R.string.activity_recognition))
+                .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentIntent(pendingIntent)
                 .build();
-
-        this.startForeground(Constants.ONGOING_NOTIFICATION_ID, notification);
     }
 
+    private void updateForegroundNotification(DetectedActivity activity) {
+        Notification notification = createForegroundNotification(ActivityDetectionModule.getHumanReadableNameFromType(getApplicationContext(), activity.getType()));
+
+        NotificationManager mgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        mgr.notify(Constants.ACTIVITY_RECOGNITION_NOTIFICATION_ID, notification);
+    }
 
     private static boolean mJustStarted;
 
@@ -148,7 +161,6 @@ public class ActivityRecognitionService extends InjectingService {
 //
 //        AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 //        alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() +100, restartServicePI);
-//
 //    }
 
     @Override
@@ -244,7 +256,7 @@ public class ActivityRecognitionService extends InjectingService {
 
                         mJustStarted = false;
 
-
+                        updateForegroundNotification(currentDetectedActivity);
 //                        logoutOnInactivity(currentDetectedActivity);
 
                         // Save activity to log
@@ -253,11 +265,14 @@ public class ActivityRecognitionService extends InjectingService {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
+                        Log.e(TAG, "Error on Activity observable", throwable);
                         Crashlytics.logException(throwable);
                         new HandleException(TAG, "Error on Activity observable", throwable);
                     }
                 });
     }
+
+
 
     private void logoutOnInactivity(DetectedActivity activity) {
         Guard guard = GuardSwiftApplication.getLoggedIn();

@@ -189,7 +189,6 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
         final ParseQuery<T> query = mFactory.create();
         onFilterQuery(query);
         query.findInBackground(new FindCallback<T>() {
-            ;
 
             @Override
             public void done(
@@ -199,7 +198,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
                 if (queriedItems != null && e == null) {
                     Log.d("QueryAdapter", "queriedItems: " + queriedItems.size());
 
-                    if (postProcessor != null) {
+                    if (postProcessor != null && !queriedItems.isEmpty()) {
                         queriedItems = postProcessor.postProcess(queriedItems);
                     }
 

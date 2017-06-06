@@ -1,18 +1,22 @@
 package com.guardswift.ui.activity;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
+import com.guardswift.ui.helpers.ViewHelper;
 import com.sothree.slidinguppanel.ScrollableViewHelper;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
@@ -29,6 +33,9 @@ public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity
 
     @BindView(R.id.sliding_layout)
     SlidingUpPanelLayout mLayout;
+
+    @BindView(R.id.sliding_layout_title)
+    LinearLayout mSlideTitleLayout;
 
     @BindView(R.id.sliding_title)
     TextView mSlideTitle;
@@ -74,6 +81,24 @@ public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity
         }
 
         mLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+//        mLayout.addPanelSlideListener(new SlidingUpPanelLayout.SimplePanelSlideListener() {
+//
+//            @Override
+//            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+//                super.onPanelStateChanged(panel, previousState, newState);
+//
+//                if (newState == mPanelDefaultState) {
+//                    toolbar.getBackground().setAlpha(100);
+//                }
+//            }
+//
+//            @Override
+//            public void onPanelSlide(View panel, float slideOffset) {
+//                int offSetAlpha = Math.round(100 * slideOffset);
+//
+//                mSlideTitleLayout.getBackground().setAlpha(offSetAlpha);
+//            }
+//        });
     }
 
     private void setupToolbar() {

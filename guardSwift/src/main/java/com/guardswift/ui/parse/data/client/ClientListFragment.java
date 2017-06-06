@@ -55,7 +55,7 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
             slidingPanelActivity.setSlidingStateOnBackpressed(SlidingUpPanelLayout.PanelState.COLLAPSED);
 
             mSlideUpPanel = slidingPanelActivity.getSlidingPanelLayout();
-            mSlideUpPanel.setAnchorPoint(0.3f);
+            mSlideUpPanel.setAnchorPoint(0.25f);
             mSlideUpPanel.setFadeOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

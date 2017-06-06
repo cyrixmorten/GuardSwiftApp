@@ -1,6 +1,5 @@
 package com.guardswift.ui.parse.execution;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -44,6 +43,7 @@ import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
+import com.guardswift.ui.helpers.ViewHelper;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
 import com.guardswift.ui.parse.data.checkpoint.CheckpointActivity;
@@ -73,6 +73,7 @@ import butterknife.BindViews;
 import butterknife.ButterKnife;
 
 import static com.guardswift.core.tasks.controller.TaskController.ACTION;
+import static com.guardswift.ui.helpers.ViewHelper.TintBackground.tintBackgroundColor;
 
 public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> {
 
@@ -501,7 +502,6 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 okCallback.done(task, null);
             }
         }
-
 
 
         private void addArrivalEvent(final Context context, final CircuitUnit task, final GetCallback<CircuitUnit> callback) {
@@ -1056,8 +1056,8 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 //            Log.d(TAG, "updateTaskStateColor " + fromState + "->" + toState);
 //            Log.d(TAG, "updateTaskStateColor " + fromColor + "->" + toColor);
 
-            tintBackgroundColor(this.vColorBorders, fromColor, toColor, 100, tintDuration);
-            tintBackgroundColor(this.cardview, fromColor, toColor, 50, tintDuration);
+            ViewHelper.TintBackground.tintBackgroundColor(this.vColorBorders, fromColor, toColor, 100, tintDuration);
+            ViewHelper.TintBackground.tintBackgroundColor(this.cardview, fromColor, toColor, 50, tintDuration);
 
         }
 
@@ -1092,57 +1092,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             return color;
         }
 
-        private <V extends View> void tintBackgroundColor(List<V> views, int colorFrom, int colorTo, final int alpha, int duration) {
-            for (View view : views) {
-                tintBackgroundColor(view, colorFrom, colorTo, alpha, duration);
-            }
-        }
 
-        private void tintBackgroundColor(final View view, int color, int alpha) {
-            int toColor = Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
-            if (view instanceof CardView) {
-                ((CardView) view).setCardBackgroundColor(toColor);
-                return;
-            }
-            view.setBackgroundColor(toColor);
-        }
-
-        private void tintBackgroundColor(final View view, int colorFrom, int colorTo, final int alpha, int duration) {
-            if (duration == 0) {
-                tintBackgroundColor(view, colorTo, alpha);
-                return;
-            }
-
-            final float[] from = new float[3],
-                    to = new float[3];
-
-
-            Color.colorToHSV(colorFrom, from);   // from white
-            Color.colorToHSV(colorTo, to);     // to red
-
-            ValueAnimator anim = ValueAnimator.ofFloat(0, 1);   // animate from 0 to 1
-            anim.setDuration(duration);                              // for 300 ms
-
-            final float[] hsv = new float[3];                  // transition color
-            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    // Transition along each axis of HSV (hue, saturation, value)
-                    hsv[0] = from[0] + (to[0] - from[0]) * animation.getAnimatedFraction();
-                    hsv[1] = from[1] + (to[1] - from[1]) * animation.getAnimatedFraction();
-                    hsv[2] = from[2] + (to[2] - from[2]) * animation.getAnimatedFraction();
-
-                    int color = Color.HSVToColor(alpha, hsv);
-                    if (view instanceof CardView) {
-                        ((CardView) view).setCardBackgroundColor(color);
-                    } else {
-                        view.setBackgroundColor(color);
-                    }
-                }
-            });
-
-            anim.start();
-        }
 
     }
 

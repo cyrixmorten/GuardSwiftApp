@@ -437,6 +437,8 @@
     <string name="click_route">Klik på rute</string>
     <string name="km_h">km/t</string>
     <string name="date">Dato</string>
+    <string name="gps_position">GPS position</string>
+    <string name="activity_recognition">Aktivitet genkendelse</string>
 
 
 </resources>

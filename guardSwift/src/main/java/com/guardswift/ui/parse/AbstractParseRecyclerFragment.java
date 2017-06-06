@@ -2,7 +2,6 @@ package com.guardswift.ui.parse;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -71,10 +70,14 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
      */
     protected abstract boolean isRelevantUIEvent(UpdateUIEvent ev);
 
+    // delay setting adapter
+    private boolean mFirstLoad = true;
+
     // block multiple loads on LDS
     private boolean mLoading;
     private boolean mLoadingNetwork;
     private ParseRecyclerQueryAdapter<T, U> mAdapter;
+
 
     public AbstractParseRecyclerFragment() {
     }
@@ -98,8 +101,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
             mAdapter = createRecycleAdapter();
             mAdapter.setFromLocalDataStore(true);
-//            mRecycleView.setAdapter(null);
-//            refreshLocalData();
+
             loadObjectsFromNetwork().onSuccess(new Continuation<Object, Object>() {
                 @Override
                 public Object then(Task<Object> task) throws Exception {
@@ -116,19 +118,22 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
     private void refreshLocalData() {
         mLoadingNetwork = true;
         mLoading = true;
-        if (mAdapter != null) {
-            if (mAdapter.getItems().isEmpty()) {
-                Log.d(TAG, "show progress");
-                mRecycleView.showProgress();
-            }
 
-            // Load from LDS
-            mAdapter.loadObjects();
-
-            loadObjectsFromNetwork();
-
+        if (mAdapter == null) {
+            mAdapter = createRecycleAdapter();
+            mAdapter.setFromLocalDataStore(true);
         }
 
+        if (mAdapter.getItems().isEmpty()) {
+            Log.d(TAG, "show progress");
+            mRecycleView.showProgress();
+        }
+
+        // Load from LDS (quick results)
+        mAdapter.loadObjects();
+
+        // Update results from cloud
+        loadObjectsFromNetwork();
     }
 
     private Task<Object> loadObjectsFromNetwork() {
@@ -187,9 +192,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
                 container, false);
 
         unbinder = ButterKnife.bind(this, rootView);
-        // must be after ButterKnife.bind as it may rely on CoordinatorLayout
-        mAdapter = createRecycleAdapter();
-        mAdapter.setFromLocalDataStore(true);
+
 
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
@@ -257,16 +260,9 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
             mLoading = mLoadingNetwork;
 
-            if (mRecycleView != null && mRecycleView.getAdapter() == null && objects != null && ((objects.size() > 0) || !mLoading)) {
-                // delay to allow the rycleview to layout
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mRecycleView != null) {
-                            mRecycleView.setAdapter(mAdapter);
-                        }
-                    }
-                }, 500);
+            if (mRecycleView != null && mFirstLoad && objects != null && ((objects.size() > 0) || !mLoading)) {
+                mRecycleView.swapAdapter(mAdapter, true);
+                mFirstLoad = false;
             }
 
         }

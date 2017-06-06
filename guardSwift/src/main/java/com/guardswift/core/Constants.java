@@ -6,5 +6,6 @@ package com.guardswift.core;
 
 public class Constants {
 
-    public static final int ONGOING_NOTIFICATION_ID = 1;
+    public static final int ACTIVITY_RECOGNITION_NOTIFICATION_ID = 100;
+    public static final int FUSED_LOCATION_NOTIFICATION_ID = 101;
 }

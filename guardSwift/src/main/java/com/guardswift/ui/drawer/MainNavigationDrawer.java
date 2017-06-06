@@ -175,7 +175,6 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         }
 
 
-        navigationDrawer.addItems(getDataDrawerItems());
         navigationDrawer.addStickyFooterItem(getLogoutDrawerItem());
 
 
@@ -382,10 +381,22 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         return districtWatchItems.toArray(new IDrawerItem[districtWatchItems.size()]);
     }
 
-    private IDrawerItem[] getDataDrawerItems() {
+    private IDrawerItem[] getAdminItems() {
+        if (!guardCache.getLoggedIn().hasRole(Guard.Role.ADMIN)) {
+            return new IDrawerItem[]{};
+        }
+
         List<IDrawerItem> dataItems = Lists.newArrayList();
+        // DATA
         IDrawerItem dataHeader = new SectionDrawerItem().withName(R.string.title_drawer_data);
         dataItems.add(dataHeader);
+        dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_guards)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+            @Override
+            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                GenericToolbarActivity.start(context, R.string.title_drawer_guards, GuardListFragment.newInstance());
+                return false;
+            }
+        }));
         dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_clients)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
@@ -394,25 +405,10 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                 return false;
             }
         }));
-        dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_guards)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                GenericToolbarActivity.start(context, R.string.title_drawer_guards, GuardListFragment.newInstance());
-                return false;
-            }
-        }));
 
-        return dataItems.toArray(new IDrawerItem[dataItems.size()]);
-    }
 
-    private IDrawerItem[] getAdminItems() {
-        if (!guardCache.getLoggedIn().hasRole(Guard.Role.ADMIN)) {
-            return new IDrawerItem[]{};
-        }
-
-        List<IDrawerItem> dataItems = Lists.newArrayList();
-        IDrawerItem dataHeader = new SectionDrawerItem().withName(R.string.title_drawer_admin);
-        dataItems.add(dataHeader);
+        IDrawerItem adminHeader = new SectionDrawerItem().withName(R.string.title_drawer_admin);
+        dataItems.add(adminHeader);
         dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_gps_history)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
@@ -420,6 +416,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                 return false;
             }
         }));
+
         return dataItems.toArray(new IDrawerItem[dataItems.size()]);
     }
 

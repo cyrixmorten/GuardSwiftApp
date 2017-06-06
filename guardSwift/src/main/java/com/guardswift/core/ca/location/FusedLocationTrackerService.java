@@ -1,5 +1,8 @@
 package com.guardswift.core.ca.location;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +16,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.LocationRequest;
 import com.google.common.collect.Lists;
+import com.guardswift.R;
+import com.guardswift.core.Constants;
 import com.guardswift.core.ca.GeofencingModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
@@ -24,6 +29,7 @@ import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.GSTasksCache;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.util.Util;
 import com.parse.ParseGeoPoint;
 
@@ -93,6 +99,28 @@ public class FusedLocationTrackerService extends InjectingService {
 
         wl.acquire();
 
+        this.startForeground(Constants.ACTIVITY_RECOGNITION_NOTIFICATION_ID, createForegroundNotification(""));
+    }
+
+    private Notification createForegroundNotification(String contentText) {
+
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        return new Notification.Builder(this)
+                .setOngoing(true)
+                .setContentTitle(getText(R.string.gps_position))
+                .setContentText(contentText)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .build();
+    }
+
+    private void updateForegroundNotification(Location location) {
+        Notification notification = createForegroundNotification(getString(R.string.latlng, location.getLatitude(), location.getLongitude()));
+
+        NotificationManager mgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        mgr.notify(Constants.FUSED_LOCATION_NOTIFICATION_ID, notification);
     }
 
     @Override
@@ -157,10 +185,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
 
     private boolean hasGooglePlayServices() {
-        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) != ConnectionResult.SUCCESS) {
-            return false;
-        }
-        return true;
+        return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS;
     }
 
 
@@ -207,7 +232,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
                             tracker.appendLocation(getApplicationContext());
 
-
+                            updateForegroundNotification(location);
                         } else {
                             stopSelf();
                         }
@@ -215,6 +240,7 @@ public class FusedLocationTrackerService extends InjectingService {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
+                        Log.e(TAG, "Error on Fused Location observable", throwable);
                         Crashlytics.logException(throwable);
                         new HandleException(TAG, "Error on Fused Location observable", throwable);
                     }
