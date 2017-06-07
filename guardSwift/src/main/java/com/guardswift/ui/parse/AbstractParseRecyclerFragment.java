@@ -209,7 +209,6 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
             }
 
             if (mFirstLoad) {
-                Log.d(TAG, "swapAdapter");
                 mRecycleView.swapAdapter(mAdapter, true);
             }
 
