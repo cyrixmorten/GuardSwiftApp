@@ -3,16 +3,12 @@ package com.guardswift.ui.parse.execution.circuit;
 import android.content.Context;
 import android.util.Log;
 
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-import com.guardswift.core.tasks.controller.CircuitUnitController;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.cache.planning.CircuitStartedCache;
 import com.guardswift.persistence.parse.execution.BaseTask;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
 import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
@@ -67,6 +63,7 @@ public class ActiveCircuitUnitsFragment extends AbstractTasksRecycleFragment<Cir
     @Override
     public ParseQueryAdapter.QueryFactory<CircuitUnit> createNetworkQueryFactory() {
 
+        Log.d(TAG, "circuitStartedCache.getSelected()" + circuitStartedCache.getSelected().getObjectId());
 
         return new ParseQueryAdapter.QueryFactory<CircuitUnit>() {
 
@@ -74,9 +71,9 @@ public class ActiveCircuitUnitsFragment extends AbstractTasksRecycleFragment<Cir
             public ParseQuery<CircuitUnit> create() {
                 return new CircuitUnit.QueryBuilder().
                         matchingNotEnded(circuitStartedCache.getSelected()).
-                        isRunToday().
+                        isRunToday()
 //                        sortBy(CircuitUnit.SORTBY_ID).
-                        build();
+                        .build();
             }
         };
     }

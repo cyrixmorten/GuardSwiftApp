@@ -68,7 +68,7 @@ public class TrackerListFragment extends AbstractParseRecyclerFragment<Tracker, 
 
         if (!date.equals(fromDate)) {
             fromDate = date;
-            reloadLocalData();
+            updatedNetworkQuery();
         }
     }
 

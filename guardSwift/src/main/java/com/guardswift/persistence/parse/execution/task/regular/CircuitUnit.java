@@ -284,6 +284,9 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
             query.include(client + "." + Client.roomLocations);
             query.include(client + "." + Client.people);
             query.setLimit(1000);
+
+            query.whereExists(client);
+
             return super.build();
         }
 
@@ -309,6 +312,8 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
             if (circuitStarted == null) {
                 return this;
             }
+
+            Log.d(TAG, "matchingNotEnded " + circuitStarted.getName());
 
             matching(circuitStarted.getCircuit());
 
@@ -365,6 +370,8 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
                 Log.e(TAG, "CIRCUIT IS NULL");
                 return this;
             }
+
+            Log.d(TAG, "matching circuit: " + circuit.getObjectId());
 
             query.whereEqualTo(CircuitUnit.circuit, circuit);
 

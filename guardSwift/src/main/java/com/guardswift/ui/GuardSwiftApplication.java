@@ -20,6 +20,8 @@ import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication;
+import com.guardswift.eventbus.EventBusController;
+import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
@@ -286,6 +288,12 @@ public class GuardSwiftApplication extends InjectingApplication {
         return bootstrapParseObjectsLocally(activity, guard, false);
     }
 
+    public boolean isBootstrapInProgress() {
+        return bootstrapInProgress;
+    }
+
+
+
     private MaterialDialog retryBootstrapDialog;
     public Task<Void> bootstrapParseObjectsLocally(final Activity activity, final Guard guard, boolean performInBackground) {
 
@@ -408,6 +416,8 @@ public class GuardSwiftApplication extends InjectingApplication {
                         parseObjectsBootstrapped = true;
 
                         startServices();
+
+                        EventBusController.post(new BootstrapCompleted());
 
                         return null;
                     }

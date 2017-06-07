@@ -17,7 +17,7 @@ public class EventBusController {
 
     public static class ForceUIUpdate {};
 
-    private static void post(Object object) {
+    public static void post(Object object) {
         EventBus.getDefault().post(object);
     }
 

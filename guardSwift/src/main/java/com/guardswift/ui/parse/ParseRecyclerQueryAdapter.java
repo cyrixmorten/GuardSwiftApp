@@ -71,8 +71,10 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
         this.context = null;
     }
 
-    public void setFromLocalDataStore(boolean fromLocalDataStore) {
+    public ParseRecyclerQueryAdapter setFromLocalDataStore(boolean fromLocalDataStore) {
         this.fromLocalDataStore = fromLocalDataStore;
+
+        return this;
     }
 
     public boolean isFromLocalDataStore() {
@@ -179,14 +181,14 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
      */
     protected void onFilterQuery(ParseQuery<T> query) {
         // provide override for filtering query
-
-        if (isFromLocalDataStore())
-            query.fromLocalDatastore();
     }
 
-    public synchronized void loadObjects() {
+    public synchronized void loadObjects(boolean fromLocalDataStore) {
         dispatchOnLoading();
         final ParseQuery<T> query = mFactory.create();
+        if (fromLocalDataStore) {
+            query.fromLocalDatastore();
+        }
         onFilterQuery(query);
         query.findInBackground(new FindCallback<T>() {
 

@@ -14,8 +14,10 @@ import android.view.ViewGroup;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingFragment;
+import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.ExtendedParseObject;
+import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.SlidingPanelActivity;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.guardswift.ui.parse.execution.TaskRecycleAdapter;
@@ -25,8 +27,6 @@ import com.parse.ParseQueryAdapter;
 
 import java.util.List;
 
-import bolts.Continuation;
-import bolts.Task;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -70,12 +70,9 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
      */
     protected abstract boolean isRelevantUIEvent(UpdateUIEvent ev);
 
-    // delay setting adapter
+    private boolean mLoading = false;
     private boolean mFirstLoad = true;
 
-    // block multiple loads on LDS
-    private boolean mLoading;
-    private boolean mLoadingNetwork;
     private ParseRecyclerQueryAdapter<T, U> mAdapter;
 
 
@@ -94,79 +91,38 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
 
     // trigger when query is updated
-    protected void reloadLocalData() {
+    protected void updatedNetworkQuery() {
+        if (GuardSwiftApplication.getInstance().isBootstrapInProgress()) {
+            Log.w(TAG, "cancel updatedNetworkQuery because bootstrapping");
+            return;
+        }
+
         if (mRecycleView != null) {
 
-            mRecycleView.showProgress();
+            mFirstLoad = true;
 
             mAdapter = createRecycleAdapter();
-            mAdapter.setFromLocalDataStore(true);
+            mAdapter.addOnQueryLoadListener(recycleQueryListener);
 
-            loadObjectsFromNetwork().onSuccess(new Continuation<Object, Object>() {
-                @Override
-                public Object then(Task<Object> task) throws Exception {
-                    mRecycleView.swapAdapter(mAdapter, true);
-
-                    mRecycleView.hideProgress();
-
-                    return null;
-                }
-            });
+            reloadAdapter(false);
         }
     }
 
-    private void refreshLocalData() {
-        mLoadingNetwork = true;
-        mLoading = true;
+    private void reloadAdapter(boolean fromLocalDatastore) {
+        if (mAdapter != null) {
+            if (GuardSwiftApplication.getInstance().isBootstrapInProgress()) {
+                Log.w(TAG, "reloadAdapter: application is bootstrapping");
+                return;
+            }
 
-        if (mAdapter == null) {
-            mAdapter = createRecycleAdapter();
-            mAdapter.setFromLocalDataStore(true);
+            if (mLoading) {
+                Log.w(TAG, "reloadAdapter: loading is already in progress");
+                return;
+            }
+
+            mAdapter.loadObjects(fromLocalDatastore);
         }
-
-        if (mAdapter.getItems().isEmpty()) {
-            Log.d(TAG, "show progress");
-            mRecycleView.showProgress();
-        }
-
-        // Load from LDS (quick results)
-        mAdapter.loadObjects();
-
-        // Update results from cloud
-        loadObjectsFromNetwork();
     }
-
-    private Task<Object> loadObjectsFromNetwork() {
-        Log.e(TAG, "fetch from network");
-        return getObjectInstance().updateAll(createNetworkQueryFactory().create(), 100)
-                .onSuccess(new Continuation<List<T>, Object>() {
-                    @Override
-                    public Object then(Task<List<T>> task) throws Exception {
-                        Log.d(TAG, "Results: " + task.getResult().size());
-
-                        if (mAdapter != null) {
-                            mAdapter.loadObjects();
-//                            mAdapter.showResults(task.getResult());
-                        }
-
-                        return task.getResult();
-                    }
-                })
-                .continueWith(new Continuation<Object, Object>() {
-                    @Override
-                    public Object then(Task<Object> task) throws Exception {
-                        if (task.isFaulted()) {
-                            new HandleException(TAG, "loadObjectsFromNetwork", task.getError());
-                        }
-
-                        mLoadingNetwork = false;
-
-
-                        return null;
-                    }
-                });
-    }
-
 
     @Override
     public void onAttach(Context context) {
@@ -193,6 +149,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
         unbinder = ButterKnife.bind(this, rootView);
 
+        mAdapter = createRecycleAdapter();
 
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
         llm.setOrientation(LinearLayoutManager.VERTICAL);
@@ -204,14 +161,10 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
             @Override
             public void onRefresh() {
-                // pull-to-refresh
-                refreshLocalData();
+                reloadAdapter(false);
             }
         });
 
-
-        // initial load
-        refreshLocalData();
 
         return rootView;
     }
@@ -229,16 +182,13 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
         return mAdapter;
     }
 
-    protected SuperRecyclerView getRecycleView() {
-        return mRecycleView;
-    }
-
 
     @Override
     public void onResume() {
+        Log.d(TAG, "onResume");
         if (mAdapter != null) {
             mAdapter.addOnQueryLoadListener(recycleQueryListener);
-            mAdapter.loadObjects(); // refresh to sort by query
+            reloadAdapter(false);
         }
 
         super.onResume();
@@ -258,18 +208,27 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
                 new HandleException(getActivity(), TAG, "recycleQueryListener", e);
             }
 
-            mLoading = mLoadingNetwork;
-
-            if (mRecycleView != null && mFirstLoad && objects != null && ((objects.size() > 0) || !mLoading)) {
+            if (mFirstLoad) {
+                Log.d(TAG, "swapAdapter");
                 mRecycleView.swapAdapter(mAdapter, true);
-                mFirstLoad = false;
             }
 
+
+            mFirstLoad = false;
+            mLoading = false;
         }
 
         @Override
         public void onLoading() {
             mLoading = true;
+
+            if (mRecycleView != null) {
+                if (mAdapter.getItems().isEmpty()) {
+                    mRecycleView.showProgress();
+                } else {
+                    mRecycleView.setRefreshing(true);
+                }
+            }
         }
     };
 
@@ -282,9 +241,13 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
     }
 
 
+    public void onEventMainThread(BootstrapCompleted ev) {
+        reloadAdapter(false);
+    }
+
     public void onEventMainThread(UpdateUIEvent ev) {
-        if (mAdapter != null && !mLoading && isRelevantUIEvent(ev)) {
-            mAdapter.loadObjects();
+        if (!mLoading && isRelevantUIEvent(ev)) {
+            reloadAdapter(true);
         }
     }
 
