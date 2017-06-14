@@ -17,7 +17,6 @@ import com.guardswift.core.documentation.eventlog.context.LogStrategyFactory;
 import com.guardswift.core.documentation.eventlog.context.LogTimestampStrategy;
 import com.guardswift.core.documentation.eventlog.task.LogTaskStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskClientLogStrategy;
-import com.guardswift.core.documentation.eventlog.task.TaskDistrictWatchLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskIdLogStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskLogStrategyFactory;
 import com.guardswift.core.documentation.eventlog.task.TaskRegularLogStrategy;
@@ -516,8 +515,6 @@ public class EventLog extends ExtendedParseObject {
 
     // pointers
     public static final String client = TaskClientLogStrategy.client;
-    public static final String districtWatchStarted = TaskDistrictWatchLogStrategy.districtWatchStarted;
-    public static final String districtWatchClient = TaskDistrictWatchLogStrategy.districtWatchClient;
     public static final String circuitStarted = TaskRegularLogStrategy.circuitStarted;
     public static final String circuitUnit = TaskRegularLogStrategy.circuitUnit;
 
@@ -1145,9 +1142,6 @@ public class EventLog extends ExtendedParseObject {
         }
         if (has(EventLog.circuitUnit)) {
             return GSTask.TASK_TYPE.REGULAR;
-        }
-        if (has(EventLog.districtWatchClient)) {
-            return GSTask.TASK_TYPE.DISTRICTWATCH;
         }
         if (has(EventLog.staticTask)) {
             return GSTask.TASK_TYPE.STATIC;

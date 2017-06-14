@@ -507,12 +507,13 @@ public class CircuitUnit extends BaseTask implements Comparable<CircuitUnit> {
         return (Circuit) getParseObject(circuit);
     }
 
+
     public Date getTimeStart() {
         return getDate(timeStartDate);
     }
 
     public String getTimeStartString() {
-        Date date = getDate(timeStartDate);
+        Date date = getTimeStart();
         DateTime dt = new DateTime(date);
         return dt.toString(DateTimeFormat.shortTime());
     }

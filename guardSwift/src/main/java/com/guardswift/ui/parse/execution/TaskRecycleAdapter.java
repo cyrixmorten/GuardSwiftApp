@@ -431,17 +431,21 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 super.onActionArrive(context, task);
             } else {
                 // Show dialog explaining that time is outside scheduled
-                new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.outside_schedule, R.string.arrived_outside_schedule, new MaterialDialog.SingleButtonCallback() {
+//                new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.outside_schedule, R.string.arrived_outside_schedule, new MaterialDialog.SingleButtonCallback() {
+//                    @Override
+//                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                // TODO date dialog (today or yesterday)
+                addArrivalEvent(context, task, new GetCallback<CircuitUnit>() {
                     @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        addArrivalEvent(context, task, new GetCallback<CircuitUnit>() {
-                            @Override
-                            public void done(CircuitUnit task, ParseException e) {
-                                update(context, task);
-                            }
-                        });
+                    public void done(CircuitUnit task, ParseException e) {
+                        task.setArrived();
+                        task.saveEventually();
+
+                        update(context, task);
                     }
-                }).show();
+                });
+//                    }
+//                }).show();
             }
         }
 
@@ -507,6 +511,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         private void addArrivalEvent(final Context context, final CircuitUnit task, final GetCallback<CircuitUnit> callback) {
             final DateTime timestamp = new DateTime();
 
+            // TODO date dialog (today or yesterday)
             RadialTimePickerDialogFragment timePickerDialog = new RadialTimePickerDialogFragment()
                     .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
                     .setOnTimeSetListener(new RadialTimePickerDialogFragment.OnTimeSetListener() {
@@ -1091,7 +1096,6 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             }
             return color;
         }
-
 
 
     }
