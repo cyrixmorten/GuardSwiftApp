@@ -88,7 +88,7 @@ public class ParseModule {
     private void logout(final SaveCallback saveCallback, ProgressCallback progressCallback, final String withMessage, final boolean inactivity) {
 
         final Guard guard = guardCache.getLoggedIn();
-        Log.w(TAG, "LOGOUG GUARD: " + guard);
+        Log.w(TAG, "LOGOUT GUARD: " + guard);
 
         if (guard != null) {
             Tracker.upload(context, guard, progressCallback).continueWithTask(new Continuation<Void, Task<Void>>() {

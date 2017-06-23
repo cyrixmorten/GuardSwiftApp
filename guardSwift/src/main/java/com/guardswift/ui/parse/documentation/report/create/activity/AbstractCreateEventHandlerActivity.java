@@ -225,6 +225,7 @@ public abstract class AbstractCreateEventHandlerActivity extends
 
         if (getClient() == null) {
             finish();
+            return;
         }
 
         if (actionBar != null) {

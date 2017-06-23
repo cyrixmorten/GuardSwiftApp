@@ -19,6 +19,7 @@ import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
 import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.exceptions.LogError;
 import com.guardswift.dagger.InjectingApplication;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.eventbus.events.BootstrapCompleted;
@@ -161,6 +162,8 @@ public class GuardSwiftApplication extends InjectingApplication {
         try {
             guard = query.getFirst();
         } catch (ParseException e) {
+            LogError.log(TAG, "Failed to get last active guard " + e.getMessage());
+
             new HandleException(TAG, "Getting last active guard", e);
         }
         return guard;

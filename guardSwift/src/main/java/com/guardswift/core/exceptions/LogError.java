@@ -26,6 +26,8 @@ public class LogError {
             error.put("tag", tag);
             error.put("gsVersion", device.getVersionCode());
             error.put("message", message);
+            error.saveInBackground();
+
         }
 
 //            if (exception != null) {
