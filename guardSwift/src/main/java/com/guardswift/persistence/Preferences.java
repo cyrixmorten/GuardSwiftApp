@@ -149,10 +149,10 @@ public class Preferences {
         }
     }
 
-    public Set<String> getStringSet(@NonNull String key) {
+    protected Set<String> getStringSet(@NonNull String key) {
          {
             Set<String> defaultValue = Sets.newConcurrentHashSet();
-            return sharedPrefs.getStringSet(key, defaultValue);
+            return Sets.newConcurrentHashSet(sharedPrefs.getStringSet(key, defaultValue));
         }
     }
 
