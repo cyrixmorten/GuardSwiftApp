@@ -18,7 +18,7 @@ import java.util.Set;
 /**
  * Created by cyrix on 10/21/15.
  */
-public abstract class ParseCache<T extends ParseObject> extends Preferences{
+public abstract class ParseCache<T extends ParseObject>  extends Preferences  {
 
 
     private static final String TAG = ParseCache.class.getSimpleName();
@@ -51,10 +51,7 @@ public abstract class ParseCache<T extends ParseObject> extends Preferences{
             return;
 
         String key = getPreferenceKey(name);
-//        Log.w(TAG, subClass.getSimpleName() + " adding name: " + name + " object: " + object + " to key: " + key);
-//        singleMapCache.put(key, object); // Store in memory
         super.put(key, object.getObjectId()); // Store objectId in SharedPreferences
-//        super.addUnique(subClass.getSimpleName(), name); // Store a list of names associated to this class
         cacheSingle.put(key, object);
     }
 
@@ -76,17 +73,12 @@ public abstract class ParseCache<T extends ParseObject> extends Preferences{
             return null;
         }
         String key = getPreferenceKey(name);
-        String objectId = super.getString(key);
 
-//        Log.w(TAG, subClass.getSimpleName() + " getting name: " + name + " with key: " + key + " and objectId: " + objectId);
-
-        // look in cache
         if (cacheSingle.containsKey(key)) {
-//            Log.w(TAG, subClass.getSimpleName() + " " + objectId + " found in cache");
             return cacheSingle.get(key);
         }
-//        Log.w(TAG, subClass.getSimpleName() + objectId + " not found in cache - looking up in LDS");
-        // look up in local datastore
+
+        String objectId = super.getString(key);
         ParseQuery<T> query = ParseQuery.getQuery(subClass);
         query.fromLocalDatastore();
         try {

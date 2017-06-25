@@ -7,13 +7,13 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 
-/**
- * Created by cyrixmorten on 14/06/2017.
- */
-
 public class LogError {
 
     public static void log(String tag, String message) {
+        log(tag, message, null);
+    }
+
+    public static void log(String tag, String message, Exception exception) {
         ParseUser user = ParseUser.getCurrentUser();
 
         if (user != null) {
@@ -26,26 +26,29 @@ public class LogError {
             error.put("tag", tag);
             error.put("gsVersion", device.getVersionCode());
             error.put("message", message);
+
+            if (exception != null) {
+
+                String exceptionMessage = exception.getMessage();
+                if (exceptionMessage != null) {
+                    error.put("exception", exceptionMessage);
+                }
+
+                Throwable cause = exception.getCause();
+                if (cause != null) {
+
+                    String causeMessage = cause.getMessage();
+
+                    if (causeMessage != null) {
+                        error.put("cause", causeMessage);
+                    }
+                }
+            }
+
             error.saveInBackground();
 
         }
-
-//            if (exception != null) {
-//
-//                String exceptionMessage = exception.getMessage();
-//                if (exceptionMessage != null) {
-//                    error.put("exception", exceptionMessage);
-//                }
-//
-//                Throwable cause = exception.getCause();
-//                if (cause != null) {
-//
-//                    String causeMessage = cause.getMessage();
-//
-//                    if (causeMessage != null) {
-//                        error.put("cause", causeMessage);
-//                    }
-//                }
-//            }
     }
+
+
 }
