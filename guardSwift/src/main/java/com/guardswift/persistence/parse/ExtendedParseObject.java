@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.common.collect.Lists;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.exceptions.LogError;
 import com.guardswift.eventbus.EventBusController;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
@@ -210,7 +211,7 @@ public abstract class ExtendedParseObject extends ParseObject {
         pinThenSaveEventually(pin, pinned, saved, false);
     }
 
-    public void pinThenSaveEventually(final String pin, final SaveCallback pinned, final SaveCallback saved, final boolean postUIUpdate) {
+    public void pinThenSaveEventually(final String pin, final SaveCallback pinned, final SaveCallback savedCallback, final boolean postUIUpdate) {
 
         Log.d(TAG, "pinThenSaveEventually: " + pin);
 
@@ -230,25 +231,28 @@ public abstract class ExtendedParseObject extends ParseObject {
                     EventBusController.postUIUpdate(ExtendedParseObject.this);
                 }
 
-                ExtendedParseObject.this.saveEventually(saved);
+//                ExtendedParseObject.this.saveEventually(saved);
 
                 if (pin.equals(PIN_NEW)) {
                     ExtendedParseObject.this.unpinInBackground(PIN_NEW);
                 }
-//                ExtendedParseObject.this.saveInBackground(new SaveCallback() {
-//                    @Override
-//                    public void done(ParseException e) {
-//                        if (e != null) {
-//                            new HandleException(TAG, "pinThenSaveEventually fallback to saveEventually", e);
-//                            ExtendedParseObject.this.saveEventually(saved);
-//                            return;
-//                        }
-//
-//                        if (saved != null) {
-//                            saved.done(null);
-//                        }
-//                    }
-//                });
+
+                ExtendedParseObject.this.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e != null) {
+                            LogError.log(TAG, "Failes to save in backgorund", e);
+
+                            new HandleException(TAG, "pinThenSaveEventually fallback to saveEventually", e);
+                            ExtendedParseObject.this.saveEventually(savedCallback);
+                            return;
+                        }
+
+                        if (savedCallback != null) {
+                            savedCallback.done(null);
+                        }
+                    }
+                });
             }
         });
 
