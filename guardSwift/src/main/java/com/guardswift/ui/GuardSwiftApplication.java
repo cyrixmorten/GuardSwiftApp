@@ -162,8 +162,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         try {
             guard = query.getFirst();
         } catch (ParseException e) {
-            LogError.log(TAG, "Failed to get last active guard " + e.getMessage());
-
+            LogError.log(TAG, "Failed to get last active guard ", e);
             new HandleException(TAG, "Getting last active guard", e);
         }
         return guard;

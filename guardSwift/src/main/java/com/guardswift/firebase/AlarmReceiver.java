@@ -7,6 +7,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.exceptions.LogError;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.execution.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -94,6 +95,7 @@ public class AlarmReceiver extends FirebaseMessagingService {
                 if (task.isFaulted()) {
                     Exception exception = task.getError();
 
+                    LogError.log(TAG, "Failed receive alarm: " + alarmId, exception);
                     new HandleException(TAG, "Failed receive alarm: " + alarmId, exception);
 
                     return null;
