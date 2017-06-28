@@ -6,8 +6,6 @@ import android.util.Log;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.Positioned;
-import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.util.GeocodedAddress;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -60,9 +58,6 @@ public class Guard extends ExtendedParseObject implements Positioned {
 
     private static final String lastLogin = "lastLogin";
     private static final String lastLogout = "lastLogout";
-    private static final String lastEvent = "lastEvent";
-    private static final String lastLocationUpdate = "lastLocationUpdate";
-    private static final String lastGeocodedAddress = "lastGeocodedAddress";
     private static final String position = "position";
     private static final String isOnline = "isOnline";
 
@@ -102,7 +97,7 @@ public class Guard extends ExtendedParseObject implements Positioned {
         @Override
         public ParseQuery<Guard> build() {
 //            query.include(messages);
-            query.include(lastEvent);
+//            query.include(lastEvent);
             query.setLimit(1000);
             return super.build();
         }
@@ -146,28 +141,6 @@ public class Guard extends ExtendedParseObject implements Positioned {
         return getDate(Guard.lastLogout);
     }
 
-    public void setLastGeocodedAddress(GeocodedAddress reverseGeocodedAddress) {
-        if (reverseGeocodedAddress == null)
-            return;
-        put(Guard.lastLocationUpdate, new Date());
-        put(Guard.lastGeocodedAddress, reverseGeocodedAddress.toJSON());
-    }
-
-    public Date getLastLocationUpdate() {
-        return getDate(lastLocationUpdate);
-    }
-
-    public GeocodedAddress getLastGeocodedAddress() {
-        return new GeocodedAddress(getJSONObject(Guard.lastGeocodedAddress));
-    }
-
-    public void setLastEvent(EventLog event) {
-        put(lastEvent, event);
-    }
-
-    public EventLog getLastEvent() {
-        return (EventLog) getParseObject(lastEvent);
-    }
 
     public void setOnline(boolean online) {
         if (online) {

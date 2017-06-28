@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.beardedhen.androidbootstrap.AwesomeTextView;
@@ -30,15 +29,6 @@ public class GuardRecycleAdapter extends ParseRecyclerQueryAdapter<Guard, GuardR
         @BindView(R.id.onlinestatus)
         AwesomeTextView onlinestatus; // isOnline
 
-        @BindView(R.id.layout_last_seen)
-        LinearLayout vLayoutLastSeen;
-//        @BindView(R.id.geocoded_address)
-//        TextView vGeoCodedAddress; // lastGeocodedAddress
-        @BindView(R.id.time)
-        TextView vTime; // lastLocationUpdate
-
-//        @BindView(R.id.layout_recent_event)
-//        LinearLayout vLayoutRecentActivity;
         @BindView(R.id.event)
         TextView vEvent; // lastEvent
         @BindView(R.id.client_name)
@@ -53,13 +43,7 @@ public class GuardRecycleAdapter extends ParseRecyclerQueryAdapter<Guard, GuardR
             super(itemView);
             ButterKnife.bind(this, itemView);
 
-//            itemView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    int recentActivityVisibility = (vLayoutRecentActivity.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
-//                    vLayoutRecentActivity.setVisibility(recentActivityVisibility);
-//                }
-//            });
+
         }
 
     }
@@ -91,62 +75,7 @@ public class GuardRecycleAdapter extends ParseRecyclerQueryAdapter<Guard, GuardR
             holder.onlinestatus.setBootstrapBrand(DefaultBootstrapBrand.DANGER);
         }
 
-        /**
-         * LAST SEEN
-         */
 
-//        holder.vLayoutLastSeen.setVisibility(View.GONE);
-//
-//        holder.vGeoCodedAddress.setVisibility(View.GONE);
-//        GeocodedAddress geocodedAddress = guard.getLastGeocodedAddress();
-//        if (geocodedAddress.hasData()) {
-//            holder.vLayoutLastSeen.setVisibility(View.VISIBLE);
-//            holder.vGeoCodedAddress.setVisibility(View.VISIBLE);
-//            holder.vGeoCodedAddress.setText(geocodedAddress.getFullAddress());
-//        }
-//
-//        holder.vTime.setVisibility(View.GONE);
-//        Date lastLocationUpdate = guard.getLastLocationUpdate();
-//        if (lastLocationUpdate != null) {
-//            holder.vLayoutLastSeen.setVisibility(View.VISIBLE);
-//            holder.vTime.setVisibility(View.VISIBLE);
-//            String dateString = DateFormat.getDateFormat(GuardSwiftApplication.getInstance()).format(lastLocationUpdate);
-//            String timeString = DateFormat.getTimeFormat(GuardSwiftApplication.getInstance()).format(lastLocationUpdate);
-//            String dateTimeString = dateString + " " + timeString;
-//            holder.vTime.setText(dateTimeString);
-//        }
-//
-//        /**
-//         * RECENT ACTIVITY
-//         */
-//
-//        holder.vLayoutRecentActivity.setVisibility(View.GONE);
-//
-//        holder.vNoActivity.setVisibility(View.GONE);
-//        holder.vClientName.setVisibility(View.GONE);
-//        holder.vClientAddress.setVisibility(View.GONE);
-//
-//        EventLog lastEvent = guard.getLastEvent();
-//        if (lastEvent != null) {
-//            holder.vEvent.setText(lastEvent.getEvent());
-//
-//            lastEvent.getClientInBackground().onSuccess(new Continuation<Client, Object>() {
-//                @Override
-//                public Object then(Task<Client> task) throws Exception {
-//
-//                    Client client = task.getResult();
-//                    holder.vClientName.setText(client.getIdAndName());
-//                    holder.vClientAddress.setText(client.getFullAddress());
-//
-//                    holder.vClientName.setVisibility(View.VISIBLE);
-//                    holder.vClientAddress.setVisibility(View.VISIBLE);
-//
-//                    return null;
-//                }
-//            });
-//        } else {
-//            holder.vNoActivity.setVisibility(View.VISIBLE);
-//        }
         new PositionedViewHolder.CalcDistanceAsync(guard, holder).execute();
     }
 }

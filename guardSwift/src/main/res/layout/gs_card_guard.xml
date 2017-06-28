@@ -48,67 +48,7 @@
                 />
         </LinearLayout>
 
-        <!--<LinearLayout-->
-            <!--android:id="@+id/layout_last_seen"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:orientation="vertical"-->
-            <!--android:paddingBottom="@dimen/mini_padding">-->
 
-            <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--style="@style/Base.TextAppearance.AppCompat.Body2"-->
-                <!--android:text="@string/last_seen_colon"/>-->
-
-            <!--<TextView-->
-                <!--android:id="@+id/geocoded_address"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--style="@style/Base.TextAppearance.AppCompat.Body1"-->
-                <!--/>-->
-
-            <!--<TextView-->
-                <!--android:id="@+id/time"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--style="@style/Base.TextAppearance.AppCompat.Caption"-->
-                <!--/>-->
-
-        <!--</LinearLayout>-->
-
-
-
-        <!--<LinearLayout-->
-            <!--android:id="@+id/layout_recent_event"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:orientation="vertical"-->
-            <!--&gt;-->
-
-            <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--style="@style/Base.TextAppearance.AppCompat.Body2"-->
-                <!--android:text="@string/most_recent_activity_colon"/>-->
-
-            <!--<include layout="@layout/gs_view_event_at_client" />-->
-
-        <!--</LinearLayout>-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/no_activity_registered"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--style="@style/Base.TextAppearance.AppCompat.Body1"-->
-            <!--android:text="@string/no_activity_registered_yet"/>-->
-
-
-        <!--<include-->
-            <!--android:id="@+id/layout_distance"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--layout="@layout/gs_view_distance" />-->
 
     </LinearLayout>
 
