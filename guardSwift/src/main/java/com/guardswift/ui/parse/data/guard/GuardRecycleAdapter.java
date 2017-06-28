@@ -29,8 +29,6 @@ public class GuardRecycleAdapter extends ParseRecyclerQueryAdapter<Guard, GuardR
         @BindView(R.id.onlinestatus)
         AwesomeTextView onlinestatus; // isOnline
 
-        @BindView(R.id.event)
-        TextView vEvent; // lastEvent
         @BindView(R.id.client_name)
         TextView vClientName;
         @BindView(R.id.client_address)
