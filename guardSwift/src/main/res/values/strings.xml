@@ -439,6 +439,6 @@
     <string name="date">Dato</string>
     <string name="gps_position">GPS position</string>
     <string name="activity_recognition">Aktivitet genkendelse</string>
-
-
+    <string name="permissions">Tilladelser</string>
+    <string name="permissions_rationale">GuardSwift skal have tilladelse til at bruge GPS samt telefonens hukommelse for at fungere</string>
 </resources>

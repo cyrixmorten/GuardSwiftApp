@@ -31,7 +31,7 @@ public class GuardListFragment extends AbstractParseRecyclerFragment<Guard, Guar
         return new ParseQueryAdapter.QueryFactory<Guard>() {
             @Override
             public ParseQuery<Guard> create() {
-                return new Guard.QueryBuilder(false).build();
+                return new Guard.QueryBuilder(false).sortByName(true).build();
             }
         };
     }

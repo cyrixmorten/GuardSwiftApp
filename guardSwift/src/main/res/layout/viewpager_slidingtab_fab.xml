@@ -7,18 +7,27 @@
     android:layout_height="match_parent"
     tools:ctx="com.guardswift.ui.activity.MainActivity">
 
-    <com.guardswift.ui.view.slidingtab.SlidingTabLayout
-        android:id="@+id/tabs"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/bootstrap_gray_lighter"
-        android:elevation="@dimen/mini_padding" />
+    <!--<com.guardswift.ui.view.slidingtab.SlidingTabLayout-->
+        <!--android:id="@+id/tabs"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:background="@color/bootstrap_gray_lighter"-->
+        <!--android:elevation="@dimen/mini_padding" />-->
 
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tabs">
+        >
+        <!--android:layout_below="@+id/tabs"-->
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="@color/white"
+            android:elevation="@dimen/mini_padding"/>
 
     </android.support.v4.view.ViewPager>
 

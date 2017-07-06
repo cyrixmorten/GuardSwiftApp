@@ -1,5 +1,6 @@
 package com.guardswift.ui.activity;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -63,11 +64,15 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-
+@RuntimePermissions
 public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     private static final String TAG = GuardLoginActivity.class.getSimpleName();
@@ -201,7 +206,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     @OnClick(R.id.sign_in_button)
     public void login(BootstrapButton button) {
-        attemptLogin();
+        GuardLoginActivityPermissionsDispatcher.attemptLoginWithCheck(this);
     }
 
     public static void closeKeyboard(Context c, IBinder windowToken) {
@@ -210,6 +215,8 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         mgr.hideSoftInputFromWindow(windowToken, 0);
     }
 
+
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     public void attemptLogin() {
 
         Log.d(TAG, "attemptLogin");
@@ -547,6 +554,36 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                           }
                 ).show();
     }
+
+    /**
+     * Permissions handling
+     */
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        GuardLoginActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    void showRationaleForPermissions(final PermissionRequest request) {
+        new CommonDialogsBuilder.MaterialDialogs(this).okCancel(R.string.permissions, getString(R.string.permissions_rationale),
+                new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        request.proceed();
+                    }
+                }, new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        request.cancel();
+                    }
+                }
+        ).show();
+
+    }
+
 
 
 }
