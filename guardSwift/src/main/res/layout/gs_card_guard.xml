@@ -1,57 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:bootstrap="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/CardView.Light"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/CardView.Light"
     android:clickable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    card_view:cardUseCompatPadding="true"
-    card_view:contentPadding="@dimen/small_padding"
     card_view:cardCornerRadius="@dimen/mini_padding"
     card_view:cardElevation="@dimen/mini_padding"
-    >
+    card_view:cardUseCompatPadding="true"
+    card_view:contentPadding="@dimen/small_padding">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        >
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            style="@style/Base.TextAppearance.AppCompat.Title"
-            android:paddingBottom="@dimen/mini_padding" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/mini_padding"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/mini_padding">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/name"
+                style="@style/Base.TextAppearance.AppCompat.Title"
+                android:layout_weight="1"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:paddingEnd="@dimen/mini_padding"
-                style="@style/Base.TextAppearance.AppCompat.Widget.ActionMode.Subtitle"
-                android:text="@string/status_colon"/>
+                tools:text="GuardName"/>
 
             <com.beardedhen.androidbootstrap.AwesomeTextView
-                android:id="@+id/onlinestatus"
+                android:id="@+id/online_status"
+                style="@style/Base.TextAppearance.AppCompat.Button"
+                android:layout_weight="0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/Base.TextAppearance.AppCompat.Button"
                 bootstrap:bootstrapBrand="warning"
-                />
+                tools:text="Offline"/>
         </LinearLayout>
 
 
+        <include
+            android:id="@+id/layout_distance"
+            layout="@layout/gs_view_distance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
 
     </LinearLayout>
-
 
 
 </android.support.v7.widget.CardView>

@@ -25,19 +25,10 @@ public class GuardRecycleAdapter extends ParseRecyclerQueryAdapter<Guard, GuardR
 
 
         @BindView(R.id.name)
-        TextView name;
-        @BindView(R.id.onlinestatus)
-        AwesomeTextView onlinestatus; // isOnline
+        TextView tvName;
+        @BindView(R.id.online_status)
+        AwesomeTextView tvOnlineStatus; // isOnline
 
-        @BindView(R.id.event)
-        TextView vEvent; // lastEvent
-        @BindView(R.id.client_name)
-        TextView vClientName;
-        @BindView(R.id.client_address)
-        TextView vClientAddress;
-
-//        @BindView(R.id.no_activity_registered)
-//        TextView vNoActivity;
 
         public GuardViewHolder(View itemView) {
             super(itemView);
@@ -66,13 +57,13 @@ public class GuardRecycleAdapter extends ParseRecyclerQueryAdapter<Guard, GuardR
     @Override
     public void onBindViewHolder(final GuardViewHolder holder, int position) {
         Guard guard = getItem(position);
-        holder.name.setText(guard.getName());
+        holder.tvName.setText(guard.getName());
         if (guard.isOnline()) {
-            holder.onlinestatus.setText(context.getString(R.string.online));
-            holder.onlinestatus.setBootstrapBrand(DefaultBootstrapBrand.SUCCESS);
+            holder.tvOnlineStatus.setText(context.getString(R.string.online));
+            holder.tvOnlineStatus.setBootstrapBrand(DefaultBootstrapBrand.SUCCESS);
         } else {
-            holder.onlinestatus.setText(context.getString(R.string.offline));
-            holder.onlinestatus.setBootstrapBrand(DefaultBootstrapBrand.DANGER);
+            holder.tvOnlineStatus.setText(context.getString(R.string.offline));
+            holder.tvOnlineStatus.setBootstrapBrand(DefaultBootstrapBrand.DANGER);
         }
 
 

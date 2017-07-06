@@ -107,6 +107,15 @@ public class Guard extends ExtendedParseObject implements Positioned {
             return this;
         }
 
+        public QueryBuilder sortByName(boolean ascending) {
+            if (ascending) {
+                query.addAscendingOrder(Guard.name);
+            } else {
+                query.addDescendingOrder(Guard.name);
+            }
+            return this;
+        }
+
     }
 
     public int getGuardId() {

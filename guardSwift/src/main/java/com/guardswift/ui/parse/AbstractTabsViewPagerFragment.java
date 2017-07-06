@@ -3,6 +3,7 @@ package com.guardswift.ui.parse;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -17,7 +18,6 @@ import com.guardswift.R;
 import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.ui.helpers.UpdateFloatingActionButtonPageChangeListener;
 import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
-import com.guardswift.ui.view.slidingtab.SlidingTabLayout;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 
 
     @BindView(R.id.tabs)
-    public SlidingTabLayout tabs;
+    public TabLayout tabs;
     @BindView(R.id.pager)
     public ViewPager mViewPager;
     @BindView(R.id.coordinator)
@@ -116,8 +116,9 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 
 //         Setting the ViewPager For the SlidingTabsLayout
         if (getTabbedFragments().keySet().size() > 1) {
-            tabs.setDistributeEvenly(true);
-            tabs.setViewPager(mViewPager);
+//            tabs.setViewPager(mViewPager);
+            tabs.setVisibility(View.VISIBLE);
+
         } else {
             tabs.setVisibility(View.GONE);
         }
