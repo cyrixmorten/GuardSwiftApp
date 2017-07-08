@@ -2,6 +2,7 @@ package com.guardswift.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.StrictMode;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
@@ -114,6 +115,7 @@ public class GuardSwiftApplication extends InjectingApplication {
     @Override
     public void onCreate() {
         super.onCreate();
+
         if (LeakCanary.isInAnalyzerProcess(this)) {
             // This process is dedicated to LeakCanary for heap analysis.
             // You should not init your app in this process.
@@ -141,6 +143,10 @@ public class GuardSwiftApplication extends InjectingApplication {
             }
         });
 
+        // Fixes android.os.FileUriExposedException
+        // https://stackoverflow.com/a/40674771/1501613
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
 
     }
 
@@ -241,10 +247,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
     private void setupFabric() {
         Fabric.with(this, new Crashlytics());
-        logUser();
-    }
 
-    private void logUser() {
         ParseUser user = ParseUser.getCurrentUser();
         if (user != null) {
             Crashlytics.setUserIdentifier(user.getObjectId());
@@ -252,6 +255,7 @@ public class GuardSwiftApplication extends InjectingApplication {
             Crashlytics.setUserName(user.getUsername());
         }
     }
+
 
     private void startServices() {
         Log.d(TAG, "startServices");

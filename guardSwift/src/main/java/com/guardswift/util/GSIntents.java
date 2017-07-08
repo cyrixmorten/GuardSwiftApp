@@ -4,7 +4,9 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.FileProvider;
 
+import com.guardswift.BuildConfig;
 import com.guardswift.R;
 
 import java.io.File;
@@ -23,12 +25,21 @@ public class GSIntents {
         context.startActivity(intent);
     }
 
+    // TODO: should be using fileProvider
+    // https://inthecheesefactory.com/blog/how-to-share-access-to-file-with-fileprovider-on-android-nougat/en
+    private static Uri getUri(Context context, File file) {
+        return FileProvider.getUriForFile(context,
+                BuildConfig.APPLICATION_ID + ".provider",
+                file);
+    }
+
     public static void openPDF(Context context, File file) {
 
         if (context != null && file == null) {
             ToastHelper.toast(context, context.getString(R.string.error_downloading_file));
             return;
         }
+
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(

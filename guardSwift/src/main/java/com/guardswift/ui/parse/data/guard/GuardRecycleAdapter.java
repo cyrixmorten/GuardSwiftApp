@@ -28,7 +28,7 @@ public class GuardRecycleAdapter extends ParseRecyclerQueryAdapter<Guard, GuardR
         TextView tvName;
         @BindView(R.id.online_status)
         AwesomeTextView tvOnlineStatus; // isOnline
-        
+
 
         public GuardViewHolder(View itemView) {
             super(itemView);
