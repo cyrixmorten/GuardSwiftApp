@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.Preference;
-import android.util.Log;
 
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
@@ -15,14 +14,11 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.ToastHelper;
 import com.parse.FindCallback;
-import com.parse.GetCallback;
 import com.parse.ParseException;
-import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.takisoft.fix.support.v7.preference.PreferenceCategory;
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat;
 
-import java.io.IOException;
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -44,9 +40,8 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
     }
+    
 
     private Dialog loadingDialog;
 
@@ -169,8 +164,13 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
         PreferenceCategory alarmNotifications = (PreferenceCategory)findPreference("alarm_notifications");
 
+        String installationName = guard.getInstallationName();
+        String alarmSMSNumber = guard.getAlarmMobile();
+        String description = installationName + " " + alarmSMSNumber;
+
         final CheckBoxPreference guardNotification = new CheckBoxPreference(getContext());
         guardNotification.setTitle(guard.getName());
+        guardNotification.setSummary(description.trim());
         guardNotification.setIcon(R.drawable.ic_alarm_black_24dp);
         guardNotification.setChecked(guard.isAlarmSoundEnabled());
         guardNotification.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {

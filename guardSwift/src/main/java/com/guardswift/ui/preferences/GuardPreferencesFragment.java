@@ -107,7 +107,7 @@ public class GuardPreferencesFragment extends PreferenceFragmentCompat {
         guard = GuardSwiftApplication.getLoggedIn();
         pref.edit()
                 .putString(GUARD_NAME, guard.getName())
-                .putString(GUARD_MOBILE_NUMBER, guard.getMobile())
+                .putString(GUARD_MOBILE_NUMBER, guard.getMobileNumber())
                 .apply();
 
     }

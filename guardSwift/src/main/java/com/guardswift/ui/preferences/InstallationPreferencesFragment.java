@@ -10,7 +10,6 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.data.Installation;
 import com.guardswift.util.ToastHelper;
 import com.parse.ParseException;
-import com.parse.ParseInstallation;
 import com.parse.SaveCallback;
 import com.takisoft.fix.support.v7.preference.EditTextPreference;
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat;
@@ -23,33 +22,34 @@ public class InstallationPreferencesFragment extends PreferenceFragmentCompat {
     private static final String PREF_DEVICE_NAME = "installation_name";
     private static final String PREF_DEVICE_MOBILE_NUMBER = "installation_mobile_number";
 
-    ParseInstallation installation;
+    Installation installation;
+
     SharedPreferences pref;
     SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
             if (key.equals(PREF_DEVICE_NAME)) {
-                installation.put(Installation.NAME, prefs.getString(key, ""));
+                installation.setName(prefs.getString(key, ""));
             }
             if (key.equals(PREF_DEVICE_MOBILE_NUMBER)) {
 
                 // TODO: cleanup and make shareable
                 String mobile = prefs.getString(key, "").replaceAll(" ", "").trim();
                 if (mobile.isEmpty()) {
-                    installation.put(Installation.MOBILE_NUMBER, mobile);
+                    installation.setEmptyMobileNumber();
                     pref.edit().putString(PREF_DEVICE_MOBILE_NUMBER, "").apply();
                 } else {
                     // TODO: Hardcoded danish country code
                     if (!mobile.startsWith("+45")) {
-                        mobile = "+45" + mobile;
-                        pref.edit().putString(PREF_DEVICE_MOBILE_NUMBER, mobile).apply();
+                        pref.edit().putString(PREF_DEVICE_MOBILE_NUMBER, "+45" + mobile).apply();
+                        installation.setMobileNumber("45", mobile);
                     } else if (mobile.length() != 11) {
                         ToastHelper.toast(getContext(), getContext().getString(R.string.invalid_mobile_number));
                         pref.edit().putString(PREF_DEVICE_MOBILE_NUMBER, "").apply();
                         return;
                     } else {
-                        installation.put(Installation.MOBILE_NUMBER, mobile);
+                        installation.setMobileNumber(mobile);
                     }
                 }
             }
@@ -87,7 +87,7 @@ public class InstallationPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private void saveChange() {
-        installation.saveInBackground(new SaveCallback() {
+        installation.getInstance().saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if (e != null) {
@@ -109,10 +109,10 @@ public class InstallationPreferencesFragment extends PreferenceFragmentCompat {
 
     private void initPreferences() {
         pref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        installation = ParseInstallation.getCurrentInstallation();
+        installation = new Installation();
         pref.edit()
-                .putString(PREF_DEVICE_NAME, installation.getString(Installation.NAME))
-                .putString(PREF_DEVICE_MOBILE_NUMBER, installation.getString(Installation.MOBILE_NUMBER))
+                .putString(PREF_DEVICE_NAME, installation.getName())
+                .putString(PREF_DEVICE_MOBILE_NUMBER, installation.getMobileNumber())
                 .apply();
 
     }

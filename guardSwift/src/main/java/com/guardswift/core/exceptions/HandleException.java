@@ -41,7 +41,7 @@ public class HandleException {
 //
 //            ParseObject error = new ParseObject("Error");
 //            error.put("owner", user);
-//            error.put("installation", ParseInstallation.getCurrentInstallation());
+//            error.put("installation", Installation.getCurrentInstallation());
 //            error.put("platform", "Android");
 //            error.put("tag", tag);
 //            error.put("gsVersion", device.getVersionCode());

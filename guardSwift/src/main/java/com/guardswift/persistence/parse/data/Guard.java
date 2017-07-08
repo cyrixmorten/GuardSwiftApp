@@ -9,7 +9,6 @@ import com.guardswift.persistence.parse.Positioned;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseSession;
@@ -97,7 +96,7 @@ public class Guard extends ExtendedParseObject implements Positioned {
         @Override
         public ParseQuery<Guard> build() {
 //            query.include(messages);
-//            query.include(lastEvent);
+            query.include(Guard.installation);
             query.setLimit(1000);
             return super.build();
         }
@@ -196,14 +195,14 @@ public class Guard extends ExtendedParseObject implements Positioned {
     }
 
     public void setInstallation() {
-        put(Guard.installation, ParseInstallation.getCurrentInstallation());
+        put(Guard.installation, com.parse.ParseInstallation.getCurrentInstallation());
     }
 
     public void setMobile(String mobile) {
         put(Guard.mobileNumber, mobile);
     }
 
-    public String getMobile() {
+    public String getMobileNumber() {
         return getStringSafe(Guard.mobileNumber);
     }
 
@@ -250,4 +249,23 @@ public class Guard extends ExtendedParseObject implements Positioned {
         return false;
     }
 
+    public Installation getInstallation() {
+        return new Installation(getLDSFallbackParseObject(Guard.installation));
+    }
+
+    public String getInstallationName() {
+        if (!has(Guard.installation)) {
+            return "";
+        }
+
+        return getInstallation().getName();
+    }
+
+    public String getAlarmMobile() {
+        if (has(Guard.installation)) {
+            return getInstallation().getMobileNumber();
+        }
+
+        return getMobileNumber();
+    }
 }

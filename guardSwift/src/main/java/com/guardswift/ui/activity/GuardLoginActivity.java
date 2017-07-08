@@ -47,7 +47,6 @@ import com.parse.GetCallback;
 import com.parse.GetFileCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
-import com.parse.ParseInstallation;
 import com.parse.ParseSession;
 import com.parse.ParseUser;
 import com.parse.ProgressCallback;
@@ -185,7 +184,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
     private void updateToolbarTitle() {
-        ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+        com.parse.ParseInstallation installation = com.parse.ParseInstallation.getCurrentInstallation();
 
         String deviceName = installation.getString(Installation.NAME);
         String smsTo = installation.getString(Installation.MOBILE_NUMBER);
