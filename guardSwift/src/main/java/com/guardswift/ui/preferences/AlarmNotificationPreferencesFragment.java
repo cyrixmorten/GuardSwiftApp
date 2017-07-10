@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.preference.CheckBoxPreference;
 import android.support.v7.preference.Preference;
+import android.text.TextUtils;
 
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
@@ -156,6 +157,29 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
         });
     }
 
+    private String getLastInstallationText(Guard guard) {
+        String installationName = guard.getInstallationName();
+        String installationText = "";
+
+        if (!TextUtils.isEmpty(installationName)) {
+            installationText += getString(R.string.device);
+            installationText += ": ";
+            installationText += installationName;
+        }
+
+        return installationText;
+    }
+
+    private String getAlarmSMSText(Guard guard) {
+        return getString(R.string.mobile) + ": " + guard.getAlarmMobile();
+    }
+
+    private String getonlineText(Guard guard) {
+        String isOnlineText = guard.isOnline() ? getString(R.string.yes) : getString(R.string.no);
+
+        return getString(R.string.online) + ": " + isOnlineText;
+    }
+
     public void createAlarmNotifyPreference(final List<Guard> guards, final Guard guard) {
 
         if (getContext() == null || isDetached()) {
@@ -164,9 +188,9 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
         PreferenceCategory alarmNotifications = (PreferenceCategory)findPreference("alarm_notifications");
 
-        String installationName = guard.getInstallationName();
-        String alarmSMSNumber = guard.getAlarmMobile();
-        String description = installationName + " " + alarmSMSNumber;
+
+
+        String description = getonlineText(guard) + "\n" + getLastInstallationText(guard) + "\n" + getAlarmSMSText(guard);
 
         final CheckBoxPreference guardNotification = new CheckBoxPreference(getContext());
         guardNotification.setTitle(guard.getName());
