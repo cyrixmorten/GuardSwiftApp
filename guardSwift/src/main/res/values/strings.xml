@@ -443,4 +443,5 @@
     <string name="permissions_rationale">GuardSwift skal have tilladelse til at bruge GPS samt telefonens hukommelse for at fungere</string>
     <string name="device">Enhed</string>
     <string name="mobile">Mobil</string>
+    <string name="not_named">Ikke navngivet</string>
 </resources>

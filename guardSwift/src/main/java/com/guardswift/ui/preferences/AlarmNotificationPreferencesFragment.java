@@ -161,10 +161,13 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
         String installationName = guard.getInstallationName();
         String installationText = "";
 
+        installationText += getString(R.string.device);
+        installationText += ": ";
+
         if (!TextUtils.isEmpty(installationName)) {
-            installationText += getString(R.string.device);
-            installationText += ": ";
             installationText += installationName;
+        } else {
+            installationText += getString(R.string.not_named);
         }
 
         return installationText;
