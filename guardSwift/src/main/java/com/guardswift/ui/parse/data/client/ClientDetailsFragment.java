@@ -1,13 +1,16 @@
 package com.guardswift.ui.parse.data.client;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.ColorUtils;
@@ -31,7 +34,7 @@ import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.data.client.ClientContact;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.web.GoogleMapFragment;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
@@ -164,16 +167,16 @@ public class ClientDetailsFragment extends InjectingFragment implements
             BootstrapButton phoneNumber = (BootstrapButton) v.findViewById(R.id.button_phoneNumber);
             String phoneNumberString = contact.getPhoneNumber();
 
-                phoneNumber.setText(phoneNumberString);
-                phoneNumber.setTag(phoneNumberString);
-                phoneNumber.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String phoneNumberString = (String) v.getTag();
-                        Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumberString));
-                        startActivity(intent);
-                    }
-                });
+            phoneNumber.setText(phoneNumberString);
+            phoneNumber.setTag(phoneNumberString);
+            phoneNumber.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String phoneNumberString = (String) v.getTag();
+                    Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phoneNumberString));
+                    startActivity(intent);
+                }
+            });
 
             if (phoneNumberString.isEmpty()) {
                 phoneNumber.setVisibility(View.GONE);
@@ -335,11 +338,14 @@ public class ClientDetailsFragment extends InjectingFragment implements
         // Zoom in, animating the camera.
 //		map.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
 //		map.setIndoorEnabled(true);
-        map.setMyLocationEnabled(true);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            map.setMyLocationEnabled(true);
+        }
+
 //        map.getUiSettings().setAllGesturesEnabled(false);
 
-        mapData.setRegularTaskRadius(createCircle(mClient.getRadius(GSTask.TASK_TYPE.REGULAR), R.color.md_green_500));
-        mapData.setRaidTaskRadius(createCircle(mClient.getRadius(GSTask.TASK_TYPE.RAID), R.color.md_blue_500));
+        mapData.setRegularTaskRadius(createCircle(mClient.getRadius(ParseTask.TASK_TYPE.REGULAR), R.color.md_green_500));
+        mapData.setRaidTaskRadius(createCircle(mClient.getRadius(ParseTask.TASK_TYPE.RAID), R.color.md_blue_500));
 
         map.addCircle(mapData.getRegularTaskRadius());
         map.addCircle(mapData.getRaidTaskRadius());

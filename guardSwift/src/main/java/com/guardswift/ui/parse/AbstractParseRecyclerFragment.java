@@ -16,7 +16,6 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.SlidingPanelActivity;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
@@ -45,13 +44,6 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
     private Unbinder unbinder;
 
-
-    /**
-     * Used to get a handle on LDS and update the database contents
-     *
-     * @return instance of Object being displayed
-     */
-    protected abstract ExtendedParseObject getObjectInstance();
 
     /**
      * Factory restricts the query for which LDS is updated and the content being displayed

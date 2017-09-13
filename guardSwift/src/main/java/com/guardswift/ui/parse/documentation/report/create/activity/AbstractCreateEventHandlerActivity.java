@@ -13,11 +13,11 @@ import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.data.EventTypeCache;
 import com.guardswift.persistence.cache.data.GuardCache;
-import com.guardswift.persistence.cache.task.GSTasksCache;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventViewPagerFragment;
 import com.guardswift.util.Analytics;
 import com.parse.FindCallback;
@@ -60,7 +60,7 @@ public abstract class AbstractCreateEventHandlerActivity extends
     Button btnNext;
 
     @Inject
-    GSTasksCache taskCache;
+    ParseTasksCache taskCache;
     @Inject
     GuardCache guardCache;
     @Inject
@@ -115,7 +115,7 @@ public abstract class AbstractCreateEventHandlerActivity extends
             eventBundle = savedInstanceState.getBundle(EXTRA_EVENT_BUNDLE);
             currentPage = savedInstanceState.getInt(STATE_PAGE, 0);
 
-            fragment = (AddEventViewPagerFragment) getSupportFragmentManager().findFragmentByTag("addEventViewpagerFragmen");
+            fragment = (AddEventViewPagerFragment) getSupportFragmentManager().findFragmentByTag("addEventViewpagerFragment");
             fragment.setPage(currentPage);
         }
 
@@ -365,9 +365,9 @@ public abstract class AbstractCreateEventHandlerActivity extends
 
         saveEvent(timestamp, event_type, amount, people, clientLocation, remarks);
 
-        GSTask task = taskCache.getLastSelected();
+        ParseTask task = taskCache.getLastSelected();
         // store remark tokens
-        if (remarks != null && !remarks.isEmpty() && task.getTaskType() != GSTask.TASK_TYPE.STATIC) {
+        if (remarks != null && !remarks.isEmpty() && task.getTaskType() != ParseTask.TASK_TYPE.STATIC) {
 
             final EventType eventType = eventTypeCache.getSelected();
             final Client client = getClient();

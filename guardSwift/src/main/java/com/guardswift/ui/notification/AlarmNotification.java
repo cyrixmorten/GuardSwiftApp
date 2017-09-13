@@ -9,7 +9,7 @@ import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 
 import com.guardswift.R;
-import com.guardswift.persistence.parse.execution.ParseTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.activity.MainActivity;
 
 public class AlarmNotification {

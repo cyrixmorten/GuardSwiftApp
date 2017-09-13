@@ -1,14 +1,10 @@
 package com.guardswift.persistence.parse.data.client;
 
-import android.content.Context;
-
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-
-import org.json.JSONObject;
 
 @ParseClassName("Person")
 public class Person extends ExtendedParseObject implements Comparable<Person> {
@@ -35,11 +31,7 @@ public class Person extends ExtendedParseObject implements Comparable<Person> {
 		return new QueryBuilder(false).build();
 	}
 
-	@Override
-	public void updateFromJSON(final Context context,
-			final JSONObject jsonObject) {
-		// TODO Auto-generated method stub
-	}
+
 
 	public static QueryBuilder getQueryBuilder(boolean fromLocalDatastore) {
 		return new QueryBuilder(fromLocalDatastore);

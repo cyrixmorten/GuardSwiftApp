@@ -5,9 +5,9 @@ import android.content.Context;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.activity.GSTaskCreateReportActivity;
+import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
 
 public class AlarmController extends BaseTaskController {
 
@@ -27,7 +27,7 @@ public class AlarmController extends BaseTaskController {
     private AlarmController() {}
 
 
-    public GSTask performAction(ACTION action, GSTask alarm, boolean automatic) {
+    public ParseTask performAction(ACTION action, ParseTask alarm, boolean automatic) {
 
         Context ctx = GuardSwiftApplication.getInstance();
 
@@ -40,7 +40,7 @@ public class AlarmController extends BaseTaskController {
             case FORWARD:
 
 //                event = new EventLog.Builder(ctx)
-//                        .taskPointer(alarm, GSTask.EVENT_TYPE.ACCEPT)
+//                        .taskPointer(alarm, ParseTask.EVENT_TYPE.ACCEPT)
 //                        .event(ctx.getString(R.string.event_forwarded))
 //                        .remarks(ctx.getString(R.string.alarm_group) + " " + alarm.getForwardedTo())
 //                        .automatic(automatic)
@@ -52,7 +52,7 @@ public class AlarmController extends BaseTaskController {
                 alarm.setAccepted();
 
                 event = new EventLog.Builder(ctx)
-                        .taskPointer(alarm, GSTask.EVENT_TYPE.ACCEPT)
+                        .taskPointer(alarm, ParseTask.EVENT_TYPE.ACCEPT)
                         .event(ctx.getString(R.string.event_accepted))
                         .automatic(automatic)
                         .eventCode(EventLog.EventCodes.ALARM_ACCEPTED);
@@ -66,7 +66,7 @@ public class AlarmController extends BaseTaskController {
                 alarm.setArrived();
 
                 event = new EventLog.Builder(ctx)
-                        .taskPointer(alarm, GSTask.EVENT_TYPE.ARRIVE)
+                        .taskPointer(alarm, ParseTask.EVENT_TYPE.ARRIVE)
                         .event(ctx.getString(R.string.event_arrived))
                         .automatic(automatic)
                         .eventCode(EventLog.EventCodes.ALARM_ARRIVED);
@@ -77,7 +77,7 @@ public class AlarmController extends BaseTaskController {
                 alarm.setAborted();
 
                 event = new EventLog.Builder(ctx)
-                        .taskPointer(alarm, GSTask.EVENT_TYPE.ABORT)
+                        .taskPointer(alarm, ParseTask.EVENT_TYPE.ABORT)
                         .event(ctx.getString(R.string.event_aborted))
                         .automatic(automatic)
                         .eventCode(EventLog.EventCodes.ALARM_ABORT);
@@ -89,7 +89,7 @@ public class AlarmController extends BaseTaskController {
                 alarm.setFinished();
 
                 event = new EventLog.Builder(ctx)
-                        .taskPointer(alarm, GSTask.EVENT_TYPE.FINISH)
+                        .taskPointer(alarm, ParseTask.EVENT_TYPE.FINISH)
                         .event(ctx.getString(R.string.event_finished))
                         .automatic(automatic)
                         .eventCode(EventLog.EventCodes.ALARM_FINISHED);
@@ -100,7 +100,7 @@ public class AlarmController extends BaseTaskController {
                 break;
 
             case OPEN_WRITE_REPORT:
-                GSTaskCreateReportActivity.start(ctx, alarm);
+                ParseTaskCreateReportActivity.start(ctx, alarm);
                 break;
 
             default:

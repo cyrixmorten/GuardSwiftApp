@@ -4,12 +4,8 @@ import com.guardswift.persistence.cache.data.ClientCache;
 import com.guardswift.persistence.cache.data.EventTypeCache;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.documentaion.EventLogCache;
-import com.guardswift.persistence.cache.planning.CircuitStartedCache;
-import com.guardswift.persistence.cache.planning.DistrictWatchStartedCache;
-import com.guardswift.persistence.cache.task.CircuitUnitCache;
-import com.guardswift.persistence.cache.task.DistrictWatchClientCache;
-import com.guardswift.persistence.cache.task.GSTasksCache;
-import com.guardswift.persistence.cache.task.StaticTaskCache;
+import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.cache.task.TaskCache;
 
 import javax.inject.Inject;
@@ -23,15 +19,14 @@ public class ParseCacheFactory {
 
 
     // Planning
-    private final CircuitStartedCache circuitStartedCache;
-    private final DistrictWatchStartedCache districtWatchStartedCache;
+    private final TaskGroupStartedCache taskGroupStartedCache;
 
     // Tasks
-    private GSTasksCache tasksCache; // adds extra functionality to task caches
+    private ParseTasksCache tasksCache; // adds extra functionality to task caches
     private final TaskCache taskCache;
-    private final StaticTaskCache staticTaskCache;
-    private final CircuitUnitCache circuitUnitCache;
-    private final DistrictWatchClientCache districtWatchClientCache;
+//    private final StaticTaskCache staticTaskCache;
+//    private final CircuitUnitCache circuitUnitCache;
+//    private final DistrictWatchClientCache districtWatchClientCache;
     // Data
     private final GuardCache guardCache;
     private final ClientCache clientCache;
@@ -42,25 +37,23 @@ public class ParseCacheFactory {
 
     @Inject
     public ParseCacheFactory(GuardCache guardCache,
-                             CircuitStartedCache circuitStartedCache,
-                             DistrictWatchStartedCache districtWatchStartedCache,
-                             GSTasksCache tasksCache,
+                             TaskGroupStartedCache taskGroupStartedCache,
+                             ParseTasksCache tasksCache,
                              TaskCache taskCache,
-                             StaticTaskCache staticTaskCache,
-                             CircuitUnitCache circuitUnitCache,
-                             DistrictWatchClientCache districtWatchClientCache,
+//                             StaticTaskCache staticTaskCache,
+//                             CircuitUnitCache circuitUnitCache,
+//                             DistrictWatchClientCache districtWatchClientCache,
                              ClientCache clientCache,
                              EventTypeCache eventTypeCache,
                              EventLogCache eventLogCache) {
 
         this.guardCache = guardCache;
-        this.circuitStartedCache = circuitStartedCache;
-        this.districtWatchStartedCache = districtWatchStartedCache;
+        this.taskGroupStartedCache = taskGroupStartedCache;
         this.tasksCache = tasksCache;
         this.taskCache = taskCache;
-        this.staticTaskCache = staticTaskCache;
-        this.circuitUnitCache = circuitUnitCache;
-        this.districtWatchClientCache = districtWatchClientCache;
+//        this.staticTaskCache = staticTaskCache;
+//        this.circuitUnitCache = circuitUnitCache;
+//        this.districtWatchClientCache = districtWatchClientCache;
         this.clientCache = clientCache;
         this.eventTypeCache = eventTypeCache;
         this.eventLogCache = eventLogCache;
@@ -69,11 +62,8 @@ public class ParseCacheFactory {
 
 
     // ParseTask groups
-    public CircuitStartedCache getCircuitStartedCache() {
-        return circuitStartedCache;
-    }
-    public DistrictWatchStartedCache getDistrictWatchStartedCache() {
-        return districtWatchStartedCache;
+    public TaskGroupStartedCache getTaskGroupStartedCache() {
+        return taskGroupStartedCache;
     }
 
     // Tasks
@@ -81,19 +71,19 @@ public class ParseCacheFactory {
         return taskCache;
     }
 
-    public StaticTaskCache getStaticTaskCache() {
-        return staticTaskCache;
-    }
+//    public StaticTaskCache getStaticTaskCache() {
+//        return staticTaskCache;
+//    }
+//
+//    public CircuitUnitCache getCircuitUnitCache() {
+//        return circuitUnitCache;
+//    }
+//
+//    public DistrictWatchClientCache getDistrictWatchClientCache() {
+//        return districtWatchClientCache;
+//    }
 
-    public CircuitUnitCache getCircuitUnitCache() {
-        return circuitUnitCache;
-    }
-
-    public DistrictWatchClientCache getDistrictWatchClientCache() {
-        return districtWatchClientCache;
-    }
-
-    public GSTasksCache getTasksCache() {
+    public ParseTasksCache getTasksCache() {
         return tasksCache;
     }
 

@@ -7,10 +7,10 @@ import android.util.Log;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.cache.task.GSTasksCache;
-import com.guardswift.persistence.parse.ExtendedParseObject;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.query.EventLogQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
@@ -27,11 +27,11 @@ import javax.inject.Inject;
 public class ReportSuggestionsListFragment extends AbstractParseRecyclerFragment<EventLog, ReportSuggestionsAdapter.ReportViewHolder> {
 
 
-    public static ReportSuggestionsListFragment newInstance(GSTask task) {
+    public static ReportSuggestionsListFragment newInstance(ParseTask task) {
 
         GuardSwiftApplication.getInstance()
                 .getCacheFactory()
-                .getTasksCache().setSelected(task);
+                .getTaskCache().setSelected(task);
 
         ReportSuggestionsListFragment fragment = new ReportSuggestionsListFragment();
         Bundle args = new Bundle();
@@ -40,12 +40,7 @@ public class ReportSuggestionsListFragment extends AbstractParseRecyclerFragment
     }
 
     @Inject
-    GSTasksCache gsTasksCache;
-
-    @Override
-    protected ExtendedParseObject getObjectInstance() {
-        return new EventLog();
-    }
+    ParseTasksCache ParseTasksCache;
 
     @Override
     protected ParseQueryAdapter.QueryFactory<EventLog> createNetworkQueryFactory() {
@@ -53,8 +48,8 @@ public class ReportSuggestionsListFragment extends AbstractParseRecyclerFragment
         return new ParseQueryAdapter.QueryFactory<EventLog>() {
             @Override
             public ParseQuery<EventLog> create() {
-                GSTask task = gsTasksCache.getLastSelected();
-                return new EventLog.QueryBuilder(false)
+                ParseTask task = ParseTasksCache.getLastSelected();
+                return new EventLogQueryBuilder(false)
                         .matching(task.getClient())
                         .matchingEventCode(task.getEventCode())
                         .notMatchingReportId(task.getReportId())
@@ -67,7 +62,7 @@ public class ReportSuggestionsListFragment extends AbstractParseRecyclerFragment
     @Override
     protected ParseRecyclerQueryAdapter<EventLog, ReportSuggestionsAdapter.ReportViewHolder> createRecycleAdapter() {
         CoordinatorLayout coordinatorLayout = ((AbstractTabsViewPagerFragment) getParentFragment()).getCoordinatorLayout();
-        ParseRecyclerQueryAdapter<EventLog, ReportSuggestionsAdapter.ReportViewHolder> adapter = new ReportSuggestionsAdapter(getActivity(), gsTasksCache.getLastSelected(), coordinatorLayout, createNetworkQueryFactory());
+        ParseRecyclerQueryAdapter<EventLog, ReportSuggestionsAdapter.ReportViewHolder> adapter = new ReportSuggestionsAdapter(getActivity(), ParseTasksCache.getLastSelected(), coordinatorLayout, createNetworkQueryFactory());
         adapter.setPostProcessor(new PostProcessAdapterResults<EventLog>() {
             @Override
             public List<EventLog> postProcess(List<EventLog> queriedItems) {

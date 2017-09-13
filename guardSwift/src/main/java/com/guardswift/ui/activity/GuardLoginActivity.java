@@ -31,9 +31,8 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingActivityModule.ForActivity;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.eventbus.events.MissingInternetEvent;
-import com.guardswift.persistence.cache.planning.CircuitStartedCache;
+import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
-import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.Installation;
 import com.guardswift.persistence.parse.misc.Update;
@@ -85,13 +84,11 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     @Inject
     Device device;
     @Inject
-    ParseObjectFactory parseObjectFactory;
-    @Inject
     EventBus eventBus;
     @Inject
     ParseModule parseModule;
     @Inject
-    CircuitStartedCache circuitsStartedCache;
+    TaskGroupStartedCache taskGroupStartedCache;
 
     @Inject
     GuardLoginNavigationDrawer navigationDrawer;

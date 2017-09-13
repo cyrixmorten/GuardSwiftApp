@@ -13,7 +13,7 @@
 //import com.guardswift.persistence.parse.data.client.ClientLocation;
 //import com.guardswift.persistence.parse.documentation.eventlog.EventLog;
 //import com.guardswift.persistence.parse.planning.regular.CircuitUnit;
-//import com.guardswift.persistence.parse.planning.GSTask;
+//import com.guardswift.persistence.parse.planning.ParseTask;
 //import com.guardswift.util.Analytics;
 //import com.guardswift.util.Sounds;
 //import com.parse.ParseException;
@@ -33,7 +33,7 @@
 //			.getSimpleName();
 //
 //
-//    private static GSTask task;
+//    private static ParseTask task;
 //
 //    public static void show(Context context, ClientLocation checkpoint) {
 ////        ClientLocation checkpoint = ClientLocation.Recent.getNearCheckpoint();
@@ -87,7 +87,7 @@
 //                                ClientLocation.Recent.setBlacklisted(null);
 //
 //                                new EventLog.Builder(getApplicationContext())
-//                                        .taskPointer(task, GSTask.EVENT_TYPE.CHECKPOINT)
+//                                        .taskPointer(task, ParseTask.EVENT_TYPE.CHECKPOINT)
 //                                        .checkpoint(checkpoint, false)
 //                                        .wifiSample(lastSample)
 //                                        .correctGuess(true)
@@ -109,7 +109,7 @@
 //                        ClientLocation.Recent.resetHits();
 //
 ////                        new EventLog.Builder(getApplicationContext())
-////                                .taskPointer(task, GSTask.EVENT_TYPE.CHECKPOINT)
+////                                .taskPointer(task, ParseTask.EVENT_TYPE.CHECKPOINT)
 ////                                .checkpoint(checkpoint, true)
 ////                                .wifiSample(lastSample)
 ////                                .correctGuess(false)

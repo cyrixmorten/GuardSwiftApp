@@ -8,7 +8,7 @@
 //import com.guardswift.core.exceptions.HandleException;
 //import com.guardswift.persistence.parse.documentation.event.EventLog;
 //import com.guardswift.persistence.parse.documentation.report.Report;
-//import com.guardswift.persistence.parse.execution.GSTask;
+//import com.guardswift.persistence.parse.execution.ParseTask;
 //import com.parse.ParseException;
 //import com.parse.SaveCallback;
 //
@@ -20,9 +20,9 @@
 //
 //    private static final String TAG = StandardTaskReportingStrategy.class.getSimpleName();
 //
-//    private final GSTask task;
+//    private final ParseTask task;
 //
-//    public StandardTaskReportingStrategy(GSTask task) {
+//    public StandardTaskReportingStrategy(ParseTask task) {
 //        this.task = task;
 //    }
 //

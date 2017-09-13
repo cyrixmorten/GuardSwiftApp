@@ -88,7 +88,9 @@ public abstract class ParseCache<T extends ParseObject>  extends Preferences  {
 
             return parseObject;
         } catch (ParseException e) {
-            new HandleException(TAG, subClass.getSimpleName() + " ParseCache get " + objectId, e);
+            if (e.getCode() != ParseException.OBJECT_NOT_FOUND) {
+                new HandleException(TAG, subClass.getSimpleName() + " ParseCache get " + objectId, e);
+            }
         }
 
         return null;

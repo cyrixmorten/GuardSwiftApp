@@ -1,10 +1,13 @@
 package com.guardswift.core.ca.geofence;
 
+import android.Manifest;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -17,8 +20,8 @@ import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingIntentService;
 import com.guardswift.eventbus.EventBusController;
-import com.guardswift.persistence.cache.task.GSTasksCache;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -50,7 +53,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
     @Inject
     GeofencingModule geofencingModule;
     @Inject
-    GSTasksCache tasksCache;
+    ParseTasksCache tasksCache;
 
     private static final String TAG = RegisterGeofencesIntentService.class.getSimpleName();
 
@@ -67,10 +70,10 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
     private ReactiveLocationProvider mReactiveLocationProvider;
     private Subscription mAddGeofencesSubscription;
-//    private Subscription mRemoveGeofencesSubscription;
+    //    private Subscription mRemoveGeofencesSubscription;
     private PendingIntent mGeofencePendingIntent;
 
-//    private static GSTask task_type;
+//    private static ParseTask task_type;
 
     public static void start(Context context, boolean force) {
         // relying on previously set task_type
@@ -90,7 +93,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
     }
 
 
-//    public static void start(Context context, GSTask geofencedTask) {
+//    public static void start(Context context, ParseTask geofencedTask) {
 ////        Log.d(TAG, "RegisterGeofencesIntentService start 2 ");
 //        task_type = geofencedTask;
 //        context.startService(new Intent(context, RegisterGeofencesIntentService.class));
@@ -115,6 +118,11 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
             clear();
             return;
         }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            new HandleException(TAG, "Missing location permission", new IllegalStateException("Missing permission"));
+            return;
+        }
+
         new ReactiveLocationProvider(getApplicationContext()).getLastKnownLocation().subscribe(new Action1<Location>() {
             @Override
             public void call(final Location deviceLocation) {
@@ -158,7 +166,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 //                            int geofenceRadius = task.getGeofenceStrategy().getGeofenceRadius();
 //                            switch (task.getTaskState()) {
 //                                case ARRIVED:
-//                                    // abort if outside radius
+//                                    // abort if outside geofenceRadius
 //                                    if (distanceMeters > geofenceRadius) {
 //                                        task.getAutomationStrategy().automaticDeparture();
 //                                        Log.w(TAG, "validateTaskState: ARRIVED -> Departure " + task.getTaskType() + " " + task.getClientName());
@@ -184,16 +192,16 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         mRebuildInProgress = true;
 
         int withinKm = 2;
-        geofencingModule.queryAllGeofenceTasks(withinKm, location).onSuccess(new Continuation<Set<ParseObject>, Object>() {
+        geofencingModule.queryAllGeofenceTasks(withinKm, location).onSuccess(new Continuation<Set<ParseTask>, Object>() {
             @Override
-            public Object then(Task<Set<ParseObject>> taskObject) throws Exception {
-                List<ParseObject> tasks = Lists.newCopyOnWriteArrayList(taskObject.getResult());
+            public Object then(Task<Set<ParseTask>> taskObject) throws Exception {
+                List<ParseTask> tasks = Lists.newCopyOnWriteArrayList(taskObject.getResult());
 
                 Log.d(TAG, "All tasks in geofence: " + tasks.size());
 
                 // weed away finished tasks
-                for (ParseObject parseObjectTask: tasks) {
-                    GSTask task = (GSTask)parseObjectTask;
+                for (ParseObject parseObjectTask : tasks) {
+                    ParseTask task = (ParseTask) parseObjectTask;
                     if (task.isFinished()) {
                         tasks.remove(parseObjectTask);
                     }
@@ -207,18 +215,16 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                     tasks = tasks.subList(0, 99);
                 }
 
-                List<GSTask> geofencedTasks = Lists.newArrayList();
+                List<ParseTask> geofencedTasks = Lists.newArrayList();
                 List<Geofence> geofences = Lists.newArrayList();
-                for (ParseObject geofencedTask : tasks) {
-                    GSTask gsTask = (GSTask)geofencedTask;
-                    ParseGeoPoint position = gsTask.getPosition();
-                    float radius = gsTask.getGeofenceStrategy().getGeofenceRadius();
-                    Geofence geofence = createGeofence(gsTask.getGeofenceId(), position, radius);
+                for (ParseTask geofencedTask : tasks) {
+                    ParseGeoPoint position = geofencedTask.getPosition();
+                    float radius = geofencedTask.getGeofenceStrategy().getGeofenceRadius();
+
+                    Geofence geofence = createGeofence(geofencedTask.getObjectId(), position, radius);
                     geofences.add(geofence);
 
-                    geofencedTasks.add(gsTask);
-
-
+                    geofencedTasks.add(geofencedTask);
                 }
 
                 addGeofences(geofences);
@@ -245,8 +251,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         });
 
 
-
-//        for (GSTask task: new TaskFactory().getTasks()) {
+//        for (ParseTask task: new TaskFactory().getTasks()) {
 //            ParseTask<List<ParseObject>> getTasksWithinGeofence =  task.getGeofenceStrategy().queryGeofencedTasks(getApplicationContext(), new FindCallback<ParseObject>() {
 //                @Override
 //                public void done(List<ParseObject> parseObjects, ParseException e) {
@@ -256,13 +261,13 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 //                        return;
 //                    }
 //
-//                    List<GSTask> geofencedTasks = Lists.newArrayList();
+//                    List<ParseTask> geofencedTasks = Lists.newArrayList();
 //                    List<Geofence> geofences = Lists.newArrayList();
 //                    for (ParseObject parseObject : parseObjects) {
-//                        GSTask geofencedTask = (GSTask) parseObject;
-//                        ParseGeoPoint clientPosition = geofencedTask.getPosition();
-//                        float radius = geofencedTask.getGeofenceStrategy().getGeofenceRadius();
-//                        Geofence geofence = createGeofence(parseObject.getObjectId(), clientPosition, radius);
+//                        ParseTask geofencedTask = (ParseTask) parseObject;
+//                        ParseGeoPoint position = geofencedTask.getPosition();
+//                        float geofenceRadius = geofencedTask.getGeofenceStrategy().getGeofenceRadius();
+//                        Geofence geofence = createGeofence(parseObject.getObjectId(), position, geofenceRadius);
 //                        geofences.addUnique(geofence);
 //
 //                        geofencedTasks.addUnique(geofencedTask);
@@ -320,22 +325,24 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         if (geofences.isEmpty())
             return;
 
-
         mReactiveLocationProvider = new ReactiveLocationProvider(getApplicationContext());
 
         final GeofencingRequest geofencingRequest = new GeofencingRequest.Builder().addGeofences(geofences).build();
         mAddGeofencesSubscription = mReactiveLocationProvider
                 .removeGeofences(createRequestPendingIntent())
-                .flatMap( new Func1<Status, Observable<Status>>() {
+                .flatMap(new Func1<Status, Observable<Status>>() {
                     @Override
                     public Observable<Status> call(Status pendingIntentRemoveGeofenceResult) {
+                        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            throw new IllegalStateException("Missing permission");
+                        }
                         return mReactiveLocationProvider.addGeofences(createRequestPendingIntent(), geofencingRequest);
                     }
                 }).subscribe(new Action1<Status>() {
                     @Override
                     public void call(Status addGeofenceResult) {
 //                        EventBus.getDefault().postSticky(new GeofenceCompleteEvent());
-                            Log.i(TAG, "AddGeofenceResult success!!");
+                        Log.i(TAG, "AddGeofenceResult success!!");
                     }
                 }, new Action1<Throwable>() {
                     @Override

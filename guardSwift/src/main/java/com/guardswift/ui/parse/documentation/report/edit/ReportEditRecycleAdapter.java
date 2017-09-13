@@ -13,7 +13,7 @@ import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandler;
@@ -81,8 +81,8 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
         final FragmentActivity activity = activityWeakReference.get();
 
 
-        final boolean isExtraTimeEvent = eventLog.getEventCode() == EventLog.EventCodes.CIRCUITUNIT_EXTRA_TIME;
-        final boolean isStaticReport = getItemViewType(position) == GSTask.TASK_TYPE.STATIC.ordinal();
+        final boolean isExtraTimeEvent = eventLog.getEventCode() == EventLog.EventCodes.REGULAR_EXTRA_TIME;
+        final boolean isStaticReport = getItemViewType(position) == ParseTask.TASK_TYPE.STATIC.ordinal();
 
         final EventLogCard eventLogCard = holder.eventLogCard;
 

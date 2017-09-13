@@ -6,8 +6,8 @@ import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.data.client.Client;
+import com.guardswift.persistence.parse.query.ClientQueryBuilder;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.activity.SlidingPanelActivity;
 import com.guardswift.ui.helpers.RecyclerViewClickListener;
@@ -24,10 +24,10 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
         void clientSelected(Client client);
     }
 
-    private Client.SORT_BY sortBy;
+    private ClientQueryBuilder.SORT_BY sortBy;
     private SlidingUpPanelLayout mSlideUpPanel;
 
-    public static ClientListFragment newInstance(Client.SORT_BY sortBy) {
+    public static ClientListFragment newInstance(ClientQueryBuilder.SORT_BY sortBy) {
 
         ClientListFragment fragment = new ClientListFragment();
 
@@ -66,17 +66,13 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
         }
     }
 
-    @Override
-    protected ExtendedParseObject getObjectInstance() {
-        return new Client();
-    }
 
     @Override
     protected ParseQueryAdapter.QueryFactory<Client> createNetworkQueryFactory() {
         return new ParseQueryAdapter.QueryFactory<Client>() {
             @Override
             public ParseQuery<Client> create() {
-                return new Client.QueryBuilder(false).notAutomatic().sort(ClientListFragment.this.sortBy).build();
+                return new ClientQueryBuilder(false).notAutomatic().sort(ClientListFragment.this.sortBy).build();
             }
         };
     }

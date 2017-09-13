@@ -1,16 +1,11 @@
 package com.guardswift.persistence.parse.misc;
 
-import android.content.Context;
-
 import com.guardswift.persistence.parse.ExtendedParseObject;
-import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.persistence.parse.query.MessageQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.ParseClassName;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
-
-import org.json.JSONObject;
 
 import java.util.Date;
 
@@ -18,10 +13,10 @@ import java.util.Date;
 public class Message extends ExtendedParseObject {
 
 
-    private static final String guard = "guard";
+    public static final String guard = "guard";
     private static final String message = "message";
     private static final String deviceTimestamp = "deviceTimestamp";
-    private static final String groupId = "groupId";
+    public static final String groupId = "groupId";
 
     public static Message newInstance(String groupId, String messageBody) {
 
@@ -55,40 +50,17 @@ public class Message extends ExtendedParseObject {
     @SuppressWarnings("unchecked")
     @Override
     public ParseQuery<Message> getAllNetworkQuery() {
-        return new QueryBuilder(false).build();
+        return new MessageQueryBuilder(false).build();
     }
 
-    @Override
-    public void updateFromJSON(final Context context,
-                               final JSONObject jsonObject) {
-        // TODO Auto-generated method stub
-    }
 
-    public static QueryBuilder getQueryBuilder(boolean fromLocalDatastore, String groupId) {
-        QueryBuilder builder =  new QueryBuilder(fromLocalDatastore);
+    public static MessageQueryBuilder getQueryBuilder(boolean fromLocalDatastore, String groupId) {
+        MessageQueryBuilder builder =  new MessageQueryBuilder(fromLocalDatastore);
         builder.withGroupId(groupId);
         return builder;
     }
 
-    public static class QueryBuilder extends ParseQueryBuilder<Message> {
 
-        public QueryBuilder(boolean fromLocalDatastore) {
-            super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery.getQuery(Message.class));
-        }
-
-        public ParseQuery<Message> withGroupId(String groupId) {
-            query.whereEqualTo(Message.groupId, groupId);
-            return super.build();
-        }
-
-        @Override
-        public ParseQuery<Message> build() {
-            query.include(Message.guard);
-            return super.build();
-        }
-
-
-    }
 
 
 }

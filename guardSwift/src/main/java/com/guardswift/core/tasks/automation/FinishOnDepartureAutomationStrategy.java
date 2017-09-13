@@ -6,7 +6,7 @@ import android.util.Log;
 import com.google.common.collect.Maps;
 import com.guardswift.R;
 import com.guardswift.core.tasks.controller.TaskController;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
 
@@ -16,15 +16,15 @@ public class FinishOnDepartureAutomationStrategy implements TaskAutomationStrate
 
     private static final String TAG = FinishOnDepartureAutomationStrategy.class.getSimpleName();
 
-    private final GSTask task;
+    private final ParseTask task;
 
     private static Map<String, TaskAutomationStrategy> instances = Maps.newConcurrentMap();
 
-    public static TaskAutomationStrategy getInstance(GSTask task) {
+    public static TaskAutomationStrategy getInstance(ParseTask task) {
         return new FinishOnDepartureAutomationStrategy(task);
     }
 
-    private FinishOnDepartureAutomationStrategy(GSTask task) {
+    private FinishOnDepartureAutomationStrategy(ParseTask task) {
         this.task = task;
     }
 

@@ -1,6 +1,5 @@
 package com.guardswift.persistence.parse;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.google.common.collect.Lists;
@@ -9,15 +8,11 @@ import com.guardswift.core.exceptions.LogError;
 import com.guardswift.eventbus.EventBusController;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
-import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +35,8 @@ public abstract class ExtendedParseObject extends ParseObject {
 
 
     public static final String createdAt = "createdAt";
+    public static final String objectId = "objectId";
 
-    protected static final String objectId = "objectId";
     protected static final String owner = "owner";
 
 
@@ -54,8 +49,6 @@ public abstract class ExtendedParseObject extends ParseObject {
 
     public abstract <T extends ParseObject> ParseQuery<T> getAllNetworkQuery();
 
-    public abstract void updateFromJSON(Context context, JSONObject jsonObject)
-            throws JSONException;
 
     public abstract String getParseClassName();
     public String getPin() {
@@ -64,50 +57,9 @@ public abstract class ExtendedParseObject extends ParseObject {
 
 
 
-    public <T extends ParseObject> void getFromObjectId(final Class<T> clazz,
-                                                        final String objectId, final boolean tryNetwork,
-                                                        final GetCallback<T> getCallback) {
-
-        Log.d(TAG, "getFromObjectId " + clazz.getSimpleName() + " : "
-                + objectId);
-        final ParseQuery<T> networkQuery = new ParseQuery<T>(clazz)
-                .whereEqualTo(ExtendedParseObject.objectId, objectId);
-        ParseQuery<T> datastoreQuery = new ParseQuery<T>(clazz).whereEqualTo(
-                ExtendedParseObject.objectId, objectId).fromLocalDatastore();
-
-        datastoreQuery.getFirstInBackground(new GetCallback<T>() {
-
-            @Override
-            public void done(T object, ParseException e) {
-                if (e == null) {
-                    // found in datastore
-                    Log.d(TAG, "getFromObjectId found in datastore");
-                    getCallback.done(object, e);
-
-                } else {
-                    if (!tryNetwork) {
-                        getCallback.done(object, e);
-                        return;
-                    }
-
-                    // try network
-                    Log.d(TAG, "getFromObjectId network lookup for " + clazz.getSimpleName() + " with id " + objectId);
-                    networkQuery.getFirstInBackground(getCallback);
-                }
-            }
-        });
-    }
-
     public  Task<Object> unpinAllPinnedToClass() {
         Log.w(TAG, "Unpinning" + getPin());
         return unpinAllInBackground(getPin())
-//        return getAllNetworkQuery().fromLocalDatastore().findInBackground().continueWithTask(new Continuation<List<ParseObject>, ParseTask<Void>>() {
-//            @Override
-//            public ParseTask<Void> then(ParseTask<List<ParseObject>> task) throws Exception {
-//                Log.w(TAG, "Unpinning from " + getPin() + " objects: " + task.getResult().size());
-//                return ParseObject.unpinAllInBackground(task.getResult());
-//            }
-//        }).
         .continueWithTask(new Continuation<Void, Task<Integer>>() {
             @Override
             public Task<Integer> then(Task<Void> task) throws Exception {
@@ -176,19 +128,11 @@ public abstract class ExtendedParseObject extends ParseObject {
 
             @Override
             public void done(List<T> objects, ParseException e) {
-//                Log.d(TAG, "Updating " + getPin() + " " + objects.size());
-//                unpinThenPinAllUpdates(objects, e,
-//                        callback);
-
                 pinAllUpdates(objects, getPin(), callback);
             }
 
         });
     }
-
-//    public <T extends ParseObject> void updateAll(List<T> objects) {
-//        unpinThenPinAllUpdates(objects, null, null);
-//    }
 
 
     public void pinThenSaveEventually() {
@@ -290,48 +234,6 @@ public abstract class ExtendedParseObject extends ParseObject {
         });
     }
 
-//    public <T extends ParseObject> void unpinThenPinAllUpdates(
-//            final List<T> objects) {
-//
-//        unpinThenPinAllUpdates(objects, null, null);
-//    }
-//    private <T extends ParseObject> void unpinThenPinAllUpdates(
-//            final List<T> objects,
-//            ParseException fetchFromNetworkException,
-//            final DataStoreCallback<T> callback) {
-//
-//        if (fetchFromNetworkException != null || objects == null) {
-//            if (callback != null)
-//                callback.failed(fetchFromNetworkException);
-//            return;
-//        }
-//
-//        final String pin = getPin();
-//
-//
-//        Log.i(TAG, "updateServerDataPin " + pin + " " + objects.size());
-//        Log.i(TAG, "remove existing - unpinning" + pin);
-//
-//        ParseObject.unpinAllInBackground(objects, new DeleteCallback() {
-//
-//            @Override
-//            public void done(ParseException e) {
-//
-//                if (e != null) {
-//                    Log.e(TAG, "Pinning failed - unpinAllInBackground");
-//                    if (callback != null)
-//                        callback.failed(e);
-//                    return;
-//                }
-//
-//                Log.i(TAG, "unpin " + pin + " complete");
-//                pinAllUpdates(objects, pin, callback);
-//
-//            }
-//
-//        });
-//
-//    }
 
     private <T extends ParseObject> void pinAllUpdates(final List<T> objects,
                                                                 final String pin, final DataStoreCallback<T> callback) {
@@ -340,19 +242,14 @@ public abstract class ExtendedParseObject extends ParseObject {
             callback.success(Lists.<T>newArrayList());
             return;
         }
-//        Log.i(TAG, "pinning " + pin + "...");
-        // ParseObject.pinAllInBackground(objects, objects, new SaveCallback() {
         ParseObject.pinAllInBackground(pin, objects, new SaveCallback() {
 
             @Override
             public void done(ParseException e) {
                 if (e == null) {
-//                    Log.i(TAG, "pinning " + pin + " complete " + objects.size()
-//                            + " pinned");
                     if (callback != null)
                         callback.success(objects);
                 } else {
-//                    Log.e(TAG, "unpinThenPinAllUpdates", e);
                     if (callback != null)
                         callback.failed(e);
                 }
@@ -361,22 +258,6 @@ public abstract class ExtendedParseObject extends ParseObject {
         });
     }
 
-    /**
-     * A flat JSONObject version of all the information stored in this object
-     *
-     * @return JSONObject
-     */
-    public JSONObject asJSONObject() {
-        JSONObject jsonObject = new JSONObject();
-        for (String key : keySet()) {
-            try {
-                jsonObject.put(key, get(key));
-            } catch (JSONException e) {
-                new HandleException(getPin(), "asJSONObject", e);
-            }
-        }
-        return jsonObject;
-    }
 
     protected ParseObject getLDSFallbackParseObject(String key) {
         ParseObject object = getParseObject(key);
@@ -412,23 +293,7 @@ public abstract class ExtendedParseObject extends ParseObject {
     protected String getStringSafe(String key, String defaultValue) {
         return has(key) ? getString(key) : defaultValue;
     }
-//    public void pinAndSaveEventually() {
-//        pinAndSaveEventually(null);
-//    }
-//
-//    public void pinAndSaveEventually(final SaveCallback saveCallback) {
-//        pinInBackground(getPin(), new SaveCallback() {
-//
-//            @Override
-//            public void done(ParseException e) {
-//                if (saveCallback != null) {
-//                    saveCallback.done(e);
-//                }
-//                saveEventually();
-//            }
-//
-//        });
-//    }
+
 
 
 }

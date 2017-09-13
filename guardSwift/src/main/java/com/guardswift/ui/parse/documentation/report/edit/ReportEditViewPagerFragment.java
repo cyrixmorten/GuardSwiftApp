@@ -5,9 +5,8 @@ import android.support.v4.app.Fragment;
 
 import com.google.common.collect.Maps;
 import com.guardswift.R;
-import com.guardswift.persistence.cache.task.GSTasksCache;
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
@@ -22,7 +21,7 @@ public class ReportEditViewPagerFragment extends AbstractTabsViewPagerFragment {
             .getSimpleName();
 
 
-    public static ReportEditViewPagerFragment newInstance(GSTask task) {
+    public static ReportEditViewPagerFragment newInstance(ParseTask task) {
 
         GuardSwiftApplication.getInstance()
                 .getCacheFactory()
@@ -32,7 +31,7 @@ public class ReportEditViewPagerFragment extends AbstractTabsViewPagerFragment {
     }
 
     @Inject
-    GSTasksCache gsTasksCache;
+    ParseTasksCache ParseTasksCache;
 
     Map<String, Fragment> fragmentMap = Maps.newLinkedHashMap();
 
@@ -41,13 +40,13 @@ public class ReportEditViewPagerFragment extends AbstractTabsViewPagerFragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        GSTask task = gsTasksCache.getLastSelected();
+        ParseTask task = ParseTasksCache.getLastSelected();
 
         fragmentMap = Maps.newLinkedHashMap();
         fragmentMap.put(getString(R.string.title_report), ReportEditListFragment.newInstance(task));
 
-        if (task.getTaskType() == GSTask.TASK_TYPE.STATIC) {
-            fragmentMap.put(getString(R.string.title_send), ReportSummaryFragment.newInstance((StaticTask) task));
+        if (task.isStaticTask()) {
+            fragmentMap.put(getString(R.string.title_send), ReportSummaryFragment.newInstance(task));
             fragmentMap.put(getString(R.string.title_history), ReportHistoryListFragment.newInstance(task.getClient(), task.getTaskType()));
         }
 

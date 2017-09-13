@@ -1,27 +1,26 @@
-package com.guardswift.persistence.parse.execution.query;
+package com.guardswift.persistence.parse.query;
 
 
 import android.location.Location;
 
 import com.google.common.collect.Sets;
 import com.guardswift.core.parse.ParseModule;
-import com.guardswift.persistence.parse.TaskQueryBuilder;
+import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.data.Guard;
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.ParseTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 
-public class AlarmQueryBuilder extends
-        TaskQueryBuilder<ParseTask> {
+public class AlarmTaskQueryBuilder extends
+        ParseQueryBuilder<ParseTask> {
 
-    public AlarmQueryBuilder(boolean fromLocalDatastore) {
+    public AlarmTaskQueryBuilder(boolean fromLocalDatastore) {
         super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery
                 .getQuery(ParseTask.class));
 
-        query.whereEqualTo(ParseTask.taskType, "Alarm");
+        query.whereEqualTo(ParseTask.taskType, ParseTask.TASK_TYPE_STRING.ALARM);
     }
 
     @Override
@@ -37,35 +36,35 @@ public class AlarmQueryBuilder extends
     }
 
 
-    public AlarmQueryBuilder within(int kilometers, Location fromLocation) {
+    public AlarmTaskQueryBuilder within(int kilometers, Location fromLocation) {
         ParseGeoPoint parseGeoPoint = ParseModule.geoPointFromLocation(fromLocation);
         if (parseGeoPoint != null)
             query.whereWithinKilometers(ParseTask.position, parseGeoPoint, kilometers);
         return this;
     }
 
-    public AlarmQueryBuilder matching(Guard guard) {
+    public AlarmTaskQueryBuilder matching(Guard guard) {
         query.whereEqualTo(ParseTask.guard, guard);
         return this;
     }
 
-    public AlarmQueryBuilder whereStatus(String... status) {
+    public AlarmTaskQueryBuilder whereStatus(String... status) {
         query.whereContainedIn(ParseTask.status, Sets.newHashSet(status));
         return this;
     }
 
 
-    public AlarmQueryBuilder sortNearest() {
+    public AlarmTaskQueryBuilder sortNearest() {
         ParseModule.sortNearest(query, ParseTask.position);
         return this;
     }
 
-    public AlarmQueryBuilder sortByTimeStarted() {
+    public AlarmTaskQueryBuilder sortByTimeStarted() {
         query.addDescendingOrder(ParseTask.timeStarted);
         return this;
     }
 
-    public AlarmQueryBuilder sortByCreatedAtDescending() {
+    public AlarmTaskQueryBuilder sortByCreatedAtDescending() {
 
         query.addDescendingOrder(ParseTask.createdAt);
 

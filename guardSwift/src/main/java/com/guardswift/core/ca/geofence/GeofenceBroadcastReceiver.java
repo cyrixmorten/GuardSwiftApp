@@ -22,7 +22,7 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
         Log.e(TAG, "GeofenceBroadcastReceiver");
 
-        geofencingModule = new GeofencingModule(context);
+        geofencingModule = new GeofencingModule();
 
         GeofencingEvent event = GeofencingEvent.fromIntent(intent);
         if (event != null) {

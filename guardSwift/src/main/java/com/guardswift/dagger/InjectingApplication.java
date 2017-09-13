@@ -24,14 +24,9 @@ import com.guardswift.persistence.cache.data.ClientCache;
 import com.guardswift.persistence.cache.data.EventTypeCache;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.documentaion.EventLogCache;
-import com.guardswift.persistence.cache.planning.CircuitStartedCache;
-import com.guardswift.persistence.cache.planning.DistrictWatchStartedCache;
-import com.guardswift.persistence.cache.task.CircuitUnitCache;
-import com.guardswift.persistence.cache.task.DistrictWatchClientCache;
-import com.guardswift.persistence.cache.task.GSTasksCache;
-import com.guardswift.persistence.cache.task.StaticTaskCache;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.cache.task.TaskCache;
-import com.guardswift.persistence.parse.ParseObjectFactory;
+import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Device;
 
@@ -128,14 +123,10 @@ public abstract class InjectingApplication extends Application implements
 			ParseCacheFactory.class,
 			ParseCachePreferences.class,
 			// Planning
-			CircuitStartedCache.class,
-			DistrictWatchStartedCache.class,
+			TaskGroupStarted.class,
 			// Tasks
 			TaskCache.class,
-			StaticTaskCache.class,
-			CircuitUnitCache.class,
-			DistrictWatchClientCache.class,
-			GSTasksCache.class, // adds extra functionality to task caches
+			ParseTasksCache.class, // adds extra functionality to task caches
 			// Data
 			GuardCache.class,
 			ClientCache.class,
@@ -190,11 +181,6 @@ public abstract class InjectingApplication extends Application implements
 		}
 
 
-		@Provides
-		@Singleton
-		ParseObjectFactory provideParseObjectFactory() {
-			return new ParseObjectFactory();
-		}
 
 		@Provides
 		EventBus provideEventBus() {

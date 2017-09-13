@@ -1,25 +1,40 @@
 package com.guardswift.core.documentation.eventlog.task;
 
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.ParseTask;
+import com.guardswift.core.exceptions.LogError;
+import com.guardswift.persistence.parse.documentation.event.EventLog;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.execution.task.TaskGroup;
 import com.parse.ParseObject;
 
-// TODO Will replace Circuit, District and Static tasks
+import static com.guardswift.persistence.parse.ExtendedParseObject.objectId;
+
 public class TaskLogStrategy implements LogTaskStrategy {
 
-
-    public static final String task = "task";
-    public static final String timeStart = "timeStart";
-    public static final String timeEnd = "timeEnd";
-
+    private static final String TAG = TaskLogStrategy.class.getSimpleName();
 
     @Override
-    public void log(GSTask task, ParseObject toParseObject) {
-        if (task instanceof ParseTask) {
+    public void log(ParseTask task, ParseObject toParseObject) {
+        toParseObject.put(EventLog.task, ParseObject.createWithoutData(ParseTask.class, task.getObjectId()));
 
-            ParseTask parseTask = (ParseTask)task;
+        if (task.getTimeStart() != null) {
+            toParseObject.put(EventLog.timeStart, task.getTimeStart());
+            toParseObject.put(EventLog.timeStartString, task.getTimeStartString());
+        } else {
+            LogError.log(TAG, "timeStartDate was null for task: " + objectId);
+        }
 
-            toParseObject.put(TaskLogStrategy.task, ParseObject.createWithoutData(ParseTask.class, parseTask.getObjectId()));
+        if (task.getTimeEnd() != null) {
+            toParseObject.put(EventLog.timeEnd, task.getTimeEnd());
+            toParseObject.put(EventLog.timeEndString, task.getTimeEndString());
+        } else {
+            LogError.log(TAG, "timeEndDate was null for task: " + objectId);
+        }
+
+        if (task.getTaskGroupStarted() != null) {
+            toParseObject.put(EventLog.taskGroupStarted, ParseObject.createWithoutData(TaskGroup.class, task.getTaskGroupStarted().getObjectId()));
+        }
+        else {
+            LogError.log(TAG, "taskGroupStarted was null for task: " + objectId);
         }
     }
 

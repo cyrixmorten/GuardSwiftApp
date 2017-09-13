@@ -2,14 +2,14 @@ package com.guardswift.ui.parse.execution.statictask;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.execution.BaseTask;
-import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.query.StaticTaskQueryBuilder;
 import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
-public class ActiveStaticTasksFragment extends AbstractTasksRecycleFragment<StaticTask> {
+public class ActiveStaticTasksFragment extends AbstractTasksRecycleFragment {
 
 	protected static final String TAG = ActiveStaticTasksFragment.class.getSimpleName();
 
@@ -23,23 +23,18 @@ public class ActiveStaticTasksFragment extends AbstractTasksRecycleFragment<Stat
 
 
     @Override
-    public PostProcessAdapterResults<StaticTask> createPostProcess() {
+    public PostProcessAdapterResults<ParseTask> createPostProcess() {
         return null;
     }
 
     @Override
-    public BaseTask getObjectInstance() {
-        return new StaticTask();
-    }
-
-    @Override
-    public ParseQueryAdapter.QueryFactory<StaticTask> createNetworkQueryFactory() {
-        return new ParseQueryAdapter.QueryFactory<StaticTask>() {
+    public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
+        return new ParseQueryAdapter.QueryFactory<ParseTask>() {
 
             @Override
-            public ParseQuery<StaticTask> create() {
-                return new StaticTask.QueryBuilder(false).
-                        active().
+            public ParseQuery<ParseTask> create() {
+                return new StaticTaskQueryBuilder(false).
+                        status(ParseTask.STATUS.ARRIVED).
                         daysBack(7).
                         sortedByCreated().
                         build();
@@ -49,7 +44,7 @@ public class ActiveStaticTasksFragment extends AbstractTasksRecycleFragment<Stat
 
     @Override
     public boolean isRelevantUIEvent(UpdateUIEvent ev) {
-        return super.isRelevantUIEvent(ev) || ev.getObject() instanceof StaticTask || ev.getObject() instanceof EventLog;
+        return super.isRelevantUIEvent(ev) || ev.getObject() instanceof ParseTask || ev.getObject() instanceof EventLog;
     }
 
 

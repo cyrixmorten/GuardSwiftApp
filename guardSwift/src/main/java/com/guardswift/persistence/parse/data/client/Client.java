@@ -2,7 +2,6 @@ package com.guardswift.persistence.parse.data.client;
 
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,31 +11,22 @@ import android.widget.TextView;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.guardswift.R;
-import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.ExtendedParseObject;
-import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.Positioned;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.query.ClientQueryBuilder;
 import com.guardswift.util.GSIntents;
 import com.parse.ParseClassName;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import butterknife.ButterKnife;
-import dk.alexandra.positioning.wifi.Fingerprint;
-import dk.alexandra.positioning.wifi.io.WiFiIO;
 
 @ParseClassName("Client")
 public class Client extends ExtendedParseObject implements Positioned {
@@ -83,44 +73,39 @@ public class Client extends ExtendedParseObject implements Positioned {
     @SuppressWarnings("unchecked")
     @Override
     public ParseQuery<Client> getAllNetworkQuery() {
-        return new QueryBuilder(false).build();
+        return new ClientQueryBuilder(false).build();
     }
 
-    @Override
-    public void updateFromJSON(final Context context,
-                               final JSONObject jsonObject) {
-        // TODO Auto-generated method stub
+
+    public static ClientQueryBuilder getQueryBuilder(boolean fromLocalDatastore) {
+        return new ClientQueryBuilder(fromLocalDatastore);
     }
 
-    public static QueryBuilder getQueryBuilder(boolean fromLocalDatastore) {
-        return new QueryBuilder(fromLocalDatastore);
-    }
+//    public void storeFingerprints(Set<Fingerprint> fingerprints) {
+//        JSONArray jsonArray = new JSONArray();
+//        for (Fingerprint fingerprint : fingerprints) {
+//            try {
+//                String jsonString = WiFiIO.convertToJSON(fingerprint);
+//                JSONObject jsonObject = new JSONObject(jsonString);
+//
+//                jsonArray.put(jsonObject);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//                Log.e(TAG, "storeFingerprints", e);
+//            }
+//        }
+//        put(Client.fingerprints, jsonArray);
+//    }
 
-    public void storeFingerprints(Set<Fingerprint> fingerprints) {
-        JSONArray jsonArray = new JSONArray();
-        for (Fingerprint fingerprint : fingerprints) {
-            try {
-                String jsonString = WiFiIO.convertToJSON(fingerprint);
-                JSONObject jsonObject = new JSONObject(jsonString);
-
-                jsonArray.put(jsonObject);
-            } catch (JSONException e) {
-                e.printStackTrace();
-                Log.e(TAG, "storeFingerprints", e);
-            }
-        }
-        put(Client.fingerprints, jsonArray);
-    }
-
-    public ClientLocation findCheckpoint(String name) {
-        List<ClientLocation> checkpoints = getCheckpoints();
-        for (ClientLocation checkpoint : checkpoints) {
-            if (checkpoint.getLocation().equals(name)) {
-                return checkpoint;
-            }
-        }
-        return null;
-    }
+//    public ClientLocation findCheckpoint(String name) {
+//        List<ClientLocation> checkpoints = getCheckpoints();
+//        for (ClientLocation checkpoint : checkpoints) {
+//            if (checkpoint.getLocation().equals(name)) {
+//                return checkpoint;
+//            }
+//        }
+//        return null;
+//    }
 
     public LinearLayout createContactsList(final Context context) {
         final List<ClientContact> contacts = getContactsWithNames();
@@ -171,7 +156,7 @@ public class Client extends ExtendedParseObject implements Positioned {
         return emails;
     }
 
-    public int getRadius(GSTask.TASK_TYPE taskType) {
+    public int getRadius(ParseTask.TASK_TYPE taskType) {
         Map<String, Integer> radiusMap = getMap(Client.tasksRadius);
         String key = taskType.toString();
         if (radiusMap != null && radiusMap.containsKey(key)) {
@@ -179,15 +164,15 @@ public class Client extends ExtendedParseObject implements Positioned {
         }
 
         switch (taskType) {
-            case REGULAR: return GSTask.DEFAULT_RADIUS_REGULAR;
-            case RAID: return GSTask.DEFAULT_RADIUS_RAID;
-            case ALARM: return GSTask.DEFAULT_RADIUS_ALARM;
+            case REGULAR: return ParseTask.DEFAULT_RADIUS_REGULAR;
+            case RAID: return ParseTask.DEFAULT_RADIUS_RAID;
+            case ALARM: return ParseTask.DEFAULT_RADIUS_ALARM;
         }
 
         return 0;
     }
 
-    public void setRadius(GSTask.TASK_TYPE taskType, int radius) {
+    public void setRadius(ParseTask.TASK_TYPE taskType, int radius) {
         Map<String, Integer> radiusMap = getMap(Client.tasksRadius);
         String key = taskType.toString();
         if (radiusMap == null) {
@@ -198,54 +183,7 @@ public class Client extends ExtendedParseObject implements Positioned {
         put(key, radiusMap);
     }
 
-    public enum SORT_BY {NAME, DISTANCE}
 
-    public static class QueryBuilder extends ParseQueryBuilder<Client> {
-
-        public QueryBuilder(boolean fromLocalDatastore) {
-            super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery.getQuery(Client.class));
-        }
-
-        @Override
-        public ParseQuery<Client> build() {
-            query.setLimit(1000);
-            query.include(roomLocations);
-            query.include(people);
-            return super.build();
-        }
-
-        public QueryBuilder matching(Client client) {
-            query.whereEqualTo(objectId, client.getObjectId());
-            return this;
-        }
-
-        public QueryBuilder sort(SORT_BY sortBy) {
-            if (sortBy == SORT_BY.NAME) {
-                return sortByName();
-            }
-            if (sortBy == SORT_BY.DISTANCE) {
-                return sortByDistance();
-            }
-
-            return this;
-        }
-
-        public QueryBuilder notAutomatic() {
-            query.whereNotEqualTo(Client.automatic, true);
-            return this;
-        }
-
-        QueryBuilder sortByName() {
-            query.orderByAscending(Client.name);
-            return this;
-        }
-
-        QueryBuilder sortByDistance() {
-            ParseModule.sortNearest(query,
-                    Client.position);
-            return this;
-        }
-    }
 
     public ParseObject getOwner() {
         return getParseObject(owner);
@@ -357,68 +295,68 @@ public class Client extends ExtendedParseObject implements Positioned {
         return new ArrayList<>();
     }
 
+//
+//    // TODO disabled checkpoints to investigate performance issue
+//    public boolean hasCheckPoints() {
+//        return false;
+////        for (ClientLocation location : getLocations()) {
+////            if (location.isCheckpoint()) {
+////                return true;
+////            }
+////        }
+////        return false;
+//    }
 
-    // TODO disabled checkpoints to investigate performance issue
-    public boolean hasCheckPoints() {
-        return false;
-//        for (ClientLocation location : getLocations()) {
+//    public void clearCheckpoints() {
+//        List<ClientLocation> checkpoints = getCheckpoints();
+//        for (ClientLocation checkpoint : checkpoints) {
+//            checkpoint.reset();
+//        }
+//        ParseObject.pinAllInBackground(checkpoints);
+//    }
+//
+//    public List<ClientLocation> getCheckpoints() {
+//        List<ClientLocation> allLocations = getLocations();
+//        List<ClientLocation> checkpoints = new ArrayList<>();
+//        for (ClientLocation location : allLocations) {
 //            if (location.isCheckpoint()) {
-//                return true;
+//                checkpoints.add(location);
 //            }
 //        }
-//        return false;
-    }
+//        Collections.sort(checkpoints);
+//        return checkpoints;
+//    }
+//
+//    public List<String> getCheckpointNamesAsList() {
+//        List<String> checkpointNames = new ArrayList<>();
+//        List<ClientLocation> checkpoints = getCheckpoints();
+//        for (ClientLocation location : checkpoints) {
+//            if (location.isCheckpoint()) {
+//                checkpointNames.add(location.getLocation());
+//            }
+//        }
+//        return checkpointNames;
+//    }
 
-    public void clearCheckpoints() {
-        List<ClientLocation> checkpoints = getCheckpoints();
-        for (ClientLocation checkpoint : checkpoints) {
-            checkpoint.reset();
-        }
-        ParseObject.pinAllInBackground(checkpoints);
-    }
-
-    public List<ClientLocation> getCheckpoints() {
-        List<ClientLocation> allLocations = getLocations();
-        List<ClientLocation> checkpoints = new ArrayList<>();
-        for (ClientLocation location : allLocations) {
-            if (location.isCheckpoint()) {
-                checkpoints.add(location);
-            }
-        }
-        Collections.sort(checkpoints);
-        return checkpoints;
-    }
-
-    public List<String> getCheckpointNamesAsList() {
-        List<String> checkpointNames = new ArrayList<>();
-        List<ClientLocation> checkpoints = getCheckpoints();
-        for (ClientLocation location : checkpoints) {
-            if (location.isCheckpoint()) {
-                checkpointNames.add(location.getLocation());
-            }
-        }
-        return checkpointNames;
-    }
-
-    public String[] getCheckpointsNamesAsArray() {
-        List<String> checkpoints = getCheckpointNamesAsList();
-        return checkpoints.toArray(new String[checkpoints.size()]);
-    }
-
-
-    public boolean[] getCheckpointsCheckedArray() {
-
-        List<ClientLocation> checkpoints = getCheckpoints();
-        boolean[] checked = new boolean[checkpoints.size()];
-
-
-        for (int i = 0; i < checkpoints.size(); i++) {
-            boolean isChecked = checkpoints.get(i).isChecked();
-            checked[i] = isChecked;
-        }
-
-        return checked;
-    }
+//    public String[] getCheckpointsNamesAsArray() {
+//        List<String> checkpoints = getCheckpointNamesAsList();
+//        return checkpoints.toArray(new String[checkpoints.size()]);
+//    }
+//
+//
+//    public boolean[] getCheckpointsCheckedArray() {
+//
+//        List<ClientLocation> checkpoints = getCheckpoints();
+//        boolean[] checked = new boolean[checkpoints.size()];
+//
+//
+//        for (int i = 0; i < checkpoints.size(); i++) {
+//            boolean isChecked = checkpoints.get(i).isChecked();
+//            checked[i] = isChecked;
+//        }
+//
+//        return checked;
+//    }
 
 
 }

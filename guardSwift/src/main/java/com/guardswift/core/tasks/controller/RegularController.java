@@ -4,54 +4,48 @@ import android.content.Context;
 import android.util.Log;
 
 import com.guardswift.R;
-import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.eventbus.EventBusController;
-import com.guardswift.persistence.cache.task.GSTasksCache;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.activity.GSTaskCreateReportActivity;
+import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
 import com.guardswift.ui.dialog.activity.CheckpointsDialogActivity;
 import com.parse.ParseException;
 import com.parse.SaveCallback;
 
-/**
- * Created by cyrix on 2/26/15.
- */
-public class CircuitUnitController extends BaseTaskController {
+public class RegularController extends BaseTaskController {
 
 
-    private static final String TAG = CircuitUnitController.class.getSimpleName();
+    private static final String TAG = RegularController.class.getSimpleName();
 
 
-    private static CircuitUnitController instance;
-    public static CircuitUnitController getInstance() {
+    private static RegularController instance;
+    public static RegularController getInstance() {
         if (instance == null) {
-            instance = new CircuitUnitController();
+            instance = new RegularController();
         }
 
         return instance;
     }
 
 
-    private CircuitUnitController() {}
+    private RegularController() {}
 
 
 
-    public GSTask performAction(ACTION action, final GSTask task, final boolean automatic) {
+    public ParseTask performAction(ACTION action, final ParseTask task, final boolean automatic) {
 
         Context ctx = GuardSwiftApplication.getInstance();
-        GSTasksCache tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
+        ParseTasksCache tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
 
         Log.e(TAG, "invoking action: " + action.toString());
 
-        final CircuitUnit circuitUnit = (CircuitUnit)task;
 
-        if (!canPerformAction(action, circuitUnit)) {
+        if (!canPerformAction(action, task)) {
             Log.e(TAG, "unable to apply action to task " + action);
-            return circuitUnit;
+            return task;
         }
 
         EventLog.Builder event = null;
@@ -69,15 +63,15 @@ public class CircuitUnitController extends BaseTaskController {
 //                if (circuitUnit.minutesSinceLastArrival() <= 15) {
 //                    Log.w(TAG, "Not been 15 minutes since last arrival - no eventlog generated");
                 event = new EventLog.Builder(ctx)
-                        .taskPointer(circuitUnit, GSTask.EVENT_TYPE.ARRIVE)
+                        .taskPointer(task, ParseTask.EVENT_TYPE.ARRIVE)
                         .event(ctx.getString(R.string.event_arrived))
                         .automatic(automatic)
-                        .eventCode(EventLog.EventCodes.CIRCUITUNIT_ARRIVED);
+                        .eventCode(EventLog.EventCodes.REGULAR_ARRIVED);
 //                }
 
 
-                circuitUnit.setArrived();
-                tasksCache.addArrived(circuitUnit);
+                task.setArrived();
+                tasksCache.addArrived(task);
 
 //                if (circuitUnit.hasCheckPoints()) {
 //                    if (!circuitUnit.isAborted()) {
@@ -92,15 +86,14 @@ public class CircuitUnitController extends BaseTaskController {
             case ABORT:
 
                 event = new EventLog.Builder(ctx)
-                        .taskPointer(circuitUnit, GSTask.EVENT_TYPE.ABORT)
+                        .taskPointer(task, ParseTask.EVENT_TYPE.ABORT)
                         .event(ctx.getString(R.string.event_aborted))
                         .automatic(automatic)
-                        .eventCode(EventLog.EventCodes.CIRCUITUNIT_ABORT);
+                        .eventCode(EventLog.EventCodes.REGULAR_ABORT);
 
-                WiFiPositioningService.stop(ctx);
 
-                circuitUnit.setAborted();
-                tasksCache.removeArrived(circuitUnit);
+                task.setAborted();
+                tasksCache.removeArrived(task);
 
 
                 break;
@@ -109,63 +102,61 @@ public class CircuitUnitController extends BaseTaskController {
 
 
                 event = new EventLog.Builder(ctx)
-                        .taskPointer(circuitUnit, GSTask.EVENT_TYPE.FINISH)
+                        .taskPointer(task, ParseTask.EVENT_TYPE.FINISH)
                         .event(ctx.getString(R.string.event_finished))
                         .automatic(automatic)
-                        .eventCode(EventLog.EventCodes.CIRCUITUNIT_FINISHED);
+                        .eventCode(EventLog.EventCodes.REGULAR_FINISHED);
 
-                WiFiPositioningService.stop(ctx);
 
-                circuitUnit.setFinished();
-                tasksCache.removeArrived(circuitUnit);
+                task.setFinished();
+                tasksCache.removeArrived(task);
 
                 break;
 
             case RESET:
 
                 event = new EventLog.Builder(ctx)
-                        .taskPointer(circuitUnit, GSTask.EVENT_TYPE.LEAVE)
+                        .taskPointer(task, ParseTask.EVENT_TYPE.LEAVE)
                         .event(ctx.getString(R.string.event_left))
                         .automatic(automatic)
-                        .eventCode(EventLog.EventCodes.CIRCUITUNIT_LEFT);
+                        .eventCode(EventLog.EventCodes.REGULAR_LEFT);
 
-                WiFiPositioningService.stop(ctx);
-
-                circuitUnit.reset();
-                tasksCache.removeArrived(circuitUnit);
+                task.reset();
+                tasksCache.removeArrived(task);
                 break;
             case OPEN_WRITE_REPORT:
-                GSTaskCreateReportActivity.start(ctx, circuitUnit);
+                ParseTaskCreateReportActivity.start(ctx, task);
                 break;
 
             case OPEN_CHECKPOINTS:
-                CheckpointsDialogActivity.start(ctx, circuitUnit);
+                CheckpointsDialogActivity.start(ctx, task);
                 break;
 
             default:
+                Log.e(TAG, "DEFAULT");
                 new HandleException(TAG, "Missing action", new IllegalArgumentException("Missing action: " + action));
-                return circuitUnit;
+                return task;
 
         }
 
 
-
         if (event != null) {
 
-            circuitUnit.pinThenSaveEventually(new SaveCallback() {
+            task.pinThenSaveEventually(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
                     if (e != null) {
                         new HandleException(TAG, "Failed to pinThenSaveEventually", e);
                     }
-                    EventBusController.postUIUpdate(circuitUnit);
+
+                    EventBusController.postUIUpdate(task);
                 }
             });
 
             event.saveAsync();
         }
 
-        return circuitUnit;
+        return task;
 
     }
 

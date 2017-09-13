@@ -11,7 +11,7 @@ import com.guardswift.R;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.data.GuardCache;
-import com.guardswift.persistence.cache.planning.CircuitStartedCache;
+import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.drawer.MainNavigationDrawer;
 import com.guardswift.ui.drawer.ToolbarFragmentDrawerCallback;
@@ -37,7 +37,7 @@ public class MainActivity extends InjectingAppCompatActivity {
     @Inject
     GuardCache guardCache;
     @Inject
-    CircuitStartedCache circuitStartedCache;
+    TaskGroupStartedCache taskGroupStartedCache;
     @Inject
     ParseModule parseModule;
     @Inject

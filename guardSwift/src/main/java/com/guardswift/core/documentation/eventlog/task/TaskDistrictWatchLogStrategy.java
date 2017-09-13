@@ -1,6 +1,6 @@
 //package com.guardswift.core.documentation.eventlog.task;
 //
-//import com.guardswift.persistence.parse.execution.GSTask;
+//import com.guardswift.persistence.parse.execution.ParseTask;
 //import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
 //import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
 //import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
@@ -21,7 +21,7 @@
 //
 //
 //    @Override
-//    public void log(GSTask task, ParseObject toParseObject) {
+//    public void log(ParseTask task, ParseObject toParseObject) {
 //        if (task instanceof DistrictWatchClient) {
 //
 //            DistrictWatchClient districtWatchClient = (DistrictWatchClient)task;

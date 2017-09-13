@@ -5,25 +5,22 @@ import android.util.Log;
 
 import com.guardswift.R;
 import com.guardswift.core.tasks.controller.TaskController;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
 
-/**
- * Created by cyrix on 6/7/15.
- */
 public class StandardTaskAutomationStrategy implements TaskAutomationStrategy {
 
     private static final String TAG = StandardTaskAutomationStrategy.class.getSimpleName();
 
-    private final GSTask task;
+    private final ParseTask task;
 
-    public static TaskAutomationStrategy getInstance(GSTask task) {
+    public static TaskAutomationStrategy getInstance(ParseTask task) {
         return new StandardTaskAutomationStrategy(task);
     }
 
 
-    private StandardTaskAutomationStrategy(GSTask task) {
+    private StandardTaskAutomationStrategy(ParseTask task) {
         this.task = task;
     }
 

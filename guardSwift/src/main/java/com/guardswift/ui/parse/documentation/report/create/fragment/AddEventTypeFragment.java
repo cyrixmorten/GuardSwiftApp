@@ -19,6 +19,7 @@ import com.guardswift.persistence.cache.data.ClientCache;
 import com.guardswift.persistence.cache.data.EventTypeCache;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.client.Client;
+import com.guardswift.persistence.parse.query.EventTypeQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.helpers.UpdateFloatingActionButton;
 import com.guardswift.ui.menu.MenuItemBuilder;
@@ -93,7 +94,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 
 					@Override
 					public ParseQuery<EventType> create() {
-						return new EventType.QueryBuilder(true)
+						return new EventTypeQueryBuilder(true)
 								.matchingIncludes(clientCache.getSelected()).sortByTimesUsed()
 								.build();
 					}

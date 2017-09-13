@@ -7,7 +7,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.guardswift.R;
 import com.guardswift.core.tasks.controller.TaskController;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
 
@@ -17,25 +17,22 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by cyrix on 6/7/15.
- */
 public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrategy {
 
     private static final String TAG = ResetOnDepartureAutomationStrategy.class.getSimpleName();
 
-    private final GSTask task;
+    private final ParseTask task;
 
     private Timer timer;
 
     private static final Set<String> lockedTasks = Sets.newConcurrentHashSet();
     private static final Map<String, TaskAutomationStrategy> instances = Maps.newConcurrentMap();
 
-    public static TaskAutomationStrategy getInstance(GSTask task) {
+    public static TaskAutomationStrategy getInstance(ParseTask task) {
         return new ResetOnDepartureAutomationStrategy(task);
     }
 
-    private ResetOnDepartureAutomationStrategy(GSTask task) {
+    private ResetOnDepartureAutomationStrategy(ParseTask task) {
         this.task = task;
     }
 

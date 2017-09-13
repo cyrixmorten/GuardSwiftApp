@@ -28,8 +28,8 @@ import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.ui.activity.GSTaskCreateReportActivity;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
 import com.guardswift.util.Analytics;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -73,9 +73,9 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
 
     abstract void openAddEvent();
 
-    abstract GSTask.TASK_TYPE getFragmentType();
+    abstract ParseTask.TASK_TYPE getFragmentType();
 
-    abstract GSTask getTaskPointer();
+    abstract ParseTask getTaskPointer();
 
     boolean excludePerimiter;
     boolean excludeAutomatic;
@@ -262,12 +262,12 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
         Bundle arguments = getArguments();
 
         btn_addevent.setText(getString(R.string.add_event));
-        if (!arguments.getBoolean(GSTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON)) {
+        if (!arguments.getBoolean(ParseTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON)) {
             btn_addevent.setVisibility(View.GONE);
         }
 
         // filters
-        String filterEvent = arguments.getString(GSTaskCreateReportActivity.FILTER_EVENT);
+        String filterEvent = arguments.getString(ParseTaskCreateReportActivity.FILTER_EVENT);
         excludePerimiter = arguments.getBoolean(FILTER_EXCLUDE_PERIMITER);
         excludeAutomatic = arguments.getBoolean(FILTER_EXCLUDE_AUTOMATIC);
 
@@ -281,7 +281,7 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        if (getArguments().getBoolean(GSTaskCreateReportActivity.MODE_ADD_EVENT)) {
+        if (getArguments().getBoolean(ParseTaskCreateReportActivity.MODE_ADD_EVENT)) {
             getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -289,18 +289,18 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
                     showCreateEventDialog(eventLog);
                 }
             });
-        } else if (getArguments().getBoolean(GSTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON)) {
+        } else if (getArguments().getBoolean(ParseTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON)) {
             getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     EventLog eventLog = mAdapter.getItem(position);
                     // go to details view
                     Intent intent = new Intent(getActivity(),
-                            GSTaskCreateReportActivity.class)
-                            .putExtra(GSTaskCreateReportActivity.FILTER_EVENT, eventLog.getEvent())
-                            .putExtra(GSTaskCreateReportActivity.TASK_TYPE, getFragmentType())
-                            .putExtra(GSTaskCreateReportActivity.MODE_ADD_EVENT, true)
-                            .putExtra(GSTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON, true);
+                            ParseTaskCreateReportActivity.class)
+                            .putExtra(ParseTaskCreateReportActivity.FILTER_EVENT, eventLog.getEvent())
+                            .putExtra(ParseTaskCreateReportActivity.TASK_TYPE, getFragmentType())
+                            .putExtra(ParseTaskCreateReportActivity.MODE_ADD_EVENT, true)
+                            .putExtra(ParseTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON, true);
 
                     startActivity(intent);
 

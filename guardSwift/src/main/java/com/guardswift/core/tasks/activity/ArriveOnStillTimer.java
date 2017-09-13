@@ -2,15 +2,12 @@ package com.guardswift.core.tasks.activity;
 
 import android.util.Log;
 
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by cyrix on 6/18/15.
- */
 class ArriveOnStillTimer {
 
     private static final String TAG = ArriveOnStillTimer.class.getSimpleName();
@@ -18,10 +15,10 @@ class ArriveOnStillTimer {
     private static final int TRIGGER_AFTER_MINUTES = 1;
 
     private Timer mTimer;
-    private GSTask task;
+    private ParseTask task;
     private  ArriveWhenNotInVehicleStrategy.TriggerArrival arrival;
 
-    public ArriveOnStillTimer(GSTask task, ArriveWhenNotInVehicleStrategy.TriggerArrival arrival) {
+    public ArriveOnStillTimer(ParseTask task, ArriveWhenNotInVehicleStrategy.TriggerArrival arrival) {
         this.task = task;
         this.arrival = arrival;
     }

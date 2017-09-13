@@ -5,9 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.guardswift.persistence.cache.task.GSTasksCache;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 
 import java.util.Date;
@@ -20,15 +20,15 @@ public class CreateEventHandlerActivity extends AbstractCreateEventHandlerActivi
 			.getSimpleName();
 
 
-	public static void start(Context context, GSTask task) {
+	public static void start(Context context, ParseTask task) {
 		GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().setSelected(task);
 		context.startActivity(new Intent(context, CreateEventHandlerActivity.class));
 	}
 
 	@Inject
-	GSTasksCache taskCache;
+	ParseTasksCache taskCache;
 
-	private GSTask task;
+	private ParseTask task;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +50,7 @@ public class CreateEventHandlerActivity extends AbstractCreateEventHandlerActivi
 
 
         new EventLog.Builder(this)
-                .taskPointer(task, GSTask.EVENT_TYPE.OTHER)
+                .taskPointer(task, ParseTask.EVENT_TYPE.OTHER)
                 .event(event)
                 .amount(amount)
 				.people(people)

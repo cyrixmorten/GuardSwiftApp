@@ -1,14 +1,17 @@
 package com.guardswift.core.ca.location;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -26,9 +29,9 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.cache.data.GuardCache;
-import com.guardswift.persistence.cache.task.GSTasksCache;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.util.Util;
 import com.parse.ParseGeoPoint;
@@ -75,14 +78,13 @@ public class FusedLocationTrackerService extends InjectingService {
     private Subscription locationSubscription;
 
 
-
     private Location mLastUIUpdateLocation;
 
     private Tracker tracker;
 
 
     @Inject
-    GSTasksCache tasksCache;
+    ParseTasksCache tasksCache;
     @Inject
     GeofencingModule geofencingModule;
     @Inject
@@ -119,7 +121,7 @@ public class FusedLocationTrackerService extends InjectingService {
     private void updateForegroundNotification(Location location) {
         Notification notification = createForegroundNotification(getString(R.string.latlng, location.getLatitude(), location.getLongitude()));
 
-        NotificationManager mgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mgr.notify(Constants.FUSED_LOCATION_NOTIFICATION_ID, notification);
     }
 
@@ -152,7 +154,6 @@ public class FusedLocationTrackerService extends InjectingService {
 //        alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() +100, restartServicePI);
 //
 //    }
-
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -168,7 +169,6 @@ public class FusedLocationTrackerService extends InjectingService {
         wl.release();
         super.onDestroy();
     }
-
 
 
     public void unsubscribeLocationUpdates() {
@@ -201,6 +201,11 @@ public class FusedLocationTrackerService extends InjectingService {
                 .setFastestInterval(5000);
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(getApplicationContext());
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            new HandleException(TAG, "Missing location permission", new SecurityException("Missing permission"));
+            return;
+        }
 
         locationSubscription = locationProvider.getUpdatedLocation(request)
                 .observeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
@@ -282,30 +287,30 @@ public class FusedLocationTrackerService extends InjectingService {
             return;
         }
 
-        Set<GSTask> geofencedTasks = tasksCache.getAllGeofencedTasks();
+        Set<ParseTask> geofencedTasks = tasksCache.getAllGeofencedTasks();
 
 
         List<String> tasksWithinGeofence = Lists.newArrayList();
         List<String> tasksMovedWithinGeofence = Lists.newArrayList();
         List<String> tasksMovedOutsideGeofence = Lists.newArrayList();
 
-        for (GSTask task : geofencedTasks) {
+        for (ParseTask task : geofencedTasks) {
 
             ParseGeoPoint clientPosition = task.getPosition();
             float distance = ParseModule.distanceBetweenMeters(location, clientPosition);
             int radius = task.getGeofenceStrategy().getGeofenceRadius();
 
             if (distance <= radius) {
-                tasksWithinGeofence.add(task.getGeofenceId());
+                tasksWithinGeofence.add(task.getObjectId());
             }
 
             if (tasksCache.isWithinGeofence(task)) {
                 if (distance > radius) {
-                    tasksMovedOutsideGeofence.add(task.getGeofenceId());
+                    tasksMovedOutsideGeofence.add(task.getObjectId());
                 }
             } else {
                 if (distance < radius) {
-                    tasksMovedWithinGeofence.add(task.getGeofenceId());
+                    tasksMovedWithinGeofence.add(task.getObjectId());
                 }
             }
 

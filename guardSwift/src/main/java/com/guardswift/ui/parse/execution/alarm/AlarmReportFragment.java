@@ -26,7 +26,7 @@
 //import com.guardswift.persistence.parse.documentation.eventlog.EventLog;
 //import com.guardswift.persistence.parse.data.Guard;
 //import com.guardswift.persistence.parse.planning.alarm.Alarm;
-//import com.guardswift.persistence.parse.planning.GSTask;
+//import com.guardswift.persistence.parse.planning.ParseTask;
 //import com.guardswift.ui.view.answer.EditTextFormView;
 //import com.guardswift.ui.view.answer.TextViewFormView;
 //import com.guardswift.ui.view.card.QuestionCardView;
@@ -416,7 +416,7 @@
 //                .amount(amount)
 //                .location(location)
 //                .remarks(remarks)
-//                .taskPointer(mAlarm, GSTask.EVENT_TYPE.OTHER)
+//                .taskPointer(mAlarm, ParseTask.EVENT_TYPE.OTHER)
 //                .eventCode(EventLog.EventCodes.ALARM_OTHER_REPORT).build();
 //
 //    }

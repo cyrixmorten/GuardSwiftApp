@@ -2,17 +2,13 @@ package com.guardswift.core.documentation.eventlog.context;
 
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.ParseObject;
 
-/**
- * Created by cyrix on 6/8/15.
- */
 public class LogCurrentGuardStrategy implements LogContextStrategy {
 
-    public static final String guard = "guard";
-    public static final String guardId = "guardId";
-    public static final String guardName = "guardName";
+
 
     private final GuardCache guardCache;
 
@@ -27,8 +23,8 @@ public class LogCurrentGuardStrategy implements LogContextStrategy {
             return;
         }
 
-        toParseObject.put(LogCurrentGuardStrategy.guard, guard);
-        toParseObject.put(LogCurrentGuardStrategy.guardId, guard.getGuardId());
-        toParseObject.put(LogCurrentGuardStrategy.guardName, guard.getName());
+        toParseObject.put(EventLog.guard, guard);
+        toParseObject.put(EventLog.guardId, guard.getGuardId());
+        toParseObject.put(EventLog.guardName, guard.getName());
     }
 }

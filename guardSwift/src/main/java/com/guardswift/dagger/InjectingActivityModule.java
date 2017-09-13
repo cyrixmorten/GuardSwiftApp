@@ -24,20 +24,16 @@ import android.view.MenuInflater;
 
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule;
 import com.guardswift.ui.activity.AbstractToolbarActivity;
-import com.guardswift.ui.activity.GSTaskCreateReportActivity;
+import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.activity.AbstractDialogActivity;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
 import com.guardswift.ui.dialog.activity.CheckpointsDialogActivity;
-import com.guardswift.ui.parse.data.checkpoint.CheckpointActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.AbstractCreateEventHandlerActivity;
-import com.guardswift.ui.parse.documentation.report.create.activity.CircuitUnitCreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
-import com.guardswift.ui.parse.documentation.report.create.activity.DistrictWatchClientCreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
-import com.guardswift.ui.parse.execution.circuit.TaskDescriptionActivity;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -68,20 +64,15 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
         AlarmDialogActivity.class,
         // Data
         GenericToolbarActivity.class,
-        // ParseTask
-        CheckpointActivity.class,
-        TaskDescriptionActivity.class,
         // Dialog Activities
         AbstractDialogActivity.class,
         CheckpointsDialogActivity.class,
         // Create report
-        GSTaskCreateReportActivity.class,
+        ParseTaskCreateReportActivity.class,
         // Create Event
         UpdateEventHandlerActivity.class,
         AbstractCreateEventHandlerActivity.class,
         CreateEventHandlerActivity.class,
-        CircuitUnitCreateEventHandlerActivity.class,
-        DistrictWatchClientCreateEventHandlerActivity.class,
         CreateEventHandlerActivity.class}, library = true)
 public class InjectingActivityModule {
     private final AppCompatActivity mActivity;

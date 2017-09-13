@@ -8,13 +8,13 @@ import android.view.MenuItem;
 
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 
 public class CheckpointsDialogActivity extends InjectingAppCompatActivity {
 
-    public static void start(Context context, CircuitUnit circuitUnit) {
-        GuardSwiftApplication.getInstance().getCacheFactory().getCircuitUnitCache().setSelected(circuitUnit);
+    public static void start(Context context, ParseTask circuitUnit) {
+        GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().setSelected(circuitUnit);
         context.startActivity(new Intent(context, CheckpointsDialogActivity.class));
     }
 

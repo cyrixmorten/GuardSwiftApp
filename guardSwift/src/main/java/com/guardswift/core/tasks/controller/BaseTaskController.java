@@ -1,22 +1,19 @@
 package com.guardswift.core.tasks.controller;
 
 import com.guardswift.eventbus.EventBusController;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 
-/**
- * Created by cyrix on 10/28/15.
- */
 public abstract class BaseTaskController implements TaskController {
 
-    abstract GSTask performAction(ACTION action, GSTask task, boolean automatic);
+    abstract ParseTask performAction(ACTION action, ParseTask task, boolean automatic);
 
     @Override
-    public GSTask performAction(ACTION action, GSTask task) {
+    public ParseTask performAction(ACTION action, ParseTask task) {
         return performAction(action, task, false);
     }
 
-    private boolean actionAllowedByTaskState(ACTION action, GSTask task) {
+    private boolean actionAllowedByTaskState(ACTION action, ParseTask task) {
         switch (task.getTaskState()) {
             case PENDING:
                 return action != ACTION.ABORT && action != ACTION.RESET;
@@ -34,7 +31,7 @@ public abstract class BaseTaskController implements TaskController {
     }
 
     @Override
-    public boolean canPerformAction(ACTION action, GSTask task) {
+    public boolean canPerformAction(ACTION action, ParseTask task) {
 
         boolean guardLoggedIn = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().isLoggedIn();
 
@@ -43,14 +40,14 @@ public abstract class BaseTaskController implements TaskController {
 
     
     @Override
-    public boolean canPerformAutomaticAction(ACTION action, GSTask task) {
+    public boolean canPerformAutomaticAction(ACTION action, ParseTask task) {
         return canPerformAction(action, task) && !task.isFinished();
     }
 
     @Override
-    public GSTask performAutomaticAction(ACTION action, GSTask task) {
+    public ParseTask performAutomaticAction(ACTION action, ParseTask task) {
         if (canPerformAutomaticAction(action, task)) {
-            GSTask executedTask = performAction(action, task, true);
+            ParseTask executedTask = performAction(action, task, true);
 
             EventBusController.postUIUpdate(task);
 
@@ -60,17 +57,17 @@ public abstract class BaseTaskController implements TaskController {
     }
 
     @Override
-    public GSTask.TASK_STATE translatesToState(ACTION action) {
+    public ParseTask.TASK_STATE translatesToState(ACTION action) {
         switch (action) {
             case ACCEPT:
-                return GSTask.TASK_STATE.ACCEPTED;
+                return ParseTask.TASK_STATE.ACCEPTED;
             case ARRIVE:
-                return GSTask.TASK_STATE.ARRIVED;
+                return ParseTask.TASK_STATE.ARRIVED;
             case ABORT:
-                return GSTask.TASK_STATE.ABORTED;
+                return ParseTask.TASK_STATE.ABORTED;
             case FINISH:
-                return GSTask.TASK_STATE.FINISHED;
+                return ParseTask.TASK_STATE.FINISHED;
         }
-        return GSTask.TASK_STATE.PENDING;
+        return ParseTask.TASK_STATE.PENDING;
     }
 }

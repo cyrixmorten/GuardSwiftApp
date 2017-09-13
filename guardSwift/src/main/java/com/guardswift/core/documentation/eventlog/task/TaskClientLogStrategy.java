@@ -5,7 +5,8 @@ import android.location.Location;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.data.client.Client;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.documentation.event.EventLog;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 
@@ -16,17 +17,10 @@ import com.parse.ParseObject;
  */
 public class TaskClientLogStrategy implements LogTaskStrategy {
 
-    public static final String client = "client";
-    public static final String clientName = "clientName";
-    public static final String clientCity = "clientCity";
-    public static final String clientZipcode = "clientZipcode";
-    public static final String clientAddress = "clientAddress";
-    public static final String clientAddressNumber = "clientAddressNumber";
-    public static final String clientFullAddress = "clientFullAddress";
-    public static final String clientDistanceMeters = "clientDistanceMeters";
+
 
     @Override
-    public void log(GSTask task, ParseObject toParseObject) {
+    public void log(ParseTask task, ParseObject toParseObject) {
 
         Client client = task.getClient();
 
@@ -37,26 +31,26 @@ public class TaskClientLogStrategy implements LogTaskStrategy {
     }
 
     private void logClientInfo(Client client, ParseObject toParseObject) {
-        toParseObject.put(TaskClientLogStrategy.client, ParseObject.createWithoutData(Client.class, client.getObjectId()));
+        toParseObject.put(EventLog.client, ParseObject.createWithoutData(Client.class, client.getObjectId()));
         if (client.has(Client.name))
-            toParseObject.put(TaskClientLogStrategy.clientName, client.getName());
-        toParseObject.put(TaskClientLogStrategy.clientAddress, client.getAddressName());
-        toParseObject.put(TaskClientLogStrategy.clientAddressNumber, client.getAddressNumber());
-        toParseObject.put(TaskClientLogStrategy.clientCity, client.getCityName());
-        toParseObject.put(TaskClientLogStrategy.clientZipcode, client.getZipcode());
+            toParseObject.put(EventLog.clientName, client.getName());
+        toParseObject.put(EventLog.clientAddress, client.getAddressName());
+        toParseObject.put(EventLog.clientAddressNumber, client.getAddressNumber());
+        toParseObject.put(EventLog.clientCity, client.getCityName());
+        toParseObject.put(EventLog.clientZipcode, client.getZipcode());
         String clientFullAddress = client.getAddressName() + " "
                 + client.getAddressNumber() + " " + client.getZipcode() + " "
                 + client.getCityName();
-        toParseObject.put(TaskClientLogStrategy.clientFullAddress, clientFullAddress);
+        toParseObject.put(EventLog.clientFullAddress, clientFullAddress);
     }
 
     private void logProximity(Client client, ParseObject toParseObject) {
         Location location = LocationModule.Recent.getLastKnownLocation();
         if (client != null && location != null) {
             ParseGeoPoint clientPosition = client.getPosition();
-//                double distanceKm = ParseModule.distanceBetweenKilometers(location, clientPosition);
+//                double distanceKm = ParseModule.distanceBetweenKilometers(location, position);
             float distanceMeters = ParseModule.distanceBetweenMeters(location, clientPosition);
-            toParseObject.put(TaskClientLogStrategy.clientDistanceMeters, distanceMeters);
+            toParseObject.put(EventLog.clientDistanceMeters, distanceMeters);
         }
     }
 

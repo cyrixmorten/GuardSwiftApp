@@ -7,7 +7,7 @@ import com.google.common.collect.Maps;
 import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.parse.ParseModule;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
 
     private static final String TAG = ArriveWhenNotInVehicleStrategy.class.getSimpleName();
 
-    private final GSTask task;
+    private final ParseTask task;
 
 
     private static Map<String, ArriveOnStillTimer> arriveOnStillTimerMap = Maps.newConcurrentMap();
@@ -27,11 +27,11 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
 
 
 
-    public static TaskActivityStrategy getInstance(GSTask task) {
+    public static TaskActivityStrategy getInstance(ParseTask task) {
         return new ArriveWhenNotInVehicleStrategy(task);
     }
 
-    private ArriveWhenNotInVehicleStrategy(final GSTask task) {
+    private ArriveWhenNotInVehicleStrategy(final ParseTask task) {
         this.task = task;
 
         if (task.getObjectId() != null) {

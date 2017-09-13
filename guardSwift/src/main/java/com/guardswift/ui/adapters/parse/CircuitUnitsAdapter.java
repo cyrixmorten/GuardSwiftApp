@@ -11,10 +11,10 @@
 //import com.guardswift.core.ca.LocationModule;
 //import com.guardswift.core.parse.ParseModule;
 //import com.guardswift.core.parse.ParseModule.DistanceStrings;
-//import com.guardswift.persitence.cache.task.GSTasksCache;
+//import com.guardswift.persitence.cache.task.ParseTasksCache;
 //import com.guardswift.persistence.parse.data.client.Client;
 //import com.guardswift.persistence.parse.planning.regular.CircuitUnit;
-//import com.guardswift.persistence.parse.planning.GSTask;
+//import com.guardswift.persistence.parse.planning.ParseTask;
 //import com.parse.ParseGeoPoint;
 //import com.parse.ParseQueryAdapter;
 //
@@ -28,14 +28,14 @@
 //    private static final String TAG = CircuitUnitsAdapter.class.getSimpleName();
 //
 //
-//    private final GSTasksCache tasksCache;
+//    private final ParseTasksCache tasksCache;
 //
 //    /**
 //     * Constructor used to display circuit units
 //     */
 //    public CircuitUnitsAdapter(Context context, QueryFactory<CircuitUnit> queryFactory) {
 //        super(context, queryFactory);
-//        this.tasksCache = new GSTasksCache(context);
+//        this.tasksCache = new ParseTasksCache(context);
 //    }
 //
 //    @BindView(R.id.linearLayout_times)
@@ -106,7 +106,7 @@
 //
 //    }
 //
-//    private void setDistanceValue(GSTask task, Location deviceLocation) {
+//    private void setDistanceValue(ParseTask task, Location deviceLocation) {
 //
 //        if (deviceLocation == null) {
 //            return;
@@ -119,9 +119,9 @@
 //        distanceValue.setText(distanceStrings.distanceValue);
 //
 //
-//        Set<GSTask> allGeofenced = tasksCache.getAllGeofencedTasks();
-//        Set<GSTask> within = tasksCache.getWithinGeofence();
-//        Set<GSTask> outside = tasksCache.getOutsideGeofence();
+//        Set<ParseTask> allGeofenced = tasksCache.getAllGeofencedTasks();
+//        Set<ParseTask> within = tasksCache.getWithinGeofence();
+//        Set<ParseTask> outside = tasksCache.getOutsideGeofence();
 //
 //        if (within.contains(task)) {
 //            setDistanceColor(R.color.button_success_gradient_dark);

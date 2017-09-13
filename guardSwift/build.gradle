@@ -25,8 +25,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 463
-        versionName "4.6.3"
+        versionCode 500
+        versionName "5.0.0"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -77,7 +77,7 @@ repositories {
 
 dependencies {
     // Local jar dependencies
-    compile fileTree(include: ['*.jar'], dir: 'libs/alexandra')
+//    compile fileTree(include: ['*.jar'], dir: 'libs/alexandra')
 
     compile('com.mikepenz:materialdrawer:5.9.1@aar') {
         transitive = true

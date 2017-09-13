@@ -13,7 +13,7 @@
 //import com.guardswift.core.tasks.controller.TaskController;
 //import com.guardswift.core.ca.GeofencingModule;
 //import com.guardswift.persistence.parse.planning.regular.CircuitUnit;
-//import com.guardswift.persistence.parse.planning.GSTask;
+//import com.guardswift.persistence.parse.planning.ParseTask;
 //import com.guardswift.util.Analytics;
 //import com.guardswift.util.AlarmNotification;
 //import com.guardswift.util.Sounds;
@@ -31,7 +31,7 @@
 //    private static final int DISMISS_TIMEOUT = 10;
 //
 //
-//    public static void show(Context context, GSTask task) {
+//    public static void show(Context context, ParseTask task) {
 //
 //        if (task instanceof CircuitUnit) {
 //            if (CircuitUnit.Recent.getArrived() != null) {
@@ -40,7 +40,7 @@
 //            }
 //        }
 //
-//        Set<GSTask> tasks =  GeofencingModule.Recent.getWithinGeofenceScheduledNow();
+//        Set<ParseTask> tasks =  GeofencingModule.Recent.getWithinGeofenceScheduledNow();
 //        if (!tasks.isEmpty()) {
 //
 //            // TODO other than the default sound
@@ -55,10 +55,10 @@
 //	protected void onCreate(Bundle arg0) {
 //		super.onCreate(arg0);
 //
-//        Set<GSTask> tasks =  GeofencingModule.Recent.getWithinGeofenceScheduledNow();
+//        Set<ParseTask> tasks =  GeofencingModule.Recent.getWithinGeofenceScheduledNow();
 //
 //        if (tasks.size() == 1) {
-//            GSTask task = tasks.iterator().next();
+//            ParseTask task = tasks.iterator().next();
 //
 //            showSingleOptionDialog(task);
 //
@@ -86,7 +86,7 @@
 //
 //
 //
-//    private void showSingleOptionDialog(final GSTask task) {
+//    private void showSingleOptionDialog(final ParseTask task) {
 //        String content = getString(R.string.question_arrived_at_task, task.getTaskTitle(this));
 //        showDialog(new MaterialDialog.Builder(this)
 //                .title(R.string.action_set_arrived)
@@ -114,11 +114,11 @@
 //    }
 //
 //
-//    private void showMultipleOptionsDialog(Set<GSTask> tasks) {
-//        final List<GSTask> tasklist = Lists.newArrayList(tasks);
+//    private void showMultipleOptionsDialog(Set<ParseTask> tasks) {
+//        final List<ParseTask> tasklist = Lists.newArrayList(tasks);
 //        String[] items = new String[tasks.size()];
 //        int index = 0;
-//        for (GSTask task: tasks) {
+//        for (ParseTask task: tasks) {
 //            items[index] = task.getTaskTitle(this);
 //            index++;
 //        }
@@ -137,7 +137,7 @@
 //                .itemsCallback(new MaterialDialog.ListCallback() {
 //                    @Override
 //                    public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-//                        GSTask task = tasklist.get(which);
+//                        ParseTask task = tasklist.get(which);
 //                        task.getController(TaskArrivedDialogActivity.this).performAction(TaskController.ACTION.ARRIVE, task, false);
 //
 //                        Analytics.eventTaskAutomation(Analytics.EventAction.Arrival, Analytics.EventLabelGuess.Correct);

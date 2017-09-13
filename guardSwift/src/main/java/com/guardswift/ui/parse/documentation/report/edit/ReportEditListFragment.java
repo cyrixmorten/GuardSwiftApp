@@ -14,14 +14,13 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.cache.task.GSTasksCache;
-import com.guardswift.persistence.parse.ExtendedParseObject;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.query.EventLogQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.helpers.UpdateFloatingActionButton;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
+import com.guardswift.ui.helpers.UpdateFloatingActionButton;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
@@ -43,7 +42,7 @@ import javax.inject.Inject;
 public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventLog, ReportEditRecycleAdapter.ReportViewHolder> implements UpdateFloatingActionButton, FragmentVisibilityListener {
 
 
-    public static ReportEditListFragment newInstance(GSTask task) {
+    public static ReportEditListFragment newInstance(ParseTask task) {
 
         GuardSwiftApplication.getInstance()
                 .getCacheFactory()
@@ -56,7 +55,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     }
 
     @Inject
-    GSTasksCache gsTasksCache;
+    ParseTasksCache ParseTasksCache;
 
     private FloatingActionButton fab;
     private boolean loading;
@@ -101,18 +100,14 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-    @Override
-    protected ExtendedParseObject getObjectInstance() {
-        return new EventLog();
-    }
 
     @Override
     protected ParseQueryAdapter.QueryFactory<EventLog> createNetworkQueryFactory() {
-        reportId = (gsTasksCache.getLastSelected() != null) ? gsTasksCache.getLastSelected().getReportId() : "";
+        reportId = (ParseTasksCache.getLastSelected() != null) ? ParseTasksCache.getLastSelected().getReportId() : "";
         return new ParseQueryAdapter.QueryFactory<EventLog>() {
             @Override
             public ParseQuery<EventLog> create() {
-                return new EventLog.QueryBuilder(false).matchingReportId(reportId).orderByDescendingTimestamp().whereIsReportEntry().build();
+                return new EventLogQueryBuilder(false).matchingReportId(reportId).orderByDescendingTimestamp().whereIsReportEntry().build();
             }
         };
     }
@@ -159,11 +154,11 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                GSTask task = gsTasksCache.getLastSelected();
+                ParseTask task = ParseTasksCache.getLastSelected();
 
-                if (task instanceof StaticTask) {
+                if (task.isStaticTask()) {
                     final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
-                    ((StaticTask) task).addReportEntry(context, "", null, new GetCallback<EventLog>() {
+                    task.addReportEntry(context, "", null, new GetCallback<EventLog>() {
                         @Override
                         public void done(EventLog eventLog, ParseException e) {
                             if (e != null) {

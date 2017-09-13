@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.persistence.parse.query.GuardQueryBuilder;
 import com.guardswift.rest.GuardSwiftServer;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
@@ -130,7 +131,7 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
     }
 
     private void createAlarmNotificationPreferences() {
-        new Guard.QueryBuilder(false)
+        new GuardQueryBuilder(false)
                 .hasSession()
                 .build()
                 .findInBackground(new FindCallback<Guard>() {

@@ -9,16 +9,15 @@ import android.widget.Toast;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.persistence.cache.ParseCacheFactory;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.documentation.eventlog.AbstractEventFragment;
-import com.guardswift.ui.parse.documentation.eventlog.CircuitUnitEventFragment;
-import com.guardswift.ui.parse.documentation.eventlog.DistrictWatchClientEventFragment;
-import com.guardswift.ui.parse.documentation.eventlog.TaskEventFragment;
+import com.guardswift.ui.parse.documentation.eventlog.AlarmEventFragment;
+import com.guardswift.ui.parse.documentation.eventlog.RegularEventFragment;
 
 import javax.inject.Inject;
 
-public class GSTaskCreateReportActivity extends InjectingAppCompatActivity {
+public class ParseTaskCreateReportActivity extends InjectingAppCompatActivity {
 
     public static final String MODE_ADD_EVENT = "MODE_ADD_EVENT";
     public static final String HAS_ADD_EVENT_BUTTON = "HAS_ADD_BUTTON";
@@ -28,13 +27,13 @@ public class GSTaskCreateReportActivity extends InjectingAppCompatActivity {
     public static final String TASK_TYPE = "com.guardswift.TASK_TYPE";
 
 
-    public static void start(Context context, GSTask task) {
+    public static void start(Context context, ParseTask task) {
 
         GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().setSelected(task);
 
         context.startActivity(new Intent(context,
-                GSTaskCreateReportActivity.class)
-                .putExtra(GSTaskCreateReportActivity.TASK_TYPE, task.getTaskType()));
+                ParseTaskCreateReportActivity.class)
+                .putExtra(ParseTaskCreateReportActivity.TASK_TYPE, task.getTaskType()));
     }
 
 
@@ -56,20 +55,21 @@ public class GSTaskCreateReportActivity extends InjectingAppCompatActivity {
             actionBar.setTitle(getString(R.string.title_events));
 
         if (getIntent().hasExtra(TASK_TYPE)) {
-            GSTask.TASK_TYPE frag_type = (GSTask.TASK_TYPE) getIntent().getSerializableExtra(TASK_TYPE);
+            ParseTask.TASK_TYPE frag_type = (ParseTask.TASK_TYPE) getIntent().getSerializableExtra(TASK_TYPE);
+            ParseTask selected = parseCacheFactory.getTaskCache().getSelected();
 
             switch (frag_type) {
                 case ALARM:
-                    fragment = TaskEventFragment.newInstance(parseCacheFactory.getTaskCache().getSelected());
+                    fragment = AlarmEventFragment.newInstance(selected);
                     break;
 
                 case REGULAR:
-                    fragment = CircuitUnitEventFragment.newInstance(this, parseCacheFactory.getCircuitUnitCache().getSelected());
+                    fragment = RegularEventFragment.newInstance(this, selected);
                     break;
 
-                case DISTRICTWATCH:
-                    fragment = DistrictWatchClientEventFragment.newInstance(this, parseCacheFactory.getDistrictWatchClientCache().getSelected());
-                    break;
+//                case DISTRICTWATCH:
+//                    fragment = DistrictWatchClientEventFragment.newInstance(this, parseCacheFactory.getDistrictWatchClientCache().getSelected());
+//                    break;
 
 //                case ALARM:
 //                    fragment = AlarmEventFragment.newInstance(this, parseCacheFactory.getAlarmCache().getSelected());

@@ -1,9 +1,7 @@
 package com.guardswift.persistence.parse.data.client;
 
-import android.content.Context;
-import android.util.Log;
+import android.support.annotation.NonNull;
 
-import com.guardswift.core.ca.FingerprintingModule;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.parse.ParseClassName;
@@ -11,24 +9,15 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.Set;
-
-import dk.alexandra.positioning.wifi.AccessPoint;
-import dk.alexandra.positioning.wifi.Fingerprint;
-import dk.alexandra.positioning.wifi.io.WiFiIO;
 
 @ParseClassName("ClientLocation")
 public class ClientLocation extends ExtendedParseObject implements Comparable<ClientLocation> {
 
 
-    // TODO
-    public void adjustFingerprint(Set<AccessPoint> sample) {
-//        JSONObject fingerprint = getFingerprint();
-    }
+//    // TODO
+//    public void adjustFingerprint(Set<AccessPoint> sample) {
+////        JSONObject fingerprint = getFingerprint();
+//    }
 
 
 
@@ -103,54 +92,50 @@ public class ClientLocation extends ExtendedParseObject implements Comparable<Cl
         return new QueryBuilder(false).build();
     }
 
-    @Override
-    public void updateFromJSON(final Context context,
-                               final JSONObject jsonObject) {
-        // TODO Auto-generated method stub
-    }
+
 
     public static QueryBuilder getQueryBuilder(boolean fromLocalDatastore) {
         return new QueryBuilder(fromLocalDatastore);
     }
 
     @Override
-    public int compareTo(ClientLocation another) {
+    public int compareTo(@NonNull ClientLocation another) {
         return getLocation().compareTo(another.getLocation());
     }
 
-    public String getFingerprintString() {
-        if (getFingerprint() != null) {
-            Log.d(TAG, "getFingerprintString() " + has(fingerprint));
-            Log.d(TAG, "getFingerprintString() " + getFingerprint().toString());
-            return getFingerprint().toString();
-        }
-        Log.e(TAG, "Checkpoint has no fingerprint: " + getLocation());
-        return null;
-    }
+//    public String getFingerprintString() {
+//        if (getFingerprint() != null) {
+//            Log.d(TAG, "getFingerprintString() " + has(fingerprint));
+//            Log.d(TAG, "getFingerprintString() " + getFingerprint().toString());
+//            return getFingerprint().toString();
+//        }
+//        Log.e(TAG, "Checkpoint has no fingerprint: " + getLocation());
+//        return null;
+//    }
 
     ;
 
-    public JSONObject getFingerprint() {
-        return getJSONObject(fingerprint);
-    }
+//    public JSONObject getFingerprint() {
+//        return getJSONObject(fingerprint);
+//    }
 
-    public void storeSamples(Set<AccessPoint> samples) {
-        put(ClientLocation.wifisamples, FingerprintingModule.convertToJsonArray(samples));
-    }
-
-    public JSONArray getWifiSamples() {
-        return getJSONArray(wifisamples);
-    }
-
-    public void storeFingerprint(Fingerprint fingerprint) {
-        String jsonString = WiFiIO.convertToJSON(fingerprint);
-        try {
-            put(ClientLocation.fingerprint, new JSONObject(jsonString));
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage(), e);
-            e.printStackTrace();
-        }
-    }
+//    public void storeSamples(Set<AccessPoint> samples) {
+//        put(ClientLocation.wifisamples, FingerprintingModule.convertToJsonArray(samples));
+//    }
+//
+//    public JSONArray getWifiSamples() {
+//        return getJSONArray(wifisamples);
+//    }
+//
+//    public void storeFingerprint(Fingerprint fingerprint) {
+//        String jsonString = WiFiIO.convertToJSON(fingerprint);
+//        try {
+//            put(ClientLocation.fingerprint, new JSONObject(jsonString));
+//        } catch (JSONException e) {
+//            Log.e(TAG, e.getMessage(), e);
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * Does only return true if distance is at least 1 less than last

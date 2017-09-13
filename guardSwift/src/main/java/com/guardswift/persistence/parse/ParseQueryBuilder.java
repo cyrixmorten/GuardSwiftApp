@@ -71,9 +71,9 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
 		return query;
 	}
 
-    public ParseQuery<ParseObject> buildAsParseObject() {
-		return (ParseQuery<ParseObject>)build();
-    }
+//    public ParseQuery<ParseObject> buildAsParseObject() {
+//		return (ParseQuery<ParseObject>)build();
+//    }
 
 
 	private void setFromLocalDatastore() {

@@ -192,12 +192,12 @@
                 android:layout_height="wrap_content"
                 android:text="@string/previous_reports" />
 
-            <Button
-                android:id="@+id/btn_task_description"
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/task_description" />
+            <!--<Button-->
+                <!--android:id="@+id/btn_task_description"-->
+                <!--style="?android:attr/borderlessButtonStyle"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="@string/task_description" />-->
 
             <Button
                 android:id="@+id/btn_client_info"
@@ -206,12 +206,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/client_contacts" />
 
-            <Button
-                android:id="@+id/btn_checkpoints"
-                style="?android:attr/borderlessButtonStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/checkpoints" />
+
 
         </LinearLayout>
 

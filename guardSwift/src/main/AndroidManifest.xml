@@ -124,16 +124,6 @@
                 android:value=".ui.activity.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.parse.documentation.report.create.activity.CircuitUnitCreateEventHandlerActivity"
-            android:label="@string/title_event_add"
-            android:parentActivityName=".ui.activity.MainActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".ui.parse.documentation.report.create.activity.DistrictWatchClientCreateEventHandlerActivity"
-            android:label="@string/title_event_add"
-            android:parentActivityName=".ui.activity.MainActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".ui.parse.documentation.report.create.activity.CreateEventHandlerActivity"
             android:label="@string/title_event_add"
             android:parentActivityName=".ui.activity.MainActivity"
@@ -143,7 +133,7 @@
             android:label="@string/title_activity_add_event"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.activity.GSTaskCreateReportActivity"
+            android:name=".ui.activity.ParseTaskCreateReportActivity"
             android:parentActivityName=".ui.activity.MainActivity"
             android:screenOrientation="portrait" />
         <activity
@@ -153,11 +143,11 @@
             android:showOnLockScreen="true"
             android:theme="@style/AppTheme.Light.Dialog" />
 
-        <receiver android:name=".core.ca.fingerprinting.WifiPositionReceiver">
-            <intent-filter>
-                <action android:name="dk.alexandra.positioning.wifi.WIFI_POSITION" />
-            </intent-filter>
-        </receiver>
+        <!--<receiver android:name=".core.ca.fingerprinting.WifiPositionReceiver">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="dk.alexandra.positioning.wifi.WIFI_POSITION" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
 
         <service android:name="com.parse.PushService" />
 
@@ -198,10 +188,10 @@
             android:name=".core.ca.location.FusedLocationTrackerService"
             android:enabled="true"
             android:exported="false" />
-        <service
-            android:name=".core.ca.fingerprinting.WiFiPositioningService"
-            android:enabled="true"
-            android:exported="false" />
+        <!--<service-->
+            <!--android:name=".core.ca.fingerprinting.WiFiPositioningService"-->
+            <!--android:enabled="true"-->
+            <!--android:exported="false" />-->
         <service
             android:name=".core.ca.activity.ActivityRecognitionService"
             android:exported="false" />
@@ -222,10 +212,7 @@
             android:name="io.fabric.ApiKey"
             android:value="1d3137a16e5b81623a1376cbae7962314b9c8d6a" />
 
-        <activity android:name=".ui.parse.execution.circuit.TaskDescriptionActivity" />
-        <activity
-            android:name=".ui.parse.data.checkpoint.CheckpointActivity"
-            android:label="@string/title_activity_checkpoint" />
+        <!--<activity android:name=".ui.parse.execution.circuit.TaskDescriptionActivity" />-->
         <activity android:name=".ui.activity.GenericToolbarActivity"
             android:screenOrientation="portrait"/>
 

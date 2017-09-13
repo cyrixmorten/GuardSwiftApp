@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.StrictMode;
 import android.support.multidex.MultiDex;
 import android.util.Log;
+import android.util.Pair;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -16,7 +17,6 @@ import com.google.common.collect.Sets;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.ca.activity.ActivityRecognitionService;
-import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
 import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.exceptions.HandleException;
@@ -27,7 +27,6 @@ import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
-import com.guardswift.persistence.parse.ParseObjectFactory;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
@@ -38,16 +37,15 @@ import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.documentation.report.Report;
-import com.guardswift.persistence.parse.execution.ParseTask;
-import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatch;
-import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
-import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
-import com.guardswift.persistence.parse.execution.task.regular.Circuit;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
-import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.execution.task.TaskGroup;
+import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.misc.Message;
 import com.guardswift.persistence.parse.misc.Update;
+import com.guardswift.persistence.parse.query.AlarmTaskQueryBuilder;
+import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
+import com.guardswift.persistence.parse.query.StaticTaskQueryBuilder;
+import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.ToastHelper;
 import com.parse.DeleteCallback;
@@ -182,18 +180,13 @@ public class GuardSwiftApplication extends InjectingApplication {
 
     private void setupParse() {
         ParseObject.registerSubclass(Report.class);
-        ParseObject.registerSubclass(StaticTask.class);
-        ParseObject.registerSubclass(Circuit.class);
         ParseObject.registerSubclass(Client.class);
         ParseObject.registerSubclass(Person.class);
         ParseObject.registerSubclass(ClientContact.class);
         ParseObject.registerSubclass(ClientLocation.class);
         ParseObject.registerSubclass(ParseTask.class);
-        ParseObject.registerSubclass(CircuitUnit.class);
-        ParseObject.registerSubclass(CircuitStarted.class);
-        ParseObject.registerSubclass(DistrictWatch.class);
-        ParseObject.registerSubclass(DistrictWatchStarted.class);
-        ParseObject.registerSubclass(DistrictWatchClient.class);
+        ParseObject.registerSubclass(TaskGroup.class);
+        ParseObject.registerSubclass(TaskGroupStarted.class);
         ParseObject.registerSubclass(EventLog.class);
         ParseObject.registerSubclass(EventType.class);
         ParseObject.registerSubclass(EventRemark.class);
@@ -268,7 +261,6 @@ public class GuardSwiftApplication extends InjectingApplication {
     public void stopServices() {
         ActivityRecognitionService.stop(this);
         FusedLocationTrackerService.stop(this);
-        WiFiPositioningService.stop(this);
         RegisterGeofencesIntentService.stop(this);
     }
 
@@ -310,7 +302,6 @@ public class GuardSwiftApplication extends InjectingApplication {
         saveInstallation();
         bootstrapInProgress = true;
 
-        ParseObjectFactory parseObjectFactory = new ParseObjectFactory();
 
         final AtomicInteger updateClassProgress = new AtomicInteger(0);
         final AtomicInteger updateClassTotal = new AtomicInteger(0);
@@ -351,28 +342,45 @@ public class GuardSwiftApplication extends InjectingApplication {
         };
 
 
-        ArrayList<ExtendedParseObject> updateClasses = Lists.newArrayList();
-        updateClasses.add(parseObjectFactory.getEventType());
-        updateClasses.add(parseObjectFactory.getClient());
-        updateClasses.add(parseObjectFactory.getGuard());
+        ArrayList<Pair<ExtendedParseObject, ParseQuery>> updateQueries = Lists.newArrayList();
+
+        EventType eventType = new EventType();
+        updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(eventType, eventType.getAllNetworkQuery()));
+
+        Client client = new Client();
+        updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(client, client.getAllNetworkQuery()));
+
+        updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(guard, guard.getAllNetworkQuery()));
+
+        ParseTask task = new ParseTask();
+        TaskGroupStarted taskGroupStarted = new TaskGroupStarted();
+        Message message = new Message();
+
         if (guard.canAccessRegularTasks()) {
-            updateClasses.add(parseObjectFactory.getCircuitStarted());
-            updateClasses.add(parseObjectFactory.getCircuitUnit());
-            updateClasses.add(parseObjectFactory.getMessage());
+            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new RegularRaidTaskQueryBuilder(false).build()));
+            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(taskGroupStarted, new TaskGroupStartedQueryBuilder(false).whereActive().build()));
+            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(message, message.getAllNetworkQuery()));
+        }
+        if (guard.canAccessStaticTasks()) {
+            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new AlarmTaskQueryBuilder(false).build()));
         }
         if (guard.canAccessAlarms()) {
-            updateClasses.add(parseObjectFactory.getTask());
+            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new StaticTaskQueryBuilder(false).build()));
         }
 
-        updateClassTotal.set(updateClasses.size());
+        updateClassTotal.set(updateQueries.size());
 
         Task<List<ParseObject>> resultTask = Task.forResult(null);
 
-        for (final ExtendedParseObject parseClass: updateClasses) {
+        for (final Pair<ExtendedParseObject,ParseQuery> objectQueryPair: updateQueries) {
+
+            final ExtendedParseObject parseObject = objectQueryPair.first;
+            final ParseQuery<ParseObject> query = objectQueryPair.second;
+
             resultTask = resultTask.onSuccessTask(new Continuation<List<ParseObject>, Task<List<ParseObject>>>() {
                 @Override
                 public Task<List<ParseObject>> then(Task<List<ParseObject>> task) throws Exception {
-                    return parseClass.updateAllAsync().onSuccess(updateClassSuccess);
+                    return parseObject.updateAll(query, 1000).onSuccess(updateClassSuccess);
                 }
             });
         }

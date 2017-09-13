@@ -25,11 +25,11 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.persistence.cache.data.ClientCache;
 import com.guardswift.persistence.cache.data.EventTypeCache;
-import com.guardswift.persistence.cache.task.GSTasksCache;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
 import com.guardswift.util.StringUtil;
@@ -75,7 +75,7 @@ public class AddEventRemarkFragment extends InjectingFragment implements
     @Inject
     EventTypeCache eventTypeCache;
     @Inject
-    GSTasksCache tasksCache;
+    ParseTasksCache tasksCache;
 
     private ParseQueryAdapter<EventRemark> mAdapter;
 
@@ -106,7 +106,7 @@ public class AddEventRemarkFragment extends InjectingFragment implements
 //        header.setText(getString(R.string.remark).toUpperCase());
 
         Log.e(TAG, "onCreateView");
-        if (tasksCache.getLastSelected().getTaskType() == GSTask.TASK_TYPE.STATIC) {
+        if (tasksCache.getLastSelected().getTaskType() == ParseTask.TASK_TYPE.STATIC) {
             btnClear.setVisibility(View.GONE);
         }
 
@@ -202,7 +202,7 @@ public class AddEventRemarkFragment extends InjectingFragment implements
     boolean remarkSuggestionsFound;
     private void prepareRemarkSuggestions() {
         Log.e(TAG, "prepareRemarkSuggestions");
-        if (tasksCache.getLastSelected().getTaskType() == GSTask.TASK_TYPE.STATIC) {
+        if (tasksCache.getLastSelected().getTaskType() == ParseTask.TASK_TYPE.STATIC) {
             // do not show suggestions for static tasks
             return;
         }

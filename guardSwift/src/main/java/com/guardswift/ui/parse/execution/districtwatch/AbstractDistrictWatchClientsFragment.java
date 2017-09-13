@@ -19,7 +19,7 @@
 //import com.guardswift.R;
 //import com.guardswift.ui.activity.MainActivity;
 //import com.guardswift.ui.adapters.parse.DistrictWatchClientAdapter;
-//import com.guardswift.core.tasks.controller.DistrictWatchClientController;
+//import com.guardswift.core.tasks.controller.RaidController;
 //import com.guardswift.core.tasks.controller.TaskController;
 //import com.guardswift.dagger.InjectingListFragment;
 //import com.guardswift.eventbus.EventBusController;
@@ -53,7 +53,7 @@
 //    public abstract boolean getShowOnlyVisited();
 //
 //    @Inject
-//    DistrictWatchClientController controller;
+//    RaidController controller;
 //	@Inject
 //	DistrictWatchStartedCache districtWatchStartedCache;
 //

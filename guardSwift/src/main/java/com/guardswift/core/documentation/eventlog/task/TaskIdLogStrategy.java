@@ -1,23 +1,14 @@
 package com.guardswift.core.documentation.eventlog.task;
 
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.parse.ParseObject;
 
-/**
- *
- * Saves the unique parseObject id of the task as a String
- *
- * Note: cannot be used directly as a pointer
- *
- * Created by cyrix on 6/7/15.
- */
+
 public class TaskIdLogStrategy implements LogTaskStrategy {
 
-    public static final String taskId = "taskId";
-
     @Override
-    public void log(GSTask task, ParseObject toParseObject) {
-        toParseObject.put(TaskIdLogStrategy.taskId, task.getObjectId());
+    public void log(ParseTask task, ParseObject toParseObject) {
+        toParseObject.put(EventLog.taskId, task.getObjectId());
     }
 }

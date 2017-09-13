@@ -16,11 +16,11 @@
 ////    /*
 ////     * Locate report for the task
 ////     */
-////    GSReport findReport(GSTask task);
+////    GSReport findReport(ParseTask task);
 ////
 ////    /*
 ////     * Locate report for the task
 ////     */
-////    GSReport findReportInBackground(GSTask task, GetCallback<ParseObject> );
+////    GSReport findReportInBackground(ParseTask task, GetCallback<ParseObject> );
 //
 //}

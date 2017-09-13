@@ -2,7 +2,7 @@ package com.guardswift.persistence.cache.task;
 
 import android.content.Context;
 
-import com.guardswift.persistence.parse.execution.ParseTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

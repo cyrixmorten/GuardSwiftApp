@@ -9,7 +9,7 @@
 //
 //import com.beardedhen.androidbootstrap.BootstrapButton;
 //import com.guardswift.R;
-//import com.guardswift.core.tasks.controller.DistrictWatchClientController;
+//import com.guardswift.core.tasks.controller.RaidController;
 //import com.guardswift.core.tasks.controller.TaskController;
 //import com.guardswift.core.ca.LocationModule;
 //import com.guardswift.core.parse.ParseModule;
@@ -35,7 +35,7 @@
 //    private static int sortBy = DistrictWatchClient.SORTBY_NEAREST;
 //    private static boolean includeArrived = false;
 //
-//    private DistrictWatchClientController controller;
+//    private RaidController controller;
 //    private final boolean only_visited;
 //
 //    public void setShowArrived(boolean show) {
@@ -199,7 +199,7 @@
 ////                districtWatchClient.getDistrictWatchUnit(),
 ////                districtWatchClient,
 ////                getContext().getString(R.string.event_arrived),
-////                EventLog.EventCodes.DISTRICTWATCH_ARRIVED);
+////                EventLog.EventCodes.RAID_ARRIVED);
 ////
 ////        districtWatchClient.setArrived(true);
 ////        districtWatchClient.saveEventually();

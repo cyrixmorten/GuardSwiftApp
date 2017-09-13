@@ -1,7 +1,5 @@
 package com.guardswift.persistence.parse.misc;
 
-import android.content.Context;
-
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.util.Device;
@@ -9,8 +7,6 @@ import com.parse.ParseClassName;
 import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-
-import org.json.JSONObject;
 
 @ParseClassName("Update")
 public class Update extends ExtendedParseObject {
@@ -34,11 +30,6 @@ public class Update extends ExtendedParseObject {
         return new QueryBuilder(false).build();
     }
 
-    @Override
-    public void updateFromJSON(final Context context,
-                               final JSONObject jsonObject) {
-        // TODO Auto-generated method stub
-    }
 
     public static QueryBuilder getQueryBuilder(boolean fromLocalDatastore, String groupId) {
         return new QueryBuilder(fromLocalDatastore);

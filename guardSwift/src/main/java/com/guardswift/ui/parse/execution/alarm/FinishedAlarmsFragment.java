@@ -1,8 +1,8 @@
 package com.guardswift.ui.parse.execution.alarm;
 
 import com.guardswift.persistence.parse.data.Guard;
-import com.guardswift.persistence.parse.execution.BaseTask;
-import com.guardswift.persistence.parse.execution.ParseTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.query.AlarmTaskQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
@@ -10,7 +10,7 @@ import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
 
-public class FinishedAlarmsFragment extends AbstractTasksRecycleFragment<ParseTask> {
+public class FinishedAlarmsFragment extends AbstractTasksRecycleFragment {
 
 	protected static final String TAG = FinishedAlarmsFragment.class
 			.getSimpleName();
@@ -26,11 +26,6 @@ public class FinishedAlarmsFragment extends AbstractTasksRecycleFragment<ParseTa
     }
 
     @Override
-    public BaseTask getObjectInstance() {
-        return new ParseTask();
-    }
-
-    @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
 
         final Guard guard = GuardSwiftApplication.getLoggedIn();
@@ -39,7 +34,7 @@ public class FinishedAlarmsFragment extends AbstractTasksRecycleFragment<ParseTa
 
             @Override
             public ParseQuery<ParseTask> create() {
-                return new ParseTask().getQueryBuilder(false)
+                return new AlarmTaskQueryBuilder(false)
                         .sortByCreatedAtDescending()
                         .whereStatus(ParseTask.STATUS.FINISHED, ParseTask.STATUS.ABORTED)
                         .build();

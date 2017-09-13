@@ -14,7 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
 import com.guardswift.core.tasks.controller.AlarmController;
 import com.guardswift.persistence.cache.task.TaskCache;
-import com.guardswift.persistence.parse.execution.ParseTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.notification.AlarmNotification;

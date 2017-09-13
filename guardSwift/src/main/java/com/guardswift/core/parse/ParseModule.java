@@ -13,13 +13,21 @@ import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule.ForApplication;
 import com.guardswift.persistence.cache.data.GuardCache;
-import com.guardswift.persistence.cache.task.GSTasksCache;
+import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
-import com.guardswift.persistence.parse.ParseObjectFactory;
+import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
+import com.guardswift.persistence.parse.data.client.ClientContact;
+import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
+import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
+import com.guardswift.persistence.parse.documentation.report.Report;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.execution.task.TaskGroup;
+import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
+import com.guardswift.persistence.parse.misc.Message;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
@@ -56,7 +64,7 @@ public class ParseModule {
     public static final String FUNCTION_SEND_REPORT = "sendReport";
 
     private final Context context;
-    private final GSTasksCache tasksCache;
+    private final ParseTasksCache tasksCache;
     private final GuardCache guardCache;
 
     @Inject
@@ -209,8 +217,7 @@ public class ParseModule {
         guardCache.removeLoggedIn();
         tasksCache.clear();
 
-        GuardSwiftApplication.getInstance().getCacheFactory().getCircuitStartedCache().clear();
-        GuardSwiftApplication.getInstance().getCacheFactory().getDistrictWatchStartedCache().clear();
+        GuardSwiftApplication.getInstance().getCacheFactory().getTaskGroupStartedCache().clear();
 
         GuardSwiftApplication.getInstance().stopServices();
 
@@ -222,7 +229,21 @@ public class ParseModule {
     private void unpinAllParseObjects() {
 
         List<Task<Object>> unpinClassNamed = Lists.newArrayList();
-        for (ExtendedParseObject parseObject : new ParseObjectFactory().getAll()) {
+        for (ExtendedParseObject parseObject : Lists.newArrayList(
+                new TaskGroup(),
+                new TaskGroupStarted(),
+                new ParseTask(),
+                new Client(),
+                new ClientContact(),
+                new ClientLocation(),
+                new Guard(),
+                new EventLog(),
+                new EventRemark(),
+                new EventType(),
+                new Tracker(),
+                new Report(),
+                new Message()
+        )) {
 
             unpinClassNamed.add(parseObject.unpinAllPinnedToClass());
         }

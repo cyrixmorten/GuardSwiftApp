@@ -18,19 +18,18 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.dagger.InjectingFragment;
-import com.guardswift.persistence.cache.task.StaticTaskCache;
+import com.guardswift.persistence.cache.task.TaskCache;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.data.client.ClientContact;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
-import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
@@ -57,11 +56,11 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
 
     private static final String TAG = ReportSummaryFragment.class.getSimpleName();
 
-    public static ReportSummaryFragment newInstance(StaticTask task) {
+    public static ReportSummaryFragment newInstance(ParseTask task) {
 
         GuardSwiftApplication.getInstance()
                 .getCacheFactory()
-                .getStaticTaskCache()
+                .getTasksCache()
                 .setSelected(task);
 
         ReportSummaryFragment fragment = new ReportSummaryFragment();
@@ -71,15 +70,14 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
     }
 
     @Inject
-    StaticTaskCache staticTaskCache;
+    TaskCache taskCache;
 
     @Inject
     ParseModule parseModule;
 
-    private StaticTask staticTask;
+    private ParseTask task;
     private Report report;
     private Client client;
-    private List<ClientContact> clientReceivers = Lists.newArrayList();
 
 
     @BindView(R.id.cardview)
@@ -115,8 +113,8 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        staticTask = staticTaskCache.getSelected();
-        client = staticTask.getClient();
+        task = taskCache.getSelected();
+        client = task.getClient();
 
     }
 
@@ -145,7 +143,8 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
         Log.w(TAG, "update");
         loadingReport(true);
 
-        staticTask.getTaskReportingStrategy().getReport().onSuccess(new Continuation<Report, Object>() {
+
+        task.findReport(false).onSuccess(new Continuation<Report, Object>() {
 
             @Override
             public Object then(Task<Report> reportTask) throws Exception {
@@ -168,7 +167,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
             public Object then(Task<Object> task) throws Exception {
                 if (task.getError() != null) {
                     Log.e(TAG, "update", task.getError());
-                    new HandleException(getContext(), TAG, "find report matching staticTask", task.getError());
+                    new HandleException(getContext(), TAG, "find report matching task", task.getError());
                 }
                 return null;
             }
@@ -211,7 +210,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
     }
 
     private void sendReportSuccess() {
-        staticTask.getController().performAction(TaskController.ACTION.FINISH, staticTask);
+        task.getController().performAction(TaskController.ACTION.FINISH, task);
         dismissSendReportDialog();
         if (getActivity() != null) {
             new CommonDialogsBuilder.MaterialDialogs(getActivity()).okCancel(R.string.logout, getString(R.string.question_logout_after_sending_report), new MaterialDialog.SingleButtonCallback() {
@@ -241,7 +240,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
     private void updateHeader() {
         Log.w(TAG, "updateHeader");
         tvTitle.setText(client.getName());
-        Date createdAt = staticTask.getParseObject().getCreatedAt();
+        Date createdAt = task.getParseObject().getCreatedAt();
         if (createdAt != null) {
             String dateString = DateUtils.formatDateTime(getContext(), createdAt.getTime(), DateUtils.FORMAT_SHOW_DATE);
             tvDate.setText(dateString);
@@ -252,7 +251,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
 
     private void updateGuard() {
         Log.w(TAG, "updateGuard");
-        Guard guard = staticTask.getGuard();
+        Guard guard = task.getGuard();
         if (guard != null) {
             tvGuardName.setText(guard.getName());
             tvGuardId.setText(String.valueOf(guard.getGuardId()));
@@ -261,7 +260,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
 
     private void updateRemarksSummary() {
         Log.w(TAG, "updateRemarksSummary");
-        EventLog.getQueryBuilder(true).matchingReportId(staticTaskCache.getSelected().getReportId()).whereIsReportEntry().orderByAscendingTimestamp().build().findInBackground(new FindCallback<EventLog>() {
+        EventLog.getQueryBuilder(true).matchingReportId(taskCache.getSelected().getReportId()).whereIsReportEntry().orderByAscendingTimestamp().build().findInBackground(new FindCallback<EventLog>() {
             @Override
             public void done(final List<EventLog> objects, ParseException e) {
                 if (!objects.isEmpty() && getActivity() != null) {
@@ -298,7 +297,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
 
     private void updateClientReceivers() {
         Log.w(TAG, "updateClientReceivers");
-        clientReceivers = client.getContactsRequestingReport();
+        List<ClientContact> clientReceivers = client.getContactsRequestingReport();
         if (!clientReceivers.isEmpty() && getActivity() != null) {
             layoutClientReceivers.removeAllViews();
 

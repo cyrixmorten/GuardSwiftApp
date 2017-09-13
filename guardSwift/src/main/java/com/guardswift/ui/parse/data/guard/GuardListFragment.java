@@ -4,10 +4,10 @@ import android.location.Location;
 import android.os.Bundle;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.data.Guard;
-import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
+import com.guardswift.persistence.parse.query.GuardQueryBuilder;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
+import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
@@ -21,17 +21,13 @@ public class GuardListFragment extends AbstractParseRecyclerFragment<Guard, Guar
     }
 
 
-    @Override
-    protected ExtendedParseObject getObjectInstance() {
-        return new Guard();
-    }
 
     @Override
     protected ParseQueryAdapter.QueryFactory<Guard> createNetworkQueryFactory() {
         return new ParseQueryAdapter.QueryFactory<Guard>() {
             @Override
             public ParseQuery<Guard> create() {
-                return new Guard.QueryBuilder(false).sortByName(true).build();
+                return new GuardQueryBuilder(false).sortByName(true).build();
             }
         };
     }

@@ -34,23 +34,16 @@ import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.execution.BaseTask;
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.ParseTask;
-import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
-import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.helpers.ViewHelper;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
-import com.guardswift.ui.parse.data.checkpoint.CheckpointActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.edit.ReportEditViewPagerFragment;
 import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
-import com.guardswift.ui.parse.execution.circuit.TaskDescriptionActivity;
 import com.guardswift.util.AnimationHelper;
 import com.guardswift.util.OpenLocalPDF;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -75,24 +68,13 @@ import butterknife.ButterKnife;
 import static com.guardswift.core.tasks.controller.TaskController.ACTION;
 import static com.guardswift.ui.helpers.ViewHelper.TintBackground.tintBackgroundColor;
 
-public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAdapter<T, TaskRecycleAdapter.TaskViewHolder> {
+public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, TaskRecycleAdapter.TaskViewHolder> {
 
     private static final String TAG = TaskRecycleAdapter.class.getSimpleName();
 
 
-    public interface TaskActionCallback<T extends BaseTask> {
-        void onActionOpen(Context context, T task);
 
-        void onActionAccept(Context context, T task);
-
-        void onActionArrive(Context context, T task);
-
-        void onActionAbort(Context context, T task);
-
-        void onActionFinish(Context context, T task);
-    }
-
-    public static class StaticTaskViewHolder extends TaskViewHolder<StaticTask> {
+    public static class StaticTaskViewHolder extends TaskViewHolder {
 
         @BindView(R.id.timeStart)
         TextView vTimeStart;
@@ -108,7 +90,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @Override
-        public void onActionOpen(final Context context, final StaticTask task) {
+        public void onActionOpen(final Context context, final ParseTask task) {
             super.onActionOpen(context, task);
 
             if (task.isPending()) {
@@ -161,7 +143,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @Override
-        protected void setupTaskActionButtons(final Context context, final StaticTask task) {
+        protected void setupTaskActionButtons(final Context context, final ParseTask task) {
             this.cardview.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -171,13 +153,13 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @Override
-        public void update(Context context, GSTask task) {
+        public void update(Context context, ParseTask task) {
             super.update(context, task);
 
-            if (task instanceof StaticTask) {
+            if (task.isStaticTask()) {
                 vContentFooter.setVisibility(View.GONE);
                 vContentHeader.setVisibility(View.GONE);
-                Date timeStarted = ((StaticTask) task).getTimeArrived();
+                Date timeStarted = task.getTimeStarted();
                 if (timeStarted != null) {
                     vTimeStart.setText(DateFormat.getLongDateFormat(context).format(timeStarted));
                     vTimeEnd.setVisibility(View.GONE);
@@ -188,13 +170,13 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     iconClock.setVisibility(View.GONE);
                 }
 
-                setupTaskActionButtons(context, (StaticTask) task);
+                setupTaskActionButtons(context,task);
             }
             super.update(context, task);
         }
     }
 
-    public static class AlarmTaskViewHolder extends TaskViewHolder<ParseTask> {
+    public static class AlarmTaskViewHolder extends TaskViewHolder {
 
         @BindView(R.id.tv_central)
         TextView vCentral;
@@ -275,7 +257,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             vBtnReportHistory.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient(), GSTask.TASK_TYPE.ALARM);
+                    Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient(), ParseTask.TASK_TYPE.ALARM);
                     GenericToolbarActivity.start(
                             context,
                             context.getString(R.string.reports),
@@ -284,12 +266,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 }
             });
 
-            vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
+//            vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
 //                    TaskDescriptionActivity.start(context, task);
-                }
-            });
+//                }
+//            });
 
 
             vBtnClientContacts.setOnClickListener(new View.OnClickListener() {
@@ -301,14 +283,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @Override
-        public void update(final Context context, GSTask task) {
+        public void update(final Context context, final ParseTask task) {
             super.update(context, task);
 
-            if (task instanceof ParseTask && task.getTaskType() == GSTask.TASK_TYPE.ALARM) {
-                final ParseTask alarmTask = (ParseTask) task;
-
+            if (task.isAlarmTask()) {
 //                vBtnAborted.setVisibility(View.GONE);
-                vBtnTaskdescription.setVisibility(View.GONE);
+//                vBtnTaskdescription.setVisibility(View.GONE);
 
                 if (task.isPending()) {
                     vBtnAccepted.setVisibility(View.VISIBLE);
@@ -325,9 +305,9 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     vBtnArrived.setVisibility(View.GONE);
                 }
 
-                String description = context.getText(R.string.security_level) + ": " + alarmTask.getPriority() + "\n" +
-                        context.getText(R.string.keybox) + ": " + alarmTask.getKeybox() + "\n" +
-                        context.getText(R.string.remarks) + ": " + alarmTask.getRemarks();
+                String description = context.getText(R.string.security_level) + ": " + task.getPriority() + "\n" +
+                        context.getText(R.string.keybox) + ": " + task.getKeybox() + "\n" +
+                        context.getText(R.string.remarks) + ": " + task.getRemarks();
 
 //                if (alarmTask.getGuard() != null) {
 //                    description += "\n\n";
@@ -338,21 +318,22 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 //                alarmTaskViewHolder.vTimeStart.setText(alarmTask.getTimeStartString());
 //                alarmTaskViewHolder.vTimeEnd.setText(alarmTask.getTimeEndString());
 
-                String centralName = alarmTask.getCentralName();
+                String centralName = task.getCentralName();
 
 
                 vCentral.setText(centralName);
                 vDate.setText(
                         new SpannableStringBuilder()
-                                .append(DateFormat.getDateFormat(context).format(alarmTask.getCreatedAt()))
+                                .append(DateFormat.getDateFormat(context).format(task.getCreatedAt()))
                                 .append(" ")
-                                .append(DateFormat.getTimeFormat(context).format(alarmTask.getCreatedAt()))
+                                .append(DateFormat.getTimeFormat(context).format(task.getCreatedAt()))
                 );
 
-                setupTaskActionButtons(context, alarmTask);
+                setupTaskActionButtons(context, task);
 
 
-                if (alarmTask.getCentralName().equals("G4S")) {
+                // TODO make smarter
+                if (task.getCentralName().equals("G4S")) {
                     View centralButton = vContentFooter.findViewById(R.id.button_central_pdf);
                     if (centralButton == null) {
                         Button g4spdf = new Button(new ContextThemeWrapper(context, android.R.style.Widget_DeviceDefault_Button_Borderless), null, android.R.style.Widget_DeviceDefault_Button_Borderless);
@@ -376,7 +357,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     originalAlarm.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.alarm, alarmTask.getOriginal()).show();
+                            new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.alarm, task.getOriginal()).show();
                         }
                     });
                     vContentFooter.addView(originalAlarm);
@@ -388,7 +369,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     }
 
-    public static class RegularTaskViewHolder extends TaskViewHolder<CircuitUnit> {
+    public static class RegularTaskViewHolder extends TaskViewHolder {
 
         @BindView(R.id.info)
         TextView vInfo;
@@ -410,7 +391,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
 
         @Override
-        public void onActionOpen(Context context, CircuitUnit task) {
+        public void onActionOpen(Context context, ParseTask task) {
             super.onActionOpen(context, task);
 
 //            boolean inverseSelection = !selectedItems.get(getAdapterPosition(), false);
@@ -426,7 +407,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @Override
-        public void onActionArrive(final Context context, final CircuitUnit task) {
+        public void onActionArrive(final Context context, final ParseTask task) {
             if (task.isWithinScheduledTime()) {
                 super.onActionArrive(context, task);
             } else {
@@ -435,9 +416,9 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 //                    @Override
 //                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 // TODO date dialog (today or yesterday)
-                addArrivalEvent(context, task, new GetCallback<CircuitUnit>() {
+                addArrivalEvent(context, task, new GetCallback<ParseTask>() {
                     @Override
-                    public void done(CircuitUnit task, ParseException e) {
+                    public void done(ParseTask task, ParseException e) {
                         task.setArrived();
                         task.saveEventually();
 
@@ -450,30 +431,30 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @Override
-        public void onActionAbort(Context context, CircuitUnit task) {
+        public void onActionAbort(Context context, ParseTask task) {
             super.onActionAbort(context, task);
             collapseFooter();
         }
 
         @Override
-        public void onActionFinish(final Context context, final CircuitUnit task) {
-            confirmIfMissingSupervisions(context, task, new GetCallback<CircuitUnit>() {
+        public void onActionFinish(final Context context, final ParseTask task) {
+            confirmIfMissingSupervisions(context, task, new GetCallback<ParseTask>() {
                 @Override
-                public void done(CircuitUnit object, ParseException e) {
+                public void done(ParseTask object, ParseException e) {
                     // Either not missing supervisions, or finish despite
                     finishWithChecks(context, task);
                 }
             });
         }
 
-        private void finishWithChecks(final Context context, final CircuitUnit task) {
+        private void finishWithChecks(final Context context, final ParseTask task) {
             if (task.getTimesArrived() == 0 && fragmentManager != null) {
                 missingArrivalTimestampDialog(context, new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        addArrivalEvent(context, task, new GetCallback<CircuitUnit>() {
+                        addArrivalEvent(context, task, new GetCallback<ParseTask>() {
                             @Override
-                            public void done(CircuitUnit object, ParseException e) {
+                            public void done(ParseTask object, ParseException e) {
                                 RegularTaskViewHolder.super.onActionFinish(context, task);
                             }
                         });
@@ -485,7 +466,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             }
         }
 
-        private void confirmIfMissingSupervisions(final Context context, final CircuitUnit task, final GetCallback<CircuitUnit> okCallback) {
+        private void confirmIfMissingSupervisions(final Context context, final ParseTask task, final GetCallback<ParseTask> okCallback) {
             int plannedSupervision = task.getPlannedSuperVisions();
             int timesArrived = task.getTimesArrived();
             int diff = plannedSupervision - timesArrived;
@@ -508,7 +489,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
 
-        private void addArrivalEvent(final Context context, final CircuitUnit task, final GetCallback<CircuitUnit> callback) {
+        private void addArrivalEvent(final Context context, final ParseTask task, final GetCallback<ParseTask> callback) {
             final DateTime timestamp = new DateTime();
 
             // TODO date dialog (today or yesterday)
@@ -524,11 +505,11 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
 
                             new EventLog.Builder(context)
-                                    .taskPointer(task, GSTask.EVENT_TYPE.ARRIVE)
+                                    .taskPointer(task, ParseTask.EVENT_TYPE.ARRIVE)
                                     .event(context.getString(R.string.event_arrived))
                                     .automatic(false)
                                     .deviceTimeStamp(cal.getTime())
-                                    .eventCode(EventLog.EventCodes.CIRCUITUNIT_ARRIVED).saveAsync();
+                                    .eventCode(EventLog.EventCodes.REGULAR_ARRIVED).saveAsync();
 
 
                             callback.done(task, null);
@@ -549,7 +530,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                     .show();
         }
 
-        private void extraTimeDialog(final Context context, final CircuitUnit task) {
+        private void extraTimeDialog(final Context context, final ParseTask task) {
             new MaterialDialog.Builder(context)
                     .title(R.string.extra_time_spend)
                     .items(R.array.extra_time_minutes_strings)
@@ -563,11 +544,11 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                                     .parseInt(extra_time_values[index]);
                             if (minutes != 0) {
                                 new EventLog.Builder(context)
-                                        .taskPointer(task, GSTask.EVENT_TYPE.OTHER)
+                                        .taskPointer(task, ParseTask.EVENT_TYPE.OTHER)
                                         .event(context.getString(R.string.event_extra_time))
                                         .amount(minutes)
                                         .remarks(value.toString())
-                                        .eventCode(EventLog.EventCodes.CIRCUITUNIT_EXTRA_TIME).saveAsync();
+                                        .eventCode(EventLog.EventCodes.REGULAR_EXTRA_TIME).saveAsync();
                             }
 
 
@@ -580,7 +561,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @Override
-        protected void setupTaskActionButtons(final Context context, final CircuitUnit task) {
+        protected void setupTaskActionButtons(final Context context, final ParseTask task) {
             super.setupTaskActionButtons(context, task);
 
             vBtnViewReport.setOnClickListener(new View.OnClickListener() {
@@ -603,7 +584,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             vBtnReportHistory.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient(), GSTask.TASK_TYPE.REGULAR);
+                    Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient(), ParseTask.TASK_TYPE.REGULAR);
                     GenericToolbarActivity.start(
                             context,
                             context.getString(R.string.reports),
@@ -612,19 +593,13 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 }
             });
 
-            vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    TaskDescriptionActivity.start(context, task);
-                }
-            });
+//            vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    TaskDescriptionActivity.start(context, task);
+//                }
+//            });
 
-            vBtnCheckpoints.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    CheckpointActivity.start(context, task);
-                }
-            });
 
             vBtnClientContacts.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -634,16 +609,15 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             });
         }
 
-        public void update(final Context context, final GSTask task) {
+        public void update(final Context context, final ParseTask task) {
             super.update(context, task);
 
-            if (task instanceof CircuitUnit) {
-                CircuitUnit circuitUnit = (CircuitUnit) task;
-                vBtnTaskdescription.setVisibility((!circuitUnit.getDescription().isEmpty()) ? View.VISIBLE : View.GONE);
+            if (task.isRegularTask() || task.isRaidTask()) {
+//                vBtnTaskdescription.setVisibility((!task.getDescription().isEmpty()) ? View.VISIBLE : View.GONE);
 
-                vTaskDesc.setText(circuitUnit.getName());
-                vTimeStart.setText(circuitUnit.getTimeStartString());
-                vTimeEnd.setText(circuitUnit.getTimeEndString());
+                vTaskDesc.setText(task.getName());
+                vTimeStart.setText(task.getTimeStartString());
+                vTimeEnd.setText(task.getTimeEndString());
 
 
                 if (vInfoLayout.getChildCount() > 1) {
@@ -651,7 +625,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 }
 
                 ImageView iconView = new ImageView(context);
-                GoogleMaterial.Icon icon = (circuitUnit.isRaid()) ? GoogleMaterial.Icon.gmd_car : GoogleMaterial.Icon.gmd_walk;
+                GoogleMaterial.Icon icon = (task.isRaidTask()) ? GoogleMaterial.Icon.gmd_car : GoogleMaterial.Icon.gmd_walk;
                 iconView.setImageDrawable(new IconicsDrawable(context)
                         .icon(icon)
                         .color(Color.DKGRAY)
@@ -662,95 +636,37 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
                 vInfoLayout.addView(iconView, 0);
 
                 String infoText = context.getString(R.string.times_supervised,
-                        circuitUnit.getTimesArrived(),
-                        circuitUnit.getPlannedSuperVisions());
+                        task.getTimesArrived(),
+                        task.getPlannedSuperVisions());
 
                 vInfo.setText(infoText);
 
-                setupTaskActionButtons(context, circuitUnit);
-
-                if (circuitUnit.completeButNotFinished()) {
-                    updateTaskState(context, GSTask.TASK_STATE.ACCEPTED);
-                }
-            }
-
-            // Add extra time button setup
-            if (task instanceof CircuitUnit) {
-                final CircuitUnit circuitUnit = (CircuitUnit) task;
                 vBtnAddExtraTime.setVisibility(View.VISIBLE);
                 vBtnAddExtraTime.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        extraTimeDialog(context, circuitUnit);
+                        extraTimeDialog(context, task);
                     }
                 });
-            } else {
+
+                setupTaskActionButtons(context, task);
+
+                if (task.isCompletedButNotMarkedFinished()) {
+                    updateTaskState(context, ParseTask.TASK_STATE.ACCEPTED);
+                }
+            }
+
+            if (!task.isRegularTask() && !task.isRaidTask()) {
                 vBtnAddExtraTime.setVisibility(View.GONE);
             }
         }
     }
 
 
-    public static class DistrictWatchTaskViewHolder extends TaskViewHolder<DistrictWatchClient> {
-
-        @BindView(R.id.timesVisited_actual)
-        TextView vTimesVisited_actual;
-        @BindView(R.id.timesVisited_expected)
-        TextView vTimesVisited_expected;
-
-        public DistrictWatchTaskViewHolder(View itemView, RemoveItemCallback removeItemCallback) {
-            super(itemView, removeItemCallback);
-
-//            this.vBtnAborted.setVisibility(View.GONE);
-            this.vBtnFinished.setVisibility(View.GONE);
-            this.vClientNumber.setVisibility(View.GONE);
-            this.vTaskDesc.setVisibility(View.GONE);
-
-        }
 
 
-        @Override
-        public void onActionArrive(final Context context, final DistrictWatchClient task) {
-            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived), new MaterialDialog.SingleButtonCallback() {
-                @Override
-                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
 
-                    int newTimesArrived = task.getTimesArrived() + 1;
-                    vTimesVisited_actual.setText(String.valueOf(newTimesArrived));
-
-                    if (newTimesArrived == task.getSupervisions()) {
-                        removeItemCallback.removeAt(getAdapterPosition());
-                    }
-
-                    performTaskAction(context, task, ACTION.ARRIVE);
-                }
-            }).show();
-
-
-        }
-
-        @Override
-        public void update(Context context, GSTask task) {
-            if (task instanceof DistrictWatchClient) {
-                vContentFooter.setVisibility(View.GONE);
-                DistrictWatchClient districtWatchClient = (DistrictWatchClient) task;
-                // swap name and address to enhance the address
-                vName.setText(districtWatchClient.getFullAddress());
-                vAddress.setText(districtWatchClient.getClientName());
-                vTimesVisited_actual.setText(String.valueOf(districtWatchClient.getTimesArrived()));
-                vTimesVisited_expected.setText(String.valueOf(districtWatchClient.getSupervisions()));
-                if (districtWatchClient.getTimesArrived() == districtWatchClient.getSupervisions()) {
-                    vBtnArrived.setEnabled(false);
-                }
-
-                setupTaskActionButtons(context, (DistrictWatchClient) task);
-            }
-            super.update(context, task);
-        }
-    }
-
-
-    static class TaskViewHolder<T extends BaseTask> extends PositionedViewHolder implements TaskActionCallback<T> {
+    static class TaskViewHolder extends PositionedViewHolder {
 
 
         @BindView(R.id.cardview)
@@ -795,23 +711,20 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         Button vBtnAddExtraTime;
         @BindView(R.id.btn_report_history)
         Button vBtnReportHistory;
-        @BindView(R.id.btn_task_description)
-        Button vBtnTaskdescription;
+//        @BindView(R.id.btn_task_description)
+//        Button vBtnTaskdescription;
         @BindView(R.id.btn_client_info)
         Button vBtnClientContacts;
-        @BindView(R.id.btn_checkpoints)
-        Button vBtnCheckpoints;
 
 
         protected RemoveItemCallback removeItemCallback;
 
-        public void update(Context context, GSTask task) {
+        public void update(Context context, ParseTask task) {
             tvGuardName.setText((task.getGuard() != null) ? task.getGuard().getName() : "");
             setTaskState(context, task);
         }
 
-        @Override
-        public void onActionOpen(Context context, T task) {
+        public void onActionOpen(Context context, ParseTask task) {
 
         }
 
@@ -825,8 +738,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             selectedItems.delete(getAdapterPosition());
         }
 
-        @Override
-        public void onActionAccept(final Context context, final T task) {
+        public void onActionAccept(final Context context, ParseTask task) {
 
             performTaskAction(context, task, ACTION.ACCEPT);
 
@@ -834,7 +746,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             vBtnAccepted.setVisibility(View.GONE);
             vBtnArrived.setVisibility(View.VISIBLE);
 
-//            if (!task.getTaskType().equals(GSTask.TASK_TYPE.ALARM)) {
+//            if (!task.getTaskType().equals(ParseTask.TASK_TYPE.ALARM)) {
 //                vBtnAborted.setVisibility(View.VISIBLE);
 //            }
 
@@ -842,15 +754,14 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         }
 
-        @Override
-        public void onActionArrive(final Context context, final T task) {
+        public void onActionArrive(final Context context, final ParseTask task) {
 
             new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived), new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                    performTaskAction(context, task, ACTION.ARRIVE).onSuccess(new Continuation<GSTask, Object>() {
+                    performTaskAction(context, task, ACTION.ARRIVE).onSuccess(new Continuation<ParseTask, Object>() {
                         @Override
-                        public Object then(Task<GSTask> task) throws Exception {
+                        public Object then(Task<ParseTask> task) throws Exception {
                             update(context, task.getResult());
                             return null;
                         }
@@ -859,13 +770,11 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             }).show();
         }
 
-        @Override
-        public void onActionAbort(final Context context, final T task) {
+        public void onActionAbort(final Context context, ParseTask task) {
             performTaskAction(context, task, ACTION.ABORT);
         }
 
-        @Override
-        public void onActionFinish(Context context, T task) {
+        public void onActionFinish(Context context, ParseTask task) {
             performTaskAction(context, task, ACTION.FINISH);
         }
 
@@ -883,7 +792,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         }
 
-        protected void setupTaskActionButtons(final Context context, final T task) {
+        protected void setupTaskActionButtons(final Context context, final ParseTask task) {
 
 
             this.cardview.setOnClickListener(new View.OnClickListener() {
@@ -931,30 +840,30 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
         @SuppressWarnings("unchecked")
-        protected Task<GSTask> performTaskAction(final Context context, final GSTask task, final ACTION action) {
+        protected Task<ParseTask> performTaskAction(final Context context, final ParseTask task, final ACTION action) {
 
             final TaskCompletionSource result = new TaskCompletionSource<>();
 
-            final GSTask.TASK_STATE previousTaskState = task.getTaskState();
+            final ParseTask.TASK_STATE previousTaskState = task.getTaskState();
             final TaskController taskController = task.getController();
             if (taskController.canPerformAction(action, task)) {
-                new AsyncTask<Void, Void, GSTask>() {
+                new AsyncTask<Void, Void, ParseTask>() {
 
                     @Override
                     protected void onPreExecute() {
-                        GSTask.TASK_STATE toState = taskController.translatesToState(action);
+                        ParseTask.TASK_STATE toState = taskController.translatesToState(action);
                         updateTaskState(context, previousTaskState, toState);
                         super.onPreExecute();
                     }
 
                     @Override
-                    protected GSTask doInBackground(Void... voids) {
+                    protected ParseTask doInBackground(Void... voids) {
                         // might contain LDS lookup
                         return taskController.performAction(action, task);
                     }
 
                     @Override
-                    protected void onPostExecute(GSTask updatedTask) {
+                    protected void onPostExecute(ParseTask updatedTask) {
                         super.onPostExecute(updatedTask);
                         result.setResult(updatedTask);
                     }
@@ -967,12 +876,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         }
 
 
-        public void setTaskState(Context context, GSTask task) {
-            GSTask.TASK_STATE state = task.getTaskState();
+        public void setTaskState(Context context, ParseTask task) {
+            ParseTask.TASK_STATE state = task.getTaskState();
             updateTaskState(context, state);
         }
 
-        public void updateTaskState(Context context, GSTask.TASK_STATE toState) {
+        public void updateTaskState(Context context, ParseTask.TASK_STATE toState) {
             int color = getTaskStateColor(context, toState);
             updateTaskStateButtons(context, toState);
             for (View border : this.vColorBorders) {
@@ -987,13 +896,13 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             }
         }
 
-        public void updateTaskState(Context context, GSTask.TASK_STATE fromState, GSTask.TASK_STATE toState) {
+        public void updateTaskState(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState) {
 
-            boolean fromActiveState = fromState == GSTask.TASK_STATE.PENDING || fromState == GSTask.TASK_STATE.ACCEPTED || fromState == GSTask.TASK_STATE.ARRIVED;
-            boolean toFinishedState = toState == GSTask.TASK_STATE.FINISHED || toState == GSTask.TASK_STATE.ABORTED;
+            boolean fromActiveState = fromState == ParseTask.TASK_STATE.PENDING || fromState == ParseTask.TASK_STATE.ACCEPTED || fromState == ParseTask.TASK_STATE.ARRIVED;
+            boolean toFinishedState = toState == ParseTask.TASK_STATE.FINISHED || toState == ParseTask.TASK_STATE.ABORTED;
 
-            boolean fromFinishedState = fromState == GSTask.TASK_STATE.FINISHED || fromState == GSTask.TASK_STATE.ABORTED;
-            boolean toActiveState = toState == GSTask.TASK_STATE.PENDING || toState == GSTask.TASK_STATE.ACCEPTED || toState == GSTask.TASK_STATE.ARRIVED;
+            boolean fromFinishedState = fromState == ParseTask.TASK_STATE.FINISHED || fromState == ParseTask.TASK_STATE.ABORTED;
+            boolean toActiveState = toState == ParseTask.TASK_STATE.PENDING || toState == ParseTask.TASK_STATE.ACCEPTED || toState == ParseTask.TASK_STATE.ARRIVED;
 
             if (fromActiveState && toFinishedState) {
                 removeTask();
@@ -1006,12 +915,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             updateTaskState(context, fromState, toState, false, true);
         }
 
-        public void updateTaskState(Context context, GSTask.TASK_STATE fromState, GSTask.TASK_STATE toState, boolean isNew, boolean animate) {
+        public void updateTaskState(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState, boolean isNew, boolean animate) {
             updateTaskStateColor(context, fromState, toState, isNew, animate);
             updateTaskStateButtons(context, toState);
         }
 
-        private void updateTaskStateButtons(Context context, GSTask.TASK_STATE state) {
+        private void updateTaskStateButtons(Context context, ParseTask.TASK_STATE state) {
             bootstrapActionButtonDefaults(context, this.vBtnArrived);
 //            bootstrapActionButtonDefaults(context, this.vBtnAborted);
             bootstrapActionButtonDefaults(context, this.vBtnFinished);
@@ -1051,7 +960,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             this.vBtnFinished.setEnabled(false);
         }
 
-        private void updateTaskStateColor(Context context, GSTask.TASK_STATE fromState, GSTask.TASK_STATE toState, boolean isNew, boolean animate) {
+        private void updateTaskStateColor(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState, boolean isNew, boolean animate) {
 
             int prevStateColor = getTaskStateColor(context, fromState);
             int toColor = getTaskStateColor(context, toState);
@@ -1066,7 +975,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         }
 
-        private int getTaskStateColor(Context context, GSTask.TASK_STATE state) {
+        private int getTaskStateColor(Context context, ParseTask.TASK_STATE state) {
             int colorRes = getTaskStateColorResource(state);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 return context.getColor(colorRes);
@@ -1075,7 +984,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
             }
         }
 
-        private int getTaskStateColorResource(GSTask.TASK_STATE state) {
+        private int getTaskStateColorResource(ParseTask.TASK_STATE state) {
             int color = R.color.bootstrap_brand_info; // default pending
             switch (state) {
                 case PENDING:
@@ -1103,12 +1012,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
     private int lastPosition = -1;
     private static SparseBooleanArray selectedItems = new SparseBooleanArray();
 
-    public TaskRecycleAdapter(Context context, ParseQueryAdapter.QueryFactory<T> factory) {
+    public TaskRecycleAdapter(Context context, ParseQueryAdapter.QueryFactory<ParseTask> factory) {
         super(factory, false);
         this.context = context;
     }
 
-    public TaskRecycleAdapter(Context context, FragmentManager fragmentManager, ParseQueryAdapter.QueryFactory<T> factory) {
+    public TaskRecycleAdapter(Context context, FragmentManager fragmentManager, ParseQueryAdapter.QueryFactory<ParseTask> factory) {
         super(factory, false);
         this.context = context;
         this.fragmentManager = fragmentManager;
@@ -1134,14 +1043,14 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         boolean isNew = isNewlyDisplayed(position);
 
-        final GSTask task = getItem(position);
+        final ParseTask task = getItem(position);
 
         Client client = task.getClient();
         if (client != null) {
             holder.vClientNumber.setText(client.getId());
             holder.vName.setText(client.getName());
             holder.vAddress.setText(client.getFullAddress());
-            holder.vBtnCheckpoints.setVisibility((client.hasCheckPoints()) ? View.VISIBLE : View.GONE);
+//            holder.vBtnCheckpoints.setVisibility((client.hasCheckPoints()) ? View.VISIBLE : View.GONE);
             holder.vBtnClientContacts.setVisibility((!client.getContactsWithNames().isEmpty()) ? View.VISIBLE : View.GONE);
         }
 
@@ -1156,7 +1065,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 //        new UpdateTaskStateAsync(task, holder, isNew).execute();
     }
 
-    private void debugGeofenceStatus(GSTask task, TaskViewHolder holder) {
+    private void debugGeofenceStatus(ParseTask task, TaskViewHolder holder) {
         if (!BuildConfig.DEBUG) {
             return;
         }
@@ -1180,21 +1089,15 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         linearLayout.addView(isWithinScheduledTime(task));
     }
 
-    private TextView isWithinScheduledTime(GSTask task) {
+    private TextView isWithinScheduledTime(ParseTask task) {
         TextView tv = new TextView(context);
         tv.setText(" TIME ");
-        boolean isWithinScheduled = false;
-        if (task instanceof CircuitUnit) {
-            isWithinScheduled = ((CircuitUnit) task).isWithinScheduledTime();
-        }
-
-
-        tv.setTextColor((isWithinScheduled) ? Color.GREEN : Color.RED);
+        tv.setTextColor((task.isWithinScheduledTime()) ? Color.GREEN : Color.RED);
 
         return tv;
     }
 
-    private TextView isOutsideGeofence(GSTask task) {
+    private TextView isOutsideGeofence(ParseTask task) {
         boolean outsideGeofence = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().isMovedOutsideGeofence(task);
 
         TextView tv = new TextView(context);
@@ -1204,7 +1107,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         return tv;
     }
 
-    private TextView isWithinGeofence(GSTask task) {
+    private TextView isWithinGeofence(ParseTask task) {
         boolean withinGeofence = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().isWithinGeofence(task);
 
         TextView tv = new TextView(context);
@@ -1214,7 +1117,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
         return tv;
     }
 
-    private TextView isGeofenced(GSTask task) {
+    private TextView isGeofenced(ParseTask task) {
         boolean isGeofenced = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().isGeofenced(task);
 
         TextView tv = new TextView(context);
@@ -1227,12 +1130,12 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
     /**
      * Here is the key method to apply the animation
      */
-//    private void setAnimation(View viewToAnimate, int clientPosition) {
+//    private void setAnimation(View viewToAnimate, int position) {
 //        // If the bound view wasn't previously displayed on screen, it's animated
-//        if (clientPosition > lastPosition) {
+//        if (position > lastPosition) {
 //            Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
 //            viewToAnimate.startAnimation(animation);
-//            lastPosition = clientPosition;
+//            lastPosition = position;
 //        }
 //    }
 
@@ -1263,49 +1166,25 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
         LinearLayout contentBody = ButterKnife.findById(itemView, R.id.content_body);
 
-        if (viewType == GSTask.TASK_TYPE.STATIC.ordinal()) {
+        int taskContentHeaderLayoutId = viewType == ParseTask.TASK_TYPE.ALARM.ordinal() ? R.layout.gs_view_task_central_and_date : R.layout.gs_view_task_planned_times;
+        
+        View taskPlannedTimesView = LayoutInflater.
+                from(parent.getContext()).
+                inflate(taskContentHeaderLayoutId, parent, false);
 
-            View taskPlannedTimesView = LayoutInflater.
-                    from(parent.getContext()).
-                    inflate(R.layout.gs_view_task_planned_times, parent, false);
-
-            contentBody.addView(taskPlannedTimesView, 0);
-
+        contentBody.addView(taskPlannedTimesView, 0);
+        
+        if (viewType == ParseTask.TASK_TYPE.STATIC.ordinal()) {
             return new StaticTaskViewHolder(itemView);
         }
-
-        if (viewType == GSTask.TASK_TYPE.ALARM.ordinal()) {
-
-            View taskPlannedTimesView = LayoutInflater.
-                    from(parent.getContext()).
-                    inflate(R.layout.gs_view_task_central_and_date, parent, false);
-
-            contentBody.addView(taskPlannedTimesView, 0);
-
+        if (viewType == ParseTask.TASK_TYPE.ALARM.ordinal()) {
             return new AlarmTaskViewHolder(itemView, defaultRemoveItemCallback);
         }
-
-        if (viewType == GSTask.TASK_TYPE.REGULAR.ordinal() || viewType == GSTask.TASK_TYPE.RAID.ordinal()) {
-
-            View taskPlannedTimesView = LayoutInflater.
-                    from(parent.getContext()).
-                    inflate(R.layout.gs_view_task_planned_times, parent, false);
-
-            contentBody.addView(taskPlannedTimesView, 0);
-
+        if (viewType == ParseTask.TASK_TYPE.REGULAR.ordinal() || viewType == ParseTask.TASK_TYPE.RAID.ordinal()) {
             return new RegularTaskViewHolder(itemView, defaultRemoveItemCallback, fragmentManager);
         }
 
-        if (viewType == GSTask.TASK_TYPE.DISTRICTWATCH.ordinal()) {
 
-            View taskPlannedTimesView = LayoutInflater.
-                    from(parent.getContext()).
-                    inflate(R.layout.gs_view_task_times_visited, parent, false);
-
-            contentBody.addView(taskPlannedTimesView, 0);
-
-            return new DistrictWatchTaskViewHolder(itemView, defaultRemoveItemCallback);
-        }
 
         return holder;
     }
@@ -1322,36 +1201,36 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
     }
 
 
-    private class UpdateTaskStateAsync extends AsyncTask<Void, Void, GSTask.TASK_STATE> {
+    private class UpdateTaskStateAsync extends AsyncTask<Void, Void, ParseTask.TASK_STATE> {
 
-        private final T task;
+        private final ParseTask task;
         private final TaskViewHolder holder;
-        private final GSTask.TASK_STATE from_state;
+        private final ParseTask.TASK_STATE from_state;
         private final boolean isNew;
 
-        public UpdateTaskStateAsync(T task, TaskViewHolder holder, GSTask.TASK_STATE from_state, boolean isNew) {
+        public UpdateTaskStateAsync(ParseTask task, TaskViewHolder holder, ParseTask.TASK_STATE from_state, boolean isNew) {
             this.task = task;
             this.holder = holder;
             this.from_state = from_state;
             this.isNew = isNew;
         }
 
-        public UpdateTaskStateAsync(T task, TaskViewHolder holder, boolean isNew) {
+        public UpdateTaskStateAsync(ParseTask task, TaskViewHolder holder, boolean isNew) {
             this.task = task;
             this.holder = holder;
-            this.from_state = GSTask.TASK_STATE.PENDING;
+            this.from_state = ParseTask.TASK_STATE.PENDING;
             this.isNew = isNew;
         }
 
 
         @Override
-        protected GSTask.TASK_STATE doInBackground(Void... voids) {
+        protected ParseTask.TASK_STATE doInBackground(Void... voids) {
             // might contain LDS lookup
             return task.getTaskState();
         }
 
         @Override
-        protected void onPostExecute(GSTask.TASK_STATE to_state) {
+        protected void onPostExecute(ParseTask.TASK_STATE to_state) {
 
 
             holder.updateTaskState(context, from_state, to_state, isNew, isNew);
@@ -1363,7 +1242,7 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 
     ;
 
-//    private void setDistanceValue(GSTask task, Location deviceLocation, LinearLayout distanceLayout, TextView distanceType, TextView distanceValue) {
+//    private void setDistanceValue(ParseTask task, Location deviceLocation, LinearLayout distanceLayout, TextView distanceType, TextView distanceValue) {
 //
 //        if (deviceLocation == null) {
 //            return;
@@ -1376,9 +1255,9 @@ public class TaskRecycleAdapter<T extends BaseTask> extends ParseRecyclerQueryAd
 //        distanceValue.setText(distanceStrings.distanceValue);
 //
 //
-//        Set<GSTask> allGeofenced = tasksCache.getAllGeofencedTasks();
-//        Set<GSTask> within = tasksCache.getWithinGeofence();
-//        Set<GSTask> outside = tasksCache.getOutsideGeofence();
+//        Set<ParseTask> allGeofenced = tasksCache.getAllGeofencedTasks();
+//        Set<ParseTask> within = tasksCache.getWithinGeofence();
+//        Set<ParseTask> outside = tasksCache.getOutsideGeofence();
 //
 //        TextView[] colorViews = new TextView[]{distanceType, distanceValue};
 //        if (within.contains(task)) {

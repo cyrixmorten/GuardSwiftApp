@@ -1,19 +1,13 @@
 package com.guardswift.persistence.parse.data;
 
-import android.content.Context;
-import android.util.Log;
-
 import com.guardswift.persistence.parse.ExtendedParseObject;
-import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.Positioned;
+import com.guardswift.persistence.parse.query.GuardQueryBuilder;
 import com.parse.ParseClassName;
-import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseSession;
-
-import org.json.JSONObject;
 
 import java.util.Date;
 import java.util.List;
@@ -23,32 +17,32 @@ public class Guard extends ExtendedParseObject implements Positioned {
 
     public enum Role {ADMIN}
 
-    public static class Query {
-
-        private static String TAG = "Guard.Query";
-
-        public static Guard get(String objectId)
-                throws ParseException {
-            ParseQuery<Guard> query = new Guard.QueryBuilder(true)
-                    .matchingObjectId(objectId).build();
-            return query.getFirst();
-        }
-
-        public static Guard get(int guardId) throws ParseException {
-            Log.e(TAG, "getGuard: " + guardId);
-            ParseQuery<Guard> query = new Guard.QueryBuilder(true)
-                    .build();
-            query.whereEqualTo(Guard.guardId, guardId);
-            return query.getFirst();
-        }
-
-    }
+//    public static class Query {
+//
+//        private static String TAG = "Guard.Query";
+//
+//        public static Guard get(String objectId)
+//                throws ParseException {
+//            ParseQuery<Guard> query = new Guard.QueryBuilder(true)
+//                    .matchingObjectId(objectId).build();
+//            return query.getFirst();
+//        }
+//
+//        public static Guard get(int guardId) throws ParseException {
+//            Log.e(TAG, "getGuard: " + guardId);
+//            ParseQuery<Guard> query = new Guard.QueryBuilder(true)
+//                    .build();
+//            query.whereEqualTo(Guard.guardId, guardId);
+//            return query.getFirst();
+//        }
+//
+//    }
 
 
     private static final String guardId = "guardId";
-    private static final String name = "name";
-    private static final String session = "session";
-    private static final String installation = "installation";
+    public static final String name = "name";
+    public static final String session = "session";
+    public static final String installation = "installation";
     private static final String mobileNumber = "mobileNumber";
 
     private static final String alarmNotify = "alarmNotify";
@@ -74,48 +68,14 @@ public class Guard extends ExtendedParseObject implements Positioned {
     @SuppressWarnings("unchecked")
     @Override
     public ParseQuery<Guard> getAllNetworkQuery() {
-        return new QueryBuilder(false).build();
+        return new GuardQueryBuilder(false).build();
     }
 
-    @Override
-    public void updateFromJSON(final Context context,
-                               final JSONObject jsonObject) {
-        // TODO Auto-generated method stub
+
+    public static GuardQueryBuilder getQueryBuilder(boolean fromLocalDatastore) {
+        return new GuardQueryBuilder(fromLocalDatastore);
     }
 
-    public static QueryBuilder getQueryBuilder(boolean fromLocalDatastore) {
-        return new QueryBuilder(fromLocalDatastore);
-    }
-
-    public static class QueryBuilder extends ParseQueryBuilder<Guard> {
-
-        public QueryBuilder(boolean fromLocalDatastore) {
-            super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery.getQuery(Guard.class));
-        }
-
-        @Override
-        public ParseQuery<Guard> build() {
-//            query.include(messages);
-            query.include(Guard.installation);
-            query.setLimit(1000);
-            return super.build();
-        }
-
-        public QueryBuilder hasSession() {
-            query.whereExists(Guard.session);
-            return this;
-        }
-
-        public QueryBuilder sortByName(boolean ascending) {
-            if (ascending) {
-                query.addAscendingOrder(Guard.name);
-            } else {
-                query.addDescendingOrder(Guard.name);
-            }
-            return this;
-        }
-
-    }
 
     public int getGuardId() {
         return getInt(Guard.guardId);
@@ -178,9 +138,6 @@ public class Guard extends ExtendedParseObject implements Positioned {
         return getBoolean(accessRegular);
     }
 
-    public boolean canAccessDistrictTasks() {
-        return getBoolean(accessDistrict);
-    }
 
     public boolean canAccessStaticTasks() {
         return getBoolean(accessStatic);

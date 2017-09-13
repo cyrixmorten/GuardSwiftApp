@@ -1,31 +1,25 @@
-package com.guardswift.persistence.parse.execution;
-
-import com.google.common.collect.Lists;
-//import com.guardswift.persistence.parse.execution.task.alarm.Alarm;
-import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
-import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
-
-import java.util.List;
-
-/**
- * Created by cyrix on 7/20/15.
- */
-public class TaskFactory {
-
-    List<GSTask> tasks;
-
-    public TaskFactory() {
-
-        tasks = Lists.newArrayList();
-
-        tasks.add(new ParseTask());
-        tasks.add(new StaticTask());
-        tasks.add(new CircuitUnit());
-        tasks.add(new DistrictWatchClient());
-    }
-
-    public List<GSTask> getTasks() {
-        return tasks;
-    }
-}
+//package com.guardswift.persistence.parse.execution;
+//
+//import com.google.common.collect.Lists;
+//import com.guardswift.persistence.parse.execution.task.ParseTask;
+//
+//import java.util.List;
+//
+///**
+// * Created by cyrix on 7/20/15.
+// */
+//public class TaskFactory {
+//
+//    List<ParseTask> tasks;
+//
+//    public TaskFactory() {
+//
+//        tasks = Lists.newArrayList();
+//
+//        tasks.add(new ParseTask());
+//    }
+//
+//    public List<ParseTask> getTasks() {
+//        return tasks;
+//    }
+//}

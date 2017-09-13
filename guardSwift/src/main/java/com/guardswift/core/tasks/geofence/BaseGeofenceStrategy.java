@@ -2,10 +2,9 @@ package com.guardswift.core.tasks.geofence;
 
 import android.location.Location;
 
-import com.guardswift.persistence.parse.execution.GSTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.parse.FindCallback;
 import com.parse.ParseException;
-import com.parse.ParseObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +12,11 @@ import java.util.List;
 import bolts.Task;
 import bolts.TaskCompletionSource;
 
-/**
- * Created by cyrix on 6/28/15.
- */
 abstract class BaseGeofenceStrategy implements TaskGeofenceStrategy {
 
-    protected final GSTask task;
+    protected final ParseTask task;
 
-    protected BaseGeofenceStrategy(GSTask task) {
+    protected BaseGeofenceStrategy(ParseTask task) {
         this.task = task;
     }
 
@@ -36,8 +32,8 @@ abstract class BaseGeofenceStrategy implements TaskGeofenceStrategy {
      * @param callback
      */
     @Override
-    public void queryGeofencedTasks(int withinKm, Location fromLocation, FindCallback<ParseObject> callback) {
-        callback.done(new ArrayList<ParseObject>(), null);
+    public void queryGeofencedTasks(int withinKm, Location fromLocation, FindCallback<ParseTask> callback) {
+        callback.done(new ArrayList<ParseTask>(), null);
     }
     /*
      * Called when at the border of the geofence
@@ -52,7 +48,7 @@ abstract class BaseGeofenceStrategy implements TaskGeofenceStrategy {
     public void enterGeofence() {
 //        boolean moved = tasksCache.moveWithinGeofence(task);
 
-//        GSTask.EVENT_TYPE event_type = (usingGPS) ? GSTask.EVENT_TYPE.GEOFENCE_ENTER_GPS : GSTask.EVENT_TYPE.GEOFENCE_ENTER;
+//        ParseTask.EVENT_TYPE event_type = (usingGPS) ? ParseTask.EVENT_TYPE.GEOFENCE_ENTER_GPS : ParseTask.EVENT_TYPE.GEOFENCE_ENTER;
 //        new EventLog.Builder(context)
 //                .taskPointer(task, event_type)
 //                .event(context.getString(R.string.event_geofence_enter))
@@ -63,7 +59,7 @@ abstract class BaseGeofenceStrategy implements TaskGeofenceStrategy {
     @Override
     public void exitGeofence() {
 //        boolean moved = tasksCache.moveOutsideGeofence(task);
-//        GSTask.EVENT_TYPE event_type = (usingGPS) ? GSTask.EVENT_TYPE.GEOFENCE_EXIT_GPS : GSTask.EVENT_TYPE.GEOFENCE_EXIT;
+//        ParseTask.EVENT_TYPE event_type = (usingGPS) ? ParseTask.EVENT_TYPE.GEOFENCE_EXIT_GPS : ParseTask.EVENT_TYPE.GEOFENCE_EXIT;
 //        new EventLog.Builder(context)
 //                .taskPointer(task, event_type)
 //                .event(context.getString(R.string.event_geofence_exit))
@@ -78,11 +74,11 @@ abstract class BaseGeofenceStrategy implements TaskGeofenceStrategy {
      * @return
      */
     @Override
-    public Task<List<ParseObject>> queryGeofencedTasks(int radiusKm, Location fromLocation) {
-        final TaskCompletionSource<List<ParseObject>> successful = new TaskCompletionSource<>();
-        queryGeofencedTasks(radiusKm, fromLocation, new FindCallback<ParseObject>() {
+    public Task<List<ParseTask>> queryGeofencedTasks(int radiusKm, Location fromLocation) {
+        final TaskCompletionSource<List<ParseTask>> successful = new TaskCompletionSource<>();
+        queryGeofencedTasks(radiusKm, fromLocation, new FindCallback<ParseTask>() {
             @Override
-            public void done(List<ParseObject> objects, ParseException e) {
+            public void done(List<ParseTask> objects, ParseException e) {
                 if (e != null) {
                     successful.setError(e);
                     return;

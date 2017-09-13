@@ -8,7 +8,7 @@
 //
 //import com.guardswift.R;
 //import com.guardswift.ui.activity.details.DetailsActivityFactory;
-//import com.guardswift.persistence.parse.planning.GSTask;
+//import com.guardswift.persistence.parse.planning.ParseTask;
 //
 //public class AlarmNotification {
 //
@@ -17,7 +17,7 @@
 //
 //	private static final int NOTICIFATION_ID_TASK = 1;
 //
-//	public static void displayTaskNotification(Context context, GSTask task, String notificationMessage) {
+//	public static void displayTaskNotification(Context context, ParseTask task, String notificationMessage) {
 //
 //        NotificationManager  mNotificationManager = (NotificationManager) context
 //                .getSystemService(Context.NOTIFICATION_SERVICE);

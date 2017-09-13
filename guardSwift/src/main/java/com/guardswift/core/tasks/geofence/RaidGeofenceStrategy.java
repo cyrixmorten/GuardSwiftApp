@@ -1,41 +1,27 @@
 package com.guardswift.core.tasks.geofence;
 
-import android.content.Context;
 import android.location.Location;
 
-import com.crashlytics.android.Crashlytics;
 import com.guardswift.core.ca.LocationModule;
-import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchClient;
-import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
-
-import java.util.ArrayList;
-
-import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
-import rx.functions.Action1;
-import rx.functions.Func1;
-
-/**
- * Created by cyrix on 6/7/15.
- */
-public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
 
 
-    private static final String TAG = DistrictWatchGeofenceStrategy.class.getSimpleName();
+public class RaidGeofenceStrategy extends BaseGeofenceStrategy {
 
 
-    public static TaskGeofenceStrategy getInstance(GSTask task) {
-        return new DistrictWatchGeofenceStrategy(task);
+    private static final String TAG = RaidGeofenceStrategy.class.getSimpleName();
+
+
+    public static TaskGeofenceStrategy getInstance(ParseTask task) {
+        return new RaidGeofenceStrategy(task);
     }
 
-    private DistrictWatchGeofenceStrategy(GSTask task) {
+    private RaidGeofenceStrategy(ParseTask task) {
         super(task);
     }
 
@@ -57,10 +43,10 @@ public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
 
         ParseGeoPoint C = task.getPosition();
 
-//        int radius = getGeofenceRadius();
-//        double innerRadius = radius*0.2;
+//        int geofenceRadius = getGeofenceRadius();
+//        double innerRadius = geofenceRadius*0.2;
 
-        // First check - if update happened within the inner radius
+        // First check - if update happened within the inner geofenceRadius
         if (B != null) {
             float LBC = ParseModule.distanceBetweenMeters(B, C);
             if (LBC <= task.getRadius()) {
@@ -71,7 +57,7 @@ public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
 
 //        Log.d(TAG, "Near geofence: " + task.getTaskTitle(context) + " " + task.getClient().getName());
 
-        // Second check - see if projection to line has distance less than radius
+        // Second check - see if projection to line has distance less than geofenceRadius
         if (A != null && B != null) {
             double Ax,Ay,Bx,By,Cx,Cy;
 
@@ -125,13 +111,13 @@ public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
                 }
             }
 
-            // segment intersects with geofence radius
+            // segment intersects with geofence geofenceRadius
             if (LEC < task.getRadius()) {
 //                if (
                         task.getAutomationStrategy().automaticArrival();
 //                        && BuildConfig.DEBUG) {
 //                    new EventLog.Builder(context).
-//                    taskPointer(task, GSTask.EVENT_TYPE.ARRIVE).
+//                    taskPointer(task, ParseTask.EVENT_TYPE.ARRIVE).
 //                    event(context.getString(R.string.event_arriving)).
 //                    remarks("LEC " + LEC).
 //                    eventCode(EventLog.EventCodes.AUTOMATIC_ARRIVED).
@@ -172,19 +158,17 @@ public class DistrictWatchGeofenceStrategy extends BaseGeofenceStrategy {
     }
 
     @Override
-    public void queryGeofencedTasks(final int radiusKm, Location fromLocation, final FindCallback<ParseObject> callback) {
+    public void queryGeofencedTasks(final int radiusKm, Location fromLocation, final FindCallback<ParseTask> callback) {
         if (fromLocation != null) {
-            geofenceQuery(radiusKm, fromLocation).findInBackground(callback);
+            new RegularRaidTaskQueryBuilder(true)
+                    .isRunToday()
+                    .within(radiusKm, fromLocation)
+                    .isRaid(true)
+                    .build()
+                    .findInBackground(callback);
         } else {
-            callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Missing location for geofencing district"));
+            callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Missing location for raid task"));
         }
     }
 
-    private ParseQuery<ParseObject> geofenceQuery(int withinRadiusKm, Location fromLocation) {
-        return new DistrictWatchClient.QueryBuilder(true)
-                .isRunToday()
-                .within(withinRadiusKm, fromLocation)
-                .buildAsParseObject();//.setLimit(100);
-//                .whereNear(DistrictWatchClient.clientPosition, ParseModule.geoPointFromLocation(fromLocation));
-    }
 }

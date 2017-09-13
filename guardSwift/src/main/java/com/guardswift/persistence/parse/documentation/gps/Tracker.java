@@ -180,11 +180,6 @@ public class Tracker extends ExtendedParseObject {
 
 
 
-    @Override
-    public void updateFromJSON(final Context context,
-                               final JSONObject jsonObject) {
-        // TODO Auto-generated method stub
-    }
 
     private int previousActivityType = Integer.MAX_VALUE;
 

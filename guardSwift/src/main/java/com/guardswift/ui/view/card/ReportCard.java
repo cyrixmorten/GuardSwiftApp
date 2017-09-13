@@ -118,7 +118,7 @@ public class ReportCard extends LinearLayout {
                 DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR));
 
 //        String taskTypeName = report.getString(TaskTypeLogStrategy.taskTypeName);
-//        if (taskTypeName != null && taskTypeName.equals(GSTask.TASK_TYPE.REGULAR.toString())) {
+//        if (taskTypeName != null && taskTypeName.equals(ParseTask.TASK_TYPE.REGULAR.toString())) {
 //            btnCopy.setOnClickListener(new OnClickListener() {
 //                @Override
 //                public void onClick(View v) {
@@ -135,7 +135,7 @@ public class ReportCard extends LinearLayout {
 //                                        }
 //                                    }
 //
-//                                    GSTask pointer = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().getLastSelected();
+//                                    ParseTask pointer = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().getLastSelected();
 //                                    final int[] pinned = {0};
 //                                    for (EventLog reportLog: reportLogs) {
 //                                        new EventLog.Builder(getContext()).from(reportLog, pointer).saveAsync(new GetCallback<EventLog>() {

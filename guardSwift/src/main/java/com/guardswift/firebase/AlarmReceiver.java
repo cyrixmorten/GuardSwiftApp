@@ -9,7 +9,7 @@ import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.exceptions.LogError;
 import com.guardswift.persistence.parse.data.Guard;
-import com.guardswift.persistence.parse.execution.ParseTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
 import com.guardswift.ui.notification.AlarmNotification;

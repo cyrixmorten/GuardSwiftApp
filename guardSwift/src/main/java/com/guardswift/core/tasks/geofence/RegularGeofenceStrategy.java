@@ -6,23 +6,21 @@ import com.google.android.gms.location.DetectedActivity;
 import com.guardswift.core.ca.ActivityDetectionModule;
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.parse.ParseModule;
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitUnit;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 
 public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
 
     private static final String TAG = RegularGeofenceStrategy.class.getSimpleName();
 
-    public static TaskGeofenceStrategy getInstance(GSTask task) {
+    public static TaskGeofenceStrategy getInstance(ParseTask task) {
         return new RegularGeofenceStrategy(task);
     }
 
-    private RegularGeofenceStrategy(GSTask task) {
+    private RegularGeofenceStrategy(ParseTask task) {
         super(task);
     }
 
@@ -49,10 +47,10 @@ public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
     public void exitGeofence() {
         super.exitGeofence();
 
-        DetectedActivity activity = ActivityDetectionModule.Recent.getDetectedActivity();
-        if (activity.getType() == DetectedActivity.IN_VEHICLE) {
+//        DetectedActivity activity = ActivityDetectionModule.Recent.getDetectedActivity();
+//        if (activity.getType() == DetectedActivity.IN_VEHICLE) {
             task.getAutomationStrategy().automaticDeparture();
-        }
+//        }
     }
 
 
@@ -66,21 +64,17 @@ public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
         return 300;
     }
 
-    @Override
-    public void queryGeofencedTasks(final int withinKm, Location fromLocation, final FindCallback<ParseObject> callback) {
 
+    @Override
+    public void queryGeofencedTasks(final int withinKm, Location fromLocation, final FindCallback<ParseTask> callback) {
         if (fromLocation != null) {
-            geofenceQuery(withinKm, fromLocation).findInBackground(callback);
+            new RegularRaidTaskQueryBuilder(false)
+                    .isRunToday()
+                    .isRaid(false)
+                    .within(withinKm, fromLocation).build().findInBackground(callback);
         } else {
             callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Missing location for geofencing regular tasks"));
         }
     }
 
-    private ParseQuery<ParseObject> geofenceQuery(int withinKm, Location fromLocation) {
-        return new CircuitUnit.QueryBuilder(true)
-                .isRunToday()
-                .within(withinKm, fromLocation)
-                .buildAsParseObject();
-//                                .whereNear(CircuitUnit.clientPosition, ParseModule.geoPointFromLocation(location))
-    }
 }

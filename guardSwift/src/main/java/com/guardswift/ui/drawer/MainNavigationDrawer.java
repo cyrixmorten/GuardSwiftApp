@@ -17,12 +17,12 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingActivityModule;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
-import com.guardswift.persistence.cache.planning.CircuitStartedCache;
+import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
-import com.guardswift.persistence.parse.execution.task.districtwatch.DistrictWatchStarted;
-import com.guardswift.persistence.parse.execution.task.regular.CircuitStarted;
-import com.guardswift.persistence.parse.execution.task.statictask.StaticTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
+import com.guardswift.persistence.parse.query.ClientQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
@@ -30,8 +30,7 @@ import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
 import com.guardswift.ui.parse.data.tracker.TrackerListFragment;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
-import com.guardswift.ui.parse.execution.circuit.CircuitViewPagerFragment;
-import com.guardswift.ui.parse.execution.districtwatch.DistrictwatchViewPagerFragment;
+import com.guardswift.ui.parse.execution.regular.RegularTaskViewPagerFragment;
 import com.guardswift.ui.parse.execution.statictask.StaticTaskViewPagerFragment;
 import com.guardswift.ui.preferences.AlarmNotificationPreferencesFragment;
 import com.guardswift.ui.preferences.GuardPreferencesFragment;
@@ -66,7 +65,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
 
     private final Context context;
     private final GuardCache guardCache;
-    private final CircuitStartedCache circuitStartedCache;
+    private final TaskGroupStartedCache circuitStartedCache;
 
     private Drawer navigationDrawer;
     private FragmentDrawerCallback fragmentDrawerCallback;
@@ -78,7 +77,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
 
         ParseCacheFactory parseCacheFactory = GuardSwiftApplication.getInstance().getCacheFactory();
         this.guardCache = parseCacheFactory.getGuardCache();
-        this.circuitStartedCache = parseCacheFactory.getCircuitStartedCache();
+        this.circuitStartedCache = parseCacheFactory.getTaskGroupStartedCache();
     }
 
     public Drawer getDrawer() {
@@ -105,12 +104,12 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
 
                         long id = drawerItem.getIdentifier();
 
-                        if (drawerItem.getTag() instanceof CircuitStarted) {
-                            Log.w(TAG, "Clicked circuitStarted");
-                            CircuitStarted clickedCircuitStarted = (CircuitStarted) drawerItem.getTag();
+                        if (drawerItem.getTag() instanceof TaskGroupStarted) {
+                            Log.w(TAG, "Clicked taskGroupStarted");
+                            TaskGroupStarted clickedTaskGroupStarted = (TaskGroupStarted) drawerItem.getTag();
                             for (IDrawerItem item : circuitItems) {
-                                CircuitStarted circuitStarted = (CircuitStarted) item.getTag();
-                                if (circuitStarted != null && clickedCircuitStarted.getObjectId().equals(circuitStarted.getObjectId())) {
+                                TaskGroupStarted circuitStarted = (TaskGroupStarted) item.getTag();
+                                if (circuitStarted != null && clickedTaskGroupStarted.getObjectId().equals(circuitStarted.getObjectId())) {
                                     Log.w(TAG, "Clicked " + circuitStarted.getName());
 
                                     String dateSubtitle = DateUtils.formatDateTime(
@@ -118,7 +117,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                                             circuitStarted.getCreatedAt().getTime(),
                                             DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE);
 
-                                    fragmentDrawerCallback.selectItem(CircuitViewPagerFragment.newInstance(context, circuitStarted), circuitStarted.getName(), dateSubtitle);
+                                    fragmentDrawerCallback.selectItem(RegularTaskViewPagerFragment.newInstance(context, circuitStarted), circuitStarted.getName(), dateSubtitle);
                                     return false; // close drawer
                                 }
                             }
@@ -166,9 +165,6 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
             navigationDrawer.addItems(getActiveCircuitDrawerItems());
         }
 
-        if (guardCache.getLoggedIn().canAccessDistrictTasks()) {
-            navigationDrawer.addItems(getActiveDistrictWatchDrawerItems());
-        }
 
         if (guardCache.getLoggedIn().canAccessStaticTasks()) {
             navigationDrawer.addItems(getStaticGuardingItems());
@@ -179,11 +175,11 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
 
 
         // Determine initial selection
-        CircuitStarted selectedCircuitStarted = circuitStartedCache.getSelected();
+        TaskGroupStarted selectedCircuitStarted = circuitStartedCache.getSelected();
         IDrawerItem selected = null;
         if (selectedCircuitStarted != null && circuitItems != null) {
             for (IDrawerItem item : circuitItems) {
-                CircuitStarted circuitStarted = (CircuitStarted) item.getTag();
+                TaskGroupStarted circuitStarted = (TaskGroupStarted) item.getTag();
                 if (circuitStarted != null && selectedCircuitStarted.getObjectId().equals(circuitStarted.getObjectId())) {
                     Log.w(TAG, "Initial: " + circuitStarted.getName() + " " + item);
                     selected = item;
@@ -192,7 +188,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         }
         if (selected != null) {
             int position = navigationDrawer.getPosition(selected);
-            Log.w(TAG, "Selected: " + ((CircuitStarted) selected.getTag()).getName());
+            Log.w(TAG, "Selected: " + ((TaskGroupStarted) selected.getTag()).getName());
             Log.w(TAG, "Position: " + position);
             navigationDrawer.setSelection(selected, true);
         } else {
@@ -217,7 +213,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         IDrawerItem createNewStaticGuardingReport = new PrimaryDrawerItem().withName(context.getString(R.string.create_new)).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                ClientListFragment clientListFragment = ClientListFragment.newInstance(Client.SORT_BY.DISTANCE);
+                ClientListFragment clientListFragment = ClientListFragment.newInstance(ClientQueryBuilder.SORT_BY.DISTANCE);
                 clientListFragment.setOnClientSelectedListener(new ClientListFragment.OnClientSelectedListener() {
                     @Override
                     public void clientSelected(Client client) {
@@ -243,15 +239,15 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         IDrawerItem circuitHeader = new SectionDrawerItem().withName(R.string.title_drawer_circuits);
 
         try {
-            List<CircuitStarted> circuitsStarted = CircuitStarted.getQueryBuilder(true).sortByName().whereActive().build().find();
+            List<TaskGroupStarted> circuitsStarted = TaskGroupStarted.getQueryBuilder(true).sortByName().whereActive().build().find();
 
 
             // TODO: Patch fix duplicates in drawer
             boolean hasDuplicates = false;
-            HashMap<String, CircuitStarted> uniqueCircuitsStarted = Maps.newHashMap();
-            for (CircuitStarted circuitStarted : circuitsStarted) {
+            HashMap<String, TaskGroupStarted> uniqueCircuitsStarted = Maps.newHashMap();
+            for (TaskGroupStarted circuitStarted : circuitsStarted) {
                 String key = circuitStarted.getName();
-                CircuitStarted unique = uniqueCircuitsStarted.get(key);
+                TaskGroupStarted unique = uniqueCircuitsStarted.get(key);
                 if (unique != null) {
                     if (circuitStarted.getCreatedAt().after(unique.getCreatedAt())) {
                         uniqueCircuitsStarted.put(key, circuitStarted);
@@ -273,7 +269,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
             Collections.sort(circuitsStarted);
 
             circuitItems.add(circuitHeader);
-            for (CircuitStarted circuitStarted : circuitsStarted) {
+            for (TaskGroupStarted circuitStarted : circuitsStarted) {
                 Log.d(TAG, "getName(): " + circuitStarted.getName());
                 IDrawerItem circuitItem = new PrimaryDrawerItem().withName(circuitStarted.getName()).withTag(circuitStarted);
                 circuitItems.add(circuitItem);
@@ -324,9 +320,9 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
             @Override
             public void run() {
 
-                StaticTask.create(client, guardCache.getLoggedIn(), new GetCallback<StaticTask>() {
+                ParseTask.createStaticTask(client, new GetCallback<ParseTask>() {
                     @Override
-                    public void done(StaticTask task, ParseException e) {
+                    public void done(ParseTask task, ParseException e) {
 
                         dialog.dismiss();
 
@@ -351,35 +347,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         }, 500);
     }
 
-    private IDrawerItem[] getActiveDistrictWatchDrawerItems() {
-        List<IDrawerItem> districtWatchItems = Lists.newArrayList();
-        IDrawerItem districtWatchHeader = new SectionDrawerItem().withName(R.string.title_drawer_districtwatches);
-        try {
-            List<DistrictWatchStarted> districtWatchesStarted = DistrictWatchStarted.getQueryBuilder(true).sortByName().whereActive().build().find();
 
-            districtWatchItems.add(districtWatchHeader);
-            for (DistrictWatchStarted districtWatchStarted : districtWatchesStarted) {
-                IDrawerItem districtWatchItem = new PrimaryDrawerItem().withName(districtWatchStarted.getName()).withTag(districtWatchStarted).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        DistrictWatchStarted selectedDistrictWatchStarted = (DistrictWatchStarted) drawerItem.getTag();
-                        fragmentDrawerCallback.selectItem(DistrictwatchViewPagerFragment.newInstance(context, selectedDistrictWatchStarted), selectedDistrictWatchStarted.getName());
-                        return true;
-                    }
-                });
-                districtWatchItems.add(districtWatchItem);
-            }
-        } catch (ParseException e) {
-            new HandleException(context, TAG, "getActiveCircuitDrawerItems", e);
-        }
-
-        // don't leave header if there is no task groups
-        if (districtWatchItems.size() == 1) {
-            districtWatchItems.clear();
-        }
-
-        return districtWatchItems.toArray(new IDrawerItem[districtWatchItems.size()]);
-    }
 
     private IDrawerItem[] getAdminItems() {
         if (!guardCache.getLoggedIn().hasRole(Guard.Role.ADMIN)) {
@@ -400,7 +368,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_clients)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
             @Override
             public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                ClientListFragment clientListFragment = ClientListFragment.newInstance(Client.SORT_BY.NAME);
+                ClientListFragment clientListFragment = ClientListFragment.newInstance(ClientQueryBuilder.SORT_BY.NAME);
                 GenericToolbarActivity.start(context, R.string.title_drawer_clients, clientListFragment);
                 return false;
             }

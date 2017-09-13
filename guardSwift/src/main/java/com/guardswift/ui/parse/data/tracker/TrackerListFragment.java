@@ -15,7 +15,6 @@ import com.codetroopers.betterpickers.calendardatepicker.CalendarDatePickerDialo
 import com.codetroopers.betterpickers.calendardatepicker.MonthAdapter;
 import com.guardswift.R;
 import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.ui.menu.MenuItemBuilder;
 import com.guardswift.ui.menu.MenuItemIcons;
@@ -109,10 +108,6 @@ public class TrackerListFragment extends AbstractParseRecyclerFragment<Tracker, 
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-    @Override
-    protected ExtendedParseObject getObjectInstance() {
-        return new Tracker();
-    }
 
     @Override
     protected ParseQueryAdapter.QueryFactory<Tracker> createNetworkQueryFactory() {

@@ -1,27 +1,24 @@
 package com.guardswift.core.tasks.geofence;
 
 import android.location.Location;
-import android.util.Log;
 
 import com.guardswift.core.ca.LocationModule;
 import com.guardswift.core.parse.ParseModule;
-import com.guardswift.persistence.parse.execution.GSTask;
-import com.guardswift.persistence.parse.execution.ParseTask;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.query.AlarmTaskQueryBuilder;
 import com.parse.FindCallback;
 import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 
 public class AlarmGeofenceStrategy extends BaseGeofenceStrategy {
 
 
     private static final String TAG = AlarmGeofenceStrategy.class.getSimpleName();
 
-    public static TaskGeofenceStrategy getInstance(GSTask task) {
+    public static TaskGeofenceStrategy getInstance(ParseTask task) {
         return new AlarmGeofenceStrategy(task);
     }
 
-    private AlarmGeofenceStrategy(GSTask task) {
+    private AlarmGeofenceStrategy(ParseTask task) {
         super(task);
     }
 
@@ -59,22 +56,17 @@ public class AlarmGeofenceStrategy extends BaseGeofenceStrategy {
     }
 
     @Override
-    public void queryGeofencedTasks(final int withinKm, Location fromLocation, final FindCallback<ParseObject> callback) {
-
-        Log.d(TAG, "queryGeofencedTasks");
-
+    public void queryGeofencedTasks(final int withinKm, Location fromLocation, final FindCallback<ParseTask> callback) {
         if (fromLocation != null) {
-            geofenceQuery(withinKm, fromLocation).findInBackground(callback);
+            new AlarmTaskQueryBuilder(true)
+                    .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ACCEPTED, ParseTask.STATUS.ARRIVED)
+                    .within(withinKm, fromLocation)
+                    .build()
+                    .findInBackground(callback);
         } else {
             callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Missing location for geofencing alarms"));
         }
 
     }
 
-    private ParseQuery<ParseObject> geofenceQuery(int withinKm, Location fromLocation) {
-        return new ParseTask().getQueryBuilder(true)
-                .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ACCEPTED, ParseTask.STATUS.ARRIVED)
-                .within(withinKm, fromLocation)
-                .buildAsParseObject();
-    }
 }

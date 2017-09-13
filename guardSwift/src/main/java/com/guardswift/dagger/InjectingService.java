@@ -18,7 +18,6 @@ import android.app.Service;
 import android.content.Context;
 
 import com.guardswift.core.ca.activity.ActivityRecognitionService;
-import com.guardswift.core.ca.fingerprinting.WiFiPositioningService;
 import com.guardswift.core.ca.location.FusedLocationTrackerService;
 
 import java.lang.annotation.Documented;
@@ -104,7 +103,7 @@ public abstract class InjectingService extends Service implements Injector {
     /**
      * The dagger module associated with {@link InjectingService}.
      */
-    @Module(addsTo = InjectingApplication.InjectingApplicationModule.class, injects = {ActivityRecognitionService.class, FusedLocationTrackerService.class, WiFiPositioningService.class}, library = true)
+    @Module(addsTo = InjectingApplication.InjectingApplicationModule.class, injects = {ActivityRecognitionService.class, FusedLocationTrackerService.class}, library = true)
     public static class InjectingServiceModule {
         private final android.app.Service mService;
         private final Injector mInjector;
