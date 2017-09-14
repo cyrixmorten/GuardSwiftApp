@@ -273,9 +273,9 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
     public String getReportId() {
         String groupId = "";
         if (has(ParseTask.taskGroupStarted)) {
-            groupId = getParseObject(ParseTask.taskGroupStarted).getObjectId();
+            groupId = getParseObject(ParseTask.taskGroupStarted).getObjectId() + "-";
         }
-        return groupId + "-" + getObjectId();
+        return groupId + getObjectId();
     }
 
 

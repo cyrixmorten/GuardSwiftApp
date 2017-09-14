@@ -3,7 +3,7 @@ package com.guardswift.core.documentation.eventlog.task;
 import com.guardswift.core.exceptions.LogError;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
-import com.guardswift.persistence.parse.execution.task.TaskGroup;
+import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.parse.ParseObject;
 
 import static com.guardswift.persistence.parse.ExtendedParseObject.objectId;
@@ -31,7 +31,7 @@ public class TaskLogStrategy implements LogTaskStrategy {
         }
 
         if (task.getTaskGroupStarted() != null) {
-            toParseObject.put(EventLog.taskGroupStarted, ParseObject.createWithoutData(TaskGroup.class, task.getTaskGroupStarted().getObjectId()));
+            toParseObject.put(EventLog.taskGroupStarted, ParseObject.createWithoutData(TaskGroupStarted.class, task.getTaskGroupStarted().getObjectId()));
         }
         else {
             LogError.log(TAG, "taskGroupStarted was null for task: " + objectId);
