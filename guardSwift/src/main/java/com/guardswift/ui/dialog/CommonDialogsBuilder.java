@@ -14,9 +14,7 @@ import com.guardswift.persistence.parse.data.client.Client;
 
 import java.lang.ref.WeakReference;
 
-/**
- * Created by cyrix on 2/24/15.
- */
+
 public class CommonDialogsBuilder {
 
     public static class BetterPicks {

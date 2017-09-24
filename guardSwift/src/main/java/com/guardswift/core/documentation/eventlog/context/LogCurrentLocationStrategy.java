@@ -2,7 +2,7 @@ package com.guardswift.core.documentation.eventlog.context;
 
 import android.location.Location;
 
-import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.ca.location.LocationModule;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 

@@ -2,7 +2,7 @@ package com.guardswift.core.tasks.geofence;
 
 import android.location.Location;
 
-import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.query.AlarmTaskQueryBuilder;

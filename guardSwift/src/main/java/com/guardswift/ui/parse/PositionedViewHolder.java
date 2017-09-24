@@ -10,7 +10,7 @@ import com.beardedhen.androidbootstrap.BootstrapText;
 import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapBrand;
 import com.beardedhen.androidbootstrap.font.FontAwesome;
 import com.guardswift.R;
-import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.Positioned;
 import com.guardswift.ui.GuardSwiftApplication;

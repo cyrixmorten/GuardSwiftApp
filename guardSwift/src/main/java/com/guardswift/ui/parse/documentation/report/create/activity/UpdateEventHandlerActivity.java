@@ -163,7 +163,7 @@ public class UpdateEventHandlerActivity extends InjectingAppCompatActivity imple
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.x_gs_activity_toolbar_footer);
+        setContentView(R.layout.gs_activity_toolbar_footer);
 
         ButterKnife.bind(this);
 

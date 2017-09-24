@@ -1,4 +1,4 @@
-package com.guardswift.core.ca;
+package com.guardswift.core.ca.activity;
 
 import android.content.Context;
 import android.graphics.Color;

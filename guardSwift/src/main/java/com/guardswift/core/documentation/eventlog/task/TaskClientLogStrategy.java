@@ -2,7 +2,7 @@ package com.guardswift.core.documentation.eventlog.task;
 
 import android.location.Location;
 
-import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;

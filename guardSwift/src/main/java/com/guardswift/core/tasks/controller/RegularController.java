@@ -11,7 +11,6 @@ import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
-import com.guardswift.ui.dialog.activity.CheckpointsDialogActivity;
 import com.parse.ParseException;
 import com.parse.SaveCallback;
 
@@ -128,9 +127,6 @@ public class RegularController extends BaseTaskController {
                 ParseTaskCreateReportActivity.start(ctx, task);
                 break;
 
-            case OPEN_CHECKPOINTS:
-                CheckpointsDialogActivity.start(ctx, task);
-                break;
 
             default:
                 Log.e(TAG, "DEFAULT");

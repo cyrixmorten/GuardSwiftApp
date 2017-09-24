@@ -9,7 +9,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.common.collect.Lists;
 import com.guardswift.R;
-import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule.ForApplication;
 import com.guardswift.persistence.cache.data.GuardCache;

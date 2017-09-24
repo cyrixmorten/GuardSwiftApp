@@ -4,8 +4,8 @@ import android.util.Log;
 
 import com.google.android.gms.location.DetectedActivity;
 import com.google.common.collect.Maps;
-import com.guardswift.core.ca.ActivityDetectionModule;
-import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.ca.activity.ActivityDetectionModule;
+import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 

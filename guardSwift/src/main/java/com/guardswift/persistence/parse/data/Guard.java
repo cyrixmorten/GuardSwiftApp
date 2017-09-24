@@ -17,27 +17,6 @@ public class Guard extends ExtendedParseObject implements Positioned {
 
     public enum Role {ADMIN}
 
-//    public static class Query {
-//
-//        private static String TAG = "Guard.Query";
-//
-//        public static Guard get(String objectId)
-//                throws ParseException {
-//            ParseQuery<Guard> query = new Guard.QueryBuilder(true)
-//                    .matchingObjectId(objectId).build();
-//            return query.getFirst();
-//        }
-//
-//        public static Guard get(int guardId) throws ParseException {
-//            Log.e(TAG, "getGuard: " + guardId);
-//            ParseQuery<Guard> query = new Guard.QueryBuilder(true)
-//                    .build();
-//            query.whereEqualTo(Guard.guardId, guardId);
-//            return query.getFirst();
-//        }
-//
-//    }
-
 
     private static final String guardId = "guardId";
     public static final String name = "name";

@@ -1,4 +1,4 @@
-package com.guardswift.core.ca;
+package com.guardswift.core.ca.geofence;
 
 import android.location.Location;
 

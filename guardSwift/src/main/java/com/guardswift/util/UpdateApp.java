@@ -34,7 +34,7 @@ public class UpdateApp extends AsyncTask<File,Void,Void> {
             file.mkdirs();
             File outputFile = new File(file, FILENAME);
 
-            FileUtil.copyFile(fromFile, outputFile);
+            FileIO.copyFile(fromFile, outputFile);
 
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setDataAndType(Uri.fromFile(outputFile), "application/vnd.android.package-archive");

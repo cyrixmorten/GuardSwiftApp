@@ -24,7 +24,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.common.collect.Lists;
 import com.guardswift.R;
-import com.guardswift.core.ca.ActivityDetectionModule;
+import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;

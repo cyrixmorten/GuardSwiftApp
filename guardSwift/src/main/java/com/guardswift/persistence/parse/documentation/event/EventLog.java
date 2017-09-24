@@ -6,7 +6,7 @@ import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
-import com.guardswift.core.ca.ActivityDetectionModule;
+import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.core.documentation.eventlog.context.LogContextStrategy;
 import com.guardswift.core.documentation.eventlog.context.LogCurrentActivityStrategy;
 import com.guardswift.core.documentation.eventlog.context.LogStrategyFactory;

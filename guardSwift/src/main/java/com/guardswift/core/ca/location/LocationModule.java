@@ -1,9 +1,10 @@
-package com.guardswift.core.ca;
+package com.guardswift.core.ca.location;
 
 import android.content.Context;
 import android.location.Address;
 import android.location.Location;
 
+import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.util.GeocodedAddress;
 
 import org.json.JSONObject;

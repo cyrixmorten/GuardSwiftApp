@@ -1,7 +1,7 @@
 package com.guardswift.core.documentation.eventlog.context;
 
 import com.google.android.gms.location.DetectedActivity;
-import com.guardswift.core.ca.ActivityDetectionModule;
+import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.parse.ParseObject;
 
 /**

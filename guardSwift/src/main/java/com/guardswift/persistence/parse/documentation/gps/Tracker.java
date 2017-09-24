@@ -6,8 +6,8 @@ import android.util.Log;
 
 import com.google.android.gms.location.DetectedActivity;
 import com.google.gson.Gson;
-import com.guardswift.core.ca.ActivityDetectionModule;
-import com.guardswift.core.ca.LocationModule;
+import com.guardswift.core.ca.activity.ActivityDetectionModule;
+import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;

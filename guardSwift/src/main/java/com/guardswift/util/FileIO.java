@@ -6,7 +6,10 @@ import android.util.Log;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -103,4 +106,17 @@ public class FileIO {
         return string.toString();
     }
 
+    public static void copyFile(File src, File dst) throws IOException {
+        FileInputStream var2 = new FileInputStream(src);
+        FileOutputStream var3 = new FileOutputStream(dst);
+        byte[] var4 = new byte[1024];
+
+        int var5;
+        while((var5 = var2.read(var4)) > 0) {
+            var3.write(var4, 0, var5);
+        }
+
+        var2.close();
+        var3.close();
+    }
 }
