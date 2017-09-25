@@ -49,10 +49,13 @@ import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.ToastHelper;
 import com.parse.DeleteCallback;
+import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseACL;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
+import com.parse.ParseLiveQueryClient;
+import com.parse.ParseLiveQueryClientCallbacks;
 import com.parse.ParseObject;
 import com.parse.ParsePush;
 import com.parse.ParseQuery;
@@ -95,7 +98,8 @@ public class GuardSwiftApplication extends InjectingApplication {
 
     private boolean parseObjectsBootstrapped;
     private boolean bootstrapInProgress;
-//    private boolean triggerNewGeofence = false;
+
+    private ParseLiveQueryClient parseLiveQueryClient;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -220,6 +224,34 @@ public class GuardSwiftApplication extends InjectingApplication {
         defaultACL.setPublicReadAccess(false);
         ParseACL.setDefaultACL(defaultACL, true);
 
+        parseLiveQueryClient = ParseLiveQueryClient.Factory.getClient();
+
+        parseLiveQueryClient.registerListener(new ParseLiveQueryClientCallbacks() {
+            @Override
+            public void onLiveQueryClientConnected(ParseLiveQueryClient client) {
+                Log.d(TAG, "onLiveQueryClientConnected");
+            }
+
+            @Override
+            public void onLiveQueryClientDisconnected(ParseLiveQueryClient client, boolean userInitiated) {
+                Log.d(TAG, "onLiveQueryClientDisconnected by user: " + userInitiated);
+
+            }
+
+            @Override
+            public void onLiveQueryError(ParseLiveQueryClient client, LiveQueryException reason) {
+                new HandleException(TAG, "onLiveQueryError", reason);
+            }
+
+            @Override
+            public void onSocketError(ParseLiveQueryClient client, Throwable reason) {
+                new HandleException(TAG, "onSocketError", reason);
+            }
+        });
+    }
+
+    public ParseLiveQueryClient getLiveQueryClient() {
+        return parseLiveQueryClient;
     }
 
 

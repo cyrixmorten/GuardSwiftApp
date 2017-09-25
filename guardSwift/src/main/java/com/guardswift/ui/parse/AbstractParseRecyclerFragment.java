@@ -96,11 +96,11 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
             mAdapter = createRecycleAdapter();
             mAdapter.addOnQueryLoadListener(recycleQueryListener);
 
-            reloadAdapter(false);
+            reloadAdapter();
         }
     }
 
-    private void reloadAdapter(boolean fromLocalDatastore) {
+    private void reloadAdapter() {
         if (mAdapter != null) {
             if (GuardSwiftApplication.getInstance().isBootstrapInProgress()) {
                 Log.w(TAG, "reloadAdapter: application is bootstrapping");
@@ -112,7 +112,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
                 return;
             }
 
-            mAdapter.loadObjects(fromLocalDatastore);
+            mAdapter.loadObjects();
         }
     }
 
@@ -153,10 +153,11 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
             @Override
             public void onRefresh() {
-                reloadAdapter(false);
+                reloadAdapter();
             }
         });
 
+        reloadAdapter();
 
         return rootView;
     }
@@ -180,7 +181,6 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
         Log.d(TAG, "onResume");
         if (mAdapter != null) {
             mAdapter.addOnQueryLoadListener(recycleQueryListener);
-            reloadAdapter(false);
         }
 
         super.onResume();
@@ -188,8 +188,9 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
     @Override
     public void onPause() {
-        if (mAdapter != null)
+        if (mAdapter != null) {
             mAdapter.removeOnQueryLoadListener(recycleQueryListener);
+        }
         super.onPause();
     }
 
@@ -233,12 +234,11 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
 
     public void onEventMainThread(BootstrapCompleted ev) {
-        reloadAdapter(false);
+        reloadAdapter();
     }
 
     public void onEventMainThread(UpdateUIEvent ev) {
         if (!mLoading && isRelevantUIEvent(ev)) {
-            reloadAdapter(true);
         }
     }
 

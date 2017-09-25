@@ -1,17 +1,22 @@
 package com.guardswift.ui.parse;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.google.common.collect.Lists;
+import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseLiveQueryClient;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter.QueryFactory;
+import com.parse.SubscriptionHandling;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +59,8 @@ import java.util.List;
  */
 public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<U> {
+
+    private static final String TAG = ParseRecyclerQueryAdapter.class.getSimpleName();
     /**
      * START My own tweaks
      */
@@ -61,7 +68,8 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
     // may be null if not attached to activity or fragment
     protected Context context;
     protected FragmentManager fragmentManager;
-    protected boolean fromLocalDataStore;
+
+    private ParseQuery<T> liveQuery;
 
     public void onAttatch(Context context) {
         this.context = context;
@@ -69,17 +77,10 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
 
     public void onDetatch() {
         this.context = null;
+
+        unsubscribeLiveQuery();
     }
 
-    public ParseRecyclerQueryAdapter setFromLocalDataStore(boolean fromLocalDataStore) {
-        this.fromLocalDataStore = fromLocalDataStore;
-
-        return this;
-    }
-
-    public boolean isFromLocalDataStore() {
-        return fromLocalDataStore;
-    }
 
     private PostProcessAdapterResults<T> postProcessor;
 
@@ -87,19 +88,6 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
         this.postProcessor = postProcessor;
     }
 
-    /**
-     * Enables an implementation to change/sort/order incoming results before being passed to the recycler adapter
-     *
-     * @param queriedItems
-     * @return result after postprocessing
-     */
-//    protected List<T>  postProcessResults(List<T> queriedItems) {
-//        return queriedItems;
-//    };
-
-    /**
-     * END
-     */
 
     private final QueryFactory<T> mFactory;
     private final boolean hasStableIds;
@@ -183,12 +171,9 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
         // provide override for filtering query
     }
 
-    public synchronized void loadObjects(boolean fromLocalDataStore) {
+    public synchronized void loadObjects() {
         dispatchOnLoading();
         final ParseQuery<T> query = mFactory.create();
-        if (fromLocalDataStore) {
-            query.fromLocalDatastore();
-        }
         onFilterQuery(query);
         query.findInBackground(new FindCallback<T>() {
 
@@ -200,10 +185,6 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
                 if (queriedItems != null && e == null) {
                     Log.d("QueryAdapter", "queriedItems: " + queriedItems.size());
 
-                    if (postProcessor != null && !queriedItems.isEmpty()) {
-                        queriedItems = postProcessor.postProcess(queriedItems);
-                    }
-
                     showResults(queriedItems);
                 }
 
@@ -214,12 +195,118 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
                 dispatchOnLoaded(queriedItems, e);
             }
         });
+
+        subscribeLiveQuery(query);
+    }
+
+    private void unsubscribeLiveQuery() {
+        if (this.liveQuery != null) {
+
+            GuardSwiftApplication.getInstance().getLiveQueryClient().unsubscribe(this.liveQuery);
+
+            this.liveQuery = null;
+        }
+    }
+
+    private void subscribeLiveQuery(ParseQuery<T> query) {
+        ParseLiveQueryClient liveQueryClient = GuardSwiftApplication.getInstance().getLiveQueryClient();
+
+        SubscriptionHandling<T> subscriptionHandling = liveQueryClient.subscribe(query);
+
+        subscriptionHandling.handleEvents(new SubscriptionHandling.HandleEventsCallback<T>() {
+            @Override
+            public void onEvents(ParseQuery<T> query, SubscriptionHandling.Event event, T object) {
+
+                Log.d(TAG, "onEvents: " + event.name());
+
+                switch (event) {
+                    case CREATE: {
+                        addItem(object);
+                        break;
+                    }
+                    case ENTER: {
+                        addItem(object);
+                        break;
+                    }
+                    case UPDATE: {
+                        replaceItem(object);
+                        break;
+                    }
+                    case LEAVE: {
+                        removeItem(object);
+                        break;
+                    }
+                    case DELETE: {
+                        removeItem(object);
+                        break;
+                    }
+                }
+
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        notifyUpdate();
+                    }
+                });
+            }
+        });
+    }
+
+    private int indexOf(T object) {
+        int index = -1;
+        for (int i = 0; i < mItems.size(); i++) {
+            T existing = mItems.get(i);
+
+            if (existing.getObjectId().equals(object.getObjectId())) {
+                index = i;
+                break;
+            }
+        }
+        return index;
+    }
+
+    private void addItem(T object) {
+        mItems.add(object);
+        postProcess(mItems);
+    }
+
+    private void removeItem(T object) {
+        int existingIndex = indexOf(object);
+
+        if (existingIndex != -1) {
+            mItems.remove(existingIndex);
+        }
+    }
+
+    private void replaceItem(T object) {
+        int existingIndex = indexOf(object);
+
+        if (existingIndex != -1) {
+            mItems.remove(existingIndex);
+            mItems.add(existingIndex, object);
+        }
     }
 
     public synchronized void showResults(List<T> results) {
         mItems.clear();
-        mItems.addAll(results);
 
+        if (postProcessor != null) {
+            postProcess(results);
+        } else {
+            mItems.addAll(results);
+        }
+
+        notifyUpdate();
+    }
+
+    private void postProcess(List<T> items) {
+        if (postProcessor != null && !items.isEmpty()) {
+            items = postProcessor.postProcess(items);
+        }
+        mItems.addAll(items);
+    }
+
+    private void notifyUpdate() {
         notifyDataSetChanged();
         fireOnDataSetChanged();
     }
