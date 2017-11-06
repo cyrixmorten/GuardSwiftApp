@@ -22,15 +22,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 
+import com.guardswift.ui.activity.RFIDRegisterActivity;
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule;
 import com.guardswift.ui.activity.AbstractToolbarActivity;
-import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.activity.MainActivity;
+import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
 import com.guardswift.ui.dialog.activity.AbstractDialogActivity;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
-import com.guardswift.ui.parse.documentation.report.create.activity.AbstractCreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
 
@@ -69,9 +69,11 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
         ParseTaskCreateReportActivity.class,
         // Create Event
         UpdateEventHandlerActivity.class,
-        AbstractCreateEventHandlerActivity.class,
         CreateEventHandlerActivity.class,
-        CreateEventHandlerActivity.class}, library = true)
+        CreateEventHandlerActivity.class,
+        CreateEventHandlerActivity.class,
+        // RFID
+        RFIDRegisterActivity.class}, library = true)
 public class InjectingActivityModule {
     private final AppCompatActivity mActivity;
     private final Injector mInjector;

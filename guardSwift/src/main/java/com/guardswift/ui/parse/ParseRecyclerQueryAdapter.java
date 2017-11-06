@@ -9,16 +9,17 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.google.common.collect.Lists;
+import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseLiveQueryClient;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter.QueryFactory;
 import com.parse.SubscriptionHandling;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /*
@@ -57,7 +58,7 @@ import java.util.List;
  * @ https://github.com/Malinskiy/SuperRecyclerView
  * SHOULD WORK WITH UltimateRecyclerView
  */
-public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends RecyclerView.ViewHolder>
+public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<U> {
 
     private static final String TAG = ParseRecyclerQueryAdapter.class.getSimpleName();
@@ -82,12 +83,6 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
     }
 
 
-    private PostProcessAdapterResults<T> postProcessor;
-
-    public void setPostProcessor(PostProcessAdapterResults<T> postProcessor) {
-        this.postProcessor = postProcessor;
-    }
-
 
     private final QueryFactory<T> mFactory;
     private final boolean hasStableIds;
@@ -95,46 +90,14 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
 
     public ParseRecyclerQueryAdapter(final QueryFactory<T> factory) {
         mFactory = factory;
-        mItems = new ArrayList<T>();
+        mItems = new ArrayList<>();
         mDataSetListeners = Lists.newCopyOnWriteArrayList();
         mQueryListeners = Lists.newCopyOnWriteArrayList();
-        this.hasStableIds = false;
+        this.hasStableIds = true;
 
-        setHasStableIds(false);
+        setHasStableIds(true);
     }
 
-    // PRIMARY CONSTRUCTOR
-    public ParseRecyclerQueryAdapter(final QueryFactory<T> factory, final boolean hasStableIds) {
-        mFactory = factory;
-        mItems = new ArrayList<T>();
-        mDataSetListeners = Lists.newCopyOnWriteArrayList();
-        mQueryListeners = Lists.newCopyOnWriteArrayList();
-        this.hasStableIds = hasStableIds;
-
-        setHasStableIds(hasStableIds);
-    }
-
-    // ALTERNATE CONSTRUCTOR
-    public ParseRecyclerQueryAdapter(final String className, final boolean hasStableIds) {
-        this(new QueryFactory<T>() {
-
-            @Override
-            public ParseQuery<T> create() {
-                return ParseQuery.getQuery(className);
-            }
-        }, hasStableIds);
-    }
-
-    // ALTERNATE CONSTRUCTOR
-    public ParseRecyclerQueryAdapter(final Class<T> clazz, final boolean hasStableIds) {
-        this(new QueryFactory<T>() {
-
-            @Override
-            public ParseQuery<T> create() {
-                return ParseQuery.getQuery(clazz);
-            }
-        }, hasStableIds);
-    }
 
 
 
@@ -144,10 +107,11 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
 
     @Override
     public long getItemId(int position) {
-        if (hasStableIds) {
-            return position;
-        }
-        return super.getItemId(position);
+//        if (hasStableIds) {
+//            return position;
+//        }
+//        return super.getItemId(position);
+        return getItem(position).getObjectId().hashCode();
     }
 
     @Override
@@ -164,17 +128,10 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
     }
 
 
-    /**
-     * Apply alterations to query prior to running findInBackground.
-     */
-    protected void onFilterQuery(ParseQuery<T> query) {
-        // provide override for filtering query
-    }
 
     public synchronized void loadObjects() {
         dispatchOnLoading();
         final ParseQuery<T> query = mFactory.create();
-        onFilterQuery(query);
         query.findInBackground(new FindCallback<T>() {
 
             @Override
@@ -183,20 +140,20 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
                     @Nullable ParseException e) {
 
                 if (queriedItems != null && e == null) {
-                    Log.d("QueryAdapter", "queriedItems: " + queriedItems.size());
+                    Log.d(TAG, "queriedItems: " + queriedItems.size());
 
                     showResults(queriedItems);
                 }
 
                 if (e != null) {
-                    Log.e("QueryAdapter", "Adapter load", e);
+                    Log.e(TAG, "Adapter load", e);
                 }
 
                 dispatchOnLoaded(queriedItems, e);
             }
         });
 
-        subscribeLiveQuery(query);
+//        subscribeLiveQuery(query);
     }
 
     private void unsubscribeLiveQuery() {
@@ -215,37 +172,35 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
 
         subscriptionHandling.handleEvents(new SubscriptionHandling.HandleEventsCallback<T>() {
             @Override
-            public void onEvents(ParseQuery<T> query, SubscriptionHandling.Event event, T object) {
+            public void onEvents(ParseQuery<T> query, final SubscriptionHandling.Event event, final T object) {
 
-                Log.d(TAG, "onEvents: " + event.name());
-
-                switch (event) {
-                    case CREATE: {
-                        addItem(object);
-                        break;
-                    }
-                    case ENTER: {
-                        addItem(object);
-                        break;
-                    }
-                    case UPDATE: {
-                        replaceItem(object);
-                        break;
-                    }
-                    case LEAVE: {
-                        removeItem(object);
-                        break;
-                    }
-                    case DELETE: {
-                        removeItem(object);
-                        break;
-                    }
-                }
+                Log.d(TAG, "onEvent: " + event.name());
 
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        notifyUpdate();
+                    switch (event) {
+                        case CREATE: {
+                            addItem(object);
+                            break;
+                        }
+                        case ENTER: {
+                            addItem(object);
+                            break;
+                        }
+                        case UPDATE: {
+                            updateItem(object);
+                            break;
+                        }
+                        case LEAVE: {
+                            removeItem(object);
+                            break;
+                        }
+                        case DELETE: {
+                            removeItem(object);
+                            break;
+                        }
+                    }
                     }
                 });
             }
@@ -267,7 +222,10 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
 
     private void addItem(T object) {
         mItems.add(object);
-        postProcess(mItems);
+
+        Collections.sort(mItems);
+
+        notifyDataSetChanged();
     }
 
     private void removeItem(T object) {
@@ -275,36 +233,33 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
 
         if (existingIndex != -1) {
             mItems.remove(existingIndex);
+            if (existingIndex != 0) {
+                notifyItemRemoved(existingIndex);
+            } else {
+                notifyDataSetChanged();
+            }
         }
     }
 
-    private void replaceItem(T object) {
+    private void updateItem(T object) {
         int existingIndex = indexOf(object);
 
         if (existingIndex != -1) {
             mItems.remove(existingIndex);
             mItems.add(existingIndex, object);
+            notifyItemChanged(existingIndex);
         }
+
+
     }
 
     public synchronized void showResults(List<T> results) {
         mItems.clear();
-
-        if (postProcessor != null) {
-            postProcess(results);
-        } else {
-            mItems.addAll(results);
-        }
-
+        mItems.addAll(results);
+        Collections.sort(mItems);
         notifyUpdate();
     }
 
-    private void postProcess(List<T> items) {
-        if (postProcessor != null && !items.isEmpty()) {
-            items = postProcessor.postProcess(items);
-        }
-        mItems.addAll(items);
-    }
 
     private void notifyUpdate() {
         notifyDataSetChanged();
@@ -369,4 +324,6 @@ public abstract class ParseRecyclerQueryAdapter<T extends ParseObject, U extends
             l.onLoaded(objects, e);
         }
     }
+
+
 }

@@ -75,7 +75,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
     }
 
     @Override
-    public void onBindViewHolder(final ReportViewHolder holder, int position) {
+    public void onBindViewHolder(final ReportViewHolder holder, final int position) {
         final EventLog eventLog = getItem(position);
         Log.d(TAG, "onBindViewHolder: " + eventLog);
         final FragmentActivity activity = activityWeakReference.get();
@@ -165,8 +165,13 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
                                                        @Override
                                                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
 
-                                                           notifyItemRemoved(getItems().indexOf(eventLog));
-                                                           getItems().remove(eventLog);
+                                                           int position = holder.getAdapterPosition();
+                                                           getItems().remove(position);
+                                                           if (position > 0) {
+                                                               notifyItemRemoved(position);
+                                                           } else {
+                                                               notifyDataSetChanged();
+                                                           }
 
                                                            eventLog.deleteEventually();
                                                        }

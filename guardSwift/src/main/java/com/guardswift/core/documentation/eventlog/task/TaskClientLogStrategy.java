@@ -15,7 +15,7 @@ import com.parse.ParseObject;
  *
  * Created by cyrix on 6/7/15.
  */
-public class TaskClientLogStrategy implements LogTaskStrategy {
+class TaskClientLogStrategy implements LogTaskStrategy {
 
 
 

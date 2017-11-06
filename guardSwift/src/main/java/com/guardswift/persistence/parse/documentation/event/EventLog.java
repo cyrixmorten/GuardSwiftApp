@@ -1,6 +1,7 @@
 package com.guardswift.persistence.parse.documentation.event;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
 import android.util.Log;
 
@@ -14,12 +15,12 @@ import com.guardswift.core.documentation.eventlog.context.LogTimestampStrategy;
 import com.guardswift.core.documentation.eventlog.task.LogTaskStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskLogStrategyFactory;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
-import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.query.EventLogQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.GetCallback;
@@ -38,8 +39,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import bolts.Task;
 
 
 @ParseClassName("EventLog")
@@ -219,7 +218,6 @@ public class EventLog extends ExtendedParseObject {
         public Builder taskPointer(ParseTask task, ParseTask.EVENT_TYPE event_type) {
 
             this.parseTask = task;
-//            this.event_type = event_type;
 
             TaskLogStrategyFactory logStrategyFactory = new TaskLogStrategyFactory();
 
@@ -230,7 +228,6 @@ public class EventLog extends ExtendedParseObject {
             }
 
 
-//            eventLog.put(EventLog.task_type, task.getTaskType().toString());
             eventLog.put(EventLog.task_event, event_type.toString());
 
 
@@ -247,74 +244,9 @@ public class EventLog extends ExtendedParseObject {
             return this;
         }
 
-
-
-
-
-//        private Builder detectedActivity() {
-//            DetectedActivity activity = ActivityDetectionModule.Recent.getDetectedActivity();
-//            if (activity != null) {
-//                eventLog.setDetectedActivity(activity);
-//            }
-//            return this;
-//        }
-
-//        public Builder guard(Guard guard) {
-//            if (guard != null)
-//                eventLog.setGuard(guard);
-//            return this;
-//        }
-
-//        private Builder location(Location location) {
-//            if (location != null)
-//                eventLog.setLocation(location);
-//            return this;
-//        }
-
-//        private Builder districtWatchClient(DistrictWatchClient districtWatchClient) {
-//            eventLog.setDistrictWatchClient(districtWatchClient);
-//            try {
-//                // Query locally for the newest DistrictWatchStarted
-//                eventLog.setDistrictWatchStarted(DistrictWatchStarted.Query.findFrom(districtWatchClient.getDistrictWatch()));
-//            } catch (ParseException e) {
-//                // fallback to Recent
-//                eventLog.setDistrictWatchStarted(DistrictWatchStarted.Recent.getSelected());
-//            }
-//
-//            return this;
-//        }
-
-//        private Builder districtWatchStarted(DistrictWatchStarted districtWatchStarted) {
-//            eventLog.setDistrictWatchStarted(districtWatchStarted);
-//            return this;
-//        }
-
-//        private Builder circuitUnit(CircuitUnit circuitUnit) {
-//            eventLog.setCircuitUnit(circuitUnit);
-//            if (circuitUnit.isArrived()) {
-//                try {
-//                    // Query locally for the newest circuitStarted
-//                    circuitStarted(CircuitStarted.Query.findFrom(circuitUnit.getCircuit()));
-//                } catch (ParseException e) {
-//                    // In case of error fallback to pointer kept on circuitUnit
-//                    // A final fallback to Recents is done for getCircuitStarted on failure
-//                    circuitStarted(circuitUnit.getCircuitStarted(false));
-//                }
-//            } else {
-//                circuitStarted(CircuitStarted.Recent.getSelected());
-//            }
-//            return this;
-//        }
-
-//        public Builder circuitStarted(CircuitStarted circuitStarted) {
-//            if (circuitStarted != null)
-//                eventLog.setCircuitstarted(circuitStarted);
-//            return this;
-//        }
-
         /**
          * Automatically adds current CircuitStarted, Guard, Location, client proximity and DeviceTimestamp
-         * before calling saveeventually and broadcast a UI init
+         * before calling saveeventually and broadcast a UI update
          */
         public void saveAsync() {
             saveAsync(null, null);
@@ -328,24 +260,8 @@ public class EventLog extends ExtendedParseObject {
 
             Log.e(TAG, "Save event " + eventLog.getEvent());
 
-//            Log.w(TAG, "1) Geocode start");
-//            LocationModule.reverseGeocodedAddress(context).continueWith(new Continuation<GeocodedAddress, Object>() {
-//                @Override
-//                public Object then(Task<GeocodedAddress> task) throws Exception {
-//                    Log.w(TAG, "2) Geocode done");
-//                    final Capture<GeocodedAddress> geocodedAddress = new Capture<>();
-//                    if (!task.isFaulted()) {
-//                        geocodedAddress.set(task.getResult());
-//                        eventLog.put(EventLog.geocodedAddress, task.getResult().toJSON());
-//                    } else {
-//                        // error reverse geocoding address
-//                        // fall-thru as reverse geocoding is not strictly needed
-//                        new HandleException(context, TAG, "reverseGeocodeAddress", task.getError());
-//                    }
-
-
             Log.w(TAG, "3) Save event");
-            eventLog.pinThenSaveEventually(PIN_NEW, new SaveCallback() {
+            eventLog.pinThenSaveEventually(NEW_OBJECT_PIN, new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
                     if (e != null) {
@@ -355,6 +271,9 @@ public class EventLog extends ExtendedParseObject {
                     if (pinnedCallback != null) {
                         pinnedCallback.done(eventLog, e);
                     }
+
+                    EventBusController.postUIUpdate();
+
                     Log.w(TAG, "4) Save event - pinned");
                 }
             }, new SaveCallback() {
@@ -366,7 +285,6 @@ public class EventLog extends ExtendedParseObject {
 
                     Log.w(TAG, "5) Save event - saved");
 
-//                            updateGuardInfo(geocodedAddress.get());
                     updateGuardInfo();
 
                     if (savedCallback != null) {
@@ -374,10 +292,6 @@ public class EventLog extends ExtendedParseObject {
                     }
                 }
             }, true);
-
-//                    return null;
-//                }
-//            });
 
         }
 
@@ -390,43 +304,8 @@ public class EventLog extends ExtendedParseObject {
             }
 
             guard.setPosition(eventLog.getPosition());
-//            guard.setLastGeocodedAddress(reverseGeocodedAddress);
-
-            // makes it impossible to unpin eventlog
-//            guard.setLastEvent(ParseObject.createWithoutData(EventLog.class, eventLog.getObjectId()));
-            guard.saveEventually();
+            guard.saveInBackground();
         }
-
-
-        public Builder correctGuess(boolean b) {
-            eventLog.put(correctGuess, b);
-            return this;
-        }
-
-//        public Builder summary(String columnName, JSONArray summary, Date timeStarted, Date timeEnded) {
-//            eventLog.setSummary(columnName, summary, timeStarted, timeEnded);
-//            return this;
-//        }
-
-//        public Builder eventSummary(JSONArray summaryEntries) {
-//            eventLog.put(eventSummary, summaryEntries);
-//            return this;
-//        }
-//
-//        public Builder taskSummary(JSONArray summaryEntries) {
-//            eventLog.put(taskSummary, summaryEntries);
-//            return this;
-//        }
-
-//        public Builder publicReadable() {
-//            ParseACL acl = new ParseACL();
-//            acl.setWriteAccess(ParseUser.getCurrentUser(), true);
-//            acl.setPublicWriteAccess(false);
-//            acl.setPublicReadAccess(true);
-////            acl.setWriteAccess(ParseUser.getCurrentUser(), false);
-//            eventLog.setACL(acl);
-//            return this;
-//        }
 
         public EventLog build() {
             return eventLog;
@@ -458,10 +337,6 @@ public class EventLog extends ExtendedParseObject {
             map.put("activityConfidence", confidence);
             map.put("activityName", name);
 
-//        Log.d(TAG, "Activity -> JSON");
-//        Log.d(TAG, "Type: " + type);
-//        Log.d(TAG, "Confidence: " + confidence);
-//        Log.d(TAG, "Name: " + name);
 
             JSONObject jsonObject = new JSONObject(map);
 
@@ -469,10 +344,6 @@ public class EventLog extends ExtendedParseObject {
         }
 
 
-//        public Builder locationTrackerUrl(String result) {
-//            eventLog.put("locationTrackerUrl", result);
-//            return this;
-//        }
     }
 
 
@@ -532,16 +403,12 @@ public class EventLog extends ExtendedParseObject {
     // eventCode
     public static final String eventCode = "eventCode";
 
-    public static final String checkpoint_wifi_sample = "checkpoint_wifi_sample";
     // misc
     public static final String deviceTimestamp = LogTimestampStrategy.deviceTimestamp;
 
     public static final String automatic = "automatic";
     public static final String correctGuess = "correctGuess";
 
-    // summary
-    public static final String timeStarted = "timeStarted";
-    public static final String timeEnded = "timeEnded";
 
 
     @Override
@@ -588,186 +455,14 @@ public class EventLog extends ExtendedParseObject {
         return getInt(eventCode);
     }
 
-//    public void addClientProximity(float distanceMeters) {
-//        put(clientDistanceMeters, distanceMeters);
-//    }
 
-
-//    private void setContactClient(Client contactClient) {
-//        put(EventLog.contactClient, contactClient);
-//    }
-//    public void setClients(Client contactClient, Client client) {
-//        put(EventLog.contactClient, contactClient);
-//        setClient(client);
-//    }
-
-//    public void setClients(Client contactClient, DistrictWatchClient client) {
-//        put(EventLog.contactClient, contactClient);
-//        setClient(client);
-//    }
-
-//    public void setData(CircuitStarted circuitStarted, Guard guard,
-//                        Location location, DetectedActivity detectedActivity, Event event) {
-//        if (circuitStarted != null)
-//            setCircuitstarted(circuitStarted);
-//        if (guard != null)
-//            setGuard(guard);
-//        if (location != null)
-//            setLocation(location);
-//        if (detectedActivity != null)
-//            setDetectedActivity(detectedActivity);
-//        setEventType(event);
-//        setOwner(ParseUser.getCurrentUser());
-//    }
-
-
-    public String getTaskTypeName() {
+    private String getTaskTypeName() {
         return getString(EventLog.taskTypeName);
     }
 
     private void setAutomatic(boolean automatic) {
         put(EventLog.automatic, automatic);
     }
-
-//    public void setClientTimestampNow() {
-//        put(clientTimestamp, new Date());
-//        put(deviceTimestamp, new Date());
-//    }
-
-//    private void setCheckpointDistance(double distance) {
-//        put(checkpoint_distance, distance);
-//    }
-
-//    private void setCheckpointProbability(double probability) {
-//        put(checkpoint_probability, probability);
-//    }
-
-//    private void setEventCode(int eventCode) {
-//        put(EventLog.eventCode, eventCode);
-//    }
-
-
-//    private void setDetectedActivity(DetectedActivity detectedActivity) {
-//        put(activityType, detectedActivity.getType());
-//        put(activityConfidence, detectedActivity.getConfidence());
-//        put(activityName, ActivityDetectionModule.getNameFromType(detectedActivity.getType()));
-//    }
-
-//    private void setAlarm(Alarm alarm) {
-//        put(EventLog.alarm, alarm);
-//
-//        Client client = alarm.getClient();
-//        String type = alarm.getType();
-//
-//        put(EventLog.type, (type != null) ? type : "");
-//
-//        if (client != null) {
-//            put(EventLog.client, client);
-//            put(EventLog.contactClient, client);
-//            if (client.has(Client.name))
-//                put(EventLog.clientName, client.getName());
-//            put(EventLog.clientAddress, client.getAddressName());
-//            put(EventLog.clientAddressNumber, client.getAddressNumber());
-//            put(EventLog.clientCity, client.getCityName());
-//            put(EventLog.clientZipcode, client.getZipcode());
-//            String clientFullAddress = client.getAddressName() + " "
-//                    + client.getAddressNumber() + " " + client.getZipcode() + " "
-//                    + client.getCityName();
-//            put(EventLog.clientFullAddress, clientFullAddress);
-//        }
-//    }
-
-//    private void setCircuitUnit(CircuitUnit circuitUnit) {
-//        put(EventLog.circuitUnit, circuitUnit);
-//
-//        setTaskType(circuitUnit.getName());
-//        put(isExtra, circuitUnit.isExtra());
-//
-//        put(timeStart, circuitUnit.getTimeStart());
-//        put(timeStartString, circuitUnit.getTimeStartString());
-//        put(timeEnd, circuitUnit.getTimeEnd());
-//        put(timeEndString, circuitUnit.getTimeEndString());
-//
-//        Client client = circuitUnit.getClient();
-//
-//        setClient(client);
-//    }
-
-//    private void setDistrictWatchClient(DistrictWatchClient districtWatchClient) {
-//        put(EventLog.districtWatchClient, districtWatchClient);
-//        if (districtWatchClient.getDistrictWatchUnit() != null) {
-//            put(EventLog.districtWatchUnit, districtWatchClient.getDistrictWatchUnit());
-//        }
-//
-//
-//        setClient(districtWatchClient);
-//    }
-
-
-//    private void setDistrictWatchStarted(
-//            DistrictWatchStarted districtWatchStarted) {
-//
-//        if (districtWatchStarted != null) {
-//            put(EventLog.districtWatchStarted, districtWatchStarted);
-//
-//            DistrictWatch districtWatch = districtWatchStarted.getDistrictWatch();
-//            if (districtWatch != null) {
-//                put(timeStart, districtWatch.getTimeStart());
-//                put(timeStartString, districtWatch.getTimeStartString());
-//                put(timeEnd, districtWatch.getTimeEnd());
-//                put(timeEndString, districtWatch.getTimeEndString());
-//            }
-//
-//        }
-//
-//    }
-    // public void setDistrictWatchClient(Client districtWatchClient) {
-    // put(EventLog.districtWatchClient, districtWatchClient);
-    // }
-
-//    public static class Event {
-//        // public String type;
-//        public final String event;
-//        public final int amount;
-//        public final String location;
-//        public final String remarks;
-//        public final int eventCode;
-//
-//        public Event(String event, int amount, String location,
-//                     String remarks, int eventCode) {
-//            super();
-//            // this.type = type;
-//            this.event = event;
-//            this.amount = amount;
-//            this.location = location;
-//            this.remarks = remarks;
-//            this.eventCode = eventCode;
-//        }
-//
-//    }
-//
-//    private void setEventType(Event event) {
-//        setEventCode(event.eventCode);
-//        setEventType(event.event);
-//        if (event.amount != 0)
-//            setAmount(event.amount);
-//        setClientLocation(event.location);
-//        setRemarks(event.remarks);
-//    }
-
-//    private void setLocation(Location location) {
-//        if (location != null) {
-//            ParseGeoPoint parseGeoPoint = new ParseGeoPoint(
-//                    location.getLatitude(), location.getLongitude());
-//            setPosition(parseGeoPoint);
-//
-//            put(EventLog.accuracy, location.getAccuracy());
-//            put(EventLog.altitude, location.getAltitude());
-//            put(EventLog.bearing, location.getBearing());
-//            put(EventLog.provider, location.getProvider());
-//            put(EventLog.speed, location.getSpeed());
-//        }
-//    }
 
 
     private void setOwner(ParseObject owner) {
@@ -794,14 +489,6 @@ public class EventLog extends ExtendedParseObject {
         return client;
     }
 
-    public Task<Client> getClientInBackground() {
-        Client client = getClient();
-        if (client != null) {
-            return client.fetchIfNeededInBackground();
-        }
-        return Task.forError(new ParseException(ParseException.OBJECT_NOT_FOUND, "Client not found"));
-    }
-
 
     public Guard getGuard() {
         return (Guard) getParseObject(guard);
@@ -810,13 +497,6 @@ public class EventLog extends ExtendedParseObject {
     public String getGuardName() {
         return getString(EventLog.guardName);
     }
-
-
-
-    public TaskGroupStarted getTaskGroupStarted() {
-        return (TaskGroupStarted) getParseObject(EventLog.taskGroupStarted);
-    }
-
 
 
     public String getEvent() {
@@ -840,7 +520,7 @@ public class EventLog extends ExtendedParseObject {
         return 0;
     }
 
-    public String getAmountString() {
+    private String getAmountString() {
         if (getAmount() > 0) {
             return String.valueOf(getAmount());
         }
@@ -856,7 +536,6 @@ public class EventLog extends ExtendedParseObject {
     public String getPeople() {
         return getStringSafe(people);
     }
-
 
     public String getRemarks() {
         return getStringSafe(remarks);
@@ -893,13 +572,17 @@ public class EventLog extends ExtendedParseObject {
         if (taskTypeName.equalsIgnoreCase(ParseTask.TASK_TYPE_STRING.RAID)) {
             return ParseTask.TASK_TYPE.RAID;
         }
-        if (taskTypeName.equalsIgnoreCase(ParseTask.TASK_TYPE_STRING.STAITC)) {
+        if (taskTypeName.equalsIgnoreCase(ParseTask.TASK_TYPE_STRING.STATIC)) {
             return ParseTask.TASK_TYPE.STATIC;
         }
         return null;
     }
 
-
-
-
+    @Override
+    public int compareTo(@NonNull ExtendedParseObject another) {
+        if (another instanceof EventLog) {
+            return ((EventLog) another).getDeviceTimestamp().compareTo(getDeviceTimestamp());
+        }
+        return super.compareTo(another);
+    }
 }

@@ -236,7 +236,7 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
                     public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
                         String editTextString = input.toString();
                         if (!editTextString.isEmpty()) {
-                            ClientLocation clientLocation = ClientLocation.create(editTextString.trim(), false);
+                            ClientLocation clientLocation = ClientLocation.create(editTextString.trim());
                             mClient.addLocation(clientLocation);
                             saveClient();
                         }

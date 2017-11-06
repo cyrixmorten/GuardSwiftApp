@@ -20,10 +20,6 @@ public class FinishedAlarmsFragment extends AbstractTasksRecycleFragment {
 		return new FinishedAlarmsFragment();
 	}
 
-    @Override
-    public PostProcessAdapterResults<ParseTask> createPostProcess() {
-        return null;
-    }
 
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {

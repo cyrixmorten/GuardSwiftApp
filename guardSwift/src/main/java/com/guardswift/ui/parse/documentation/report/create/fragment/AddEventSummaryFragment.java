@@ -55,11 +55,6 @@ public class AddEventSummaryFragment extends InjectingFragment implements
 		eventLogCard.setEditable(true);
 		eventLogCard.setDeletable(false);
 
-//		ButterKnife.bind(this, eventLogCard);
-
-//		header.setText(getString(R.string.summary).toUpperCase(
-//				Locale.getDefault()));
-
 
 		eventLogCard.onEventClickListener(new View.OnClickListener() {
 			@Override

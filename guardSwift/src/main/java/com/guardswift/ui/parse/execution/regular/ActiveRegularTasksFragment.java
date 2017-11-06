@@ -9,13 +9,9 @@ import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
-
-import java.util.Collections;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -42,18 +38,7 @@ public class ActiveRegularTasksFragment extends AbstractTasksRecycleFragment {
     TaskGroupStartedCache circuitStartedCache;
 
 
-    @Override
-    public PostProcessAdapterResults<ParseTask> createPostProcess() {
-        return new PostProcessAdapterResults<ParseTask>() {
-            @Override
-            public List<ParseTask> postProcess(List<ParseTask> queriedItems) {
-                if (queriedItems != null) {
-                    Collections.sort(queriedItems);
-                }
-                return queriedItems;
-            }
-        };
-    }
+
 
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
@@ -76,7 +61,6 @@ public class ActiveRegularTasksFragment extends AbstractTasksRecycleFragment {
     @Override
     public boolean isRelevantUIEvent(UpdateUIEvent ev) {
         Log.d(TAG, "Active circuitUnits isRelevant: " + super.isRelevantUIEvent(ev));
-
         return super.isRelevantUIEvent(ev);
     }
 

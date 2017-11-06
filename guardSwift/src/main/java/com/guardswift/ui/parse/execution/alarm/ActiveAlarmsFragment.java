@@ -2,7 +2,6 @@ package com.guardswift.ui.parse.execution.alarm;
 
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.query.AlarmTaskQueryBuilder;
-import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
@@ -17,11 +16,6 @@ public class ActiveAlarmsFragment extends AbstractTasksRecycleFragment {
 	public static ActiveAlarmsFragment newInstance() {
 		return new ActiveAlarmsFragment();
 	}
-
-    @Override
-    public PostProcessAdapterResults<ParseTask> createPostProcess() {
-        return null;
-    }
 
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {

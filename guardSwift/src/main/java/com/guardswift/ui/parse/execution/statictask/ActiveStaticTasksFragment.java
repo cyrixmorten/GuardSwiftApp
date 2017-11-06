@@ -1,10 +1,8 @@
 package com.guardswift.ui.parse.execution.statictask;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.query.StaticTaskQueryBuilder;
-import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
@@ -20,12 +18,6 @@ public class ActiveStaticTasksFragment extends AbstractTasksRecycleFragment {
 
 	public ActiveStaticTasksFragment() {
 	}
-
-
-    @Override
-    public PostProcessAdapterResults<ParseTask> createPostProcess() {
-        return null;
-    }
 
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
@@ -44,7 +36,7 @@ public class ActiveStaticTasksFragment extends AbstractTasksRecycleFragment {
 
     @Override
     public boolean isRelevantUIEvent(UpdateUIEvent ev) {
-        return super.isRelevantUIEvent(ev) || ev.getObject() instanceof ParseTask || ev.getObject() instanceof EventLog;
+        return false;
     }
 
 

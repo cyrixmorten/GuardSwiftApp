@@ -28,7 +28,7 @@ public class StaticTaskQueryBuilder extends ParseQueryBuilder<ParseTask> {
         super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery
                 .getQuery(ParseTask.class));
 
-        query.whereEqualTo(ParseTask.taskType, ParseTask.TASK_TYPE_STRING.STAITC);
+        query.whereEqualTo(ParseTask.taskType, ParseTask.TASK_TYPE_STRING.STATIC);
     }
     
 
@@ -81,8 +81,8 @@ public class StaticTaskQueryBuilder extends ParseQueryBuilder<ParseTask> {
         return this;
     }
 
-    public StaticTaskQueryBuilder sortedByTimeEnded() {
-        query.orderByDescending(ParseTask.timeEnded);
+    public StaticTaskQueryBuilder sortedByUpdated() {
+        query.orderByDescending(ParseTask.updatedAt);
         return this;
     }
 

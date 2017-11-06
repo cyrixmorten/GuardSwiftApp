@@ -2,6 +2,8 @@ package com.guardswift.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.support.multidex.MultiDex;
 import android.util.Log;
@@ -100,6 +102,7 @@ public class GuardSwiftApplication extends InjectingApplication {
     private boolean bootstrapInProgress;
 
     private ParseLiveQueryClient parseLiveQueryClient;
+    private boolean liveQueryConnected = false;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -224,33 +227,50 @@ public class GuardSwiftApplication extends InjectingApplication {
         defaultACL.setPublicReadAccess(false);
         ParseACL.setDefaultACL(defaultACL, true);
 
-        parseLiveQueryClient = ParseLiveQueryClient.Factory.getClient();
 
-        parseLiveQueryClient.registerListener(new ParseLiveQueryClientCallbacks() {
+    }
+
+    private void reconnectLiveQuery(final ParseLiveQueryClient client) {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
-            public void onLiveQueryClientConnected(ParseLiveQueryClient client) {
-                Log.d(TAG, "onLiveQueryClientConnected");
+            public void run() {
+                if (!liveQueryConnected) {
+                    client.reconnect();
+                    reconnectLiveQuery(client);
+                }
             }
-
-            @Override
-            public void onLiveQueryClientDisconnected(ParseLiveQueryClient client, boolean userInitiated) {
-                Log.d(TAG, "onLiveQueryClientDisconnected by user: " + userInitiated);
-
-            }
-
-            @Override
-            public void onLiveQueryError(ParseLiveQueryClient client, LiveQueryException reason) {
-                new HandleException(TAG, "onLiveQueryError", reason);
-            }
-
-            @Override
-            public void onSocketError(ParseLiveQueryClient client, Throwable reason) {
-                new HandleException(TAG, "onSocketError", reason);
-            }
-        });
+        }, 10000);
     }
 
     public ParseLiveQueryClient getLiveQueryClient() {
+        if (parseLiveQueryClient == null) {
+
+            parseLiveQueryClient = ParseLiveQueryClient.Factory.getClient();
+
+            parseLiveQueryClient.registerListener(new ParseLiveQueryClientCallbacks() {
+                @Override
+                public void onLiveQueryClientConnected(ParseLiveQueryClient client) {
+                    Log.d(TAG, "onLiveQueryClientConnected");
+                }
+
+                @Override
+                public void onLiveQueryClientDisconnected(ParseLiveQueryClient client, boolean userInitiated) {
+                    Log.d(TAG, "onLiveQueryClientDisconnected by user: " + userInitiated);
+                }
+
+                @Override
+                public void onLiveQueryError(ParseLiveQueryClient client, LiveQueryException reason) {
+                    new HandleException(TAG, "onLiveQueryError", reason);
+                }
+
+                @Override
+                public void onSocketError(ParseLiveQueryClient client, Throwable reason) {
+                    new HandleException(TAG, "onSocketError", reason);
+                }
+            });
+
+        }
+
         return parseLiveQueryClient;
     }
 
@@ -477,6 +497,11 @@ public class GuardSwiftApplication extends InjectingApplication {
         if (retryBootstrapDialog != null) {
             retryBootstrapDialog.dismiss();
             retryBootstrapDialog = null;
+        }
+
+        if (parseLiveQueryClient != null) {
+            parseLiveQueryClient.disconnect();
+            parseLiveQueryClient = null;
         }
     }
 }

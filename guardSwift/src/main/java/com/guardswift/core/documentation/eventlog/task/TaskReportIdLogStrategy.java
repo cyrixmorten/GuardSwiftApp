@@ -5,7 +5,7 @@ import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.parse.ParseObject;
 
 
-public class TaskReportIdLogStrategy implements LogTaskStrategy {
+class TaskReportIdLogStrategy implements LogTaskStrategy {
 
     @Override
     public void log(ParseTask task, ParseObject toParseObject) {

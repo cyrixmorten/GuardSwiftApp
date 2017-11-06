@@ -6,6 +6,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
@@ -119,4 +120,16 @@ public class Device {
 	public static boolean isScreenOn() {
 		return screenOn;
 	}
+
+	public boolean isNFCEnabled() {
+		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(context);
+		boolean enabled = false;
+
+		if (nfcAdapter != null) {
+			enabled = nfcAdapter.isEnabled();
+		}
+
+		return enabled;
+	}
+
 }

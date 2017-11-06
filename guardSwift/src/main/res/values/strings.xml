@@ -444,4 +444,8 @@
     <string name="device">Enhed</string>
     <string name="mobile">Mobil</string>
     <string name="not_named">Ikke navngivet</string>
+    <string name="data">Data</string>
+    <string name="nfc_disabled">NFC ikke aktiv</string>
+    <string name="nfc_enable_description">NFC er nødvendig for at kunne registrere indendørs tags.\n\nVed at klikke OK vil du blive taget til trådløse indstillinger hvor NFC kan blive slået til.</string>
+    <string name="title_rfid">RFID</string>
 </resources>

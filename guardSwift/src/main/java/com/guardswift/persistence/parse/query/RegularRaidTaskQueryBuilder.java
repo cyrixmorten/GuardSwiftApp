@@ -76,7 +76,7 @@ public class RegularRaidTaskQueryBuilder extends ParseQueryBuilder<ParseTask> {
 
         query.whereEqualTo(ParseTask.status, ParseTask.STATUS.FINISHED);
 
-        query.orderByDescending(ParseTask.timeEnded);
+        query.orderByDescending(ParseTask.updatedAt);
 
         return this;
     }

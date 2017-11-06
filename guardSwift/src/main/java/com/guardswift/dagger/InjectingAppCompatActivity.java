@@ -28,18 +28,28 @@
 
 package com.guardswift.dagger;
 
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.nfc.NfcAdapter;
+import android.provider.Settings;
 import android.support.annotation.CallSuper;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.eventbus.events.MissingInternetEvent;
 import com.guardswift.persistence.cache.data.GuardCache;
+import com.guardswift.ui.activity.RFIDRegisterActivity;
+import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.Analytics;
+import com.guardswift.util.Device;
 import com.parse.ParseAnalytics;
 
 import java.util.ArrayList;
@@ -63,11 +73,16 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
             .getSimpleName();
 
     @Inject
+    Device device;
+    @Inject
     EventBus eventBus;
     @Inject
     GuardCache guardCache;
 
     private ObjectGraph mObjectGraph;
+
+    private NfcAdapter mAdapter;
+    private PendingIntent mPendingIntent;
 
     /**
      * Gets this FragmentActivity's object graph.
@@ -118,7 +133,13 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
         // injection in their
         // onAttach override.
 
-        registerReceivers();
+        mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, RFIDRegisterActivity.class), 0);
+
+        mAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        if (mAdapter == null) {
+            // TODO show warning that device cannot read RFID tags
+        }
 
         super.onCreate(savedInstanceState);
 
@@ -126,11 +147,71 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     }
 
 
+    @Override
+    @CallSuper
+    protected void onResume() {
+        eventBus.register(this);
+
+        registerReceivers();
+
+        super.onResume();
+    }
+
+    @Override
+    @CallSuper
+    protected void onPause() {
+        eventBus.unregister(this);
+
+        unregisterReceivers();
+
+        super.onPause();
+    }
+
+
+    private MaterialDialog mDialog;
 
     private void registerReceivers() {
+        if (mAdapter != null) {
+            if (!mAdapter.isEnabled()) {
+//                showRFIDNotActiveDialog();
+            } else {
+                dismissRFIDNotActiveDialog();
+                mAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
+            }
+        }
+    }
+
+    private void showRFIDNotActiveDialog() {
+        if (mDialog == null) {
+            mDialog = new CommonDialogsBuilder.MaterialDialogs(this).ok(R.string.nfc_disabled, getString(R.string.nfc_enable_description), new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                    startActivityForResult(intent, 0);
+                }
+            }).build();
+
+            mDialog.show();
+        }
+    }
+
+    private void dismissRFIDNotActiveDialog() {
+        if (mDialog != null) {
+            mDialog.dismiss();
+            mDialog = null;
+        }
     }
 
     private void unregisterReceivers() {
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        registerReceivers();
     }
 
     @Override
@@ -178,13 +259,7 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
         super.onBackPressed();
     }
 
-//    public void onEventMainThread(PowerConnected ev) {
-//        wakeScreen.screenWakeup(true);
-//    }
-//
-//    public void onEventMainThread(PowerDisconnected ev) {
-//        wakeScreen.screenRelease();
-//    }
+
 
     public void onEventMainThread(MissingInternetEvent ev) {
         new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
@@ -193,40 +268,16 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
                 .show();
     }
 
-    @Override
-    @CallSuper
-    protected void onResume() {
-//        wakeScreen.wakeIfPowerConnected();
-        eventBus.register(this);
-
-        super.onResume();
-    }
-
-    @Override
-    @CallSuper
-    protected void onPause() {
-        eventBus.unregister(this);
-        super.onPause();
-    }
 
     @Override
     @CallSuper
     protected void onPostResume() {
         super.onPostResume();
 
-//        if (!guardCache.isLoggedIn())
-//            return;
-
-//        new Handler().postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (!alarmCache.isDialogShowing()) {
-//                    AlarmDialogActivity.show(InjectingAppCompatActivity.this);
-//                }
-//            }
-//        }, 1000);
 
     }
+
+
 
     @Override
     @CallSuper

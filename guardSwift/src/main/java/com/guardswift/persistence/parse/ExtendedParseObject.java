@@ -1,5 +1,6 @@
 package com.guardswift.persistence.parse;
 
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.common.collect.Lists;
@@ -21,10 +22,10 @@ import bolts.Continuation;
 import bolts.Task;
 import bolts.TaskCompletionSource;
 
-public abstract class ExtendedParseObject extends ParseObject {
+public abstract class ExtendedParseObject extends ParseObject implements Comparable<ExtendedParseObject> {
 
 
-    public static final String PIN_NEW = "NEW_OBJECT_PIN";
+    public static final String NEW_OBJECT_PIN = "NEW_OBJECT_PIN";
 
     // TODO get rid of this and use bolts Tasks instead
     public interface DataStoreCallback<T extends ParseObject> {
@@ -35,6 +36,7 @@ public abstract class ExtendedParseObject extends ParseObject {
 
 
     public static final String createdAt = "createdAt";
+    public static final String updatedAt = "updatedAt";
     public static final String objectId = "objectId";
 
     protected static final String owner = "owner";
@@ -175,10 +177,8 @@ public abstract class ExtendedParseObject extends ParseObject {
                     EventBusController.postUIUpdate(ExtendedParseObject.this);
                 }
 
-//                ExtendedParseObject.this.saveEventually(saved);
-
-                if (pin.equals(PIN_NEW)) {
-                    ExtendedParseObject.this.unpinInBackground(PIN_NEW);
+                if (pin.equals(NEW_OBJECT_PIN)) {
+                    ExtendedParseObject.this.unpinInBackground(NEW_OBJECT_PIN);
                 }
 
                 ExtendedParseObject.this.saveInBackground(new SaveCallback() {
@@ -294,6 +294,10 @@ public abstract class ExtendedParseObject extends ParseObject {
         return has(key) ? getString(key) : defaultValue;
     }
 
+    @Override
+    public int compareTo(@NonNull ExtendedParseObject another) {
+        return 0;
+    }
 
 
 }

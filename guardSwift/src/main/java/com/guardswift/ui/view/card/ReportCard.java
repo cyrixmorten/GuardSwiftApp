@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.guardswift.R;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.parse.documentation.report.view.DownloadReport;
 import com.guardswift.util.GSIntents;
 
@@ -88,13 +89,14 @@ public class ReportCard extends LinearLayout {
 
         layoutEvents.removeAllViews();
         for (EventLog eventLog : report.getEventLogs()) {
-//            if (!eventLog.isReportEvent()) {
-//                continue;
-//            }
+
+            if (!eventLog.isDataAvailable()) {
+                continue;
+            }
 
             TextView tv = new TextView(getContext());
 
-            if (eventLog.getEventCode() == EventLog.EventCodes.STATIC_OTHER) {
+            if (eventLog.getTaskType() == ParseTask.TASK_TYPE.STATIC) {
                 tv.setText(eventLog.getRemarks());
             } else {
                 tv.setText(eventLog.getSummaryString());

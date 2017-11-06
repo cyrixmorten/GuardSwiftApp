@@ -17,8 +17,6 @@ public class HandleException {
 
     public HandleException(final Context context, String tag, String message, final Throwable e) {
 
-//        EventBusController.postUIUpdate(e);
-
         Log.e(tag, message, e);
 
         Crashlytics.logException(e);
@@ -29,46 +27,10 @@ public class HandleException {
             new ParseErrorHandler().handleParseError(context, parseException);
         }
 
-//        saveError(tag, message, e);
+        LogError.log(tag, message, e);
     }
 
-//    private void saveError(String tag, String message, Throwable exception) {
-//
-//        ParseUser user = ParseUser.getCurrentUser();
-//
-//        if (user != null) {
-//            Device device = new Device(GuardSwiftApplication.getInstance());
-//
-//            ParseObject error = new ParseObject("Error");
-//            error.put("owner", user);
-//            error.put("installation", Installation.getCurrentInstallation());
-//            error.put("platform", "Android");
-//            error.put("tag", tag);
-//            error.put("gsVersion", device.getVersionCode());
-//            error.put("message", message);
-//
-//
-//            if (exception != null) {
-//
-//                String exceptionMessage = exception.getMessage();
-//                if (exceptionMessage != null) {
-//                    error.put("exception", exceptionMessage);
-//                }
-//
-//                Throwable cause = exception.getCause();
-//                if (cause != null) {
-//
-//                    String causeMessage = cause.getMessage();
-//
-//                    if (causeMessage != null) {
-//                        error.put("cause", causeMessage);
-//                    }
-//                }
-//            }
-//
-//            error.saveInBackground();
-//        }
-//    }
+
 }
 
 

@@ -2,20 +2,18 @@ package com.guardswift.ui.parse.data.client;
 
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.View;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.query.ClientQueryBuilder;
 import com.guardswift.ui.activity.GenericToolbarActivity;
-import com.guardswift.ui.activity.SlidingPanelActivity;
 import com.guardswift.ui.helpers.RecyclerViewClickListener;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
+import com.guardswift.ui.parse.data.client.details.ClientDetailsViewpagerFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 public class ClientListFragment extends AbstractParseRecyclerFragment<Client, ClientAdapter.ClientViewHolder> {
 
@@ -25,7 +23,6 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
     }
 
     private ClientQueryBuilder.SORT_BY sortBy;
-    private SlidingUpPanelLayout mSlideUpPanel;
 
     public static ClientListFragment newInstance(ClientQueryBuilder.SORT_BY sortBy) {
 
@@ -45,26 +42,6 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
         this.onClientSelectedListener = onClientSelectedListener;
     }
 
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        if (getActivity() instanceof SlidingPanelActivity) {
-
-            SlidingPanelActivity slidingPanelActivity = (SlidingPanelActivity) getActivity();
-            slidingPanelActivity.setSlidingStateOnBackpressed(SlidingUpPanelLayout.PanelState.COLLAPSED);
-
-            mSlideUpPanel = slidingPanelActivity.getSlidingPanelLayout();
-            mSlideUpPanel.setAnchorPoint(0.25f);
-            mSlideUpPanel.setFadeOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mSlideUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                }
-            });
-
-        }
-    }
 
 
     @Override
@@ -87,17 +64,9 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
                 if (onClientSelectedListener != null) {
                     // Custom click handler
                     onClientSelectedListener.clientSelected(client);
-                } else {
-                    // Default behaviour (show client details)
-                    if (getActivity() instanceof SlidingPanelActivity) {
-                        SlidingPanelActivity slidingPanelActivity = (SlidingPanelActivity)getActivity();
-                        slidingPanelActivity.setSlidingTitle(client.getName(), client.getFullAddress());
-                        slidingPanelActivity.setSlidingContent(ClientDetailsFragment.newInstance(client));
-                        mSlideUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
-                    } else {
-                        GenericToolbarActivity.start(getContext(), client.getName(), client.getFullAddress(), ClientDetailsFragment.newInstance(client));
-                    }
                 }
+
+                GenericToolbarActivity.start(getContext(), client.getName(), client.getFullAddress(), ClientDetailsViewpagerFragment.newInstance(client));
             }
         });
     }

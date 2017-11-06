@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
-import android.util.Log;
+import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -107,7 +107,11 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         return new ParseQueryAdapter.QueryFactory<EventLog>() {
             @Override
             public ParseQuery<EventLog> create() {
-                return new EventLogQueryBuilder(false).matchingReportId(reportId).orderByDescendingTimestamp().whereIsReportEntry().build();
+                return new EventLogQueryBuilder(false)
+                        .matchingReportId(reportId)
+                        .orderByDescendingTimestamp()
+                        .whereIsReportEntry()
+                        .build();
             }
         };
     }
@@ -124,7 +128,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
                     return;
                 }
 
-                showFloadingActionButton(1000);
+                showFloatingActionButton(1000);
                 loading = false;
                 if (pdfMenu != null) {
                     pdfMenu.setEnabled(!objects.isEmpty());
@@ -141,7 +145,6 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
     @Override
     protected boolean isRelevantUIEvent(UpdateUIEvent ev) {
-        Log.w(TAG, "isRelevantUIEvent: " + ev.getObject() + " -> " + (ev.getObject() instanceof EventLog));
         return ev.getObject() instanceof EventLog;
     }
 
@@ -150,7 +153,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     public void updateFloatingActionButton(final Context context, FloatingActionButton floatingActionButton) {
         this.fab = floatingActionButton;
 
-        fab.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_note_add_white_18dp));
+        fab.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_note_add_white_18dp));
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -177,7 +180,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         });
     }
 
-    private void showFloadingActionButton(long delay) {
+    private void showFloatingActionButton(long delay) {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -193,7 +196,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     @Override
     public void fragmentBecameVisible() {
         if (!loading) {
-            showFloadingActionButton(1000);
+            showFloatingActionButton(1000);
         }
         fragmentVisible = true;
     }

@@ -1,6 +1,5 @@
 package com.guardswift.ui.parse.documentation.report.create.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,7 +23,7 @@ import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.helpers.UpdateFloatingActionButtonPageChangeListener;
-import com.guardswift.ui.parse.documentation.report.create.activity.AbstractCreateEventHandlerActivity;
+import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
 import com.guardswift.util.ToastHelper;
 
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ public class AddEventViewPagerFragment extends InjectingFragment {
 
     private Unbinder unbinder;
 
-    public static AddEventViewPagerFragment newInstance(Context context, Client client) {
+    public static AddEventViewPagerFragment newInstance(Client client) {
 
         GuardSwiftApplication.getInstance().getCacheFactory().getClientCache().setSelected(client);
 
@@ -157,28 +156,6 @@ public class AddEventViewPagerFragment extends InjectingFragment {
         return --value;
     }
 
-//    @Override
-//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//        inflater.inflate(R.menu.next, menu);
-//        if (isLastPage()) {
-//            menu.findItem(R.id.menu_next).setTitle(R.string.action_save);
-//        }
-//        super.onCreateOptionsMenu(menu, inflater);
-//    }
-//
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.menu_next:
-//                if (!isLastPage()) {
-//                    nextPageDelayed();
-//                } else {
-//                    saveEventLog();
-//                }
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
-
 
     @Override
     public void onDestroyView() {
@@ -193,12 +170,13 @@ public class AddEventViewPagerFragment extends InjectingFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mActionBar = ((AbstractCreateEventHandlerActivity) getActivity()).getSupportActionBar();
+        mActionBar = ((CreateEventHandlerActivity) getActivity()).getSupportActionBar();
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
         if (!(getActivity() instanceof ViewPager.OnPageChangeListener)) {
             throw new IllegalStateException(
                     "Activity must be an instance of OnPageChangeListener!");
@@ -292,32 +270,9 @@ public class AddEventViewPagerFragment extends InjectingFragment {
             return fragments.get(position);
         }
 
-        // @Override
-        // public CharSequence getPageTitle(int clientPosition) {
-        // switch (clientPosition) {
-        // case 0:
-        // return getString(R.string.title_event_type);
-        // case 1:
-        // return getString(R.string.title_event_amount);
-        // case 2:
-        // return getString(R.string.title_event_location);
-        // case 3:
-        // return getString(R.string.title_event_remarks);
-        //
-        // default:
-        // break;
-        // }
-        // return "";
-        // }
 
         @Override
         public int getCount() {
-            // if (eventBundle.getString(TYPE) != null)
-            // count++;
-            // if (eventBundle.getInt(EXTRA_AMOUNT) > 0)
-            // count++;
-            // if (eventBundle.getString(EXTRA_LOCATIONS) != null)
-            // count++;
             return PAGES_COUNT;
         }
 

@@ -92,7 +92,7 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
             return;
         }
 
-        if (activity.getType() == DetectedActivity.IN_VEHICLE) {
+        if (activity.getType() == DetectedActivity.IN_VEHICLE && activity.getConfidence() == 100) {
             task.getAutomationStrategy().automaticDeparture();
         }
     }

@@ -73,7 +73,6 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
     private static final String TAG = TaskRecycleAdapter.class.getSimpleName();
 
 
-
     public static class StaticTaskViewHolder extends TaskViewHolder {
 
         @BindView(R.id.timeStart)
@@ -111,7 +110,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                                     loadingDialog.cancel();
                                     new CommonDialogsBuilder.MaterialDialogs(context).missingInternetContent().show();
 
-                                    new HandleException(context, TAG, "Failed to createWithFontAwesomeIcon static task", error);
+                                    new HandleException(context, TAG, "Failed to start static task", error);
                                     return null;
                                 }
 
@@ -120,7 +119,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                                     public void done(EventLog object, ParseException e) {
                                         GenericToolbarActivity.start(context,
                                                 context.getString(R.string.title_report),
-                                                task.getClient().getFullAddress(),
+                                                task.getClientAddress(),
                                                 ReportEditViewPagerFragment.newInstance(task));
 
                                         loadingDialog.cancel();
@@ -136,7 +135,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             } else {
                 GenericToolbarActivity.start(context,
                         context.getString(R.string.title_report),
-                        task.getClient().getFullAddress(),
+                        task.getClientAddress(),
                         ReportEditViewPagerFragment.newInstance(task));
             }
 
@@ -159,7 +158,8 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             if (task.isStaticTask()) {
                 vContentFooter.setVisibility(View.GONE);
                 vContentHeader.setVisibility(View.GONE);
-                Date timeStarted = task.getTimeStarted();
+
+                Date timeStarted = task.getCreatedAt();
                 if (timeStarted != null) {
                     vTimeStart.setText(DateFormat.getLongDateFormat(context).format(timeStarted));
                     vTimeEnd.setVisibility(View.GONE);
@@ -170,7 +170,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                     iconClock.setVisibility(View.GONE);
                 }
 
-                setupTaskActionButtons(context,task);
+                setupTaskActionButtons(context, task);
             }
             super.update(context, task);
         }
@@ -569,7 +569,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 public void onClick(View view) {
                     GenericToolbarActivity.start(context,
                             context.getString(R.string.title_report),
-                            task.getClient().getFullAddress(),
+                            task.getClientAddress(),
                             ReportEditViewPagerFragment.newInstance(task));
                 }
             });
@@ -588,7 +588,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                     GenericToolbarActivity.start(
                             context,
                             context.getString(R.string.reports),
-                            task.getClient().getFullAddress(),
+                            task.getClientAddress(),
                             fragment);
                 }
             });
@@ -663,9 +663,6 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
     }
 
 
-
-
-
     static class TaskViewHolder extends PositionedViewHolder {
 
 
@@ -711,7 +708,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         Button vBtnAddExtraTime;
         @BindView(R.id.btn_report_history)
         Button vBtnReportHistory;
-//        @BindView(R.id.btn_task_description)
+        //        @BindView(R.id.btn_task_description)
 //        Button vBtnTaskdescription;
         @BindView(R.id.btn_client_info)
         Button vBtnClientContacts;
@@ -1013,12 +1010,12 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
     private static SparseBooleanArray selectedItems = new SparseBooleanArray();
 
     public TaskRecycleAdapter(Context context, ParseQueryAdapter.QueryFactory<ParseTask> factory) {
-        super(factory, false);
+        super(factory);
         this.context = context;
     }
 
     public TaskRecycleAdapter(Context context, FragmentManager fragmentManager, ParseQueryAdapter.QueryFactory<ParseTask> factory) {
-        super(factory, false);
+        super(factory);
         this.context = context;
         this.fragmentManager = fragmentManager;
     }
@@ -1045,12 +1042,13 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         final ParseTask task = getItem(position);
 
+
+        holder.vClientNumber.setText(task.getClientId());
+        holder.vName.setText(task.getClientName());
+        holder.vAddress.setText(task.getClientAddress());
+
         Client client = task.getClient();
         if (client != null) {
-            holder.vClientNumber.setText(client.getId());
-            holder.vName.setText(client.getName());
-            holder.vAddress.setText(client.getFullAddress());
-//            holder.vBtnCheckpoints.setVisibility((client.hasCheckPoints()) ? View.VISIBLE : View.GONE);
             holder.vBtnClientContacts.setVisibility((!client.getContactsWithNames().isEmpty()) ? View.VISIBLE : View.GONE);
         }
 
@@ -1083,10 +1081,19 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         linearLayout.removeAllViews();
 
-        linearLayout.addView(isGeofenced(task));
-        linearLayout.addView(isWithinGeofence(task));
-        linearLayout.addView(isOutsideGeofence(task));
-        linearLayout.addView(isWithinScheduledTime(task));
+
+//        linearLayout.addView(isGeofenced(task));
+//        linearLayout.addView(isWithinGeofence(task));
+//        linearLayout.addView(isOutsideGeofence(task));
+//        linearLayout.addView(isWithinScheduledTime(task));
+
+//        TextView tvTaskTypeString = new TextView(context);
+//        tvTaskTypeString.setText(task.getTaskTypeString());
+//        linearLayout.addView(tvTaskTypeString);
+//
+//        TextView tvTaskType = new TextView(context);
+//        tvTaskType.setText(task.getTaskType().toString());
+//        linearLayout.addView(tvTaskType);
     }
 
     private TextView isWithinScheduledTime(ParseTask task) {
@@ -1167,13 +1174,13 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         LinearLayout contentBody = ButterKnife.findById(itemView, R.id.content_body);
 
         int taskContentHeaderLayoutId = viewType == ParseTask.TASK_TYPE.ALARM.ordinal() ? R.layout.gs_view_task_central_and_date : R.layout.gs_view_task_planned_times;
-        
+
         View taskPlannedTimesView = LayoutInflater.
                 from(parent.getContext()).
                 inflate(taskContentHeaderLayoutId, parent, false);
 
         contentBody.addView(taskPlannedTimesView, 0);
-        
+
         if (viewType == ParseTask.TASK_TYPE.STATIC.ordinal()) {
             return new StaticTaskViewHolder(itemView);
         }
@@ -1185,19 +1192,18 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         }
 
 
-
         return holder;
     }
 
     public void removeItemAt(int position) {
         getItems().remove(position);
-        notifyItemRemoved(position);
+
         // TODO RecyclerView bug https://github.com/lucasr/twoway-view/issues/134
-//        if (position == 0) {
-//            notifyDataSetChanged();
-//        } else {
-//            notifyItemRemoved(position);
-//        }
+        if (position == 0) {
+            notifyDataSetChanged();
+        } else {
+            notifyItemRemoved(position);
+        }
     }
 
 

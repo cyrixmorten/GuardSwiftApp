@@ -7,7 +7,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 @ParseClassName("Person")
-public class Person extends ExtendedParseObject implements Comparable<Person> {
+public class Person extends ExtendedParseObject {
 
 
 	public static final String name = "name";
@@ -38,8 +38,12 @@ public class Person extends ExtendedParseObject implements Comparable<Person> {
 	}
 
 	@Override
-	public int compareTo(Person person) {
-		return getName().compareTo(person.getName());
+	public int compareTo(ExtendedParseObject object) {
+		if (object instanceof Person) {
+			return getName().compareTo(((Person)object).getName());
+		}
+
+		return 0;
 	}
 
 	public static class QueryBuilder extends ParseQueryBuilder<Person> {

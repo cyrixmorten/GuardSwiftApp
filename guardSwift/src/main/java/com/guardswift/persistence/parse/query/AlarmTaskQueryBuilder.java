@@ -59,11 +59,6 @@ public class AlarmTaskQueryBuilder extends
         return this;
     }
 
-    public AlarmTaskQueryBuilder sortByTimeStarted() {
-        query.addDescendingOrder(ParseTask.timeStarted);
-        return this;
-    }
-
     public AlarmTaskQueryBuilder sortByCreatedAtDescending() {
 
         query.addDescendingOrder(ParseTask.createdAt);

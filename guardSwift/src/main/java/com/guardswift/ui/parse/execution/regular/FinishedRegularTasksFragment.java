@@ -9,7 +9,6 @@ import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
@@ -35,11 +34,6 @@ public class FinishedRegularTasksFragment extends AbstractTasksRecycleFragment {
 
 	public FinishedRegularTasksFragment() {
 	}
-
-    @Override
-    public PostProcessAdapterResults<ParseTask> createPostProcess() {
-        return null;
-    }
 
 
     @Override

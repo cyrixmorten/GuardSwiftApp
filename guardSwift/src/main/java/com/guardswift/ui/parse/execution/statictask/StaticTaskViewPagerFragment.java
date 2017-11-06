@@ -2,7 +2,6 @@ package com.guardswift.ui.parse.execution.statictask;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.View;
 
 import com.google.common.collect.Maps;
 import com.guardswift.R;
@@ -19,22 +18,11 @@ public class StaticTaskViewPagerFragment extends AbstractTabsViewPagerFragment {
     protected static final String TAG = StaticTaskViewPagerFragment.class
             .getSimpleName();
 
-//    private static final String CREATE_REPORT = "com.guardswift.CREATE_REPORT";
-    private static final int CLIENT_SELECTION = 1;
-
-    public static StaticTaskViewPagerFragment newCreateReportInstance() {
-        return newInstance(true);
-    }
 
     public static StaticTaskViewPagerFragment newInstance() {
-        return newInstance(false);
-    }
-
-    private static StaticTaskViewPagerFragment newInstance(boolean createReport) {
         StaticTaskViewPagerFragment fragment = new StaticTaskViewPagerFragment();
 
         Bundle args = new Bundle();
-//        args.putBoolean(CREATE_REPORT, createReport);
         fragment.setArguments(args);
         return fragment;
     }
@@ -61,20 +49,6 @@ public class StaticTaskViewPagerFragment extends AbstractTabsViewPagerFragment {
         super.onCreate(savedInstanceState);
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-//        if (getArguments().getBoolean(CREATE_REPORT)) {
-//            ClientListFragment clientSelection = ClientListFragment.newInstance();
-//            clientSelection.setTargetFragment(this, CLIENT_SELECTION);
-////            if (getActivity() != null && getActivity() instanceof MainNavigationDrawer.FragmentDrawerCallback) {
-////                ((MainActivity)getActivity()).selectItem(, R.string.static_guarding_reports);
-//            getChildFragmentManager().beginTransaction().replace(R.id.content, clientSelection).addToBackStack(null).commit();
-////            }
-//
-//        }
-    }
 
 
     @Override

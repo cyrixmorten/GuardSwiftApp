@@ -15,6 +15,9 @@
     <!-- Opt out of Doze mode -->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
+    <!-- Read RFID tags-->
+    <uses-permission android:name="android.permission.NFC" />
+
     <!-- Keep services running -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -22,14 +25,14 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- Account -->
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <!--<uses-permission android:name="android.permission.GET_ACCOUNTS" />-->
+    <!--<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />-->
 
 
     <!-- State -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
+    <!--<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
+    <!--<uses-permission android:name="android.permission.READ_PHONE_STATE" />-->
+    <!--<uses-permission android:name="android.permission.READ_LOGS" />-->
 
     <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -37,8 +40,8 @@
     <!-- Position -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <!--<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />-->
+    <!--<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />-->
 
     <!-- Activity -->
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
@@ -82,7 +85,20 @@
             android:configChanges="keyboardHidden"
             android:label="@string/app_name"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait" >
+
+            <intent-filter>
+                <action android:name="android.nfc.action.TECH_DISCOVERED"/>
+            </intent-filter>
+            <!-- Filter which RFID technologies to support -->
+            <meta-data android:name="android.nfc.action.TECH_DISCOVERED"
+                android:resource="@xml/nfc_tech_filter" />
+
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED"/>
+            </intent-filter>
+
+            </activity>
         <activity
             android:name="com.parse.ui.ParseLoginActivity"
             android:label="@string/app_name"
@@ -101,6 +117,14 @@
             <!-- android:name="com.parse.ui.ParseLoginActivity.PARSE_LOGIN_EMAIL_AS_USERNAME" -->
             <!-- android:value="true"/> -->
         </activity>
+
+        <activity
+            android:name=".ui.activity.RFIDRegisterActivity"
+            android:launchMode="singleTop"
+            android:excludeFromRecents="true"
+            android:label="@string/title_rfid"
+            android:screenOrientation="portrait" />
+
         <activity
             android:name=".ui.activity.GuardLoginActivity"
             android:excludeFromRecents="true"
@@ -128,6 +152,7 @@
             android:theme="@style/AppTheme.Light.Dialog" />
 
 
+        <!-- PARSE -->
         <service android:name="com.parse.PushService" />
 
         <receiver
@@ -154,6 +179,17 @@
             android:name="com.parse.push.gcm_sender_id"
             android:value="id:343541591235" />
 
+
+        <!-- CONTEXT AWARENESS -->
+        <service
+            android:name=".core.ca.location.FusedLocationTrackerService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".core.ca.geofence.RegisterGeofencesIntentService"
+            android:exported="false" />
+
         <receiver
             android:name=".core.ca.geofence.GeofenceBroadcastReceiver"
             android:exported="false">
@@ -162,20 +198,10 @@
             </intent-filter>
         </receiver>
 
-        <!-- SERVICES -->
-        <service
-            android:name=".core.ca.location.FusedLocationTrackerService"
-            android:enabled="true"
-            android:exported="false" />
-
         <service
             android:name=".core.ca.activity.ActivityRecognitionService"
             android:exported="false" />
 
-        <!-- INTENT_SERVICES -->
-        <service
-            android:name=".core.ca.geofence.RegisterGeofencesIntentService"
-            android:exported="false" />
 
         <!-- META -->
         <meta-data
@@ -185,7 +211,6 @@
             android:name="io.fabric.ApiKey"
             android:value="1d3137a16e5b81623a1376cbae7962314b9c8d6a" />
 
-        <!--<activity android:name=".ui.parse.execution.circuit.TaskDescriptionActivity" />-->
         <activity android:name=".ui.activity.GenericToolbarActivity"
             android:screenOrientation="portrait"/>
 
@@ -217,6 +242,7 @@
             android:name=".ui.activity.MapsActivity"
             android:label="@string/title_activity_maps" />
 
+        <!-- Needed when previewing PDFs -->
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.provider"

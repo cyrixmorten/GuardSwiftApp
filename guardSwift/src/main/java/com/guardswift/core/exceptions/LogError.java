@@ -13,7 +13,7 @@ public class LogError {
         log(tag, message, null);
     }
 
-    public static void log(String tag, String message, Exception exception) {
+    public static void log(String tag, String message, Throwable exception) {
         ParseUser user = ParseUser.getCurrentUser();
 
         if (user != null) {

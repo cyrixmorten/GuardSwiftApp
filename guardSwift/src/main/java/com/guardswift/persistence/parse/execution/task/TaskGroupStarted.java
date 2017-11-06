@@ -11,11 +11,15 @@ import com.parse.ParseQuery;
 import java.util.Date;
 
 @ParseClassName("TaskGroupStarted")
-public class TaskGroupStarted extends ExtendedParseObject implements Comparable<TaskGroupStarted>{
+public class TaskGroupStarted extends ExtendedParseObject{
 
     @Override
-    public int compareTo(@NonNull TaskGroupStarted circuitStarted) {
-        return getName().compareTo(circuitStarted.getName());
+    public int compareTo(@NonNull ExtendedParseObject object) {
+        if (object instanceof TaskGroupStarted) {
+            return getName().compareTo(((TaskGroupStarted)object).getName());
+        }
+
+        return 0;
     }
 
 

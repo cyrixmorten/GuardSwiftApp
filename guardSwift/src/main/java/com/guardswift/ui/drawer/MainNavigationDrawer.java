@@ -3,6 +3,7 @@ package com.guardswift.ui.drawer;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
@@ -316,7 +317,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
     private void createReport(final Client client) {
         final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(context).indeterminate(client.getName(), R.string.creating_report).show();
         // fake a bit of delay to ensure that the dialog is shown/readable
-        new Handler().postDelayed(new Runnable() {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
 

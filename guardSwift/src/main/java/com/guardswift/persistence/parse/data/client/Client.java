@@ -81,31 +81,6 @@ public class Client extends ExtendedParseObject implements Positioned {
         return new ClientQueryBuilder(fromLocalDatastore);
     }
 
-//    public void storeFingerprints(Set<Fingerprint> fingerprints) {
-//        JSONArray jsonArray = new JSONArray();
-//        for (Fingerprint fingerprint : fingerprints) {
-//            try {
-//                String jsonString = WiFiIO.convertToJSON(fingerprint);
-//                JSONObject jsonObject = new JSONObject(jsonString);
-//
-//                jsonArray.put(jsonObject);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//                Log.e(TAG, "storeFingerprints", e);
-//            }
-//        }
-//        put(Client.fingerprints, jsonArray);
-//    }
-
-//    public ClientLocation findCheckpoint(String name) {
-//        List<ClientLocation> checkpoints = getCheckpoints();
-//        for (ClientLocation checkpoint : checkpoints) {
-//            if (checkpoint.getLocation().equals(name)) {
-//                return checkpoint;
-//            }
-//        }
-//        return null;
-//    }
 
     public LinearLayout createContactsList(final Context context) {
         final List<ClientContact> contacts = getContactsWithNames();
@@ -295,68 +270,6 @@ public class Client extends ExtendedParseObject implements Positioned {
         return new ArrayList<>();
     }
 
-//
-//    // TODO disabled checkpoints to investigate performance issue
-//    public boolean hasCheckPoints() {
-//        return false;
-////        for (ClientLocation location : getLocations()) {
-////            if (location.isCheckpoint()) {
-////                return true;
-////            }
-////        }
-////        return false;
-//    }
-
-//    public void clearCheckpoints() {
-//        List<ClientLocation> checkpoints = getCheckpoints();
-//        for (ClientLocation checkpoint : checkpoints) {
-//            checkpoint.reset();
-//        }
-//        ParseObject.pinAllInBackground(checkpoints);
-//    }
-//
-//    public List<ClientLocation> getCheckpoints() {
-//        List<ClientLocation> allLocations = getLocations();
-//        List<ClientLocation> checkpoints = new ArrayList<>();
-//        for (ClientLocation location : allLocations) {
-//            if (location.isCheckpoint()) {
-//                checkpoints.add(location);
-//            }
-//        }
-//        Collections.sort(checkpoints);
-//        return checkpoints;
-//    }
-//
-//    public List<String> getCheckpointNamesAsList() {
-//        List<String> checkpointNames = new ArrayList<>();
-//        List<ClientLocation> checkpoints = getCheckpoints();
-//        for (ClientLocation location : checkpoints) {
-//            if (location.isCheckpoint()) {
-//                checkpointNames.add(location.getLocation());
-//            }
-//        }
-//        return checkpointNames;
-//    }
-
-//    public String[] getCheckpointsNamesAsArray() {
-//        List<String> checkpoints = getCheckpointNamesAsList();
-//        return checkpoints.toArray(new String[checkpoints.size()]);
-//    }
-//
-//
-//    public boolean[] getCheckpointsCheckedArray() {
-//
-//        List<ClientLocation> checkpoints = getCheckpoints();
-//        boolean[] checked = new boolean[checkpoints.size()];
-//
-//
-//        for (int i = 0; i < checkpoints.size(); i++) {
-//            boolean isChecked = checkpoints.get(i).isChecked();
-//            checked[i] = isChecked;
-//        }
-//
-//        return checked;
-//    }
 
 
 }

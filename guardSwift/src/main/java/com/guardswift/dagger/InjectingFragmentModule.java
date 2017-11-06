@@ -30,8 +30,9 @@ package com.guardswift.dagger;
 
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
-import com.guardswift.ui.parse.data.client.ClientDetailsFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
+import com.guardswift.ui.parse.data.client.details.ClientDataFragment;
+import com.guardswift.ui.parse.data.client.details.ClientDetailsViewpagerFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
 import com.guardswift.ui.parse.data.tracker.TrackerListFragment;
 import com.guardswift.ui.parse.data.tracker.TrackerMapFragment;
@@ -45,7 +46,6 @@ import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventType
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventViewPagerFragment;
 import com.guardswift.ui.parse.documentation.report.edit.ReportEditListFragment;
 import com.guardswift.ui.parse.documentation.report.edit.ReportEditViewPagerFragment;
-import com.guardswift.ui.parse.documentation.report.edit.ReportSuggestionsListFragment;
 import com.guardswift.ui.parse.documentation.report.edit.ReportSummaryFragment;
 import com.guardswift.ui.parse.documentation.report.view.ReportHistoryListFragment;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
@@ -53,8 +53,8 @@ import com.guardswift.ui.parse.execution.alarm.ActiveAlarmsFragment;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.ui.parse.execution.alarm.FinishedAlarmsFragment;
 import com.guardswift.ui.parse.execution.regular.ActiveRegularTasksFragment;
-import com.guardswift.ui.parse.execution.regular.RegularTaskViewPagerFragment;
 import com.guardswift.ui.parse.execution.regular.FinishedRegularTasksFragment;
+import com.guardswift.ui.parse.execution.regular.RegularTaskViewPagerFragment;
 import com.guardswift.ui.parse.execution.statictask.ActiveStaticTasksFragment;
 import com.guardswift.ui.parse.execution.statictask.FinishedStaticTasksFragment;
 import com.guardswift.ui.parse.execution.statictask.PendingStaticTasksFragment;
@@ -86,8 +86,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		AbstractTasksRecycleFragment.class,
 		// - Data
 		GuardListFragment.class,
+		// -- Client
+		ClientDetailsViewpagerFragment.class,
 		ClientListFragment.class,
-		ClientDetailsFragment.class,
+		ClientDataFragment.class,
 		TrackerListFragment.class,
 		TrackerMapFragment.class,
 		// - Execution
@@ -96,12 +98,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		AlarmsViewPagerFragment.class,
 		ActiveAlarmsFragment.class,
 		FinishedAlarmsFragment.class,
-		// -- StaticTask
+		// -- Static
 		StaticTaskViewPagerFragment.class,
 		PendingStaticTasksFragment.class,
 		ActiveStaticTasksFragment.class,
 		FinishedStaticTasksFragment.class,
-		// -- CircuitUnit
+		// -- Regular
 		RegularTaskViewPagerFragment.class,
         ActiveRegularTasksFragment.class,
 		FinishedRegularTasksFragment.class,
@@ -117,7 +119,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		// Report
 		ReportEditViewPagerFragment.class,
 		ReportEditListFragment.class,
-		ReportSuggestionsListFragment.class,
 		ReportSummaryFragment.class,
 		ReportHistoryListFragment.class
 		}, library = true)

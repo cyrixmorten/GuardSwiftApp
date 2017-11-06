@@ -20,7 +20,6 @@ import android.widget.LinearLayout;
 
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
-import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.ClientCache;
 import com.guardswift.persistence.cache.data.EventTypeCache;
@@ -34,8 +33,6 @@ import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventPeop
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventRemarkFragment;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventTypeFragment;
 import com.guardswift.ui.parse.documentation.report.create.fragment.EventEntryFragment;
-import com.parse.ParseException;
-import com.parse.SaveCallback;
 
 import javax.inject.Inject;
 
@@ -81,6 +78,7 @@ public class UpdateEventHandlerActivity extends InjectingAppCompatActivity imple
         ParseCacheFactory parseCacheFactory = GuardSwiftApplication.getInstance().getCacheFactory();
         parseCacheFactory.getEventLogCache().setSelected(eventLog);
         parseCacheFactory.getClientCache().setSelected(client);
+
         context.startActivity(prepareIntent(context, eventRequest, preselected));
     }
     
@@ -265,7 +263,8 @@ public class UpdateEventHandlerActivity extends InjectingAppCompatActivity imple
     private void setResultAndFinish(int resultCode) {
         Log.d(TAG, "setResultAndFinish: " + (resultCode == RESULT_OK) + " " + modifySelectedEventLog);
         if (resultCode == RESULT_OK && modifySelectedEventLog) {
-            final EventLog eventLog = eventLogCache.getSelected();
+            EventLog eventLog = eventLogCache.getSelected();
+
             switch (eventRequest) {
                 case REQUEST_EVENT_TYPE:
                     eventLog.put(EventLog.event, eventBundle.getString(EXTRA_EVENT_TYPE, ""));
@@ -280,12 +279,8 @@ public class UpdateEventHandlerActivity extends InjectingAppCompatActivity imple
                     eventLog.put(EventLog.remarks, eventBundle.getString(EXTRA_REMARKS, ""));
                     break;
             }
-            eventLog.pinThenSaveEventually(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    EventBusController.postUIUpdate(eventLog);
-                }
-            });
+
+            eventLog.pinThenSaveEventually();
         }
         setResult(resultCode, getIntent().putExtra(EXTRA_EVENT_BUNDLE, eventBundle));
         finish();

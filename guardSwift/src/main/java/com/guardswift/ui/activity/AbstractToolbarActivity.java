@@ -1,29 +1,25 @@
 package com.guardswift.ui.activity;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingAppCompatActivity;
-import com.guardswift.ui.helpers.ViewHelper;
-import com.sothree.slidinguppanel.ScrollableViewHelper;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static com.guardswift.ui.activity.GenericToolbarActivity.fragment;
+import butterknife.OnClick;
 
 public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity implements SlidingPanelActivity {
 
@@ -42,6 +38,9 @@ public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity
 
     @BindView(R.id.sliding_subtitle)
     TextView mSlideSubTitle;
+
+    @BindView(R.id.sliding_close_btn)
+    ImageView mSlideClose;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -81,24 +80,26 @@ public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity
         }
 
         mLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-//        mLayout.addPanelSlideListener(new SlidingUpPanelLayout.SimplePanelSlideListener() {
-//
-//            @Override
-//            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-//                super.onPanelStateChanged(panel, previousState, newState);
-//
-//                if (newState == mPanelDefaultState) {
-//                    toolbar.getBackground().setAlpha(100);
-//                }
-//            }
-//
-//            @Override
-//            public void onPanelSlide(View panel, float slideOffset) {
-//                int offSetAlpha = Math.round(100 * slideOffset);
-//
-//                mSlideTitleLayout.getBackground().setAlpha(offSetAlpha);
-//            }
-//        });
+        mLayout.addPanelSlideListener(new SlidingUpPanelLayout.SimplePanelSlideListener() {
+
+            @Override
+            public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
+                super.onPanelStateChanged(panel, previousState, newState);
+
+                mSlideClose.setVisibility((newState == mPanelDefaultState) ? View.INVISIBLE : View.VISIBLE);
+            }
+
+            @Override
+            public void onPanelSlide(View panel, float slideOffset) {
+                super.onPanelSlide(panel, slideOffset);
+            }
+        });
+
+    }
+
+    @OnClick(R.id.sliding_close_btn)
+    public void closeSlidingUpPanel() {
+        mLayout.setPanelState(mPanelDefaultState);
     }
 
     private void setupToolbar() {
@@ -106,15 +107,36 @@ public abstract class AbstractToolbarActivity extends InjectingAppCompatActivity
         if (actionBar == null) {
             setSupportActionBar(toolbar);
             actionBar = getSupportActionBar();
-            actionBar.setDefaultDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (getToolbarTitle() != null && !getToolbarTitle().isEmpty()) {
-            actionBar.setTitle(getToolbarTitle());
+
+        setToolbarTitle(getToolbarTitle());
+        setToolbarSubTitle(getToolbarSubTitle());
+    }
+
+    protected void setToolbarTitle(String title) {
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar == null) {
+            return;
         }
-        if (getToolbarSubTitle() != null && !getToolbarSubTitle().isEmpty()) {
-            actionBar.setSubtitle(getToolbarSubTitle());
+
+        if (title != null && !title.isEmpty()) {
+            actionBar.setTitle(title);
+        }
+    }
+
+
+    protected void setToolbarSubTitle(String subTitle) {
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar == null) {
+            return;
+        }
+
+        if (subTitle != null && !subTitle.isEmpty()) {
+            actionBar.setSubtitle(subTitle);
         }
     }
 

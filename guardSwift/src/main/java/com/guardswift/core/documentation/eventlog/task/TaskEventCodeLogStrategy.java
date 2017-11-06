@@ -5,12 +5,11 @@ import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.parse.ParseObject;
 
 
-public class TaskEventCodeLogStrategy implements LogTaskStrategy {
-
-
+class TaskEventCodeLogStrategy implements LogTaskStrategy {
 
     @Override
     public void log(ParseTask task, ParseObject toParseObject) {
         toParseObject.put(EventLog.eventCode, task.getEventCode());
     }
+
 }

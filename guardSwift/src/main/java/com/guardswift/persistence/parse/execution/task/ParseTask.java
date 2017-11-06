@@ -52,14 +52,11 @@ import bolts.Task;
 
 
 @ParseClassName("Task")
-public class ParseTask extends ExtendedParseObject implements Comparable<ParseTask>, Positioned {
+public class ParseTask extends ExtendedParseObject implements Positioned {
 
     public static final int DEFAULT_RADIUS_RAID = 50;
     public static final int DEFAULT_RADIUS_REGULAR = 100;
     public static final int DEFAULT_RADIUS_ALARM = 100;
-
-
-
 
     public enum TASK_TYPE {REGULAR, RAID, STATIC, ALARM}
     public enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINISHED}
@@ -74,8 +71,11 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
     public static final String type = "type"; // short desc of task provided by owner
     public static final String guard = "guard";
     public static final String client = "client";
-    public static final String clientId = "clientId";
     public static final String position = "position";
+
+    public static final String clientId = "clientId";
+    public static final String clientName = "clientName";
+    public static final String clientAddress = "clientAddress";
 
     public static final String street = "street";
     public static final String streetNumber = "streetNumber";
@@ -84,8 +84,8 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
     public static final String formattedAddress = "formattedAddress";
     public static final String fullAddress = "fullAddress";
 
-    public static final String timeStarted = "timeStarted";
-    public static final String timeEnded = "timeEnded";
+//    public static final String timeStarted = "timeStarted";
+//    public static final String timeEnded = "timeEnded";
 
     public static final String geofenceRadius = "geofenceRadius";
 
@@ -123,7 +123,7 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
         public static String ALARM = "Alarm";
         public static String REGULAR = "Regular";
         public static String RAID = "Raid";
-        public static String STAITC = "Static";
+        public static String STATIC = "Static";
     }
 
 
@@ -193,7 +193,7 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
         switch (taskType) {
             case ALARM: taskTypeString = TASK_TYPE_STRING.ALARM; break;
             case REGULAR: taskTypeString = TASK_TYPE_STRING.REGULAR; break;
-            case STATIC: taskTypeString = TASK_TYPE_STRING.STAITC; break;
+            case STATIC: taskTypeString = TASK_TYPE_STRING.STATIC; break;
             case RAID: taskTypeString = TASK_TYPE_STRING.RAID; break;
         }
 
@@ -308,8 +308,16 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
         return (Client) getLDSFallbackParseObject(ParseTask.client);
     }
 
+    public String getClientId() {
+        return getStringSafe(ParseTask.clientId);
+    }
+
     public String getClientName() {
-        return (getClient() != null) ? getClient().getName() : "";
+        return getStringSafe(ParseTask.clientName);
+    }
+
+    public String getClientAddress() {
+        return getStringSafe(ParseTask.clientAddress);
     }
 
     private void setGuardCurrent() {
@@ -385,7 +393,7 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
     }
 
     public void setAccepted() {
-        setTimeStartedNow();
+//        setTimeStartedNow();
         setStatus(STATUS.ACCEPTED);
         setGuardCurrent();
     }
@@ -402,7 +410,7 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
     }
 
     public void setAborted() {
-        setTimeEndedNow();
+//        setTimeEndedNow();
         setStatus(STATUS.ABORTED);
         setGuardCurrent();
 
@@ -410,7 +418,7 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
     }
 
     public void setFinished() {
-        setTimeEndedNow();
+//        setTimeEndedNow();
         setStatus(STATUS.FINISHED);
         setGuardCurrent();
 
@@ -493,47 +501,48 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
         return getParseGeoPoint(ParseTask.position);
     }
 
-    public Date getTimeStarted() {
-        return getDate(timeStarted);
-    }
-
-
-    private void setTimeStartedNow() {
-        put(ParseTask.timeStarted, new Date());
-    }
-
-
-    private void setTimeEndedNow() {
-        put(ParseTask.timeEnded, new Date());
-    }
+//    public Date getTimeStarted() {
+//        return getDate(timeStarted);
+//    }
+//
+//
+//    private void setTimeStartedNow() {
+//        put(ParseTask.timeStarted, new Date());
+//    }
+//
+//
+//    private void setTimeEndedNow() {
+//        put(ParseTask.timeEnded, new Date());
+//    }
 
     public String getOriginal() {
         return getStringSafe(original, "");
     }
 
-    public String getClientId() {
-        if (getClient() != null) {
-            return getClient().getId();
-        }
-        return (has(clientId)) ? getString(clientId) : "";
-    }
 
+    // Used for sorting
     @Override
-    public int compareTo(@NonNull ParseTask another) {
-        // another has clientId and this does not
-        if (this.getClientId().isEmpty() && !another.getClientId().isEmpty()) {
-            return -1;
+    public int compareTo(@NonNull ExtendedParseObject another) {
+        if (another instanceof ParseTask) {
+            ParseTask otherTask = (ParseTask) another;
+
+            // another has clientId and this does not
+            if (this.getClientId().isEmpty() && !otherTask.getClientId().isEmpty()) {
+                return -1;
+            }
+            // this has clientId and another does not
+            if (!this.getClientId().isEmpty() && otherTask.getClientId().isEmpty()) {
+                return 1;
+            }
+            // both has clientId
+            if (!this.getClientId().isEmpty() && !otherTask.getClientId().isEmpty()) {
+                return this.getClientId().compareTo(otherTask.getClientId());
+            }
+            // neither contains clientId
+            return this.getClientName().compareTo(otherTask.getClientName());
+        } else {
+            return 0;
         }
-        // this has clientId and another does not
-        if (!this.getClientId().isEmpty() && another.getClientId().isEmpty()) {
-            return 1;
-        }
-        // both has clientId
-        if (!this.getClientId().isEmpty() && !another.getClientId().isEmpty()) {
-            return this.getClientId().compareTo(another.getClientId());
-        }
-        // neither contains clientId
-        return this.getClientName().compareTo(another.getClientName());
     }
 
     /**
@@ -609,7 +618,7 @@ public class ParseTask extends ExtendedParseObject implements Comparable<ParseTa
     public void setStartedBy(Guard guard) {
         setGuard(guard);
         setArrived();
-        setTimeStartedNow();
+//        setTimeStartedNow();
     }
 
     public Task<Report> findReport(final boolean fromLocalDataStore) {

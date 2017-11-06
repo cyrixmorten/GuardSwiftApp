@@ -10,6 +10,7 @@ import android.view.Gravity;
 import com.guardswift.R;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingAppCompatActivity;
+import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -128,6 +129,11 @@ public class MainActivity extends InjectingAppCompatActivity {
         if (sounds.isPlayingAlarmSound()) {
             sounds.stopAlarm();
         }
+
+//        ParseLiveQueryClient liveQueryClient = GuardSwiftApplication.getInstance().getLiveQueryClient();
+//        if (liveQueryClient != null) {
+//            liveQueryClient.connectIfNeeded();
+//        }
     }
 
 
@@ -187,8 +193,11 @@ public class MainActivity extends InjectingAppCompatActivity {
             startActivity(redirectToOtherActivityIntent());
         }
 
+        EventBusController.postUIUpdate();
+
         super.onPostResume();
     }
+
 
 
     @Override

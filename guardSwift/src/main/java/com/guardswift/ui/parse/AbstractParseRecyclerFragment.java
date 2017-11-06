@@ -16,12 +16,12 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.eventbus.events.UpdateUIEvent;
+import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.SlidingPanelActivity;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.guardswift.ui.parse.execution.TaskRecycleAdapter;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
-import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 
 import java.util.List;
@@ -37,7 +37,7 @@ import butterknife.Unbinder;
  * <p/>
  * Created by cyrix on 11/15/15.
  */
-public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U extends RecyclerView.ViewHolder> extends InjectingFragment {
+public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObject, U extends RecyclerView.ViewHolder> extends InjectingFragment {
 
     protected static final String TAG = AbstractTasksRecycleFragment.class
             .getSimpleName();
@@ -63,7 +63,6 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
     protected abstract boolean isRelevantUIEvent(UpdateUIEvent ev);
 
     private boolean mLoading = false;
-    private boolean mFirstLoad = true;
 
     private ParseRecyclerQueryAdapter<T, U> mAdapter;
 
@@ -82,7 +81,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
     }
 
 
-    // trigger when query is updated
+    // trigger this when there are chenges in the query
     protected void updatedNetworkQuery() {
         if (GuardSwiftApplication.getInstance().isBootstrapInProgress()) {
             Log.w(TAG, "cancel updatedNetworkQuery because bootstrapping");
@@ -91,8 +90,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
         if (mRecycleView != null) {
 
-            mFirstLoad = true;
-
+            mRecycleView.setAdapter(null);
             mAdapter = createRecycleAdapter();
             mAdapter.addOnQueryLoadListener(recycleQueryListener);
 
@@ -118,6 +116,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
     @Override
     public void onAttach(Context context) {
+        Log.d(TAG, "onAttach");
         super.onAttach(context);
         if (mAdapter != null) {
             mAdapter.onAttatch(getActivity());
@@ -126,6 +125,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
     @Override
     public void onDetach() {
+        Log.d(TAG, "onDetach");
         super.onDetach();
         if (mAdapter != null) {
             mAdapter.onDetatch();
@@ -136,10 +136,12 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_recycle_tasks,
                 container, false);
 
         unbinder = ButterKnife.bind(this, rootView);
+
 
         mAdapter = createRecycleAdapter();
 
@@ -164,11 +166,13 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onViewCreated");
         super.onViewCreated(view, savedInstanceState);
 
         if (getActivity() instanceof SlidingPanelActivity) {
             ((SlidingPanelActivity) getActivity()).setSlidingScrollView(mRecycleView);
         }
+
     }
 
     protected ParseRecyclerQueryAdapter<T, U> getAdapter() {
@@ -181,6 +185,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
         Log.d(TAG, "onResume");
         if (mAdapter != null) {
             mAdapter.addOnQueryLoadListener(recycleQueryListener);
+            mAdapter.notifyDataSetChanged();
         }
 
         super.onResume();
@@ -201,12 +206,11 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
                 new HandleException(getActivity(), TAG, "recycleQueryListener", e);
             }
 
-            if (mFirstLoad) {
+            if (mRecycleView.getAdapter() == null) {
                 mRecycleView.swapAdapter(mAdapter, true);
             }
 
 
-            mFirstLoad = false;
             mLoading = false;
         }
 
@@ -239,6 +243,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ParseObject, U ext
 
     public void onEventMainThread(UpdateUIEvent ev) {
         if (!mLoading && isRelevantUIEvent(ev)) {
+            mAdapter.notifyDataSetChanged();
         }
     }
 
