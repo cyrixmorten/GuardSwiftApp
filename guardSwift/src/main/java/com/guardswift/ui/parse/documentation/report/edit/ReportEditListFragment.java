@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -41,6 +42,7 @@ import javax.inject.Inject;
 
 public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventLog, ReportEditRecycleAdapter.ReportViewHolder> implements UpdateFloatingActionButton, FragmentVisibilityListener {
 
+    private static final int ADD_EVENT_RESULT_CODE = 200;
 
     public static ReportEditListFragment newInstance(ParseTask task) {
 
@@ -130,9 +132,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
                 showFloatingActionButton(1000);
                 loading = false;
-                if (pdfMenu != null) {
-                    pdfMenu.setEnabled(!objects.isEmpty());
-                }
+                setPDFMenuEnabled(!objects.isEmpty());
             }
 
             @Override
@@ -143,9 +143,35 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         return adapter;
     }
 
+    private void setPDFMenuEnabled(boolean enabled) {
+        if (pdfMenu != null) {
+            pdfMenu.setEnabled(true);
+        }
+    }
+
     @Override
     protected boolean isRelevantUIEvent(UpdateUIEvent ev) {
-        return ev.getObject() instanceof EventLog;
+        boolean isEventLog = ev.getObject() instanceof EventLog;
+
+        Log.d(TAG, "isRelevantUIEvent action: " + ev.getAction());
+        Log.d(TAG, "isRelevantUIEvent isEventLog: " + isEventLog);
+
+        if (isEventLog && ev.getAction() == UpdateUIEvent.ACTION.CREATE) {
+            EventLog eventLog = (EventLog) ev.getObject();
+
+            Log.d(TAG, "eventLog.getReportId() " + eventLog.getReportId());
+            Log.d(TAG, "this.reportId " + this.reportId);
+
+            if (eventLog.getReportId().equals(this.reportId)) {
+                getAdapter().addItem(eventLog);
+                setPDFMenuEnabled(true);
+
+                return false;
+            }
+        }
+
+        // calls notifyDataSetChanged() if true
+        return isEventLog;
     }
 
 
@@ -179,6 +205,8 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
             }
         });
     }
+
+
 
     private void showFloatingActionButton(long delay) {
         new Handler().postDelayed(new Runnable() {

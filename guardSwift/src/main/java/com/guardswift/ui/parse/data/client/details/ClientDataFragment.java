@@ -66,7 +66,7 @@ public class ClientDataFragment extends InjectingFragment implements
 
 
         ParseQuery<Client> query = new ClientQueryBuilder(false).matchingObjectId(getArguments().getString("id")).build();
-        query.setCachePolicy(ParseQuery.CachePolicy.CACHE_ELSE_NETWORK);
+//        query.setCachePolicy(ParseQuery.CachePolicy.CACHE_ELSE_NETWORK);
         try {
             Client client = query.getFirst();
             mClient = new ObservableClient(client);

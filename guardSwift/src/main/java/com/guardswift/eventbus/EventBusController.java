@@ -18,18 +18,21 @@ public class EventBusController {
         EventBus.getDefault().post(object);
     }
 
-
     public static void postUIUpdate(Object object) {
+        postUIUpdate(object, UpdateUIEvent.ACTION.UPDATE);
+    }
+
+    public static void postUIUpdate(Object object, UpdateUIEvent.ACTION action) {
         if (!Device.isScreenOn()) {
 //            Log.w("EventBusController", "Blocked UI Event - screen is off " + object.getClass().getSimpleName());
         }
         if (object instanceof List) {
             List objList = (List)object;
             if (!objList.isEmpty()) {
-                post(new UpdateUIEvent(objList.iterator().next()));
+                post(new UpdateUIEvent(objList.iterator().next(), action));
             }
         } else {
-            post(new UpdateUIEvent(object));
+            post(new UpdateUIEvent(object, action));
         }
     }
 

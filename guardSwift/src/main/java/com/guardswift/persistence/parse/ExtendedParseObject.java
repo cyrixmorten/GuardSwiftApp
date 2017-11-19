@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.exceptions.LogError;
 import com.guardswift.eventbus.EventBusController;
+import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -138,26 +139,19 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
 
 
     public void pinThenSaveEventually() {
-        pinThenSaveEventually(getPin(), null, null, false);
-    }
-
-    public void pinThenSaveEventually(boolean postUIUpdate) {
-        pinThenSaveEventually(getPin(), null, null, postUIUpdate);
+        pinThenSaveEventually(getPin(), null, null, UpdateUIEvent.ACTION.UPDATE);
     }
 
     public void pinThenSaveEventually(final SaveCallback pinned) {
-        pinThenSaveEventually(getPin(), pinned, null, false);
+        pinThenSaveEventually(getPin(), pinned, null, UpdateUIEvent.ACTION.UPDATE);
     }
 
     public void pinThenSaveEventually(final SaveCallback pinned, final SaveCallback saved) {
-        pinThenSaveEventually(getPin(), pinned, saved, false);
+        pinThenSaveEventually(getPin(), pinned, saved, UpdateUIEvent.ACTION.UPDATE);
     }
 
-    public void pinThenSaveEventually(String pin, SaveCallback pinned, SaveCallback saved) {
-        pinThenSaveEventually(pin, pinned, saved, false);
-    }
 
-    public void pinThenSaveEventually(final String pin, final SaveCallback pinned, final SaveCallback savedCallback, final boolean postUIUpdate) {
+    public void pinThenSaveEventually(final String pin, final SaveCallback pinned, final SaveCallback savedCallback, final UpdateUIEvent.ACTION action) {
 
         Log.d(TAG, "pinThenSaveEventually: " + pin);
 
@@ -173,9 +167,6 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
                     pinned.done(e);
                 }
 
-                if (postUIUpdate) {
-                    EventBusController.postUIUpdate(ExtendedParseObject.this);
-                }
 
                 if (pin.equals(NEW_OBJECT_PIN)) {
                     ExtendedParseObject.this.unpinInBackground(NEW_OBJECT_PIN);
@@ -185,21 +176,41 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
                     @Override
                     public void done(ParseException e) {
                         if (e != null) {
-                            LogError.log(TAG, "Failes to save in backgorund", e);
+                            LogError.log(TAG, "Failed to save in background", e);
 
                             new HandleException(TAG, "pinThenSaveEventually fallback to saveEventually", e);
-                            ExtendedParseObject.this.saveEventually(savedCallback);
+
+                            ExtendedParseObject.this.saveEventually(new SaveCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    if (e != null) {
+                                        LogError.log(TAG, "Failed to save object", e);
+                                    }
+
+                                    doneSaving(e, savedCallback, action);
+
+                                }
+                            });
+
                             return;
                         }
 
-                        if (savedCallback != null) {
-                            savedCallback.done(null);
-                        }
+                        doneSaving(null, savedCallback, action);
                     }
                 });
             }
         });
 
+    }
+
+    private void doneSaving(ParseException e, SaveCallback savedCallback, UpdateUIEvent.ACTION action) {
+        if (savedCallback != null) {
+            savedCallback.done(null);
+        }
+
+        if (e == null) {
+            EventBusController.postUIUpdate(this, action);
+        }
     }
 
     public <T extends ParseObject> void pinUpdate(final T object, final DataStoreCallback<T> callback) {

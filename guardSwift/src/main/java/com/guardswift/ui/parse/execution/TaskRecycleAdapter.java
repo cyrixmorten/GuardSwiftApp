@@ -54,9 +54,12 @@ import com.parse.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -1091,9 +1094,12 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //        tvTaskTypeString.setText(task.getTaskTypeString());
 //        linearLayout.addView(tvTaskTypeString);
 //
-//        TextView tvTaskType = new TextView(context);
-//        tvTaskType.setText(task.getTaskType().toString());
-//        linearLayout.addView(tvTaskType);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM HH:mm",
+                Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getDefault());
+        TextView tvTaskType = new TextView(context);
+        tvTaskType.setText(dateFormat.format(task.getUpdatedAt()));
+        linearLayout.addView(tvTaskType);
     }
 
     private TextView isWithinScheduledTime(ParseTask task) {

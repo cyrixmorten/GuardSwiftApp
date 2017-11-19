@@ -44,6 +44,8 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
 
     private Unbinder unbinder;
 
+    // does a full reload of data on resume if true
+    private boolean reloadOnResume = false;
 
     /**
      * Factory restricts the query for which LDS is updated and the content being displayed
@@ -81,7 +83,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
     }
 
 
-    // trigger this when there are chenges in the query
+    // trigger this when there are changes in the query
     protected void updatedNetworkQuery() {
         if (GuardSwiftApplication.getInstance().isBootstrapInProgress()) {
             Log.w(TAG, "cancel updatedNetworkQuery because bootstrapping");
@@ -179,13 +181,21 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
         return mAdapter;
     }
 
+    protected void setReloadOnResume(boolean reloadOnResume) {
+        this.reloadOnResume = reloadOnResume;
+    }
 
     @Override
     public void onResume() {
-        Log.d(TAG, "onResume");
+        Log.d(TAG, "onResume - reloadOnResume: " + reloadOnResume);
+
         if (mAdapter != null) {
             mAdapter.addOnQueryLoadListener(recycleQueryListener);
-            mAdapter.notifyDataSetChanged();
+            if (reloadOnResume) {
+                mAdapter.loadObjects();
+            } else {
+                mAdapter.notifyDataSetChanged();
+            }
         }
 
         super.onResume();

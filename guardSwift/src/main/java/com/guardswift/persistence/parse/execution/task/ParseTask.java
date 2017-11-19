@@ -523,7 +523,8 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     // Used for sorting
     @Override
     public int compareTo(@NonNull ExtendedParseObject another) {
-        if (another instanceof ParseTask) {
+        // TODO introduce swappable compare strategies
+        if (another instanceof ParseTask && (isRegularTask() || isRaidTask())) {
             ParseTask otherTask = (ParseTask) another;
 
             // another has clientId and this does not

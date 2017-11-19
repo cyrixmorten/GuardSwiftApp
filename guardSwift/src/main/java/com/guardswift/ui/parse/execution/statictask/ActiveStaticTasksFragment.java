@@ -1,6 +1,5 @@
 package com.guardswift.ui.parse.execution.statictask;
 
-import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.query.StaticTaskQueryBuilder;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
@@ -17,7 +16,9 @@ public class ActiveStaticTasksFragment extends AbstractTasksRecycleFragment {
 	}
 
 	public ActiveStaticTasksFragment() {
+        this.setReloadOnResume(true);
 	}
+
 
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
@@ -34,10 +35,26 @@ public class ActiveStaticTasksFragment extends AbstractTasksRecycleFragment {
         };
     }
 
-    @Override
-    public boolean isRelevantUIEvent(UpdateUIEvent ev) {
-        return false;
-    }
+//    @Override
+//    public boolean isRelevantUIEvent(UpdateUIEvent ev) {
+//        Log.d(TAG, "isRelevantUIEvent");
+//        if (ev.getObject() instanceof ParseTask) {
+//            ParseTask task = (ParseTask)ev.getObject();
+//
+//            Log.d(TAG, "isRelevantUIEvent yes");
+//
+//            if (task.isStaticTask()) {
+//                if (task.isPending()) {
+//                    Log.d(TAG, "isRelevantUIEvent addItem");
+//                    getAdapter().addItem(task);
+//                } else {
+//                    Log.d(TAG, "isRelevantUIEvent addItem");
+//                    getAdapter().removeItem(task);
+//                }
+//            }
+//        }
+//        return false;
+//    }
 
 
 }

@@ -15,7 +15,7 @@ import com.guardswift.core.documentation.eventlog.context.LogTimestampStrategy;
 import com.guardswift.core.documentation.eventlog.task.LogTaskStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskLogStrategyFactory;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.eventbus.EventBusController;
+import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.Guard;
@@ -272,7 +272,6 @@ public class EventLog extends ExtendedParseObject {
                         pinnedCallback.done(eventLog, e);
                     }
 
-                    EventBusController.postUIUpdate();
 
                     Log.w(TAG, "4) Save event - pinned");
                 }
@@ -283,6 +282,8 @@ public class EventLog extends ExtendedParseObject {
                         new HandleException(TAG, "Saving new EventLog", e);
                     }
 
+//                    EventBusController.postUIUpdate(eventLog, UpdateUIEvent.ACTION.CREATE);
+
                     Log.w(TAG, "5) Save event - saved");
 
                     updateGuardInfo();
@@ -291,7 +292,7 @@ public class EventLog extends ExtendedParseObject {
                         savedCallback.done(eventLog, e);
                     }
                 }
-            }, true);
+            }, UpdateUIEvent.ACTION.CREATE);
 
         }
 
@@ -576,6 +577,10 @@ public class EventLog extends ExtendedParseObject {
             return ParseTask.TASK_TYPE.STATIC;
         }
         return null;
+    }
+
+    public String getReportId() {
+        return getStringSafe(EventLog.reportId);
     }
 
     @Override

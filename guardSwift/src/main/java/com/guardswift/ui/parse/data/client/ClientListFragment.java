@@ -65,8 +65,9 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
                     // Custom click handler
                     onClientSelectedListener.clientSelected(client);
                 }
-
-                GenericToolbarActivity.start(getContext(), client.getName(), client.getFullAddress(), ClientDetailsViewpagerFragment.newInstance(client));
+                else {
+                    GenericToolbarActivity.start(getContext(), client.getName(), client.getFullAddress(), ClientDetailsViewpagerFragment.newInstance(client));
+                }
             }
         });
     }

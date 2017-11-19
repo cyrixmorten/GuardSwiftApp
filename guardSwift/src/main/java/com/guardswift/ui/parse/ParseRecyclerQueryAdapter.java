@@ -220,15 +220,19 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
         return index;
     }
 
-    private void addItem(T object) {
-        mItems.add(object);
+    public void addItem(T object) {
+        int existingIndex = indexOf(object);
 
-        Collections.sort(mItems);
+        if (existingIndex == -1) {
+            mItems.add(object);
+
+            Collections.sort(mItems);
+        }
 
         notifyDataSetChanged();
     }
 
-    private void removeItem(T object) {
+    public void removeItem(T object) {
         int existingIndex = indexOf(object);
 
         if (existingIndex != -1) {
