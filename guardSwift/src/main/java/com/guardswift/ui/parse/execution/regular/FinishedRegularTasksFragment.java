@@ -1,7 +1,6 @@
 package com.guardswift.ui.parse.execution.regular;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
@@ -56,21 +55,24 @@ public class FinishedRegularTasksFragment extends AbstractTasksRecycleFragment {
     public boolean isRelevantUIEvent(UpdateUIEvent ev) {
         Object obj = ev.getObject();
 
-        boolean isRelevant = super.isRelevantUIEvent(ev);
-
         if (obj instanceof ParseTask) {
-            boolean isSameTaskType = ((ParseTask) obj).getTaskType() == ParseTask.TASK_TYPE.REGULAR;
+            ParseTask task = (ParseTask) obj;
+
+            boolean isSameTaskType = task.getTaskType() == ParseTask.TASK_TYPE.REGULAR;
+
             if (isSameTaskType) {
                 ParseTask.TASK_STATE state = ((ParseTask) obj).getTaskState();
                 if (state == ParseTask.TASK_STATE.FINISHED) {
-                    isRelevant = true;
+                    getAdapter().addItem(task);
+                } else {
+                    getAdapter().removeItem(task);
                 }
+
+                return false;
             }
         }
 
-        Log.d(TAG, "Finished circuitUnits isRelevant: " + obj + " -> " + isRelevant);
-
-        return isRelevant;
+        return super.isRelevantUIEvent(ev);
     }
 }
 

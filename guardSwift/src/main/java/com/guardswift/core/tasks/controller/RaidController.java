@@ -35,6 +35,7 @@ public class RaidController extends BaseTaskController {
         Context ctx = GuardSwiftApplication.getInstance();
         ParseTasksCache tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
 
+        EventLog.Builder event = null;
 
         switch (action) {
             case OPEN:
@@ -43,16 +44,30 @@ public class RaidController extends BaseTaskController {
             case ARRIVE:
 
 
-                task.setArrived();
-
-                new EventLog.Builder(ctx)
+                event = new EventLog.Builder(ctx)
                         .taskPointer(task, ParseTask.EVENT_TYPE.ARRIVE)
                         .event(ctx.getString(R.string.event_arrived))
                         .automatic(automatic)
                         .location(task.getFullAddress())
-                        .eventCode(EventLog.EventCodes.RAID_ARRIVED).saveAsync();
+                        .eventCode(EventLog.EventCodes.RAID_ARRIVED);
 
+                task.setArrived();
                 tasksCache.addArrived(task);
+
+                break;
+            case FINISH:
+
+
+                event = new EventLog.Builder(ctx)
+                        .taskPointer(task, ParseTask.EVENT_TYPE.FINISH)
+                        .event(ctx.getString(R.string.event_finished))
+                        .automatic(automatic)
+                        .eventCode(EventLog.EventCodes.REGULAR_FINISHED);
+
+
+                task.setFinished();
+                tasksCache.removeArrived(task);
+
                 break;
             case RESET:
 
@@ -71,14 +86,20 @@ public class RaidController extends BaseTaskController {
         }
 
 
-        task.pinThenSaveEventually((new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (automatic) {
-                    EventBusController.postUIUpdate(task);
+        if (task.isDirty()) {
+            task.pinThenSaveEventually((new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (automatic) {
+                        EventBusController.postUIUpdate(task);
+                    }
                 }
-            }
-        }));
+            }));
+        }
+
+        if (event != null) {
+            event.saveAsync();
+        }
 
         return task;
     }

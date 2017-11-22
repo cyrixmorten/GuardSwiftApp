@@ -215,6 +215,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
             if (e != null) {
                 new HandleException(getActivity(), TAG, "recycleQueryListener", e);
             }
+//            mRecycleView.setRefreshing(false);
 
             if (mRecycleView.getAdapter() == null) {
                 mRecycleView.swapAdapter(mAdapter, true);
@@ -229,10 +230,10 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
             mLoading = true;
 
             if (mRecycleView != null) {
-                if (mAdapter.getItems().isEmpty()) {
-                    mRecycleView.showProgress();
+                if (mAdapter != null && mAdapter.getItems().isEmpty()) {
+//                    mRecycleView.showProgress();
                 } else {
-                    mRecycleView.setRefreshing(true);
+//                    mRecycleView.setRefreshing(true);
                 }
             }
         }

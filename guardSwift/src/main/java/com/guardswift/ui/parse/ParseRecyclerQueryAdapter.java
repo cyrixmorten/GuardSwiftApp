@@ -225,11 +225,9 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
 
         if (existingIndex == -1) {
             mItems.add(object);
-
             Collections.sort(mItems);
+            notifyDataSetChanged();
         }
-
-        notifyDataSetChanged();
     }
 
     public void removeItem(T object) {
@@ -237,11 +235,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
 
         if (existingIndex != -1) {
             mItems.remove(existingIndex);
-            if (existingIndex != 0) {
-                notifyItemRemoved(existingIndex);
-            } else {
-                notifyDataSetChanged();
-            }
+            notifyDataSetChanged();
         }
     }
 

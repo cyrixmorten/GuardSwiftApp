@@ -52,11 +52,9 @@ android {
         javaMaxHeapSize "4g" // 2g should be also OK
     }
     buildTypes {
-        ngrok {
-            buildConfigField "String", "PARSE_SERVER_URL", '"https://3a85a757.ngrok.io/parse/"'
-            buildConfigField "String", "SERVER_API_URL", '""https://3a85a757.ngrok.io/api/"'
-        }
         debug {
+//            buildConfigField "String", "PARSE_SERVER_URL", '"https://9eca68ac.eu.ngrok.io/parse/"'
+//            buildConfigField "String", "SERVER_API_URL", '"https://9eca68ac.eu.ngrok.io/api/"'
             buildConfigField "String", "PARSE_SERVER_URL", '"https://gsdev-server.herokuapp.com/parse/"'
             buildConfigField "String", "SERVER_API_URL", '"https://gsdev-server.herokuapp.com/api/"'
         }

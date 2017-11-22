@@ -60,7 +60,22 @@ public class ActiveRegularTasksFragment extends AbstractTasksRecycleFragment {
 
     @Override
     public boolean isRelevantUIEvent(UpdateUIEvent ev) {
-        Log.d(TAG, "Active circuitUnits isRelevant: " + super.isRelevantUIEvent(ev));
+        Object obj = ev.getObject();
+
+        if (obj instanceof ParseTask) {
+            ParseTask task = (ParseTask) obj;
+
+            boolean isSameTaskType = task.getTaskType() == ParseTask.TASK_TYPE.REGULAR;
+
+            if (isSameTaskType) {
+                ParseTask.TASK_STATE state = ((ParseTask) obj).getTaskState();
+                if (state != ParseTask.TASK_STATE.FINISHED) {
+                    getAdapter().addItem(task);
+                }
+
+                return false;
+            }
+        }
         return super.isRelevantUIEvent(ev);
     }
 

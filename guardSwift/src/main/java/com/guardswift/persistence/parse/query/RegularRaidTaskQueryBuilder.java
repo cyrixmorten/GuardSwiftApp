@@ -62,6 +62,7 @@ public class RegularRaidTaskQueryBuilder extends ParseQueryBuilder<ParseTask> {
 
         matching(taskGroupStarted.getTaskGroup());
 
+        // TODO: rewrite query to OR pending, aborted and arrived
         query.whereNotEqualTo(ParseTask.status, ParseTask.STATUS.FINISHED);
 
         return this;
