@@ -86,35 +86,20 @@ public class EventLog extends ExtendedParseObject {
         public static final int REGULAR_LEFT = 108;
         public static final int REGULAR_OTHER = 104;
         public static final int REGULAR_EXTRA_TIME = 105;
-        public static final int CIRCUITUNIT_CHECKPOINT_ARRIVED = 106;
-        public static final int CIRCUITUNIT_CHECKPOINT_ABORTED = 107;
-        public static final int AUTOMATIC_CIRCUITUNIT_CHECKPOINT_ARRIVED = 1006;
-        public static final int AUTOMATIC_GEOFENCE_ENTER = 1101;
-        public static final int AUTOMATIC_GEOFENCE_EXIT = 1102;
-        public static final int AUTOMATIC_ARRIVED_ON_FOOT = 1201;
-        public static final int AUTOMATIC_ARRIVED_STILL = 1202;
-        public static final int AUTOMATIC_ARRIVED = 1301;
-        public static final int AUTOMATIC_DEPARTURE = 1302;
+
 
         public static final int RAID_ARRIVED = 111;
-        public static final int DISTRICTWATCH_FINISHED = 112;
-        public static final int DISTRICTWATCH_ABORT = 113;
         public static final int RAID_OTHER = 114;
         public static final int ALARM_ACCEPTED = 120;
         public static final int ALARM_ARRIVED = 121;
         public static final int ALARM_FINISHED = 122;
         public static final int ALARM_ABORT = 123;
         public static final int ALARM_OTHER = 124;
-        public static final int ALARM_OTHER_REPORT = 125;
-        public static final int ALARM_FORWARDED = 126;
         public static final int STATIC_ARRIVED = 131;
         public static final int STATIC_FINISHED = 132;
-        public static final int STATIC_ABORT = 133;
         public static final int STATIC_OTHER = 134;
         public static final int GUARD_LOGIN = 200;
         public static final int GUARD_LOGOUT = 201;
-        public static final int TASK_GPS_SUMMARY = 180;
-        public static final int TASK_EVENT_SUMMARY = 181;
 
     }
 
@@ -454,6 +439,12 @@ public class EventLog extends ExtendedParseObject {
 
     public int getEventCode() {
         return getInt(eventCode);
+    }
+
+    public boolean isArrivalEvent() {
+        int eventCode = getEventCode();
+
+        return eventCode == EventCodes.ALARM_ARRIVED || eventCode == EventCodes.RAID_ARRIVED || eventCode == EventCodes.REGULAR_ARRIVED;
     }
 
 

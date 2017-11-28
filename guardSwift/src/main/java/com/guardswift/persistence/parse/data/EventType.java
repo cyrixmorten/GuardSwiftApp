@@ -1,6 +1,7 @@
 package com.guardswift.persistence.parse.data;
 
 import com.guardswift.persistence.parse.ExtendedParseObject;
+import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.query.EventTypeQueryBuilder;
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
@@ -51,6 +52,12 @@ public class EventType extends ExtendedParseObject {
 
 	public int getTimesUsed() {
 		return getInt(timesUsed);
+	}
+
+	public void setClient(Client client) {
+		if (client != null) {
+			put(EventType.client, client);
+		}
 	}
 
 	public void setName(String name) {

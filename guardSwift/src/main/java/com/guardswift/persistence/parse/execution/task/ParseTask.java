@@ -404,6 +404,10 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         increment(ParseTask.timesArrived);
     }
 
+    public void deleteArrival() {
+        put(ParseTask.timesArrived, getTimesArrived()-1);
+    }
+
     public void reset() {
         setGuard(null);
         setPending();

@@ -173,6 +173,12 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
                                                                notifyDataSetChanged();
                                                            }
 
+                                                           if (eventLog.isArrivalEvent() && eventLog.getTask() != null) {
+                                                               ParseTask task = eventLog.getTask();
+                                                               task.deleteArrival();
+                                                               task.saveEventually();
+                                                           }
+
                                                            eventLog.deleteEventually();
                                                        }
                                                    }).show();

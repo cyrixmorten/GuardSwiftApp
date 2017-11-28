@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -153,14 +152,10 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     protected boolean isRelevantUIEvent(UpdateUIEvent ev) {
         boolean isEventLog = ev.getObject() instanceof EventLog;
 
-        Log.d(TAG, "isRelevantUIEvent action: " + ev.getAction());
-        Log.d(TAG, "isRelevantUIEvent isEventLog: " + isEventLog);
 
         if (isEventLog && ev.getAction() == UpdateUIEvent.ACTION.CREATE) {
             EventLog eventLog = (EventLog) ev.getObject();
 
-            Log.d(TAG, "eventLog.getReportId() " + eventLog.getReportId());
-            Log.d(TAG, "this.reportId " + this.reportId);
 
             if (eventLog.getReportId().equals(this.reportId)) {
                 getAdapter().addItem(eventLog);

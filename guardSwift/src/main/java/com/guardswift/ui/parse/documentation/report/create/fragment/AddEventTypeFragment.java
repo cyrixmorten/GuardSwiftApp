@@ -95,7 +95,8 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 					@Override
 					public ParseQuery<EventType> create() {
 						return new EventTypeQueryBuilder(true)
-								.matchingIncludes(clientCache.getSelected()).sortByTimesUsed()
+								.matchingIncludes(clientCache.getSelected())
+                                .sortByTimesUsed()
 								.build();
 					}
 				});
@@ -212,6 +213,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
                     public void onInput(MaterialDialog dialog, CharSequence input) {
                         if (input.length() > 0) {
                              final EventType new_type = new EventType();
+                             new_type.setClient(clientCache.getSelected());
                              new_type.setOwner(ParseUser.getCurrentUser());
                              new_type.setName(input.toString());
                              new_type.pinInBackground(new SaveCallback() {
