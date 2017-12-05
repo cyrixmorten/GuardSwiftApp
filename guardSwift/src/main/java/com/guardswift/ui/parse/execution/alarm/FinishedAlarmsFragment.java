@@ -4,7 +4,6 @@ import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.query.AlarmTaskQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.parse.PostProcessAdapterResults;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;

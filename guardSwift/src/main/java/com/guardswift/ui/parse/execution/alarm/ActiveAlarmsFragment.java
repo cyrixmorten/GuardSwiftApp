@@ -17,6 +17,11 @@ public class ActiveAlarmsFragment extends AbstractTasksRecycleFragment {
 		return new ActiveAlarmsFragment();
 	}
 
+	public ActiveAlarmsFragment() {
+        // update view using network query on resume
+        this.setReloadOnResume(true);
+	}
+
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
 

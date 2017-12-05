@@ -20,8 +20,6 @@ public class PendingStaticTasksFragment extends AbstractTasksRecycleFragment {
     }
 
 
-
-
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
         return new ParseQueryAdapter.QueryFactory<ParseTask>() {
