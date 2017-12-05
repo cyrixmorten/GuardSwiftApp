@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.fabric.TrackEvent;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -28,6 +29,8 @@ public class AlarmController extends BaseTaskController {
 
 
     public ParseTask performAction(ACTION action, ParseTask alarm, boolean automatic) {
+
+        TrackEvent.taskAction(action, alarm, automatic);
 
         Context ctx = GuardSwiftApplication.getInstance();
 

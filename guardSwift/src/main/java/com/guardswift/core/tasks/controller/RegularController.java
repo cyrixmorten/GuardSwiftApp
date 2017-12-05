@@ -6,6 +6,7 @@ import android.util.Log;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.eventbus.EventBusController;
+import com.guardswift.fabric.TrackEvent;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
@@ -36,11 +37,12 @@ public class RegularController extends BaseTaskController {
 
     public ParseTask performAction(ACTION action, final ParseTask task, final boolean automatic) {
 
+        TrackEvent.taskAction(action, task, automatic);
+
         Context ctx = GuardSwiftApplication.getInstance();
         ParseTasksCache tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
 
         Log.e(TAG, "invoking action: " + action.toString());
-
 
         if (!canPerformAction(action, task)) {
             Log.e(TAG, "unable to apply action to task " + action);
@@ -55,31 +57,15 @@ public class RegularController extends BaseTaskController {
                 break;
             case ARRIVE:
 
-                // Optimistically fill datastore with relevant EventLog entries
-//                new EventLog().updateDatastore(circuitUnit);
-
-
-//                if (circuitUnit.minutesSinceLastArrival() <= 15) {
-//                    Log.w(TAG, "Not been 15 minutes since last arrival - no eventlog generated");
                 event = new EventLog.Builder(ctx)
                         .taskPointer(task, ParseTask.EVENT_TYPE.ARRIVE)
                         .event(ctx.getString(R.string.event_arrived))
                         .automatic(automatic)
                         .eventCode(EventLog.EventCodes.REGULAR_ARRIVED);
-//                }
 
 
                 task.setArrived();
                 tasksCache.addArrived(task);
-
-//                if (circuitUnit.hasCheckPoints()) {
-//                    if (!circuitUnit.isAborted()) {
-//                        // otherwise resume where we left off
-//                        circuitUnit.clearCheckpoints();
-//                    }
-//                    WiFiPositioningService.start(ctx);
-//                }
-
 
                 break;
             case ABORT:
