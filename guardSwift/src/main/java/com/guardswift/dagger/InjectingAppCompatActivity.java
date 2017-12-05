@@ -152,7 +152,7 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     protected void onResume() {
         eventBus.register(this);
 
-        registerReceivers();
+//        registerReceivers();
 
         super.onResume();
     }
@@ -162,7 +162,7 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     protected void onPause() {
         eventBus.unregister(this);
 
-        unregisterReceivers();
+//        unregisterReceivers();
 
         super.onPause();
     }
@@ -173,7 +173,7 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     private void registerReceivers() {
         if (mAdapter != null) {
             if (!mAdapter.isEnabled()) {
-//                showRFIDNotActiveDialog();
+                showRFIDNotActiveDialog();
             } else {
                 dismissRFIDNotActiveDialog();
                 mAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
@@ -207,12 +207,7 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     private void unregisterReceivers() {
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        registerReceivers();
-    }
 
     @Override
     @CallSuper

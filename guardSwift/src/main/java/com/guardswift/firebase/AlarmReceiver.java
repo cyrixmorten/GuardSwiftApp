@@ -6,7 +6,6 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
-import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.exceptions.LogError;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
@@ -18,6 +17,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Seconds;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.Map;
 
 import bolts.Capture;
@@ -92,11 +92,16 @@ public class AlarmReceiver extends FirebaseMessagingService {
         }).continueWith(new Continuation<Guard, Object>() {
             @Override
             public Object then(Task<Guard> task) throws Exception {
-                if (task.isFaulted()) {
+                ParseTask alarm = alarmCapture.get();
+
+                if (task.isFaulted() || alarm == null) {
                     Exception exception = task.getError();
 
+                    if (alarm == null && exception == null) {
+                        exception = new NullPointerException();
+                    }
+
                     LogError.log(TAG, "Failed receive alarm: " + alarmId, exception);
-                    new HandleException(TAG, "Failed receive alarm: " + alarmId, exception);
 
                     return null;
                 }
@@ -110,7 +115,7 @@ public class AlarmReceiver extends FirebaseMessagingService {
                 boolean someTimePast =  lastAlarmReceive == null ||  Seconds.secondsBetween(lastAlarmReceive, new DateTime()).isGreaterThan(Seconds.seconds(30));
 
                 if (guard.isAlarmSoundEnabled() && someTimePast) {
-                    ParseTask alarm = alarmCapture.get();
+
                     AlarmDialogActivity.start(AlarmReceiver.this, alarm);
                     AlarmNotification.show(AlarmReceiver.this, alarm);
 

@@ -11,6 +11,7 @@ import android.os.Vibrator;
 import android.util.Log;
 
 import com.guardswift.R;
+import com.guardswift.core.exceptions.LogError;
 
 import java.io.IOException;
 
@@ -123,7 +124,6 @@ public class Sounds {
         Resources res = context.getResources();
         AssetFileDescriptor afd = res.openRawResourceFd(sound);
 
-
         alarmMediaPlayer.reset();
 		alarmMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
 		alarmMediaPlayer.setLooping(true);
@@ -141,7 +141,13 @@ public class Sounds {
             // set the volume to what we want it to be.  In this case it's max volume for the alarm stream.
             mAudioManager.setStreamVolume(AudioManager.STREAM_ALARM, mAudioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM), AudioManager.FLAG_PLAY_SOUND);
         } catch (IOException e) {
-            Log.e(TAG, "prepare alarm media player", e);
+            LogError.log(TAG, "prepare alarm media player", e);
+        } finally {
+            try {
+                afd.close();
+            } catch (IOException e) {
+                LogError.log(TAG, "Failed to close AssetFileDescriptor", e);
+            }
         }
 
         long[] pattern = { 0, 500, 2000 };

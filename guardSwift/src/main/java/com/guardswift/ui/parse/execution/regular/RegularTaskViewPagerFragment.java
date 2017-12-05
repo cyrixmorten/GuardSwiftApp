@@ -308,6 +308,10 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
         Message.getQueryBuilder(true, getGroupId()).build().addDescendingOrder(Message.createdAt).findInBackground(new FindCallback<Message>() {
             @Override
             public void done(List<Message> messages, ParseException e) {
+                if (getActivity() == null) {
+                    return;
+                }
+
                 for (Message message : messages) {
                     messagesDrawer.addItem(createMessageItem(message));
                 }

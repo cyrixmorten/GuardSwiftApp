@@ -7,34 +7,22 @@ import android.util.Log;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule.ForApplication;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
-import com.guardswift.persistence.parse.ExtendedParseObject;
-import com.guardswift.persistence.parse.data.EventType;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
-import com.guardswift.persistence.parse.data.client.ClientContact;
-import com.guardswift.persistence.parse.data.client.ClientLocation;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
-import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
-import com.guardswift.persistence.parse.documentation.report.Report;
-import com.guardswift.persistence.parse.execution.task.ParseTask;
-import com.guardswift.persistence.parse.execution.task.TaskGroup;
-import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
-import com.guardswift.persistence.parse.misc.Message;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.Device;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ProgressCallback;
 import com.parse.SaveCallback;
@@ -42,7 +30,6 @@ import com.parse.SaveCallback;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -222,40 +209,9 @@ public class ParseModule {
         GuardSwiftApplication.getInstance().stopServices();
 
 
-        unpinAllParseObjects();
+        GuardSwiftApplication.getInstance().teardownParseObjectsLocally();
     }
 
-    // TODO since pinning to DEFAULT, this no longer makes much sense
-    private void unpinAllParseObjects() {
-
-        List<Task<Object>> unpinClassNamed = Lists.newArrayList();
-        for (ExtendedParseObject parseObject : Lists.newArrayList(
-                new TaskGroup(),
-                new TaskGroupStarted(),
-                new ParseTask(),
-                new Client(),
-                new ClientContact(),
-                new ClientLocation(),
-                new Guard(),
-                new EventLog(),
-                new EventRemark(),
-                new EventType(),
-                new Tracker(),
-                new Report(),
-                new Message()
-        )) {
-
-            unpinClassNamed.add(parseObject.unpinAllPinnedToClass());
-        }
-
-        Task.whenAll(unpinClassNamed).continueWith(new Continuation<Void, Object>() {
-            @Override
-            public Object then(Task<Void> task) throws Exception {
-                GuardSwiftApplication.getInstance().teardownParseObjectsLocally();
-                return ParseObject.unpinAllInBackground(ParseObject.DEFAULT_PIN);
-            }
-        });
-    }
 
 
     public static ParseGeoPoint geoPointFromLocation(Location loc) {

@@ -179,19 +179,17 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 	}
 
     private void selectEvent(EventType eventType) {
-//        Toast.makeText(getActivity(), eventType.getName(), Toast.LENGTH_SHORT)
-//                .show();
+        if (getActivity() == null) {
+            return;
+        }
 
         eventType.increment(EventType.timesUsed);
         eventType.pinThenSaveEventually();
 
         eventTypeCache.setSelected(eventType);
 
-
         // jump to next if amount is not needed
         ((AddEventHandler) getActivity()).setEventType(eventType);
-
-
     }
 
 

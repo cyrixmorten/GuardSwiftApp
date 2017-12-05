@@ -153,11 +153,13 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        updateHeader();
-                        updateGuard();
-                        updateRemarksSummary();
-                        updateClientReceivers();
-                        loadingReport(false);
+                        if (isAdded()) {
+                            updateHeader();
+                            updateGuard();
+                            updateRemarksSummary();
+                            updateClientReceivers();
+                            loadingReport(false);
+                        }
                     }
                 });
                 return null;

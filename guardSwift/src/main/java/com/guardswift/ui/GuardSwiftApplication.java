@@ -148,11 +148,23 @@ public class GuardSwiftApplication extends InjectingApplication {
             }
         });
 
-        // Fixes android.os.FileUriExposedException
-        // https://stackoverflow.com/a/40674771/1501613
-        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        StrictMode.setVmPolicy(builder.build());
 
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+
+        if (BuildConfig.DEBUG) {
+            // Force crash with log for leaking db objects
+            // https://stackoverflow.com/a/28155638/1501613
+            StrictMode.setVmPolicy(builder
+                    .detectLeakedSqlLiteObjects()
+                    .detectLeakedClosableObjects()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
+        } else {
+            // Fixes android.os.FileUriExposedException
+            // https://stackoverflow.com/a/40674771/1501613
+            StrictMode.setVmPolicy(builder.build());
+        }
     }
 
 
@@ -491,7 +503,6 @@ public class GuardSwiftApplication extends InjectingApplication {
     }
 
     public void teardownParseObjectsLocally() {
-        // todo move last part of logout process here
         parseObjectsBootstrapped = false;
 
         if (retryBootstrapDialog != null) {
@@ -503,5 +514,7 @@ public class GuardSwiftApplication extends InjectingApplication {
             parseLiveQueryClient.disconnect();
             parseLiveQueryClient = null;
         }
+
+        ParseObject.unpinAllInBackground();
     }
 }
