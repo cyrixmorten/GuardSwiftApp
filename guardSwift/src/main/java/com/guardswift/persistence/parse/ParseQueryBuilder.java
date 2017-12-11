@@ -36,6 +36,7 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
 
 
 
+
     public ParseQueryBuilder<T> matchingObjectId(String objectId) {
         query.whereEqualTo("objectId", objectId);
         return this;
@@ -46,6 +47,13 @@ public abstract class ParseQueryBuilder<T extends ParseObject> {
         	query.whereContainedIn("objectId", Arrays.asList(objectIds));
         return this;
     }
+
+	public ParseQueryBuilder<T> createdAfter(ParseObject object) {
+		if (object != null) {
+			query.whereGreaterThan("createdAt", object.getCreatedAt());
+		}
+		return this;
+	}
 
     public ParseQueryBuilder<T> fromLocalDatastore() {
         query.fromLocalDatastore();

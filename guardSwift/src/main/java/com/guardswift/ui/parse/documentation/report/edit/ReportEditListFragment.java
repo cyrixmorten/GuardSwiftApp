@@ -58,14 +58,17 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     @Inject
     ParseTasksCache ParseTasksCache;
 
+    private ParseTask task;
+
     private FloatingActionButton fab;
     private boolean loading;
 
-    private String reportId;
     private MenuItem pdfMenu;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        task = ParseTasksCache.getLastSelected();
+
         setHasOptionsMenu(true);
         setRetainInstance(true);
 
@@ -88,9 +91,9 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         pdfMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                new DownloadReport(getContext()).execute(reportId, new DownloadReport.CompletedCallback() {
+                new DownloadReport(getContext()).execute(task, new DownloadReport.CompletedCallback() {
                     @Override
-                    public void done(File file, Error e) {
+                    public void done(File file, Exception e) {
                         GSIntents.openPDF(getContext(), file);
                     }
                 });
@@ -101,15 +104,14 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-
     @Override
     protected ParseQueryAdapter.QueryFactory<EventLog> createNetworkQueryFactory() {
-        reportId = (ParseTasksCache.getLastSelected() != null) ? ParseTasksCache.getLastSelected().getReportId() : "";
         return new ParseQueryAdapter.QueryFactory<EventLog>() {
             @Override
             public ParseQuery<EventLog> create() {
                 return new EventLogQueryBuilder(false)
-                        .matchingReportId(reportId)
+                        .matching(task)
+                        .matching(task.getTaskGroupStarted())
                         .orderByDescendingTimestamp()
                         .whereIsReportEntry()
                         .build();
@@ -157,7 +159,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
             EventLog eventLog = (EventLog) ev.getObject();
 
 
-            if (eventLog.getReportId().equals(this.reportId)) {
+            if (eventLog.getTask().equals(this.task)) {
                 getAdapter().addItem(eventLog);
                 setPDFMenuEnabled(true);
 

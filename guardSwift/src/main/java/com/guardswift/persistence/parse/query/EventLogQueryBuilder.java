@@ -6,6 +6,8 @@ import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
@@ -39,6 +41,21 @@ public class EventLogQueryBuilder extends
         return this;
     }
 
+    public EventLogQueryBuilder matching(ParseTask task) {
+        query.whereEqualTo(EventLog.task, task);
+
+        return this;
+    }
+
+    public EventLogQueryBuilder matching(TaskGroupStarted taskGroupStarted) {
+        if (taskGroupStarted == null) {
+            return this;
+        }
+
+        query.whereEqualTo(EventLog.taskGroupStarted, taskGroupStarted);
+
+        return this;
+    }
 
     public EventLogQueryBuilder eventCode(int eventCode) {
         query.whereEqualTo(EventLog.eventCode, eventCode);
@@ -99,17 +116,6 @@ public class EventLogQueryBuilder extends
 
         query.whereContainedIn(eventCode, reportEntryCodes);
 
-        return this;
-    }
-
-
-    public EventLogQueryBuilder matchingReportId(String reportId) {
-        query.whereEqualTo(EventLog.reportId, reportId);
-        return this;
-    }
-
-    public EventLogQueryBuilder notMatchingReportId(String reportId) {
-        query.whereNotEqualTo(EventLog.reportId, reportId);
         return this;
     }
 

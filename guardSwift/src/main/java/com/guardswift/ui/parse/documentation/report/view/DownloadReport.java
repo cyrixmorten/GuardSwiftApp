@@ -11,9 +11,10 @@ import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.documentation.report.Report;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.rest.GuardSwiftServer;
-import com.parse.GetCallback;
-import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,6 +23,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import bolts.Continuation;
+import bolts.Task;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,7 +38,7 @@ import retrofit2.Retrofit;
 public class DownloadReport {
 
     public interface CompletedCallback {
-        void done(File file, Error e);
+        void done(File file, Exception e);
     }
 
     private static String TAG = DownloadReport.class.getSimpleName();
@@ -66,13 +69,45 @@ public class DownloadReport {
         }
     }
 
-    public void execute(String reportId, final CompletedCallback callback) {
+    private Task<Report> findReportFromTask(final ParseTask parseTask) {
+
+        Task<ParseQuery<Report>> buildQueryTask;
+
+        if (parseTask.getTaskGroupStarted() != null) {
+            Log.e(TAG, "taskGroupStarted: " + parseTask.getTaskGroupStarted().isDataAvailable());
+            buildQueryTask = parseTask.getTaskGroupStarted().fetchIfNeededInBackground().continueWithTask(new Continuation<ParseObject, Task<ParseQuery<Report>>>() {
+                @Override
+                public Task<ParseQuery<Report>> then(Task<ParseObject> task) throws Exception {
+                    return Task.forResult(Report.getQueryBuilder(false).matching(parseTask.getClient()).createdAfter(task.getResult()).build());
+                }
+            });
+        } else {
+            buildQueryTask =  Task.forResult(Report.getQueryBuilder(false).matching(parseTask).build());
+        }
+
+        return buildQueryTask.continueWithTask(new Continuation<ParseQuery<Report>, Task<Report>>() {
+            @Override
+            public Task<Report> then(Task<ParseQuery<Report>> task) throws Exception {
+                return task.getResult().getFirstInBackground();
+            }
+        });
+    }
+
+    public void execute(ParseTask task, final CompletedCallback callback) {
         showDialog();
 
-        Report.getQueryBuilder(false).matching(reportId).build().getFirstInBackground(new GetCallback<Report>() {
+        findReportFromTask(task).continueWith(new Continuation<Report, Void>() {
             @Override
-            public void done(Report report, ParseException e) {
-                execute(report, callback);
+            public Void then(Task<Report> task) throws Exception {
+                if (task.isFaulted()) {
+                    new HandleException(TAG, "Error finding report from task", task.getError());
+
+                    callback.done(null, task.getError());
+                } else {
+                    execute(task.getResult(), callback);
+                }
+
+                return null;
             }
         });
     }
@@ -81,7 +116,7 @@ public class DownloadReport {
         showDialog();
 
         if (report == null) {
-            callback.done(null, new Error("Report is null"));
+            callback.done(null, new IllegalStateException("Report is null"));
             return;
         }
 
@@ -97,7 +132,7 @@ public class DownloadReport {
                 if (response.isSuccessful()) {
                     new DownloadFileAsyncTask(callback).execute(response.body().byteStream());
                 } else {
-                    callback.done(null, new Error("Error generating report"));
+                    callback.done(null, new IllegalStateException("Error generating report"));
                 }
 
                 dismissDialog();
@@ -106,7 +141,7 @@ public class DownloadReport {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 new HandleException("Report PDF", "Error generating PDF", t);
-                callback.done(null, new Error("Error connecting to server"));
+                callback.done(null, new IllegalStateException("Error connecting to server"));
 
                 dismissDialog();
             }

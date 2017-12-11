@@ -262,7 +262,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
 
     private void updateRemarksSummary() {
         Log.w(TAG, "updateRemarksSummary");
-        EventLog.getQueryBuilder(true).matchingReportId(taskCache.getSelected().getReportId()).whereIsReportEntry().orderByAscendingTimestamp().build().findInBackground(new FindCallback<EventLog>() {
+        EventLog.getQueryBuilder(true).matching(taskCache.getSelected()).whereIsReportEntry().orderByAscendingTimestamp().build().findInBackground(new FindCallback<EventLog>() {
             @Override
             public void done(final List<EventLog> objects, ParseException e) {
                 if (!objects.isEmpty() && getActivity() != null) {

@@ -341,7 +341,6 @@ public class EventLog extends ExtendedParseObject {
 
     // task
     public static final String taskId = "taskId";
-    public static final String reportId = "reportId";
     public static final String taskType = "taskType";
     public static final String taskTypeName = "taskTypeName";
     public static final String taskTypeCode = "taskTypeCode";
@@ -570,9 +569,9 @@ public class EventLog extends ExtendedParseObject {
         return null;
     }
 
-    public String getReportId() {
-        return getStringSafe(EventLog.reportId);
-    }
+//    public String getReportId() {
+//        return getStringSafe(EventLog.reportId);
+//    }
 
     @Override
     public int compareTo(@NonNull ExtendedParseObject another) {

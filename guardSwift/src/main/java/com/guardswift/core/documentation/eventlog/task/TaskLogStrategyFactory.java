@@ -10,7 +10,7 @@ public class TaskLogStrategyFactory implements LogTaskFactory {
     private List<LogTaskStrategy> logStrategies = Lists.newArrayList();
 
     public TaskLogStrategyFactory() {
-        logStrategies.add(new TaskReportIdLogStrategy());
+//        logStrategies.add(new TaskReportIdLogStrategy());
         logStrategies.add(new TaskLogStrategy());
         logStrategies.add(new TaskTypeLogStrategy());
         logStrategies.add(new TaskTypeDescLogStrategy());

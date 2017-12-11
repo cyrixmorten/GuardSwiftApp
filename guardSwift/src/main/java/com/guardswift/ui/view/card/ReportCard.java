@@ -175,7 +175,7 @@ public class ReportCard extends LinearLayout {
             public void onClick(View v) {
                 new DownloadReport(getContext()).execute(report, new DownloadReport.CompletedCallback() {
                     @Override
-                    public void done(File file, Error e) {
+                    public void done(File file, Exception e) {
                         GSIntents.openPDF(getContext(), file);
                     }
                 });

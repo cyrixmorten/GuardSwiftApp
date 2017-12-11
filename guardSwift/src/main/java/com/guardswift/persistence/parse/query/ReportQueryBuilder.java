@@ -27,15 +27,14 @@ public class ReportQueryBuilder extends
         return this;
     }
 
-    public ReportQueryBuilder matching(String reportId) {
-        query.whereEqualTo(Report.reportId, reportId);
+
+    public ReportQueryBuilder matching(ParseTask task) {
+
+        query.whereEqualTo(Report.tasks, task);
+
         return this;
     }
 
-    public ReportQueryBuilder matching(ParseTask task) {
-        query.whereEqualTo(Report.reportId, task.getReportId());
-        return this;
-    }
 
     public ReportQueryBuilder matching(Client client) {
         query.whereEqualTo(EventLog.client, client);

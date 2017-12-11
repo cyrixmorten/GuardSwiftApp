@@ -270,13 +270,13 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return has(ParseTask.type) ? getString(ParseTask.type) : "";
     }
 
-    public String getReportId() {
-        String groupId = "";
-        if (has(ParseTask.taskGroupStarted)) {
-            groupId = getParseObject(ParseTask.taskGroupStarted).getObjectId() + "-";
-        }
-        return groupId + getObjectId();
-    }
+//    public String getReportId() {
+//        String groupId = this.getObjectId();
+//        if (has(ParseTask.client) && has(ParseTask.taskGroupStarted)) {
+//            groupId = getTaskGroupStarted().getObjectId() + "-" + getClient().getObjectId();
+//        }
+//        return groupId;
+//    }
 
 
     public ExtendedParseObject getParseObject() {
