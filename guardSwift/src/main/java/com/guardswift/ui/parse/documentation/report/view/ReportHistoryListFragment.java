@@ -44,11 +44,11 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
         return new ParseQueryAdapter.QueryFactory<Report>() {
             @Override
             public ParseQuery<Report> create() {
-                ParseTask.TASK_TYPE taskType = (ParseTask.TASK_TYPE) getArguments().getSerializable("taskType");
+//                ParseTask.TASK_TYPE taskType = (ParseTask.TASK_TYPE) getArguments().getSerializable("taskType");
                 return new ReportQueryBuilder(false)
                         .include(Report.eventLogs)
                         .matching(clientCache.getSelected())
-                        .matching(taskType)
+//                        .matching(taskType)
                         .build()
                         .setLimit(10)
                         .addDescendingOrder("createdAt");
