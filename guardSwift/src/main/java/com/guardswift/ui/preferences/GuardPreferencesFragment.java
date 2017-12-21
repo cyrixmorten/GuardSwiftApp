@@ -85,7 +85,7 @@ public class GuardPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private void saveChange() {
-        guard.pinThenSaveEventually(new SaveCallback() {
+        guard.saveEventuallyAndNotify(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 GuardSwiftApplication.saveCurrentGuardAsLastActive();

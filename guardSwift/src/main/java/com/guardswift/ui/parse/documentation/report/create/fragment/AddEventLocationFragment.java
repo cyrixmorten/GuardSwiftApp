@@ -251,7 +251,7 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
         }
 
 
-        mClient.pinThenSaveEventually(new SaveCallback() {
+        mClient.saveEventuallyAndNotify(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if (e != null) {

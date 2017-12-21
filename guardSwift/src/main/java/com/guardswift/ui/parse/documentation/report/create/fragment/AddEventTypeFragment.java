@@ -184,7 +184,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
         }
 
         eventType.increment(EventType.timesUsed);
-        eventType.pinThenSaveEventually();
+        eventType.saveEventually();
 
         eventTypeCache.setSelected(eventType);
 

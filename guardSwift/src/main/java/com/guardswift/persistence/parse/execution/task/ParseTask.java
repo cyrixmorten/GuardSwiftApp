@@ -600,7 +600,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         task.setTaskType(TASK_TYPE.STATIC);
         task.setDefaultOwner();
         task.setClient(client);
-        task.pinThenSaveEventually(null, new SaveCallback() {
+        task.saveEventuallyAndNotify(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 getCallback.done(task, e);

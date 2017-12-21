@@ -4,15 +4,12 @@ import android.content.Context;
 
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.eventbus.EventBusController;
 import com.guardswift.fabric.TrackEvent;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
-import com.parse.ParseException;
-import com.parse.SaveCallback;
 
 public class RaidController extends BaseTaskController {
 
@@ -89,16 +86,7 @@ public class RaidController extends BaseTaskController {
         }
 
 
-        if (task.isDirty()) {
-            task.pinThenSaveEventually((new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (automatic) {
-                        EventBusController.postUIUpdate(task);
-                    }
-                }
-            }));
-        }
+        task.saveEventuallyAndNotify();
 
         if (event != null) {
             event.saveAsync();

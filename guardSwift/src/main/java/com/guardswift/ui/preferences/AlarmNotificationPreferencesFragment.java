@@ -227,7 +227,7 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
                             guard.enableAlarmNotification(enable);
                             guard.enableAlarmSound(enable);
                             guard.enableAlarmSMS(enable);
-                            guard.pinThenSaveEventually();
+                            guard.saveEventuallyAndNotify();
 
                             guardNotification.setChecked(enable);
 

@@ -95,7 +95,7 @@ public class TaskGroupStarted extends ExtendedParseObject{
     public void incrementExtras() {
         put(hasExtras, true);
         increment(extrasCount);
-        pinThenSaveEventually();
+        saveEventually();
     }
 
     // public List<DistrictWatch> getDistrictWatches() {

@@ -250,12 +250,12 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
                         if (!editTextString.isEmpty()) {
                             if (editMode) {
                                 editMessage.setMessage(editTextString);
-                                editMessage.pinThenSaveEventually();
+                                editMessage.saveEventually();
 
                                 messagesDrawer.updateItem(drawerItem.withDescription(editTextString));
                             } else {
                                 Message message = Message.newInstance(getGroupId(), editTextString);
-                                message.pinThenSaveEventually();
+                                message.saveEventually();
 
                                 messagesDrawer.addItemAtPosition(createMessageItem(message), 0);
                                 messagesDrawer.closeDrawer();
