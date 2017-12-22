@@ -42,7 +42,7 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
             // task is locked for arrivals
             return;
         }
-        if (task.isWithinScheduledTime()) {
+        if (task.isWithinScheduledTime() && task.matchesSelectedTaskGroupStarted(true)) {
             Context context = GuardSwiftApplication.getInstance();
             TaskController controller = task.getController();
             if (controller.canPerformAutomaticAction(TaskController.ACTION.ARRIVE, task)) {

@@ -245,6 +245,11 @@ public class EventLog extends ExtendedParseObject {
 
             Log.e(TAG, "Save event " + eventLog.getEvent());
 
+            // Todo: remove pinnedCallback
+            if (pinnedCallback != null) {
+                pinnedCallback.done(eventLog, null);
+            }
+
             Log.w(TAG, "3) Save event");
             eventLog.saveEventuallyAndNotify(new SaveCallback() {
                 @Override
@@ -258,10 +263,6 @@ public class EventLog extends ExtendedParseObject {
                     Log.w(TAG, "5) Save event - saved");
 
                     updateGuardInfo();
-
-                    if (pinnedCallback != null) {
-                        pinnedCallback.done(eventLog, e);
-                    }
 
                     if (savedCallback != null) {
                         savedCallback.done(eventLog, e);

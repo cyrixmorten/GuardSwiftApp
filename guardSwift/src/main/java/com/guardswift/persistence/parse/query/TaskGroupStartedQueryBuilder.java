@@ -44,4 +44,9 @@ public class TaskGroupStartedQueryBuilder extends ParseQueryBuilder<TaskGroupSta
         query.whereEqualTo(TaskGroupStarted.taskGroup, taskGroup);
         return this;
     }
+
+    public TaskGroupStartedQueryBuilder matchingName(String name) {
+        query.whereEqualTo(TaskGroupStarted.name, name);
+        return this;
+    }
 }

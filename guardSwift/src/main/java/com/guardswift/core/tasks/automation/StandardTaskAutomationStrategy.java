@@ -28,8 +28,10 @@ public class StandardTaskAutomationStrategy implements TaskAutomationStrategy {
     @Override
     public void automaticArrival() {
         Context context = GuardSwiftApplication.getInstance();
+
+
         TaskController controller = task.getController();
-        if (task.isWithinScheduledTime()) {
+        if (task.isWithinScheduledTime() && task.matchesSelectedTaskGroupStarted(true)) {
             if (controller.canPerformAutomaticAction(TaskController.ACTION.ARRIVE, task)) {
                 Log.w(TAG, "automaticArrival " + task.getTaskType() + " " + task.getClientName());
                 Sounds.getInstance(context).playNotification(R.raw.arrived);

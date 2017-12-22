@@ -26,7 +26,6 @@ import bolts.TaskCompletionSource;
 public abstract class ExtendedParseObject extends ParseObject implements Comparable<ExtendedParseObject> {
 
 
-    public static final String NEW_OBJECT_PIN = "NEW_OBJECT_PIN";
 
     // TODO get rid of this and use bolts Tasks instead
     public interface DataStoreCallback<T extends ParseObject> {

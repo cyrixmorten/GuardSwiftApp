@@ -11,6 +11,7 @@ import com.guardswift.R;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.eventbus.EventBusController;
+import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -69,38 +70,36 @@ public class MainActivity extends InjectingAppCompatActivity {
 
 
         if (!shouldRedirectToOtherActivity()) {
-
-            // bootstrap parseObjects if it has not been done during this session
-
-//            if (!BuildConfig.DEBUG) {
-                GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn());
-//            } else {
-//                GuardSwiftApplication.getInstance().startServices();
-//            }
-
-
-            mainDrawerCallback = new ToolbarFragmentDrawerCallback(this, toolbar, R.id.content);
-            mainDrawerCallback.setActionCallback(new ToolbarFragmentDrawerCallback.SelectActionCallback() {
-                public void selectAction(long action) {
-                    if (action == MainNavigationDrawer.DRAWER_LOGOUT) {
-                        showLogoutDialog();
-                    }
-                }
-            });
-
-            Drawer drawer = navigationDrawer.initNavigationDrawer(this, toolbar, mainDrawerCallback);
-
-            messagesDrawer = new DrawerBuilder()
-                    .withActivity(this)
-                    .withDrawerGravity(Gravity.END)
-                    .withCloseOnClick(false)
-                    .append(drawer);
-
+            GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn());
+            initDrawer();
             setSelectionFromIntent();
-
         }
 
     }
+
+    public void onEventMainThread(BootstrapCompleted ev) {
+        initDrawer();
+    }
+
+    public void initDrawer() {
+        mainDrawerCallback = new ToolbarFragmentDrawerCallback(this, toolbar, R.id.content);
+        mainDrawerCallback.setActionCallback(new ToolbarFragmentDrawerCallback.SelectActionCallback() {
+            public void selectAction(long action) {
+                if (action == MainNavigationDrawer.DRAWER_LOGOUT) {
+                    showLogoutDialog();
+                }
+            }
+        });
+
+        Drawer drawer = navigationDrawer.initNavigationDrawer(this, toolbar, mainDrawerCallback);
+
+        messagesDrawer = new DrawerBuilder()
+                .withActivity(this)
+                .withDrawerGravity(Gravity.END)
+                .withCloseOnClick(false)
+                .append(drawer);
+    }
+
 
 
 
@@ -244,6 +243,10 @@ public class MainActivity extends InjectingAppCompatActivity {
 
     public Drawer getDrawer() {
         return navigationDrawer.getDrawer();
+    }
+
+    public MainNavigationDrawer getNavigationDrawer() {
+        return navigationDrawer;
     }
 
     public Drawer getMessagesDrawer() {

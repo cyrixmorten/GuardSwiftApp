@@ -448,4 +448,5 @@
     <string name="nfc_disabled">NFC ikke aktiv</string>
     <string name="nfc_enable_description">NFC er nødvendig for at kunne registrere indendørs tags.\n\nVed at klikke OK vil du blive taget til trådløse indstillinger hvor NFC kan blive slået til.</string>
     <string name="title_rfid">RFID</string>
+    <string name="new_taskgroup_available">Ny kreds tilgængelig\n\nAlle kredse nulstilles en gang i døgnet og det ser ud til at denne kreds er blevet nulstillet siden sidst du loggede på systemet\n\nTryk OK for at skifte til den seneste kreds</string>
 </resources>

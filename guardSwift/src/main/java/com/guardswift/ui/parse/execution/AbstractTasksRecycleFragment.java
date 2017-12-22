@@ -19,6 +19,7 @@ public abstract class AbstractTasksRecycleFragment extends AbstractParseRecycler
     public abstract ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory();
 
     public AbstractTasksRecycleFragment() {
+        super(true);
     }
 
     @Override

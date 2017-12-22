@@ -38,6 +38,10 @@ public class TrackerListFragment extends AbstractParseRecyclerFragment<Tracker, 
         return fragment;
     }
 
+    public TrackerListFragment() {
+        super(false);
+    }
+
     private Date fromDate = new Date();
 
     @Override

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.guardswift.BuildConfig;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.tasks.activity.ArriveWhenNotInVehicleStrategy;
 import com.guardswift.core.tasks.activity.NoActivityStrategy;
@@ -23,6 +24,7 @@ import com.guardswift.core.tasks.geofence.NoGeofenceStrategy;
 import com.guardswift.core.tasks.geofence.RaidGeofenceStrategy;
 import com.guardswift.core.tasks.geofence.RegularGeofenceStrategy;
 import com.guardswift.core.tasks.geofence.TaskGeofenceStrategy;
+import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.persistence.cache.task.BaseTaskCache;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
@@ -57,6 +59,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public static final int DEFAULT_RADIUS_RAID = 50;
     public static final int DEFAULT_RADIUS_REGULAR = 100;
     public static final int DEFAULT_RADIUS_ALARM = 100;
+
 
     public enum TASK_TYPE {REGULAR, RAID, STATIC, ALARM}
     public enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINISHED}
@@ -241,7 +244,9 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     private void setStatus(String status) {
 
         // prevent abort notification to be broadcast by server
-        addKnownStatus(status);
+        if (status.equals(STATUS.ABORTED)) {
+            addKnownStatus(status);
+        }
 
         put(ParseTask.status, status);
     }
@@ -454,7 +459,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public boolean isWithinScheduledTime() {
-        if (isRegularTask() || isRaidTask()) {
+        if (isRegularTask() || isRaidTask() && !BuildConfig.DEBUG) {
             DateTime timeStartOrg = new DateTime(getTimeStart());
             DateTime timeEndOrg = new DateTime(getTimeEnd());
 
@@ -660,5 +665,19 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
                 return Task.forResult(report);
             }
         });
+    }
+
+    public boolean matchesSelectedTaskGroupStarted(boolean defaultTo) {
+        TaskGroupStartedCache taskGroupStartedCache = GuardSwiftApplication.getInstance().getCacheFactory().getTaskGroupStartedCache();
+
+        if (taskGroupStartedCache.getSelected() != null) {
+            if (getTaskGroupStarted() != null) {
+                boolean isMatch =  getTaskGroupStarted().equals(taskGroupStartedCache.getSelected());
+                Log.d(TAG, "isMatch: " + isMatch);
+                return isMatch;
+            }
+        }
+
+        return defaultTo;
     }
 }

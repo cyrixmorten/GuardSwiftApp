@@ -43,7 +43,7 @@ public class ActiveRegularTasksFragment extends AbstractTasksRecycleFragment {
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
 
-        Log.d(TAG, "circuitStartedCache.getSelected()" + circuitStartedCache.getSelected().getObjectId());
+        Log.d(TAG, "taskGroupStartedCache.getSelected()" + circuitStartedCache.getSelected().getObjectId());
 
         return new ParseQueryAdapter.QueryFactory<ParseTask>() {
 
@@ -75,6 +75,8 @@ public class ActiveRegularTasksFragment extends AbstractTasksRecycleFragment {
 
                 return false;
             }
+
+            return true;
         }
         return super.isRelevantUIEvent(ev);
     }

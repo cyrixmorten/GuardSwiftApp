@@ -35,6 +35,10 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
         return fragment;
     }
 
+    public ClientListFragment() {
+        super(false);
+    }
+
 
     private OnClientSelectedListener onClientSelectedListener;
 

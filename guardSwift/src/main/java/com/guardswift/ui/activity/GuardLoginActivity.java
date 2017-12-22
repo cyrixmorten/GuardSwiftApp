@@ -166,8 +166,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
             ignoreBatteryOptimizations();
         }
 
-        // TODO Remove this line again after 5.0.4
-        GuardSwiftApplication.getInstance().teardownParseObjectsLocally();
     }
 
     private void ignoreBatteryOptimizations() {

@@ -55,6 +55,10 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         return fragment;
     }
 
+    public ReportEditListFragment() {
+        super(false);
+    }
+
     @Inject
     ParseTasksCache ParseTasksCache;
 

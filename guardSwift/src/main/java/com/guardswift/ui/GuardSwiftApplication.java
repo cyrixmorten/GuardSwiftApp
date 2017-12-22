@@ -82,7 +82,6 @@ import io.fabric.sdk.android.Fabric;
 import rx.plugins.RxJavaErrorHandler;
 import rx.plugins.RxJavaPlugins;
 
-import static com.guardswift.persistence.parse.ExtendedParseObject.NEW_OBJECT_PIN;
 
 public class GuardSwiftApplication extends InjectingApplication {
 
@@ -504,7 +503,7 @@ public class GuardSwiftApplication extends InjectingApplication {
                 });
     }
 
-    public void teardownParseObjectsLocally() {
+    public void teardownParseObjectsLocally(boolean unpinParseObjects) {
         parseObjectsBootstrapped = false;
 
         if (retryBootstrapDialog != null) {
@@ -517,7 +516,8 @@ public class GuardSwiftApplication extends InjectingApplication {
             parseLiveQueryClient = null;
         }
 
-        ParseObject.unpinAllInBackground(NEW_OBJECT_PIN);
-        ParseObject.unpinAllInBackground();
+        if (unpinParseObjects) {
+            ParseObject.unpinAllInBackground();
+        }
     }
 }

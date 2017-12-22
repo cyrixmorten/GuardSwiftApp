@@ -209,7 +209,7 @@ public class ParseModule {
         GuardSwiftApplication.getInstance().stopServices();
 
 
-        GuardSwiftApplication.getInstance().teardownParseObjectsLocally();
+        GuardSwiftApplication.getInstance().teardownParseObjectsLocally(true);
     }
 
 

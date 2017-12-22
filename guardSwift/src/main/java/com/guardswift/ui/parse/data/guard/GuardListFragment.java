@@ -20,6 +20,9 @@ public class GuardListFragment extends AbstractParseRecyclerFragment<Guard, Guar
         return fragment;
     }
 
+    public GuardListFragment() {
+        super(false);
+    }
 
 
     @Override
