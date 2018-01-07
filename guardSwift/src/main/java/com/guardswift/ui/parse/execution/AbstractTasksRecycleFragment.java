@@ -19,7 +19,6 @@ public abstract class AbstractTasksRecycleFragment extends AbstractParseRecycler
     public abstract ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory();
 
     public AbstractTasksRecycleFragment() {
-        super(true);
     }
 
     @Override
@@ -42,6 +41,26 @@ public abstract class AbstractTasksRecycleFragment extends AbstractParseRecycler
 
         if (obj instanceof EventBusController.ForceUIUpdate) {
             isRelevant = true;
+        }
+
+        if (obj instanceof ParseTask) {
+            ParseTask task = (ParseTask) obj;
+
+            switch (ev.getAction()) {
+                case CREATE: {
+                    getAdapter().addItem(task);
+                    break;
+                }
+                case UPDATE: {
+                    getAdapter().updateItem(task);
+                    break;
+                }
+                case DELETE: {
+                    getAdapter().removeItem(task);
+                    break;
+                }
+            }
+            return false;
         }
 
         Log.d(TAG, "Abstract isRelevantUIEvent " + isRelevant);

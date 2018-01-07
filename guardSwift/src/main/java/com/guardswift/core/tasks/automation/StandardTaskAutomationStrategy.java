@@ -31,7 +31,7 @@ public class StandardTaskAutomationStrategy implements TaskAutomationStrategy {
 
 
         TaskController controller = task.getController();
-        if (task.isWithinScheduledTime() && task.matchesSelectedTaskGroupStarted(true)) {
+        if (task.isWithinScheduledTime() && task.matchesSelectedTaskGroupStarted()) {
             if (controller.canPerformAutomaticAction(TaskController.ACTION.ARRIVE, task)) {
                 Log.w(TAG, "automaticArrival " + task.getTaskType() + " " + task.getClientName());
                 Sounds.getInstance(context).playNotification(R.raw.arrived);

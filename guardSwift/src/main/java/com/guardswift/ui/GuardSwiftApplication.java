@@ -44,9 +44,6 @@ import com.guardswift.persistence.parse.execution.task.TaskGroup;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.misc.Message;
 import com.guardswift.persistence.parse.misc.Update;
-import com.guardswift.persistence.parse.query.AlarmTaskQueryBuilder;
-import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
-import com.guardswift.persistence.parse.query.StaticTaskQueryBuilder;
 import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.ToastHelper;
@@ -413,25 +410,25 @@ public class GuardSwiftApplication extends InjectingApplication {
         updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(eventType, eventType.getAllNetworkQuery()));
 
         Client client = new Client();
-        updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(client, client.getAllNetworkQuery()));
+//        updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(client, client.getAllNetworkQuery()));
 
-        updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(guard, guard.getAllNetworkQuery()));
+//        updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(guard, guard.getAllNetworkQuery()));
 
         ParseTask task = new ParseTask();
         TaskGroupStarted taskGroupStarted = new TaskGroupStarted();
         Message message = new Message();
 
         if (guard.canAccessRegularTasks()) {
-            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new RegularRaidTaskQueryBuilder(false).build()));
+//            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new RegularRaidTaskQueryBuilder(false).build()));
             updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(taskGroupStarted, new TaskGroupStartedQueryBuilder(false).whereActive().build()));
-            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(message, message.getAllNetworkQuery()));
+//            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(message, message.getAllNetworkQuery()));
         }
-        if (guard.canAccessStaticTasks()) {
-            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new AlarmTaskQueryBuilder(false).build()));
-        }
-        if (guard.canAccessAlarms()) {
-            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new StaticTaskQueryBuilder(false).build()));
-        }
+//        if (guard.canAccessAlarms()) {
+//            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new AlarmTaskQueryBuilder(false).build()));
+//        }
+//        if (guard.canAccessStaticTasks()) {
+//            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new StaticTaskQueryBuilder(false).build()));
+//        }
 
         updateClassTotal.set(updateQueries.size());
 

@@ -22,7 +22,6 @@ import com.guardswift.ui.activity.SlidingPanelActivity;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.guardswift.ui.parse.execution.TaskRecycleAdapter;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
-import com.parse.ParseObject;
 import com.parse.ParseQueryAdapter;
 
 import java.util.List;
@@ -66,14 +65,9 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
     protected abstract boolean isRelevantUIEvent(UpdateUIEvent ev);
 
     private boolean mLoading = false;
-    private boolean mPinObjects = false;
 
     private ParseRecyclerQueryAdapter<T, U> mAdapter;
 
-
-    public AbstractParseRecyclerFragment(boolean pinObjects) {
-        mPinObjects = pinObjects;
-    }
 
 
     @BindView(R.id.list)
@@ -222,10 +216,6 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
 
             if (mRecycleView.getAdapter() == null) {
                 mRecycleView.swapAdapter(mAdapter, true);
-            }
-
-            if (mPinObjects) {
-                ParseObject.pinAllInBackground(objects);
             }
 
 

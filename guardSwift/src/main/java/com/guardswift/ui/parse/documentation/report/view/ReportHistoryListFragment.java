@@ -24,7 +24,6 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
     }
 
     public ReportHistoryListFragment() {
-        super(false);
     }
 
     public static ReportHistoryListFragment newInstance(Client client, ParseTask.TASK_TYPE task_type) {

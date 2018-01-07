@@ -160,7 +160,7 @@ public class RaidGeofenceStrategy extends BaseGeofenceStrategy {
     @Override
     public void queryGeofencedTasks(final int radiusKm, Location fromLocation, final FindCallback<ParseTask> callback) {
         if (fromLocation != null) {
-            new RegularRaidTaskQueryBuilder(true)
+            new RegularRaidTaskQueryBuilder(false)
                     .isRunToday()
                     .within(radiusKm, fromLocation)
                     .isRaid(true)

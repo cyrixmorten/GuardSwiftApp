@@ -40,9 +40,10 @@ public class RegularRaidTaskQueryBuilder extends ParseQueryBuilder<ParseTask> {
         query.include(ParseTask.client + "." + Client.contacts);
         query.include(ParseTask.client + "." + Client.roomLocations);
         query.include(ParseTask.client + "." + Client.people);
+        query.whereExists(ParseTask.client);
         query.setLimit(1000);
 
-        query.whereExists(ParseTask.client);
+
 
         return super.build();
     }

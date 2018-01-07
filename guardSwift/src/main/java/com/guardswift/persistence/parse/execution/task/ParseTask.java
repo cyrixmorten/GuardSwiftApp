@@ -667,7 +667,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         });
     }
 
-    public boolean matchesSelectedTaskGroupStarted(boolean defaultTo) {
+    public boolean matchesSelectedTaskGroupStarted() {
         TaskGroupStartedCache taskGroupStartedCache = GuardSwiftApplication.getInstance().getCacheFactory().getTaskGroupStartedCache();
 
         if (taskGroupStartedCache.getSelected() != null) {
@@ -678,6 +678,6 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
             }
         }
 
-        return defaultTo;
+        return false;
     }
 }

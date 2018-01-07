@@ -221,6 +221,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
     }
 
     public void addItem(T object) {
+        Log.e(TAG, "addItem");
         int existingIndex = indexOf(object);
 
         if (existingIndex == -1) {
@@ -231,6 +232,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
     }
 
     public void removeItem(T object) {
+        Log.e(TAG, "removeItem");
         int existingIndex = indexOf(object);
 
         if (existingIndex != -1) {
@@ -239,7 +241,8 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
         }
     }
 
-    private void updateItem(T object) {
+    public void updateItem(T object) {
+        Log.e(TAG, "updateItem");
         int existingIndex = indexOf(object);
 
         if (existingIndex != -1) {

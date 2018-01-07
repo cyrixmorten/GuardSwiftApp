@@ -207,22 +207,22 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         }
 
-        public void abort(final Context context, final ParseTask task) {
-            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_aborted, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
-                @Override
-                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                    AlarmTaskViewHolder.super.onActionAbort(context, task);
-                }
-            }).show();
-        }
+//        public void abort(final Context context, final ParseTask task) {
+//            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_aborted, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
+//                @Override
+//                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+//                    AlarmTaskViewHolder.super.onActionAbort(context, task);
+//                }
+//            }).show();
+//        }
 
         @Override
         public void onActionFinish(final Context context, final ParseTask task) {
 
-            if (task.isAccepted()) {
-                abort(context, task);
-                return;
-            }
+//            if (task.isAccepted()) {
+//                abort(context, task);
+//                return;
+//            }
 
             // arrived
             new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_finished), new MaterialDialog.SingleButtonCallback() {
@@ -300,9 +300,9 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                     vBtnFinished.setVisibility(View.GONE);
                 }
 
-                if (task.isAccepted()) {
-                    vBtnFinished.setText(context.getString(R.string.onActionAbort));
-                }
+//                if (task.isAccepted()) {
+//                    vBtnFinished.setText(context.getString(R.string.onActionAbort));
+//                }
 
                 if (task.isAborted() || task.isFinished()) {
                     vBtnArrived.setVisibility(View.GONE);

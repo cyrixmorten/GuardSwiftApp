@@ -39,7 +39,6 @@ public class TrackerListFragment extends AbstractParseRecyclerFragment<Tracker, 
     }
 
     public TrackerListFragment() {
-        super(false);
     }
 
     private Date fromDate = new Date();

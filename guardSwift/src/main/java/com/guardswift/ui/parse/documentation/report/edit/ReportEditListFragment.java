@@ -56,7 +56,6 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     }
 
     public ReportEditListFragment() {
-        super(false);
     }
 
     @Inject
@@ -148,7 +147,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
     private void setPDFMenuEnabled(boolean enabled) {
         if (pdfMenu != null) {
-            pdfMenu.setEnabled(true);
+            pdfMenu.setEnabled(enabled);
         }
     }
 
@@ -157,14 +156,25 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         boolean isEventLog = ev.getObject() instanceof EventLog;
 
 
-        if (isEventLog && ev.getAction() == UpdateUIEvent.ACTION.CREATE) {
+        if (isEventLog) {
             EventLog eventLog = (EventLog) ev.getObject();
 
-
             if (eventLog.getReportId().equals(this.reportId)) {
-                getAdapter().addItem(eventLog);
-                setPDFMenuEnabled(true);
-
+                switch (ev.getAction()) {
+                    case CREATE: {
+                        getAdapter().addItem(eventLog);
+                        setPDFMenuEnabled(true);
+                        break;
+                    }
+                    case UPDATE: {
+                        getAdapter().updateItem(eventLog);
+                        break;
+                    }
+                    case DELETE: {
+                        getAdapter().removeItem(eventLog);
+                        break;
+                    }
+                }
                 return false;
             }
         }

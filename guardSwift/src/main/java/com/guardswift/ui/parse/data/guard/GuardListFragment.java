@@ -21,7 +21,6 @@ public class GuardListFragment extends AbstractParseRecyclerFragment<Guard, Guar
     }
 
     public GuardListFragment() {
-        super(false);
     }
 
 

@@ -36,7 +36,6 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
     }
 
     public ClientListFragment() {
-        super(false);
     }
 
 
