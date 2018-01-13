@@ -1,5 +1,7 @@
 package com.guardswift.core.exceptions;
 
+import android.util.Log;
+
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Device;
 import com.parse.ParseInstallation;
@@ -9,11 +11,16 @@ import com.parse.ParseUser;
 
 public class LogError {
 
+    private static String TAG = LogError.class.getSimpleName();
+
     public static void log(String tag, String message) {
         log(tag, message, null);
     }
 
     public static void log(String tag, String message, Throwable exception) {
+
+        Log.e(TAG, message, exception);
+
         ParseUser user = ParseUser.getCurrentUser();
 
         if (user != null) {
