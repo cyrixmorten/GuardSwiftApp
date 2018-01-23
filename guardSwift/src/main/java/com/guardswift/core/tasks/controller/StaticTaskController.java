@@ -81,7 +81,7 @@ public class StaticTaskController extends BaseTaskController {
         }
 
 
-        task.pinThenSaveEventually();
+        task.saveEventuallyAndNotify();
 
         if (event != null) {
             event.saveAsync();

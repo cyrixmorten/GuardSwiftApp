@@ -5,13 +5,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
-import android.util.Log;
 
+import com.guardswift.core.exceptions.LogError;
 import com.guardswift.ui.GuardSwiftApplication;
 
 import java.io.File;
 
 public class UpdateApp extends AsyncTask<File,Void,Void> {
+
+    private static String TAG = UpdateApp.class.getSimpleName();
 
     private Context context;
 
@@ -43,7 +45,7 @@ public class UpdateApp extends AsyncTask<File,Void,Void> {
 
 
         } catch (Exception e) {
-            Log.e("UpdateAPP", "Update error! " + e.getMessage());
+            LogError.log(TAG, "Update app apk", e);
         }
         return null;
     }

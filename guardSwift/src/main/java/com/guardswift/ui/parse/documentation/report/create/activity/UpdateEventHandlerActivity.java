@@ -280,7 +280,7 @@ public class UpdateEventHandlerActivity extends InjectingAppCompatActivity imple
                     break;
             }
 
-            eventLog.pinThenSaveEventually();
+            eventLog.saveEventuallyAndNotify();
         }
         setResult(resultCode, getIntent().putExtra(EXTRA_EVENT_BUNDLE, eventBundle));
         finish();

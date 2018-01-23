@@ -58,7 +58,7 @@ public class AlarmGeofenceStrategy extends BaseGeofenceStrategy {
     @Override
     public void queryGeofencedTasks(final int withinKm, Location fromLocation, final FindCallback<ParseTask> callback) {
         if (fromLocation != null) {
-            new AlarmTaskQueryBuilder(true)
+            new AlarmTaskQueryBuilder(false)
                     .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ACCEPTED, ParseTask.STATUS.ARRIVED)
                     .within(withinKm, fromLocation)
                     .build()

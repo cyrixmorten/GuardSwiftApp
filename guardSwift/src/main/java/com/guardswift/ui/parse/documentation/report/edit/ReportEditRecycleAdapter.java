@@ -135,7 +135,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
                                         // update card
                                         eventLogCard.setEventLog(eventLog);
                                         // save online
-                                        eventLog.pinThenSaveEventually();
+                                        eventLog.saveEventuallyAndNotify();
                                     }
                                 })
                         .show();
@@ -176,7 +176,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
                                                            if (eventLog.isArrivalEvent() && eventLog.getTask() != null) {
                                                                ParseTask task = eventLog.getTask();
                                                                task.deleteArrival();
-                                                               task.saveEventually();
+                                                               task.saveEventuallyAndNotify();
                                                            }
 
                                                            eventLog.deleteEventually();
@@ -208,7 +208,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
                                                                       // update card
                                                                       eventLogCard.setEventLog(eventLog);
                                                                       // update online
-                                                                      eventLog.pinThenSaveEventually();
+                                                                      eventLog.saveEventuallyAndNotify();
                                                                   }
                                                               })
                                                               .setThemeDark()

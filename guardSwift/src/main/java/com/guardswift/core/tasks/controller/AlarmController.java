@@ -114,7 +114,7 @@ public class AlarmController extends BaseTaskController {
         }
 
 
-        alarm.pinThenSaveEventually();
+        alarm.saveEventuallyAndNotify();
 
         if (event != null) {
             event.saveAsync();

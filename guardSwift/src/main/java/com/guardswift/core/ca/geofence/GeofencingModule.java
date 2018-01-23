@@ -6,11 +6,13 @@ import com.google.android.gms.location.DetectedActivity;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.exceptions.LogError;
 import com.guardswift.core.tasks.geofence.AlarmGeofenceStrategy;
 import com.guardswift.core.tasks.geofence.RaidGeofenceStrategy;
 import com.guardswift.core.tasks.geofence.RegularGeofenceStrategy;
 import com.guardswift.core.tasks.geofence.TaskGeofenceStrategy;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
+import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.query.TaskQueryBuilder;
 import com.parse.ParseException;
@@ -29,6 +31,8 @@ import bolts.TaskCompletionSource;
 public class GeofencingModule {
 
     private static final String TAG = GeofencingModule.class.getSimpleName();
+
+    private static final String LDS_PIN = "LDS_PIN";
 
     @Inject
     ParseTasksCache tasksCache;
@@ -128,9 +132,26 @@ public class GeofencingModule {
 
     }
 
-    public Task<Set<ParseTask>> queryAllGeofenceTasks(int withinKm, Location fromLocation) {
+    public Task<Void> clearPinned() {
+        return ExtendedParseObject.unpinAllInBackground(LDS_PIN);
+    }
 
-//        Log.d(TAG, "queryAllGeofenceTasks withinKm: " + withinKm);
+    private void pinGeofenceTasks(final List<ParseTask> tasks) {
+        clearPinned().continueWith(new Continuation<Void, Object>() {
+            @Override
+            public Object then(Task<Void> task) throws Exception {
+                if (task.isFaulted()) {
+                    LogError.log(TAG, "Unpin existing geoenced", task.getError());
+                }
+
+                ExtendedParseObject.pinAllInBackground(LDS_PIN, tasks);
+
+                return null;
+            }
+        });
+    }
+
+    Task<Set<ParseTask>> queryAllGeofenceTasks(int withinKm, Location fromLocation) {
 
         final TaskCompletionSource<Set<ParseTask>> promise = new TaskCompletionSource<>();
 
@@ -176,8 +197,10 @@ public class GeofencingModule {
             public Void then(Task<Void> result) throws Exception {
                 if (result.isCancelled() || result.isFaulted()) {
                     promise.setError(result.getError());
-//                    new HandleException(TAG, " queryAllGeofenceTasks", result.getError());
                 } else {
+
+                    pinGeofenceTasks(Lists.newArrayList(geofenceResults));
+
                     promise.setResult(geofenceResults);
                 }
                 return null;
@@ -202,7 +225,7 @@ public class GeofencingModule {
         ArrayList<Task<List<ParseTask>>> tasks = new ArrayList<>();
 
 
-        final ParseQuery<ParseTask> geofencedQueryNetwork = new TaskQueryBuilder(false).matchingObjectIds(geofenceIds).build();
+        final ParseQuery<ParseTask> geofencedQueryNetwork = new TaskQueryBuilder(LDS_PIN).matchingObjectIds(geofenceIds).build();
         ParseQuery<ParseTask> geofencedQueryLDS = new ParseQuery<>(geofencedQueryNetwork).fromLocalDatastore();
         Task<List<ParseTask>> geofencedTask = geofencedQueryLDS.findInBackground();
         geofencedTask.continueWith(new Continuation<List<ParseTask>, Object>() {

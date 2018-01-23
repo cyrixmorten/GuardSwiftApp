@@ -26,7 +26,6 @@ import bolts.TaskCompletionSource;
 public abstract class ExtendedParseObject extends ParseObject implements Comparable<ExtendedParseObject> {
 
 
-    public static final String NEW_OBJECT_PIN = "NEW_OBJECT_PIN";
 
     // TODO get rid of this and use bolts Tasks instead
     public interface DataStoreCallback<T extends ParseObject> {
@@ -138,70 +137,92 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
     }
 
 
-    public void pinThenSaveEventually() {
-        pinThenSaveEventually(getPin(), null, null, UpdateUIEvent.ACTION.UPDATE);
+    public void saveEventuallyAndNotify() {
+        saveEventuallyAndNotify(null, UpdateUIEvent.ACTION.UPDATE);
     }
 
-    public void pinThenSaveEventually(final SaveCallback pinned) {
-        pinThenSaveEventually(getPin(), pinned, null, UpdateUIEvent.ACTION.UPDATE);
+    public void saveEventuallyAndNotify(final SaveCallback saved) {
+        saveEventuallyAndNotify(saved, UpdateUIEvent.ACTION.UPDATE);
     }
 
-    public void pinThenSaveEventually(final SaveCallback pinned, final SaveCallback saved) {
-        pinThenSaveEventually(getPin(), pinned, saved, UpdateUIEvent.ACTION.UPDATE);
-    }
-
-
-    public void pinThenSaveEventually(final String pin, final SaveCallback pinned, final SaveCallback savedCallback, final UpdateUIEvent.ACTION action) {
-
-        Log.d(TAG, "pinThenSaveEventually: " + pin);
-
-
-        this.pinInBackground(pin, new SaveCallback() {
+    public void saveEventuallyAndNotify(final SaveCallback saved, final UpdateUIEvent.ACTION action) {
+        ExtendedParseObject.this.saveEventually(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if (e != null) {
-                    new HandleException(TAG, "pinThenSaveEventually failed to pin", e);
-                }
-                if (pinned != null) {
-                    Log.d(TAG, "pin callback");
-                    pinned.done(e);
+                    LogError.log(TAG, "Failed to save object", e);
                 }
 
+                doneSaving(e, saved, action);
 
-                if (pin.equals(NEW_OBJECT_PIN)) {
-                    ExtendedParseObject.this.unpinInBackground(NEW_OBJECT_PIN);
-                }
-
-                ExtendedParseObject.this.saveInBackground(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        if (e != null) {
-                            LogError.log(TAG, "Failed to save in background", e);
-
-                            new HandleException(TAG, "pinThenSaveEventually fallback to saveEventually", e);
-
-                            ExtendedParseObject.this.saveEventually(new SaveCallback() {
-                                @Override
-                                public void done(ParseException e) {
-                                    if (e != null) {
-                                        LogError.log(TAG, "Failed to save object", e);
-                                    }
-
-                                    doneSaving(e, savedCallback, action);
-
-                                }
-                            });
-
-                            return;
-                        }
-
-                        doneSaving(null, savedCallback, action);
-                    }
-                });
             }
         });
-
     }
+
+//    public void pinThenSaveEventually() {
+//        pinThenSaveEventually(getPin(), null, null, UpdateUIEvent.ACTION.UPDATE);
+//    }
+//
+//    public void pinThenSaveEventually(final SaveCallback pinned) {
+//        pinThenSaveEventually(getPin(), pinned, null, UpdateUIEvent.ACTION.UPDATE);
+//    }
+//
+//    public void pinThenSaveEventually(final SaveCallback pinned, final SaveCallback saved) {
+//        pinThenSaveEventually(getPin(), pinned, saved, UpdateUIEvent.ACTION.UPDATE);
+//    }
+//
+//
+//    public void pinThenSaveEventually(final String pin, final SaveCallback pinned, final SaveCallback savedCallback, final UpdateUIEvent.ACTION action) {
+//
+//        Log.d(TAG, "pinThenSaveEventually: " + pin);
+//
+//
+//        this.pinInBackground(pin, new SaveCallback() {
+//            @Override
+//            public void done(ParseException e) {
+//                if (e != null) {
+//                    new HandleException(TAG, "pinThenSaveEventually failed to pin", e);
+//                }
+//                if (pinned != null) {
+//                    Log.d(TAG, "pin callback");
+//                    pinned.done(e);
+//                }
+//
+//
+//                if (pin.equals(NEW_OBJECT_PIN)) {
+//                    ExtendedParseObject.this.unpinInBackground(NEW_OBJECT_PIN);
+//                }
+//
+//                ExtendedParseObject.this.saveInBackground(new SaveCallback() {
+//                    @Override
+//                    public void done(ParseException e) {
+//                        if (e != null) {
+//                            LogError.log(TAG, "Failed to save in background", e);
+//
+//                            new HandleException(TAG, "pinThenSaveEventually fallback to saveEventually", e);
+//
+//                            ExtendedParseObject.this.saveEventually(new SaveCallback() {
+//                                @Override
+//                                public void done(ParseException e) {
+//                                    if (e != null) {
+//                                        LogError.log(TAG, "Failed to save object", e);
+//                                    }
+//
+//                                    doneSaving(e, savedCallback, action);
+//
+//                                }
+//                            });
+//
+//                            return;
+//                        }
+//
+//                        doneSaving(null, savedCallback, action);
+//                    }
+//                });
+//            }
+//        });
+//
+//    }
 
     private void doneSaving(ParseException e, SaveCallback savedCallback, UpdateUIEvent.ACTION action) {
         if (savedCallback != null) {

@@ -21,11 +21,17 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.common.collect.Maps;
 import com.guardswift.R;
+import com.guardswift.core.exceptions.LogError;
+import com.guardswift.eventbus.events.BootstrapCompleted;
+import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.execution.task.TaskGroup;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.misc.Message;
+import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
+import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
@@ -38,7 +44,11 @@ import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
+
+import org.joda.time.DateTime;
 
 import java.lang.ref.WeakReference;
 import java.util.Date;
@@ -69,13 +79,18 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     }
 
     @Inject
-    TaskGroupStartedCache circuitStartedCache;
+    TaskGroupStartedCache taskGroupStartedCache;
+
+    @Inject
+    GuardCache guardCache;
 
     Map<String, Fragment> fragmentMap = Maps.newLinkedHashMap();
 
     WeakReference<Drawer> messagesDrawerWeakReference;
     private MenuItem messagesMenu;
 
+    private String nameOfSelectedTaskgroup;
+    private MaterialDialog newTaskgroupAvailableDialog;
 
     public RegularTaskViewPagerFragment() {
     }
@@ -83,9 +98,69 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         fragmentMap = Maps.newLinkedHashMap();
-        fragmentMap.put(getString(R.string.title_tasks_new), ActiveRegularTasksFragment.newInstance(getContext(), circuitStartedCache.getSelected()));
-        fragmentMap.put(getString(R.string.title_tasks_old), FinishedRegularTasksFragment.newInstance(getContext(), circuitStartedCache.getSelected()));
+        fragmentMap.put(getString(R.string.title_tasks_new), ActiveRegularTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
+        fragmentMap.put(getString(R.string.title_tasks_old), FinishedRegularTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
+
+        nameOfSelectedTaskgroup = taskGroupStartedCache.getSelected().getName();
+
+        newTaskgroupAvailableDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).ok(R.string.update_data, getString(R.string.new_taskgroup_available), new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                try {
+                    List<ParseTask> currentTasks = new RegularRaidTaskQueryBuilder(true).build().find();
+                    List<TaskGroupStarted> currentTaskGroups = new TaskGroupStartedQueryBuilder(true).build().find();
+
+                    ParseObject.unpinAll(currentTasks);
+                    ParseObject.unpinAll(currentTaskGroups);
+
+                    GuardSwiftApplication.getInstance().teardownParseObjectsLocally(false);
+                    GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(getActivity(), guardCache.getLoggedIn());
+                } catch (ParseException e) {
+                    LogError.log(TAG, "Update to new TaskGroup", e);
+                }
+                return;
+            }
+        }).build();
+
         super.onCreate(savedInstanceState);
+    }
+
+    public void onEventMainThread(BootstrapCompleted ev) {
+
+        try {
+            TaskGroupStarted pinnedTaskGroup = new TaskGroupStartedQueryBuilder(true).matchingName(nameOfSelectedTaskgroup).build().getFirst();
+            TaskGroupStarted selectedTaskGroup = taskGroupStartedCache.getSelected();
+
+            if (!pinnedTaskGroup.equals(selectedTaskGroup) && getActivity() instanceof MainActivity) {
+                MainActivity mainActivity = (MainActivity)getActivity();
+
+                mainActivity.getNavigationDrawer().selectTaskGroupStarted(pinnedTaskGroup);
+            }
+        } catch (ParseException e) {
+            LogError.log(TAG, "Check TaskGroup", e);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        // Detect if there is newer taskGroupStarted available
+        new TaskGroupStartedQueryBuilder(false).matching(taskGroupStartedCache.getSelected().getTaskGroup()).whereActive().build().getFirstInBackground(new GetCallback<TaskGroupStarted>() {
+            @Override
+            public void done(TaskGroupStarted object, ParseException e) {
+                if (object != null && getActivity() != null) {
+                    Date latestCreatedAt = object.getCreatedAt();
+                    Date currentCreatedAt = taskGroupStartedCache.getSelected().getCreatedAt();
+
+                    if (new DateTime(latestCreatedAt).isAfter(new DateTime(currentCreatedAt))) {
+                        if (!newTaskgroupAvailableDialog.isShowing()) {
+                            newTaskgroupAvailableDialog.show();
+                        }
+                    }
+                }
+            }
+        });
+
+        super.onResume();
     }
 
     private int newMessagesCount(List<Message> messages) {
@@ -110,7 +185,7 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     }
 
     private String getGroupId() {
-        TaskGroupStarted taskGroupStarted = circuitStartedCache.getSelected();
+        TaskGroupStarted taskGroupStarted = taskGroupStartedCache.getSelected();
         if (taskGroupStarted != null) {
             TaskGroup taskGroup = taskGroupStarted.getTaskGroup();
             if (taskGroup != null) {
@@ -250,12 +325,12 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
                         if (!editTextString.isEmpty()) {
                             if (editMode) {
                                 editMessage.setMessage(editTextString);
-                                editMessage.pinThenSaveEventually();
+                                editMessage.saveEventually();
 
                                 messagesDrawer.updateItem(drawerItem.withDescription(editTextString));
                             } else {
                                 Message message = Message.newInstance(getGroupId(), editTextString);
-                                message.pinThenSaveEventually();
+                                message.saveEventually();
 
                                 messagesDrawer.addItemAtPosition(createMessageItem(message), 0);
                                 messagesDrawer.closeDrawer();

@@ -245,22 +245,13 @@ public class EventLog extends ExtendedParseObject {
 
             Log.e(TAG, "Save event " + eventLog.getEvent());
 
+            // Todo: remove pinnedCallback
+            if (pinnedCallback != null) {
+                pinnedCallback.done(eventLog, null);
+            }
+
             Log.w(TAG, "3) Save event");
-            eventLog.pinThenSaveEventually(NEW_OBJECT_PIN, new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e != null) {
-                        new HandleException(TAG, "Pinning new EventLog", e);
-                    }
-
-                    if (pinnedCallback != null) {
-                        pinnedCallback.done(eventLog, e);
-                    }
-
-
-                    Log.w(TAG, "4) Save event - pinned");
-                }
-            }, new SaveCallback() {
+            eventLog.saveEventuallyAndNotify(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
                     if (e != null) {

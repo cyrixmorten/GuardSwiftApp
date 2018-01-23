@@ -43,11 +43,6 @@ public class ParseModule {
 
     private static final String TAG = ParseModule.class.getSimpleName();
 
-    public static final String DEVApplicationID = "7fynHGuQW5NZLROiIDcCzLddbINcUSwPdoE0L72d";
-    public static final String DEVClientKey = "esiyR18YFQ5Ew1dMZDwcFuFYTZls8TwYWUtPs5Tu";
-    public static final String ApplicationID = "gejAg1OFJrBwepcORHB3U7V7fawoDjlymRe8grHJ";
-    public static final String ClientKey = "ZOZ7GGeu2tfOQXGRcMSOtDMg1qTGVZaxjO8gl89p";
-
     public static final String FUNCTION_SEND_REPORT = "sendReport";
 
     private final Context context;
@@ -73,7 +68,6 @@ public class ParseModule {
                 .eventCode(EventLog.EventCodes.GUARD_LOGIN).saveAsync();
 
     }
-
 
 
     private void logout(final SaveCallback saveCallback, ProgressCallback progressCallback) {
@@ -209,9 +203,8 @@ public class ParseModule {
         GuardSwiftApplication.getInstance().stopServices();
 
 
-        GuardSwiftApplication.getInstance().teardownParseObjectsLocally();
+        GuardSwiftApplication.getInstance().teardownParseObjectsLocally(true);
     }
-
 
 
     public static ParseGeoPoint geoPointFromLocation(Location loc) {

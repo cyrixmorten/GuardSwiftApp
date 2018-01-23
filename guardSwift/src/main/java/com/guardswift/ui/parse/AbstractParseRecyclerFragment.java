@@ -69,9 +69,6 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
     private ParseRecyclerQueryAdapter<T, U> mAdapter;
 
 
-    public AbstractParseRecyclerFragment() {
-    }
-
 
     @BindView(R.id.list)
     protected SuperRecyclerView mRecycleView;

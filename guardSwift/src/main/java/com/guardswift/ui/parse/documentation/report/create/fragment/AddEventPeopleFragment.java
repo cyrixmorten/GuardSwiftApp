@@ -239,7 +239,7 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
         }
 
 
-        mClient.pinThenSaveEventually(new SaveCallback() {
+        mClient.saveEventuallyAndNotify(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if (e != null) {

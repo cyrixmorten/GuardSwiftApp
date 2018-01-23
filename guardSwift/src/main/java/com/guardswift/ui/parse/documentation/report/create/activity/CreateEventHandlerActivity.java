@@ -24,7 +24,6 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventViewPagerFragment;
 import com.guardswift.util.Analytics;
 import com.parse.FindCallback;
-import com.parse.GetCallback;
 import com.parse.ParseException;
 
 import java.util.Date;
@@ -308,6 +307,8 @@ public class CreateEventHandlerActivity extends
         final String remarks = eventBundle.getString(EXTRA_REMARKS, "");
         final ParseTask task = taskCache.getLastSelected();
 
+        storeRemarkTokens(task, remarks);
+
         new EventLog.Builder(this)
                 .taskPointer(task, ParseTask.EVENT_TYPE.OTHER)
                 .event(event_type)
@@ -317,17 +318,9 @@ public class CreateEventHandlerActivity extends
                 .remarks(remarks)
                 .eventCode(task.getEventCode())
                 .deviceTimeStamp(new Date())
-                .saveAsync(new GetCallback<EventLog>() {
-                    @Override
-                    public void done(EventLog object, ParseException e) {
-                        finish();
-                    }
-                }, new GetCallback<EventLog>() {
-                    @Override
-                    public void done(EventLog object, ParseException e) {
-                        storeRemarkTokens(task, remarks);
-                    }
-                });
+                .saveAsync();
+
+        finish();
     }
 
     private void storeRemarkTokens(ParseTask task, final String remarks) {
@@ -360,7 +353,7 @@ public class CreateEventHandlerActivity extends
                         }
 
                         if (!exists) {
-                            EventRemark.create(eventType, clientLocation, remark, getClient(), guardCache.getLoggedIn()).pinThenSaveEventually();
+                            EventRemark.create(eventType, clientLocation, remark, getClient(), guardCache.getLoggedIn()).saveEventually();
                         } else {
                             autocompletesCount++;
                         }

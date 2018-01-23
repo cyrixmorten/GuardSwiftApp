@@ -23,6 +23,9 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
         return newInstance(client, null);
     }
 
+    public ReportHistoryListFragment() {
+    }
+
     public static ReportHistoryListFragment newInstance(Client client, ParseTask.TASK_TYPE task_type) {
 
         GuardSwiftApplication.getInstance()

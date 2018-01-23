@@ -3,7 +3,6 @@ package com.guardswift.ui.parse.execution.regular;
 import android.content.Context;
 import android.util.Log;
 
-import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
@@ -17,33 +16,31 @@ import javax.inject.Inject;
 
 public class ActiveRegularTasksFragment extends AbstractTasksRecycleFragment {
 
-	protected static final String TAG = ActiveRegularTasksFragment.class.getSimpleName();
+    protected static final String TAG = ActiveRegularTasksFragment.class.getSimpleName();
 
 
-	public static ActiveRegularTasksFragment newInstance(Context context, TaskGroupStarted circuitStarted ) {
+    public static ActiveRegularTasksFragment newInstance(Context context, TaskGroupStarted circuitStarted) {
 
         GuardSwiftApplication.getInstance()
                 .getCacheFactory()
                 .getTaskGroupStartedCache()
                 .setSelected(circuitStarted);
 
-		return new ActiveRegularTasksFragment();
-	}
+        return new ActiveRegularTasksFragment();
+    }
 
-	public ActiveRegularTasksFragment() {
+    public ActiveRegularTasksFragment() {
 
-	}
+    }
 
     @Inject
     TaskGroupStartedCache circuitStartedCache;
 
 
-
-
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
 
-        Log.d(TAG, "circuitStartedCache.getSelected()" + circuitStartedCache.getSelected().getObjectId());
+        Log.d(TAG, "taskGroupStartedCache.getSelected()" + circuitStartedCache.getSelected().getObjectId());
 
         return new ParseQueryAdapter.QueryFactory<ParseTask>() {
 
@@ -58,26 +55,7 @@ public class ActiveRegularTasksFragment extends AbstractTasksRecycleFragment {
         };
     }
 
-    @Override
-    public boolean isRelevantUIEvent(UpdateUIEvent ev) {
-        Object obj = ev.getObject();
 
-        if (obj instanceof ParseTask) {
-            ParseTask task = (ParseTask) obj;
-
-            boolean isSameTaskType = task.getTaskType() == ParseTask.TASK_TYPE.REGULAR;
-
-            if (isSameTaskType) {
-                ParseTask.TASK_STATE state = ((ParseTask) obj).getTaskState();
-                if (state != ParseTask.TASK_STATE.FINISHED) {
-                    getAdapter().addItem(task);
-                }
-
-                return false;
-            }
-        }
-        return super.isRelevantUIEvent(ev);
-    }
 
 
 }

@@ -13,7 +13,11 @@ public class TaskQueryBuilder extends
     public TaskQueryBuilder(boolean fromLocalDatastore) {
         super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery
                 .getQuery(ParseTask.class));
+    }
 
+    public TaskQueryBuilder(String pin) {
+        super(pin, true, ParseQuery
+                .getQuery(ParseTask.class));
     }
 
     @Override

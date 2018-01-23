@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
@@ -27,6 +28,10 @@ public class AlarmTaskQueryBuilder extends
     public ParseQuery<ParseTask> build() {
         query.include(ParseTask.guard);
         query.include(ParseTask.client);
+        query.include(ParseTask.client + "." + Client.contacts);
+        query.include(ParseTask.client + "." + Client.roomLocations);
+        query.include(ParseTask.client + "." + Client.people);
+        query.whereExists(ParseTask.client);
         return super.build();
     }
 

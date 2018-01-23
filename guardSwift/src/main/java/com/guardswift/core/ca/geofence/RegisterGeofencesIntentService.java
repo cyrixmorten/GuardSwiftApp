@@ -296,12 +296,10 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
     public void clear() {
         Log.d(TAG, "onDestroy");
-//        if (mRemoveGeofencesSubscription != null && !mRemoveGeofencesSubscription.isUnsubscribed()) {
-//            mRemoveGeofencesSubscription.unsubscribe();
-//            mRemoveGeofencesSubscription = null;
-//        }
 
         clearGeofence();
+
+        geofencingModule.clearPinned();
 
         if (mAddGeofencesSubscription != null && !mAddGeofencesSubscription.isUnsubscribed()) {
             mAddGeofencesSubscription.unsubscribe();

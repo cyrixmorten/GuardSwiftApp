@@ -5,15 +5,12 @@ import android.util.Log;
 
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.eventbus.EventBusController;
 import com.guardswift.fabric.TrackEvent;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
-import com.parse.ParseException;
-import com.parse.SaveCallback;
 
 public class RegularController extends BaseTaskController {
 
@@ -122,19 +119,9 @@ public class RegularController extends BaseTaskController {
         }
 
 
+        task.saveEventuallyAndNotify();
+
         if (event != null) {
-
-            task.pinThenSaveEventually(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e != null) {
-                        new HandleException(TAG, "Failed to pinThenSaveEventually", e);
-                    }
-
-                    EventBusController.postUIUpdate(task);
-                }
-            });
-
             event.saveAsync();
         }
 
