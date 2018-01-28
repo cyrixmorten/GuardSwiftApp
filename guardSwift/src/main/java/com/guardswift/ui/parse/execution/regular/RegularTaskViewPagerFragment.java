@@ -103,6 +103,14 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
 
         nameOfSelectedTaskgroup = taskGroupStartedCache.getSelected().getName();
 
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+
+        final WeakReference<Activity> activityWeakReference = new WeakReference<Activity>(getActivity());
+
         newTaskgroupAvailableDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).ok(R.string.update_data, getString(R.string.new_taskgroup_available), new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -114,15 +122,14 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
                     ParseObject.unpinAll(currentTaskGroups);
 
                     GuardSwiftApplication.getInstance().teardownParseObjectsLocally(false);
-                    GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(getActivity(), guardCache.getLoggedIn());
+                    GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(activityWeakReference.get(), guardCache.getLoggedIn());
                 } catch (ParseException e) {
                     LogError.log(TAG, "Update to new TaskGroup", e);
                 }
-                return;
             }
         }).build();
 
-        super.onCreate(savedInstanceState);
+        super.onAttach(context);
     }
 
     public void onEventMainThread(BootstrapCompleted ev) {

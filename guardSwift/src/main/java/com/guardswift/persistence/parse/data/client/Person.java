@@ -39,6 +39,10 @@ public class Person extends ExtendedParseObject {
 
 	@Override
 	public int compareTo(ExtendedParseObject object) {
+		if (object == null) {
+			return 0;
+		}
+
 		if (object instanceof Person) {
 			return getName().compareTo(((Person)object).getName());
 		}

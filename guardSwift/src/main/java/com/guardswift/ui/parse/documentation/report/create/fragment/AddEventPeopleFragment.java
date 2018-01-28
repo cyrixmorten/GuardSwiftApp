@@ -88,7 +88,7 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
         super.onCreate(savedInstanceState);
     }
 
-    private void updateLocations() {
+    private void updatePeople() {
         if (getActivity() == null || !isAdded() || mAdapter == null) {
             return;
         }
@@ -143,7 +143,7 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-        updateLocations();
+        updatePeople();
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -247,7 +247,7 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
                     return;
                 }
 
-                updateLocations();
+                updatePeople();
             }
         });
 

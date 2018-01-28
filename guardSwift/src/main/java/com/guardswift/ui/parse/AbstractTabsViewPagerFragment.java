@@ -157,7 +157,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 
         @Override
         public int getCount() {
-            return getTabbedFragments().size();
+            return getTabbedFragments() != null ? getTabbedFragments().size() : 0;
         }
     }
 
