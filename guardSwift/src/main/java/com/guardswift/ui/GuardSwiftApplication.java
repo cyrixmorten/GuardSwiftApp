@@ -355,6 +355,8 @@ public class GuardSwiftApplication extends InjectingApplication {
 
 
     private MaterialDialog retryBootstrapDialog;
+    private MaterialDialog updateDialog;
+
     public Task<Void> bootstrapParseObjectsLocally(final Activity activity, final Guard guard, boolean performInBackground) {
 
         if (parseObjectsBootstrapped || bootstrapInProgress) {
@@ -369,13 +371,16 @@ public class GuardSwiftApplication extends InjectingApplication {
         final AtomicInteger updateClassTotal = new AtomicInteger(0);
 
         // Prepare dialog showing progress
-        final MaterialDialog updateDialog = new MaterialDialog.Builder(activity)
-                .title(R.string.working)
-                .content(R.string.please_wait)
-                .progress(false, 0, true).build();
 
-        if (!performInBackground) {
-            updateDialog.show();
+        if (activity != null) {
+            updateDialog = new MaterialDialog.Builder(activity)
+                    .title(R.string.working)
+                    .content(R.string.please_wait)
+                    .progress(false, 0, true).build();
+
+            if (!performInBackground) {
+                updateDialog.show();
+            }
         }
 
         final Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
