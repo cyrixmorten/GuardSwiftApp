@@ -560,9 +560,6 @@ public class EventLog extends ExtendedParseObject {
         return null;
     }
 
-//    public String getReportId() {
-//        return getStringSafe(EventLog.reportId);
-//    }
 
     @Override
     public int compareTo(@NonNull ExtendedParseObject another) {

@@ -10,11 +10,10 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.rest.GuardSwiftServer;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -70,27 +69,7 @@ public class DownloadReport {
     }
 
     private Task<Report> findReportFromTask(final ParseTask parseTask) {
-
-        Task<ParseQuery<Report>> buildQueryTask;
-
-        if (parseTask.getTaskGroupStarted() != null) {
-            Log.e(TAG, "taskGroupStarted: " + parseTask.getTaskGroupStarted().isDataAvailable());
-            buildQueryTask = parseTask.getTaskGroupStarted().fetchIfNeededInBackground().continueWithTask(new Continuation<ParseObject, Task<ParseQuery<Report>>>() {
-                @Override
-                public Task<ParseQuery<Report>> then(Task<ParseObject> task) throws Exception {
-                    return Task.forResult(Report.getQueryBuilder(false).matching(parseTask.getClient()).createdAfter(task.getResult()).build());
-                }
-            });
-        } else {
-            buildQueryTask =  Task.forResult(Report.getQueryBuilder(false).matching(parseTask).build());
-        }
-
-        return buildQueryTask.continueWithTask(new Continuation<ParseQuery<Report>, Task<Report>>() {
-            @Override
-            public Task<Report> then(Task<ParseQuery<Report>> task) throws Exception {
-                return task.getResult().getFirstInBackground();
-            }
-        });
+        return Report.getQueryBuilder(false).matching(parseTask).build().orderByDescending(ExtendedParseObject.createdAt).getFirstInBackground();
     }
 
     public void execute(ParseTask task, final CompletedCallback callback) {
