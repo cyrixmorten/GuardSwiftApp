@@ -21,6 +21,8 @@ import com.guardswift.dagger.InjectingIntentService;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.parse.DeleteCallback;
+import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
@@ -47,8 +49,6 @@ import rx.functions.Func1;
  */
 public class RegisterGeofencesIntentService extends InjectingIntentService {
 
-    // TODO InjectingIntentService to inject geofenceModule -> fix queryGeofenceTasks below
-
     @Inject
     GeofencingModule geofencingModule;
     @Inject
@@ -56,32 +56,28 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
     private static final String TAG = RegisterGeofencesIntentService.class.getSimpleName();
 
-//    private static final float RADIUS_METERS = 50;
-
-//    public static final String TASK_TYPE = "com.guardswift.services.TASK_TYPE";
-
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-//    public static final String ADD = "com.guardswift.services.action.ADD";
-//    public static final String REMOVE = "com.guardswift.services.action.REMOVE";
 
     private static Location mLastGeofenceRebuildLocation;
     private static boolean mRebuildInProgress;
 
     private ReactiveLocationProvider mReactiveLocationProvider;
     private Subscription mAddGeofencesSubscription;
-    //    private Subscription mRemoveGeofencesSubscription;
     private PendingIntent mGeofencePendingIntent;
 
-//    private static ParseTask task_type;
+    private RetryGeofenceRegistrationTimer retryTimer;
 
     public static void start(Context context, boolean force) {
         // relying on previously set task_type
         Log.d(TAG, "START forced: " + force);
 
+
         if (force) {
             RegisterGeofencesIntentService.mLastGeofenceRebuildLocation = null;
         }
 
+        if (RegisterGeofencesIntentService.isRebuildingGeofence()) {
+            return;
+        }
         context.startService(new Intent(context, RegisterGeofencesIntentService.class));
     }
 
@@ -92,26 +88,29 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
     }
 
 
-//    public static void start(Context context, ParseTask geofencedTask) {
-////        Log.d(TAG, "RegisterGeofencesIntentService start 2 ");
-//        task_type = geofencedTask;
-//        context.startService(new Intent(context, RegisterGeofencesIntentService.class));
-//    }
-
-//    public static void stop(Context context) {
-//        context.stopService(new Intent(context, RegisterGeofencesIntentService.class));
-//    }
-
-
     public RegisterGeofencesIntentService() {
         super("RegisterGeofencesIntentService");
+    }
+
+    @Override
+    public void onDestroy() {
+        if (this.retryTimer != null) {
+            this.retryTimer.stop();
+            this.retryTimer = null;
+        }
+
+        super.onDestroy();
+
+
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
         super.onHandleIntent(intent); // Inject to ObjectGraph
 
-        Log.d(TAG, "onHandleIntent");
+        if (this.retryTimer == null) {
+            this.retryTimer = new RetryGeofenceRegistrationTimer(getApplicationContext());
+        }
 
         if (intent.hasExtra("clear")) {
             clear();
@@ -128,8 +127,12 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                 AsyncExecutor.create().execute(new AsyncExecutor.RunnableEx() {
                     @Override
                     public void run() throws Exception {
-//                        validateTaskState(deviceLocation);
-                        rebuildGeofenceForTasks(deviceLocation);
+                        clearGeofence(new DeleteCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                rebuildGeofenceForTasks(deviceLocation);
+                            }
+                        });
                     }
                 });
             }
@@ -145,39 +148,6 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         return mRebuildInProgress;
     }
 
-//    /**
-//     * If the device has been moved while guardswift has been shut down or
-//     * the guard has been logged out, then it may happen that tasks are left 'hanging'
-//     * in an arrived state
-//     */
-//    private void validateTaskState(final Location deviceLocation) {
-//        List<BaseTask> tasks = new TaskFactory().getTasks();
-//        for (final BaseTask task: tasks) {
-//                task.getQueryBuilder(true).buildNoIncludes().findInBackground(new FindCallback<BaseTask>() {
-//                    @Override
-//                    public void done(List<BaseTask> tasks, ParseException e) {
-//                        if (e != null) {
-//                            new HandleException(TAG, "validateTaskState", e);
-//                            return;
-//                        }
-//                        for (BaseTask task : tasks) {
-//                            double distanceMeters = ParseModule.distanceBetweenMeters(deviceLocation, task.getPosition());
-//                            int geofenceRadius = task.getGeofenceStrategy().getGeofenceRadius();
-//                            switch (task.getTaskState()) {
-//                                case ARRIVED:
-//                                    // abort if outside geofenceRadius
-//                                    if (distanceMeters > geofenceRadius) {
-//                                        task.getAutomationStrategy().automaticDeparture();
-//                                        Log.w(TAG, "validateTaskState: ARRIVED -> Departure " + task.getTaskType() + " " + task.getClientName());
-//                                    }
-//                                    break;
-//                            }
-//                        }
-//                    }
-//
-//                });
-//        }
-//    }
 
     /**
      * Handle action Foo in the provided background thread with the provided
@@ -238,6 +208,8 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
             public Task<Void> then(Task<Object> task) throws Exception {
                 if (task.isFaulted()) {
                     new HandleException(getBaseContext(), TAG, "Failed to build geofences", task.getError());
+
+                    retryTimer.start();
                 } else {
                     EventBusController.postUIUpdate(location);
                 }
@@ -249,37 +221,6 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
             }
         });
 
-
-//        for (ParseTask task: new TaskFactory().getTasks()) {
-//            ParseTask<List<ParseObject>> getTasksWithinGeofence =  task.getGeofenceStrategy().queryGeofencedTasks(getApplicationContext(), new FindCallback<ParseObject>() {
-//                @Override
-//                public void done(List<ParseObject> parseObjects, ParseException e) {
-//                    if (e != null) {
-//                        Log.e(TAG, "rebuildGeofenceForTasks", e);
-//                        Crashlytics.logException(e);
-//                        return;
-//                    }
-//
-//                    List<ParseTask> geofencedTasks = Lists.newArrayList();
-//                    List<Geofence> geofences = Lists.newArrayList();
-//                    for (ParseObject parseObject : parseObjects) {
-//                        ParseTask geofencedTask = (ParseTask) parseObject;
-//                        ParseGeoPoint position = geofencedTask.getPosition();
-//                        float geofenceRadius = geofencedTask.getGeofenceStrategy().getGeofenceRadius();
-//                        Geofence geofence = createGeofence(parseObject.getObjectId(), position, geofenceRadius);
-//                        geofences.addUnique(geofence);
-//
-//                        geofencedTasks.addUnique(geofencedTask);
-//
-//                    }
-//
-//                    addGeofences(geofences);
-//
-//                    GeofencingModule.Recent.setAllGeofencedTasks(geofencedTasks);
-//
-//                }
-//            });
-//        }
 
     }
 
@@ -297,7 +238,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
     public void clear() {
         Log.d(TAG, "onDestroy");
 
-        clearGeofence();
+        clearGeofence(null);
 
         geofencingModule.clearPinned();
 
@@ -314,10 +255,6 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
     private void addGeofences(List<Geofence> geofences) {
         Log.i(TAG, "addGeofences " + geofences.size());
-
-//        for (GeofencedTask task : GeofencingModule.Recent.getWithinGeofence()) {
-//            task.exitGeofence(getApplicationContext());
-//        }
 
         if (geofences.isEmpty())
             return;
@@ -344,24 +281,29 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
-                        Log.e(TAG, "AddGeofenceResult subscription failed!");
-                        Crashlytics.logException(throwable);
+                        new HandleException(getBaseContext(), TAG, "AddGeofenceResult subscription failed!", throwable);
                     }
                 });
 
     }
 
-    private void clearGeofence() {
+    private void clearGeofence(final DeleteCallback callback) {
         mReactiveLocationProvider = new ReactiveLocationProvider(getApplicationContext());
         mReactiveLocationProvider.removeGeofences(createRequestPendingIntent()).subscribe(new Action1<Status>() {
             @Override
             public void call(Status pendingIntentRemoveGeofenceResult) {
-                Log.d(TAG, "Geofences removed");
+                if (callback != null) {
+                    callback.done(null);
+                }
             }
         }, new Action1<Throwable>() {
             @Override
             public void call(Throwable throwable) {
-                Log.e(TAG, "Error removing geofences", throwable);
+                if (callback != null) {
+                    callback.done(new ParseException(throwable));
+                }
+
+                new HandleException(getBaseContext(), TAG, "Error removing geofences", throwable);
             }
         });
     }
@@ -383,54 +325,6 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
             return mGeofencePendingIntent;
         }
     }
-
-//    private void removeGeofences(final boolean explicit) {
-//        Log.i(TAG, "removeGeofences");
-//
-//        mReactiveLocationProvider = new ReactiveLocationProvider(getApplicationContext());
-//
-//        Observable<RemoveGeofencesResult.PendingIntentRemoveGeofenceResult> requestPIntentRemoveGeofenceResultObservable = mReactiveLocationProvider.removeGeofences(createRequestPendingIntent());
-//        mRemoveGeofencesSubscription = requestPIntentRemoveGeofenceResultObservable.doOnError(new Action1<Throwable>() {
-//            @Override
-//            public void call(Throwable throwable) {
-//                Crashlytics.logException(throwable);
-//                Log.e(TAG, "removeGeofences", throwable);
-//            }
-//        }).subscribe(new Action1<RemoveGeofencesResult.PendingIntentRemoveGeofenceResult>() {
-//            @Override
-//            public void call(RemoveGeofencesResult.PendingIntentRemoveGeofenceResult requestIdsRemoveGeofenceResult) {
-//                if (requestIdsRemoveGeofenceResult.isSuccess()) {
-//                    Log.i(TAG, "removeGeofences success!!");
-//                } else {
-//                    Log.e(TAG, "removeGeofences subscription failed with code " + requestIdsRemoveGeofenceResult.getStatusCode());
-//                }
-//            }
-//        });
-//    }
-
-//    private void removeGeofences(List<String> requestIds) {
-//        Log.i(TAG, "removeGeofences " + requestIds.size());
-//
-//        mReactiveLocationProvider = new ReactiveLocationProvider(getApplicationContext());
-//
-//        Observable<RemoveGeofencesResult.RequestIdsRemoveGeofenceResult> requestIdsRemoveGeofenceResultObservable = mReactiveLocationProvider.removeGeofences(requestIds);
-//        mRemoveGeofencesSubscription = requestIdsRemoveGeofenceResultObservable.doOnError(new Action1<Throwable>() {
-//            @Override
-//            public void call(Throwable throwable) {
-//                Log.e(TAG, "removeGeofences", throwable);
-//            }
-//        }).subscribe(new Action1<RemoveGeofencesResult.RequestIdsRemoveGeofenceResult>() {
-//            @Override
-//            public void call(RemoveGeofencesResult.RequestIdsRemoveGeofenceResult requestIdsRemoveGeofenceResult) {
-//                if (requestIdsRemoveGeofenceResult.isSuccess()) {
-//                    Log.i(TAG, "removeGeofences success!!");
-//                } else {
-//                    Log.e(TAG, "removeGeofences subscription failed with code " + requestIdsRemoveGeofenceResult.getStatusCode());
-//                }
-//                EventBus.getDefault().post(new GeofenceCompleteEvent(REMOVE));
-//            }
-//        });
-//    }
 
 
 }

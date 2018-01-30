@@ -68,6 +68,7 @@ import net.danlew.android.joda.JodaTimeAndroid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.inject.Inject;
@@ -76,6 +77,8 @@ import bolts.Continuation;
 import bolts.Task;
 import de.greenrobot.event.EventBus;
 import io.fabric.sdk.android.Fabric;
+import okhttp3.ConnectionPool;
+import okhttp3.OkHttpClient;
 import rx.plugins.RxJavaErrorHandler;
 import rx.plugins.RxJavaPlugins;
 
@@ -238,6 +241,11 @@ public class GuardSwiftApplication extends InjectingApplication {
         ParseACL.setDefaultACL(defaultACL, true);
 
 
+        // https://github.com/square/okhttp/issues/3146#issuecomment-311158567
+        new OkHttpClient.Builder()
+                .connectTimeout(10_000, TimeUnit.MILLISECONDS)
+                .retryOnConnectionFailure(true)
+                .readTimeout(10_000, TimeUnit.MILLISECONDS).connectionPool(new ConnectionPool(0, 1, TimeUnit.NANOSECONDS));
     }
 
     private void reconnectLiveQuery(final ParseLiveQueryClient client) {

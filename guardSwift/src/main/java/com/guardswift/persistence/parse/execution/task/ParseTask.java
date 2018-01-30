@@ -459,7 +459,12 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public boolean isWithinScheduledTime() {
-        if (isRegularTask() || isRaidTask() && !BuildConfig.DEBUG) {
+        // always return true if debugging
+        if (BuildConfig.DEBUG) {
+            return true;
+        }
+
+        if (isRegularTask() || isRaidTask()) {
             DateTime timeStartOrg = new DateTime(getTimeStart());
             DateTime timeEndOrg = new DateTime(getTimeEnd());
 
@@ -489,6 +494,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
             return afterTimeStart && beforeTimeEnd;
         }
+
         return true;
     }
 

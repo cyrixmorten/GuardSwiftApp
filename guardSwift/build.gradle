@@ -36,8 +36,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 506
-        versionName "5.0.6"
+        versionCode 507
+        versionName "5.0.7"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -114,9 +114,8 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.0.2'
     compile 'com.parse:parseui-login-android:0.0.1'
     compile 'com.parse:parseui-widget-android:0.0.1'
-    compile 'com.parse:parse-android:1.16.3'
+    compile 'com.parse:parse-android:1.16.5'
     compile 'com.parse:parse-livequery-android:1.0.4'
-    compile 'com.parse.bolts:bolts-tasks:1.4.0'
     compile 'com.squareup:javawriter:2.5.1'
     compile 'javax.inject:javax.inject:1'
     compile 'com.jakewharton:butterknife:8.5.1'
