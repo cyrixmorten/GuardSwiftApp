@@ -326,6 +326,14 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
         return has(key) ? getString(key) : defaultValue;
     }
 
+    protected boolean getBooleanSafe(String key, boolean defaultValue) {
+        if (has(key)) {
+            return getBoolean(key);
+        }
+
+        return defaultValue;
+    }
+
     @Override
     public int compareTo(@NonNull ExtendedParseObject another) {
         return 0;

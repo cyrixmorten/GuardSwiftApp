@@ -9,16 +9,17 @@ import com.google.gson.Gson;
 import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.parse.CloudFunctions;
 import com.guardswift.persistence.parse.ExtendedParseObject;
-import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.persistence.parse.data.Guard;
+import com.guardswift.persistence.parse.query.TrackerQueryBuilder;
+import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.FileIO;
 import com.parse.GetDataCallback;
 import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseInstallation;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.ProgressCallback;
@@ -34,18 +35,20 @@ import bolts.Continuation;
 import bolts.Task;
 import bolts.TaskCompletionSource;
 
+import static com.guardswift.R.string.started;
+
 @ParseClassName("Tracker")
 public class Tracker extends ExtendedParseObject {
 
     private static String TAG = Tracker.class.getSimpleName();
 
-    private static final String guard = "guard";
-    private static final String installation = "installation";
-    private static final String sampleStart = "start";
-    private static final String sampleEnd = "end";
-    private static final String sampleMinutes = "minutes";
-    private static final String clientTimestamp = "clientTimestamp";
-
+    public static final String guard = "guard";
+    public static final String installation = "installation";
+    public static final String sampleStart = "start";
+    public static final String sampleEnd = "end";
+    public static final String sampleMinutes = "minutes";
+    public static final String clientTimestamp = "clientTimestamp";
+    public static final String inProgress = "inProgress";
 
     private static final String gpsFile = "gpsFile";
 
@@ -62,44 +65,86 @@ public class Tracker extends ExtendedParseObject {
     }
 
 
-    public static Task<Void> upload(final Context context, final Guard guard, final ProgressCallback progressCallback) {
+    public static Task<Void> upload(final Context context, final ProgressCallback progressCallback, final boolean partialUpload) {
 
-        final Tracker tracker = new Tracker();
+        final Guard guard = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().getLoggedIn();
 
-        DateTime started = new DateTime(guard.getLastLogin());
-        DateTime ended = DateTime.now();
+        Log.d(TAG, "Tracker upload: " + guard.getName());
 
-        tracker.put(Tracker.sampleStart, started.toDate());
-        tracker.put(Tracker.sampleEnd, ended.toDate());
-        tracker.put(Tracker.sampleMinutes, Minutes.minutesBetween(started, ended).getMinutes());
-        tracker.put(Tracker.guard, guard);
-        tracker.put(Tracker.clientTimestamp, ended.toDate());
-        tracker.put(owner, ParseUser.getCurrentUser());
-        tracker.put(installation, ParseInstallation.getCurrentInstallation());
+        return new TrackerQueryBuilder(false).matching(guard).inProgress(true).build().getFirstInBackground().continueWithTask(new Continuation<Tracker, Task<Void>>() {
+            @Override
+            public Task<Void> then(Task<Tracker> task) throws Exception {
 
-        return tracker.upload(context, progressCallback);
+                Tracker tracker = task.getResult();
+
+                DateTime started = new DateTime(guard.getLastLogin());
+                DateTime ended = DateTime.now();
+
+                if (task.isFaulted()) {
+                    Exception e = task.getError();
+
+                    if (e instanceof ParseException && ((ParseException) e).getCode() == ParseException.OBJECT_NOT_FOUND) {
+                        Log.d(TAG, "Creating new Tracker");
+                        tracker = new Tracker();
+
+                        tracker.put(Tracker.sampleStart, started.toDate());
+                        tracker.put(Tracker.guard, guard);
+                        tracker.put(Tracker.installation, ParseInstallation.getCurrentInstallation());
+                        tracker.put(ExtendedParseObject.owner, ParseUser.getCurrentUser());
+                    } else {
+                        new HandleException(TAG, "Error finding existing Tracker", e);
+
+                        throw e;
+                    }
+                }
+
+                tracker.put(Tracker.sampleEnd, ended.toDate());
+                tracker.put(Tracker.sampleMinutes, Minutes.minutesBetween(started, ended).getMinutes());
+                tracker.put(Tracker.clientTimestamp, ended.toDate());
+
+                return tracker.uploadData(context, progressCallback, partialUpload);
+            }
+        });
 
     }
 
 
     private String readGPSFileAsJSONArrayString(Context context) throws IOException {
-        String string = FileIO.readFromFile(context, LOCAL_GPS_FILE_NAME);
+        String string = "";
+        try {
+             string = FileIO.readFromFile(context, LOCAL_GPS_FILE_NAME);
+        } catch (Exception e) {
+            return string;
+        }
+
         String jsonObjectsLocationString = (string.contains("{")) ? string.substring(string.indexOf("{"), string.lastIndexOf("}") + 1) : "";
         return "[" + jsonObjectsLocationString + "]";
     }
 
-    private Task<Void> saveGPSParseFile(final Context context, final ParseFile file, ProgressCallback progressCallback) {
+    private Task<Void> deleteExistingGPSParseFile(final Context context) {
+        ParseFile file = getParseFile(Tracker.gpsFile);
 
-        // Add location before saving (to mark ending postion + time in case of still period)
-        appendLocation(context);
+        if (file == null) {
+            return Task.forResult(null);
+        }
 
-        Task<Void> saveFileTask = file.saveInBackground(progressCallback);
+        return CloudFunctions.deleteFile(file);
+    }
 
-        return saveFileTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
+    private Task<Void> saveGPSParseFile(final Context context, final ParseFile file, final ProgressCallback progressCallback, final boolean partialUpload) {
+
+
+        return deleteExistingGPSParseFile(context).onSuccessTask(new Continuation<Void, Task<Void>>() {
+            @Override
+            public Task<Void> then(Task<Void> task) throws Exception {
+                return file.saveInBackground(progressCallback);
+            }
+        }).onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
             public Task<Void> then(Task<Void> task) throws Exception {
 
                 put(Tracker.gpsFile, file);
+                put(Tracker.inProgress, partialUpload);
 
                 return saveInBackground();
             }
@@ -111,10 +156,9 @@ public class Tracker extends ExtendedParseObject {
                     return null;
                 }
 
-                boolean deleted = context.deleteFile(LOCAL_GPS_FILE_NAME);
-
-                Log.d(TAG, "Deleted GPS file: " + deleted);
-
+                if (!partialUpload) {
+                    context.deleteFile(LOCAL_GPS_FILE_NAME);
+                }
 
                 return null;
             }
@@ -123,13 +167,16 @@ public class Tracker extends ExtendedParseObject {
 
     }
 
-    private Task<Void> upload(final Context context, ProgressCallback progressCallback) {
+    private Task<Void> uploadData(final Context context, ProgressCallback progressCallback, boolean partialUpload) {
 
         final TaskCompletionSource<Void> taskResult = new TaskCompletionSource<>();
 
         Log.d(TAG, "upload");
 
         try {
+
+            // Add location before saving (to mark ending postion + time in case of still period)
+            appendLocation(context);
 
             String gpsJsonArrayString = readGPSFileAsJSONArrayString(context);
 
@@ -141,7 +188,7 @@ public class Tracker extends ExtendedParseObject {
 
                 final ParseFile file = new ParseFile("gps.json.gzip", gzipped);
 
-                return saveGPSParseFile(context, file, progressCallback);
+                return saveGPSParseFile(context, file, progressCallback, partialUpload);
             }
         } catch (IllegalStateException e) {
             new HandleException(context, TAG, "Get local file name", e);
@@ -179,9 +226,8 @@ public class Tracker extends ExtendedParseObject {
     }
 
 
-
-
-    private int previousActivityType = Integer.MAX_VALUE;
+    // Assume still until proven otherwise
+    private int previousActivityType = DetectedActivity.STILL;
 
     public void appendLocation(final Context context) {
 
@@ -215,32 +261,9 @@ public class Tracker extends ExtendedParseObject {
     @SuppressWarnings("unchecked")
     @Override
     public ParseQuery<Tracker> getAllNetworkQuery() {
-        return new QueryBuilder(false).build();
+        return new TrackerQueryBuilder(false).build();
     }
 
-
-    public static class QueryBuilder extends ParseQueryBuilder<Tracker> {
-
-        public QueryBuilder(boolean fromLocalDatastore) {
-            super(ParseObject.DEFAULT_PIN, fromLocalDatastore, ParseQuery.getQuery(Tracker.class));
-        }
-
-        @Override
-        public ParseQuery<Tracker> build() {
-            query.include(Tracker.guard);
-            return super.build();
-        }
-
-        public QueryBuilder matching(Guard guard) {
-            query.whereEqualTo(Tracker.guard, guard);
-            return this;
-        }
-
-        public QueryBuilder matching(Date date) {
-            query.whereEqualTo(Tracker.sampleStart, date);
-            return this;
-        }
-    }
 
     public Guard getGuard() {
         return (Guard) getLDSFallbackParseObject(Tracker.guard);
@@ -260,6 +283,10 @@ public class Tracker extends ExtendedParseObject {
 
     public int getMinutes() {
         return getInt(Tracker.sampleMinutes);
+    }
+
+    public boolean inProgress() {
+        return getBooleanSafe(Tracker.inProgress, false);
     }
 
     public interface DownloadTrackerDataCallback {

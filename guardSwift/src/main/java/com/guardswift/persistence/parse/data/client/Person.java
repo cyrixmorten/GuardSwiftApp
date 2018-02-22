@@ -39,7 +39,7 @@ public class Person extends ExtendedParseObject {
 
 	@Override
 	public int compareTo(ExtendedParseObject object) {
-		if (object == null) {
+		if (getName() == null || object == null) {
 			return 0;
 		}
 

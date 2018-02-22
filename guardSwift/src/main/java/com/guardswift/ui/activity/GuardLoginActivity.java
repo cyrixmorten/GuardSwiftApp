@@ -339,8 +339,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
                         GuardSwiftApplication.saveCurrentGuardAsLastActive();
 
-                        saveSessionToGuard(guard);
-
                         Intent intent = new Intent(context, MainActivity.class);
                         context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
 
@@ -351,20 +349,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-    private void saveSessionToGuard(final Guard guard) {
-        ParseSession.getCurrentSessionInBackground(new GetCallback<ParseSession>() {
-            @Override
-            public void done(ParseSession session, ParseException e) {
-                if (e != null) {
-                    new HandleException(TAG, "Getting current session", e);
-                    return;
-                }
-
-                guard.setSession(session);
-                guard.setInstallation();
-            }
-        });
-    }
 
 
     private boolean hasGooglePlayServices() {

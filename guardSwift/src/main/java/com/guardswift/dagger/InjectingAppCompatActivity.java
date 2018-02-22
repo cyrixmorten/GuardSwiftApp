@@ -34,8 +34,6 @@ import android.nfc.NfcAdapter;
 import android.provider.Settings;
 import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.afollestad.materialdialogs.DialogAction;
@@ -235,24 +233,24 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     }
 
     // workaround from http://stackoverflow.com/questions/13418436/android-4-2-back-stack-behaviour-with-nested-fragments
-    @Override
-    public void onBackPressed() {
-        // if there is a fragment and the back stack of this fragment is not empty,
-        // then emulate 'onBackPressed' behaviour, because in default, it is not working
-        FragmentManager fm = getSupportFragmentManager();
-        if (fm != null && fm.getFragments() != null) {
-            for (Fragment frag : fm.getFragments()) {
-                if (frag != null && frag.isVisible()) {
-                    FragmentManager childFm = frag.getChildFragmentManager();
-                    if (childFm.getBackStackEntryCount() > 0) {
-                        childFm.popBackStack();
-                        return;
-                    }
-                }
-            }
-        }
-        super.onBackPressed();
-    }
+//    @Override
+//    public void onBackPressed() {
+//        // if there is a fragment and the back stack of this fragment is not empty,
+//        // then emulate 'onBackPressed' behaviour, because in default, it is not working
+//        FragmentManager fm = getSupportFragmentManager();
+//        if (fm != null && fm.getFragments() != null) {
+//            for (Fragment frag : fm.getFragments()) {
+//                if (frag != null && frag.isVisible()) {
+//                    FragmentManager childFm = frag.getChildFragmentManager();
+//                    if (childFm.getBackStackEntryCount() > 0) {
+//                        childFm.popBackStack();
+//                        return;
+//                    }
+//                }
+//            }
+//        }
+//        super.onBackPressed();
+//    }
 
 
 

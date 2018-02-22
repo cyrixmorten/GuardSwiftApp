@@ -13,6 +13,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.TypefaceProvider;
 import com.crashlytics.android.Crashlytics;
+import com.evernote.android.job.JobManager;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -26,6 +27,8 @@ import com.guardswift.core.exceptions.LogError;
 import com.guardswift.dagger.InjectingApplication;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.eventbus.events.BootstrapCompleted;
+import com.guardswift.jobs.GSJobCreator;
+import com.guardswift.jobs.periodic.TrackerUploadJob;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.parse.ExtendedParseObject;
@@ -141,6 +144,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         setupParse();
         setupFabric();
+        setupJobs();
 
         RxJavaPlugins.getInstance().registerErrorHandler(new RxJavaErrorHandler() {
             @Override
@@ -166,6 +170,10 @@ public class GuardSwiftApplication extends InjectingApplication {
             // https://stackoverflow.com/a/40674771/1501613
             StrictMode.setVmPolicy(builder.build());
         }
+    }
+
+    private void setupJobs() {
+        JobManager.create(this).addJobCreator(new GSJobCreator());
     }
 
 
@@ -326,12 +334,16 @@ public class GuardSwiftApplication extends InjectingApplication {
         ActivityRecognitionService.start(this);
         FusedLocationTrackerService.start(this);
         RegisterGeofencesIntentService.start(getInstance(), true);
+
+        TrackerUploadJob.scheduleJob();
     }
 
     public void stopServices() {
         ActivityRecognitionService.stop(this);
         FusedLocationTrackerService.stop(this);
         RegisterGeofencesIntentService.stop(this);
+
+        TrackerUploadJob.cancelJob();
     }
 
     private com.google.android.gms.analytics.Tracker tracker;

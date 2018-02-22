@@ -20,6 +20,7 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.parse.CloudFunctions;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.dagger.InjectingFragment;
@@ -34,12 +35,9 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.documentation.report.create.FragmentVisibilityListener;
 import com.parse.FindCallback;
-import com.parse.FunctionCallback;
-import com.parse.ParseCloud;
 import com.parse.ParseException;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -183,22 +181,19 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
         btnSendReport.setEnabled(false);
         sendReportDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate(R.string.working, R.string.sending_reprt).show();
 
-        final HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put("reportId", report.getObjectId());
-        ParseCloud.callFunctionInBackground(ParseModule.FUNCTION_SEND_REPORT, params, new FunctionCallback<Object>() {
+        CloudFunctions.sendReport(report).continueWith(new Continuation<Void, Object>() {
             @Override
-            public void done(Object object, ParseException e) {
-                if (e != null) {
-                    sendReportFailedWithError(e);
-                    return;
+            public Object then(Task<Void> task) throws Exception {
+                if (task.isFaulted()) {
+                    sendReportFailedWithError(task.getError());
+                    return null;
                 }
 
                 sendReportSuccess();
 
+                return null;
             }
         });
-
-
     }
 
     private void dismissSendReportDialog() {

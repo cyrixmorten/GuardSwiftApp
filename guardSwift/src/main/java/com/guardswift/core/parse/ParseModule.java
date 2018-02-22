@@ -11,6 +11,7 @@ import com.guardswift.R;
 import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule.ForApplication;
+import com.guardswift.jobs.periodic.TrackerUploadJob;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.data.Guard;
@@ -21,9 +22,11 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GuardLoginActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.Device;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
+import com.parse.ParseSession;
 import com.parse.ProgressCallback;
 import com.parse.SaveCallback;
 
@@ -43,8 +46,6 @@ public class ParseModule {
 
     private static final String TAG = ParseModule.class.getSimpleName();
 
-    public static final String FUNCTION_SEND_REPORT = "sendReport";
-
     private final Context context;
     private final ParseTasksCache tasksCache;
     private final GuardCache guardCache;
@@ -61,6 +62,20 @@ public class ParseModule {
         guard.setOnline(true);
 
         guardCache.setLoggedIn(guard);
+
+        ParseSession.getCurrentSessionInBackground(new GetCallback<ParseSession>() {
+            @Override
+            public void done(ParseSession session, ParseException e) {
+                if (e != null) {
+                    new HandleException(TAG, "Getting current session", e);
+                    return;
+                }
+
+                guard.setSession(session);
+                guard.setInstallation();
+                guard.saveInBackground();
+            }
+        });
 
         // Save login EventLog
         new EventLog.Builder(context)
@@ -80,7 +95,7 @@ public class ParseModule {
         Log.w(TAG, "LOGOUT GUARD: " + guard);
 
         if (guard != null) {
-            Tracker.upload(context, guard, progressCallback).continueWithTask(new Continuation<Void, Task<Void>>() {
+            Tracker.upload(context, progressCallback, false).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
                 public Task<Void> then(Task<Void> task) throws Exception {
                     return new EventLog.Builder(context).event(context.getString(R.string.logout)).eventCode(EventLog.EventCodes.GUARD_LOGOUT).automatic(inactivity).build().saveInBackground();

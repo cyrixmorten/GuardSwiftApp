@@ -1,9 +1,6 @@
 package com.guardswift.core.ca.location;
 
 import android.Manifest;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -19,19 +16,17 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.LocationRequest;
 import com.google.common.collect.Lists;
-import com.guardswift.R;
-import com.guardswift.core.Constants;
 import com.guardswift.core.ca.geofence.GeofencingModule;
 import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
 import com.guardswift.eventbus.EventBusController;
+import com.guardswift.notification.LocationNotification;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
-import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.util.Util;
 import com.parse.ParseGeoPoint;
 
@@ -100,29 +95,10 @@ public class FusedLocationTrackerService extends InjectingService {
 
         wl.acquire();
 
-        this.startForeground(Constants.ACTIVITY_RECOGNITION_NOTIFICATION_ID, createForegroundNotification(""));
+        this.startForeground(LocationNotification.NOTIFY_ID, LocationNotification.create(this, ""));
     }
 
-    private Notification createForegroundNotification(String contentText) {
 
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-        return new Notification.Builder(this)
-                .setOngoing(true)
-                .setContentTitle(getText(R.string.gps_position))
-                .setContentText(contentText)
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setContentIntent(pendingIntent)
-                .build();
-    }
-
-    private void updateForegroundNotification(Location location) {
-        Notification notification = createForegroundNotification(getString(R.string.latlng, location.getLatitude(), location.getLongitude()));
-
-        NotificationManager mgr = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mgr.notify(Constants.FUSED_LOCATION_NOTIFICATION_ID, notification);
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, final int startId) {
@@ -190,8 +166,6 @@ public class FusedLocationTrackerService extends InjectingService {
 
     private void requestLocationUpdates() {
 
-        Log.i(TAG, "requestLocationUpdates");
-
         unsubscribeLocationUpdates(); // in case we are already listening
 
         LocationRequest request = LocationRequest.create() //standard GMS LocationRequest
@@ -236,7 +210,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
                             tracker.appendLocation(getApplicationContext());
 
-                            updateForegroundNotification(location);
+                            LocationNotification.update(FusedLocationTrackerService.this, location);
                         } else {
                             stopSelf();
                         }

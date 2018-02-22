@@ -23,10 +23,14 @@ import butterknife.ButterKnife;
 
 public class TrackerCard extends LinearLayout {
 
+    @BindView(R.id.tv_in_progress)
+    TextView tvActive;
 
     @BindView(R.id.tv_date_start)
     TextView tvDateStart;
 
+    @BindView(R.id.tv_date_end)
+    TextView tvDateEnd;
 
     @BindView(R.id.tv_guard_name)
     TextView tvGuardName;
@@ -51,7 +55,6 @@ public class TrackerCard extends LinearLayout {
         View v = inflater.inflate(R.layout.gs_card_tracker, this, true);
 
         ButterKnife.bind(v);
-
     }
 
     public TrackerCard(Context context, AttributeSet attrs, Tracker tracker) {
@@ -82,10 +85,17 @@ public class TrackerCard extends LinearLayout {
         tvDateStart.setText(DateUtils.formatDateTime(
                 getContext(),
                 dateStart.getTime(),
-                DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_YEAR));
+                DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE));
+
+        tvDateEnd.setText(DateUtils.formatDateTime(
+                getContext(),
+                dateEnd.getTime(),
+                DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE));
+
 
         tvGuardName.setText(tracker.getGuardName());
         tvMinutes.setText(getDurationText(dateStart, dateEnd));
+        tvActive.setVisibility(tracker.inProgress() ? VISIBLE : INVISIBLE);
     }
 
     private String getDurationText(Date from, Date to) {

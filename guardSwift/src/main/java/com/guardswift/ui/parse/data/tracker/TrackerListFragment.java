@@ -16,6 +16,7 @@ import com.codetroopers.betterpickers.calendardatepicker.MonthAdapter;
 import com.guardswift.R;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
+import com.guardswift.persistence.parse.query.TrackerQueryBuilder;
 import com.guardswift.ui.menu.MenuItemBuilder;
 import com.guardswift.ui.menu.MenuItemIcons;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
@@ -117,7 +118,7 @@ public class TrackerListFragment extends AbstractParseRecyclerFragment<Tracker, 
         return new ParseQueryAdapter.QueryFactory<Tracker>() {
             @Override
             public ParseQuery<Tracker> create() {
-                return new Tracker.QueryBuilder(false).build().whereLessThanOrEqualTo(Tracker.createdAt, fromDate).addDescendingOrder(Tracker.createdAt);
+                return new TrackerQueryBuilder(false).build().whereLessThanOrEqualTo(Tracker.createdAt, fromDate).addDescendingOrder(Tracker.createdAt);
             }
         };
     }

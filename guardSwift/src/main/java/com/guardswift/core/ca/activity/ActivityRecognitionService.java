@@ -1,8 +1,5 @@
 package com.guardswift.core.ca.activity;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -14,27 +11,20 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
-import com.guardswift.core.Constants;
 import com.guardswift.core.ca.geofence.GeofencingModule;
 import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
-import com.guardswift.persistence.parse.data.Guard;
-import com.guardswift.ui.GuardSwiftApplication;
-import com.guardswift.ui.activity.MainActivity;
-import com.guardswift.util.TriggerTask;
+import com.guardswift.notification.ActivityNotification;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -52,17 +42,12 @@ public class ActivityRecognitionService extends InjectingService {
 
     PowerManager.WakeLock wl;
 
-    private static final int INACTIVITY_TIMEOUT_MINUTES = 60;
-
     private Subscription filteredActivitySubscription;
-    private TriggerTask logoutOnStill;
 
     @Inject
     GeofencingModule geofencingModule;
     @Inject
     ParseModule parseModule;
-
-    private Notification notification;
 
     public ActivityRecognitionService() {
 
@@ -71,36 +56,15 @@ public class ActivityRecognitionService extends InjectingService {
     @Override
     public void onCreate() {
         super.onCreate();
-        this.logoutOnStill = new TriggerTask();
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         wl.acquire();
 
-        this.startForeground(Constants.FUSED_LOCATION_NOTIFICATION_ID, createForegroundNotification(getString(R.string.activity_still)));
+        this.startForeground(ActivityNotification.NOTIFY_ID, ActivityNotification.create(this, getString(R.string.activity_still)));
     }
 
-    private Notification createForegroundNotification(String contentText) {
-
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-
-        return new Notification.Builder(this)
-                .setOngoing(true)
-                .setContentTitle(getText(R.string.activity_recognition))
-                .setContentText(contentText)
-                .setSmallIcon(R.drawable.ic_launcher)
-                .setContentIntent(pendingIntent)
-                .build();
-    }
-
-    private void updateForegroundNotification(DetectedActivity activity) {
-        Notification notification = createForegroundNotification(ActivityDetectionModule.getHumanReadableNameFromType(getApplicationContext(), activity.getType()));
-
-        NotificationManager mgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        mgr.notify(Constants.ACTIVITY_RECOGNITION_NOTIFICATION_ID, notification);
-    }
 
     private static boolean mJustStarted;
 
@@ -121,27 +85,21 @@ public class ActivityRecognitionService extends InjectingService {
 
         unsubscribeActivityUpdates();
 
-        if (hasGooglePlayServices()) {
-
-
-            releaseTextToSpeech();
-            ttobj = new TextToSpeech(getApplicationContext(),
-                    new TextToSpeech.OnInitListener() {
-                        @Override
-                        public void onInit(int status) {
-                            if (status != TextToSpeech.ERROR) {
-                                ttobj.setLanguage(Locale.UK);
+        releaseTextToSpeech();
+        ttobj = new TextToSpeech(getApplicationContext(),
+                new TextToSpeech.OnInitListener() {
+                    @Override
+                    public void onInit(int status) {
+                        if (status != TextToSpeech.ERROR) {
+                            ttobj.setLanguage(Locale.UK);
 //                                speakText("GuardSwiftWeb ready");
-                            }
                         }
-                    });
+                    }
+                });
 
-            requestFilteredActivityUpdates();
+        requestFilteredActivityUpdates();
 
-        } else {
-            Log.e(TAG, "Missing Google Play Services");
-            return Service.START_NOT_STICKY;
-        }
+
         return Service.START_STICKY;
     }
 
@@ -161,7 +119,6 @@ public class ActivityRecognitionService extends InjectingService {
 //        AlarmManager alarmService = (AlarmManager)getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 //        alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() +100, restartServicePI);
 //    }
-
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -255,10 +212,7 @@ public class ActivityRecognitionService extends InjectingService {
 
                         mJustStarted = false;
 
-                        updateForegroundNotification(currentDetectedActivity);
-//                        logoutOnInactivity(currentDetectedActivity);
-
-                        // Save activity to log
+                        ActivityNotification.update(ActivityRecognitionService.this, currentDetectedActivity);
 
                     }
                 }, new Action1<Throwable>() {
@@ -270,54 +224,6 @@ public class ActivityRecognitionService extends InjectingService {
                     }
                 });
     }
-
-
-
-    private void logoutOnInactivity(DetectedActivity activity) {
-        Guard guard = GuardSwiftApplication.getLoggedIn();
-        if (guard != null && guard.canAccessRegularTasks()) {
-            if (activity.getType() == DetectedActivity.STILL) {
-                logoutOnStill.start(new TimerTask() {
-                    @Override
-                    public void run() {
-                        speakText("Inactivity logout complete");
-                        parseModule.logoutDueToInactivity();
-                    }
-                }, INACTIVITY_TIMEOUT_MINUTES);
-            } else {
-                logoutOnStill.stop();
-            }
-        }
-    }
-
-    /**
-     * Map detected activity types to strings
-     *
-     * @param activityType The detected activity type
-     * @return A user-readable name for the type
-     */
-    public static String getNameFromType(int activityType) {
-        switch (activityType) {
-            case DetectedActivity.WALKING:
-                return "walking";
-            case DetectedActivity.IN_VEHICLE:
-                return "in vehicle";
-            case DetectedActivity.ON_BICYCLE:
-                return "on bicycle";
-            case DetectedActivity.ON_FOOT:
-                return "on foot";
-            case DetectedActivity.STILL:
-                return "still";
-            case DetectedActivity.UNKNOWN:
-                return "unknown";
-            case DetectedActivity.TILTING:
-                return "tilting";
-            case DetectedActivity.RUNNING:
-                return "running";
-        }
-        return "unknown";
-    }
-
 
     public void unsubscribeActivityUpdates() {
         unsubscribe(filteredActivitySubscription);
@@ -334,11 +240,5 @@ public class ActivityRecognitionService extends InjectingService {
         }
     }
 
-    private boolean hasGooglePlayServices() {
-        int result = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getApplicationContext());
-        if (result != ConnectionResult.SUCCESS) {
-            return false;
-        }
-        return true;
-    }
+
 }
