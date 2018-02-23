@@ -3,6 +3,8 @@ package com.guardswift.util;
 import android.content.Context;
 import android.util.Log;
 
+import com.guardswift.core.exceptions.HandleException;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -52,8 +54,10 @@ public class FileIO {
         Log.d(TAG, "readFromFile: " + filename);
         String ret = "";
 
+        InputStream inputStream = null;
+
         try {
-            InputStream inputStream = context.openFileInput(filename);
+            inputStream = context.openFileInput(filename);
 
             if (inputStream != null) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -65,18 +69,22 @@ public class FileIO {
                     stringBuilder.append(receiveString);
                 }
 
-                inputStream.close();
                 ret = stringBuilder.toString();
             }
         } catch (FileNotFoundException e) {
-            Log.e(TAG, "File not found: " + e.toString());
-            throw e;
+            new HandleException(TAG, "File not found", e);
         } catch (IOException e) {
-            Log.e(TAG, "Can not read file: " + e.toString());
-            throw e;
+            new HandleException(TAG, "Could not read file", e);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    new HandleException(TAG, "Close input stream", e);
+                }
+            }
         }
 
-        Log.d(TAG, "readFromFile: " + ret.length());
 
         return ret;
     }

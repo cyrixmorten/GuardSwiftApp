@@ -12,7 +12,6 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.eventbus.events.BootstrapCompleted;
-import com.guardswift.jobs.periodic.TrackerUploadJob;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -23,12 +22,12 @@ import com.guardswift.util.Device;
 import com.guardswift.util.Sounds;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 
 import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class MainActivity extends InjectingAppCompatActivity {
 

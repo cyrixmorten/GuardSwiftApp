@@ -17,7 +17,7 @@ public class HandleException {
 
     public HandleException(final Context context, String tag, String message, final Throwable e) {
 
-        Log.e(tag, message, e);
+        e.printStackTrace();
 
         Crashlytics.logException(e);
         Crashlytics.log(Log.ERROR, tag, message + " error: " + e.getMessage());

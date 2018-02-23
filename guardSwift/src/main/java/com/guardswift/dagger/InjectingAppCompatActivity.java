@@ -48,6 +48,7 @@ import com.guardswift.ui.activity.RFIDRegisterActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.Analytics;
 import com.guardswift.util.Device;
+import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 import com.parse.ParseAnalytics;
 
 import java.util.ArrayList;
@@ -55,7 +56,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import cn.pedant.SweetAlert.SweetAlertDialog;
 import dagger.ObjectGraph;
 import de.greenrobot.event.EventBus;
 
