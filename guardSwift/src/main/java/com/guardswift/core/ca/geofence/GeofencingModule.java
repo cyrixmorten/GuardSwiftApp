@@ -182,6 +182,7 @@ public class GeofencingModule {
                     Exception e = task.getError();
                     if (e != null) {
                         new HandleException(TAG, "Failed to query geofence for: " + geofenceStrategy.getName(), e);
+                        throw e;
                     }
                     return null;
                 }

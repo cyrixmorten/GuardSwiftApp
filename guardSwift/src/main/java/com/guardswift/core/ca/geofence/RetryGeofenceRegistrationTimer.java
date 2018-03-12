@@ -14,16 +14,19 @@ class RetryGeofenceRegistrationTimer {
 
     private Timer mTimer;
     private Context context;
+    private int retryCount;
 
-    public RetryGeofenceRegistrationTimer(Context context) {
+    RetryGeofenceRegistrationTimer(Context context) {
         this.context = context.getApplicationContext();
     }
 
-    public void start() {
+    public void start(int retryCount) {
 
         if (running()) {
             return;
         }
+
+        this.retryCount = retryCount;
 
         long triggerMillis = TimeUnit.MINUTES.toMillis(TRIGGER_AFTER_MINUTES);
         mTimer = new Timer();
@@ -31,7 +34,7 @@ class RetryGeofenceRegistrationTimer {
 
     }
 
-    public void stop() {
+    void stop() {
 
         if (mTimer != null) {
             mTimer.cancel();
@@ -47,7 +50,7 @@ class RetryGeofenceRegistrationTimer {
     private class RetryGeofenceRegistrationTimerTask extends TimerTask {
         @Override
         public void run() {
-            RegisterGeofencesIntentService.start(RetryGeofenceRegistrationTimer.this.context, false);
+            RegisterGeofencesIntentService.start(RetryGeofenceRegistrationTimer.this.context, retryCount);
             stop();
         }
     }

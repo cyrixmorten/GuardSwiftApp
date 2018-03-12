@@ -59,6 +59,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
     private static Location mLastGeofenceRebuildLocation;
     private static boolean mRebuildInProgress;
+    private static int retryCount;
 
     private ReactiveLocationProvider mReactiveLocationProvider;
     private Subscription mAddGeofencesSubscription;
@@ -66,10 +67,15 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
     private RetryGeofenceRegistrationTimer retryTimer;
 
-    public static void start(Context context, boolean force) {
-        // relying on previously set task_type
-        Log.d(TAG, "START forced: " + force);
+    public static void start(Context context) {
+        RegisterGeofencesIntentService.start(context, 0);
+    }
 
+    public static void start(Context context, int retryCount) {
+        // relying on previously set task_type
+        Log.d(TAG, "START retryCount: " + retryCount);
+
+        boolean force = retryCount > 0;
 
         if (force) {
             RegisterGeofencesIntentService.mLastGeofenceRebuildLocation = null;
@@ -78,6 +84,9 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         if (RegisterGeofencesIntentService.isRebuildingGeofence()) {
             return;
         }
+
+        RegisterGeofencesIntentService.retryCount = retryCount;
+
         context.startService(new Intent(context, RegisterGeofencesIntentService.class));
     }
 
@@ -207,9 +216,9 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
             @Override
             public Task<Void> then(Task<Object> task) throws Exception {
                 if (task.isFaulted()) {
-                    new HandleException(getBaseContext(), TAG, "Failed to build geofences", task.getError());
+                    new HandleException(getBaseContext(), TAG, "Failed to build geofences retryCount: " + RegisterGeofencesIntentService.retryCount, task.getError());
 
-                    retryTimer.start();
+                    retryTimer.start(RegisterGeofencesIntentService.retryCount + 1);
                 } else {
                     EventBusController.postUIUpdate(location);
                 }
