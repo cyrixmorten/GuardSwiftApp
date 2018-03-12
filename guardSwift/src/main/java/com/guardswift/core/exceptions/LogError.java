@@ -2,6 +2,7 @@ package com.guardswift.core.exceptions;
 
 import android.util.Log;
 
+import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Device;
 import com.parse.ParseInstallation;
@@ -34,6 +35,11 @@ public class LogError {
             error.put("gsVersion", device.getVersionCode());
             error.put("message", message);
 
+            Guard guard = GuardSwiftApplication.getLoggedIn();
+            if (guard != null) {
+                error.put("guard", guard);
+            }
+
             if (exception != null) {
 
                 String exceptionMessage = exception.getMessage();
@@ -49,6 +55,11 @@ public class LogError {
                     if (causeMessage != null) {
                         error.put("cause", causeMessage);
                     }
+                }
+
+                StackTraceElement[] st = exception.getStackTrace();
+                if (st != null && st.length > 0) {
+                    error.put("trace", st[0].toString());
                 }
             }
 
