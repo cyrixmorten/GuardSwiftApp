@@ -33,10 +33,6 @@ public class EventType extends ExtendedParseObject {
 
 	public static final String timesUsed = "timesUsed";
 
-	@Override
-	public String getParseClassName() {
-		return EventType.class.getSimpleName();
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override

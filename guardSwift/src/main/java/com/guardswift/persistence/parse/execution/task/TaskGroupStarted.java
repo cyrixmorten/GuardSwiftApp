@@ -76,10 +76,7 @@ public class TaskGroupStarted extends ExtendedParseObject{
     public static final String extrasCount = "extrasCount"; // number of extras
     public static final String eventCount = "eventCount";
 
-    @Override
-    public String getParseClassName() {
-        return TaskGroupStarted.class.getSimpleName();
-    }
+
 
     @SuppressWarnings("unchecked")
     @Override

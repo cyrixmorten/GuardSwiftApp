@@ -42,10 +42,6 @@ public class Message extends ExtendedParseObject {
         return (Guard) getLDSFallbackParseObject(Message.guard);
     }
 
-    @Override
-    public String getParseClassName() {
-        return Message.class.getSimpleName();
-    }
 
     @SuppressWarnings("unchecked")
     @Override

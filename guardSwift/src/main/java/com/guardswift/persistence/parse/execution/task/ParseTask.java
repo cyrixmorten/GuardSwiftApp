@@ -294,12 +294,6 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return null;
     }
 
-    @Override
-    public String getParseClassName() {
-        return ParseTask.class.getSimpleName();
-    }
-
-
 
     public ParseObject getOwner() {
         return getParseObject(owner);

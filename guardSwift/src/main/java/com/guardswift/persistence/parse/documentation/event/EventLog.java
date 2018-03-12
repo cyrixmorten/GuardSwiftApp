@@ -387,11 +387,6 @@ public class EventLog extends ExtendedParseObject {
 
 
 
-    @Override
-    public String getParseClassName() {
-        return EventLog.class.getSimpleName();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public ParseQuery<EventLog> getAllNetworkQuery() {

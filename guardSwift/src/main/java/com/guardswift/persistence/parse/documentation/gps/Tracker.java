@@ -5,7 +5,6 @@ import android.location.Location;
 import android.util.Log;
 
 import com.google.android.gms.location.DetectedActivity;
-import com.google.gson.Gson;
 import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
@@ -35,8 +34,6 @@ import bolts.Continuation;
 import bolts.Task;
 import bolts.TaskCompletionSource;
 
-import static com.guardswift.R.string.started;
-
 @ParseClassName("Tracker")
 public class Tracker extends ExtendedParseObject {
 
@@ -59,17 +56,14 @@ public class Tracker extends ExtendedParseObject {
     public Tracker() {
     }
 
-    @Override
-    public String getParseClassName() {
-        return Tracker.class.getSimpleName();
-    }
+
 
 
     public static Task<Void> upload(final Context context, final ProgressCallback progressCallback, final boolean partialUpload) {
 
         final Guard guard = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().getLoggedIn();
 
-        Log.d(TAG, "Tracker upload: " + guard.getName());
+        Log.d(TAG, "Tracker create: " + guard.getName());
 
         return new TrackerQueryBuilder(false).matching(guard).inProgress(true).build().getFirstInBackground().continueWithTask(new Continuation<Tracker, Task<Void>>() {
             @Override
@@ -109,13 +103,8 @@ public class Tracker extends ExtendedParseObject {
     }
 
 
-    private String readGPSFileAsJSONArrayString(Context context) throws IOException {
-        String string = "";
-        try {
-             string = FileIO.readFromFile(context, LOCAL_GPS_FILE_NAME);
-        } catch (Exception e) {
-            return string;
-        }
+    private String readGPSFileAsJSONArrayString(Context context) {
+        String string = FileIO.readFromFile(context, LOCAL_GPS_FILE_NAME);
 
         String jsonObjectsLocationString = (string.contains("{")) ? string.substring(string.indexOf("{"), string.lastIndexOf("}") + 1) : "";
         return "[" + jsonObjectsLocationString + "]";
@@ -171,12 +160,12 @@ public class Tracker extends ExtendedParseObject {
 
         final TaskCompletionSource<Void> taskResult = new TaskCompletionSource<>();
 
-        Log.d(TAG, "upload");
+        Log.d(TAG, "create");
 
         try {
 
             // Add location before saving (to mark ending postion + time in case of still period)
-            appendLocation(context);
+            appendLocation(context, LocationModule.Recent.getLastKnownLocation());
 
             String gpsJsonArrayString = readGPSFileAsJSONArrayString(context);
 
@@ -216,8 +205,7 @@ public class Tracker extends ExtendedParseObject {
                 }
 
                 try {
-                    TrackerData[] trackerDataArray = new Gson().fromJson(FileIO.decompress(data), TrackerData[].class);
-                    callback.done(trackerDataArray, null);
+                    callback.done(TrackerData.locationJSONArraytoTrackerData(FileIO.decompress(data)), null);
                 } catch (IOException e1) {
                     callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Unable to parse GPS data"));
                 }
@@ -229,9 +217,8 @@ public class Tracker extends ExtendedParseObject {
     // Assume still until proven otherwise
     private int previousActivityType = DetectedActivity.STILL;
 
-    public void appendLocation(final Context context) {
+    public void appendLocation(final Context context, Location location) {
 
-        Location location = LocationModule.Recent.getLastKnownLocation();
 
         if (location == null || location.isFromMockProvider()) {
             return;
@@ -244,7 +231,8 @@ public class Tracker extends ExtendedParseObject {
             return;
         }
 
-        JSONObject jsonLocation = LocationModule.locationToJSONObject(location);
+
+        JSONObject jsonLocation = TrackerData.locationToJSONObject(location);
         try {
             FileIO.writeToFile(context, LOCAL_GPS_FILE_NAME, Context.MODE_APPEND, jsonLocation.toString());
             FileIO.writeToFile(context, LOCAL_GPS_FILE_NAME, Context.MODE_APPEND, ",");

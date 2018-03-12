@@ -24,11 +24,6 @@ public class Report extends ExtendedParseObject {
     }
 
 
-    @Override
-    public String getParseClassName() {
-        return Report.class.getSimpleName();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public ParseQuery<Report> getAllNetworkQuery() {

@@ -50,7 +50,7 @@ public class FileIO {
     }
 
 
-    public static String readFromFile(Context context, String filename) throws IOException {
+    public static String readFromFile(Context context, String filename) {
         Log.d(TAG, "readFromFile: " + filename);
         String ret = "";
 
@@ -72,7 +72,7 @@ public class FileIO {
                 ret = stringBuilder.toString();
             }
         } catch (FileNotFoundException e) {
-            new HandleException(TAG, "File not found", e);
+            // Ignore (create it)
         } catch (IOException e) {
             new HandleException(TAG, "Could not read file", e);
         } finally {

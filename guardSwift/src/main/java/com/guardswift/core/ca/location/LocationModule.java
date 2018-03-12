@@ -1,17 +1,13 @@
 package com.guardswift.core.ca.location;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Address;
 import android.location.Location;
 
-import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.util.GeocodedAddress;
 
-import org.json.JSONObject;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import bolts.Task;
@@ -63,27 +59,12 @@ public class LocationModule {
         }
     }
 
-    public static JSONObject locationToJSONObject(Location location) {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("activityType", ActivityDetectionModule.Recent.getDetectedActivityType());
-        map.put("activityConfidence", ActivityDetectionModule.Recent.getDetectedActivityConfidence());
-        map.put("provider", location.getProvider());
-        map.put("latitude", location.getLatitude());
-        map.put("longitude", location.getLongitude());
-        map.put("speed", location.getSpeed());
-        map.put("accuracy", location.getAccuracy());
-        map.put("bearing", location.getBearing());
-        map.put("altitude", location.getAltitude());
-        map.put("time", location.getTime());
-        return new JSONObject(map);
-    }
-
     // Reverse geocode GPS position
     public static Task<GeocodedAddress> reverseGeocodedAddress(Context context) {
         final TaskCompletionSource<GeocodedAddress> result = new TaskCompletionSource<>();
 
         final ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(context);
-        Observable<Location> lastKnownLocationObservable = locationProvider.getLastKnownLocation();
+        @SuppressLint("MissingPermission") Observable<Location> lastKnownLocationObservable = locationProvider.getLastKnownLocation();
 
         lastKnownLocationObservable
                 .subscribeOn(Schedulers.trampoline())

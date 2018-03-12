@@ -25,10 +25,13 @@ import com.guardswift.eventbus.EventBusController;
 import com.guardswift.notification.LocationNotification;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
+import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
+import com.guardswift.persistence.parse.documentation.gps.TrackerData;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.util.Util;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
 
 import java.util.List;
 import java.util.Set;
@@ -208,9 +211,9 @@ public class FusedLocationTrackerService extends InjectingService {
                             inspectDistanceToGeofencedTasks(location);
                             updateUIIfDistanceThresholdReached(location);
 
-                            tracker.appendLocation(getApplicationContext());
-
                             LocationNotification.update(FusedLocationTrackerService.this, location);
+
+                            uploadLocation(location);
                         } else {
                             stopSelf();
                         }
@@ -223,6 +226,19 @@ public class FusedLocationTrackerService extends InjectingService {
                         new HandleException(TAG, "Error on Fused Location observable", throwable);
                     }
                 });
+    }
+
+    private void uploadLocation(Location location) {
+        tracker.appendLocation(getApplicationContext(), location);
+
+        Guard guard = guardCache.getLoggedIn();
+        if (guard != null) {
+
+            TrackerData trackerData = TrackerData.create(location, guardCache.getLoggedIn());
+            guard.setPosition(location);
+
+            ParseObject.saveAllInBackground(Lists.newArrayList(guard, trackerData));
+        }
     }
 
 
@@ -239,7 +255,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
 
         if (triggerByDistance) {
-            RegisterGeofencesIntentService.start(getApplicationContext(), false);
+            RegisterGeofencesIntentService.start(getApplicationContext());
         }
     }
 

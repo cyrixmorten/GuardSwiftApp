@@ -34,11 +34,6 @@ public class EventRemark extends ExtendedParseObject {
 
 
 
-	@Override
-	public String getParseClassName() {
-		return EventRemark.class.getSimpleName();
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public ParseQuery<EventRemark> getAllNetworkQuery() {

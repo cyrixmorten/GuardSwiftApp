@@ -176,7 +176,7 @@ public class MainActivity extends InjectingAppCompatActivity {
 //            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 //        } else
 
-        if (GuardSwiftApplication.getLastActiveGuard() == null || !guardCache.isLoggedIn()) {
+        if (!guardCache.isLoggedIn()) {
             intent = new Intent(MainActivity.this,
                     GuardLoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

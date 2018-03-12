@@ -29,7 +29,7 @@ public class TrackerUploadJob extends Job {
             @Override
             public Object then(Task<Void> task) throws Exception {
                 if (task.isFaulted()) {
-                    new HandleException(TAG, "Failed to perform periodic Tracker upload", task.getError());
+                    new HandleException(TAG, "Failed to perform periodic Tracker create", task.getError());
                     return null;
                 }
 

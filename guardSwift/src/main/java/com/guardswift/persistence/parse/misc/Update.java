@@ -17,13 +17,6 @@ public class Update extends ExtendedParseObject {
     public static final String androidApk = "androidApk";
 
 
-
-
-    @Override
-    public String getParseClassName() {
-        return Update.class.getSimpleName();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public ParseQuery<Update> getAllNetworkQuery() {

@@ -12,10 +12,6 @@ public class TaskGroup extends ExtendedParseObject {
 
 	public static final String name = "name";
 
-	@Override
-	public String getParseClassName() {
-		return TaskGroup.class.getSimpleName();
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override

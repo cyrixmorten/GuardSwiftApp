@@ -26,7 +26,7 @@ public class Analytics {
 
         Log.i(TAG, "sendScreenName: " + screenName);
 
-        Tracker t = GuardSwiftApplication.getInstance().getTracker();
+        Tracker t = GuardSwiftApplication.getInstance().getGoogleAnalyticsTracker();
         t.setScreenName(screenName);
         t.send(new HitBuilders.ScreenViewBuilder().build());
     }
@@ -42,7 +42,7 @@ public class Analytics {
 
         Log.i(TAG, "sendEvent cat:" + category + " action: " + action + " label: " + label);
 
-        GuardSwiftApplication.getInstance().getTracker().send(new HitBuilders.EventBuilder()
+        GuardSwiftApplication.getInstance().getGoogleAnalyticsTracker().send(new HitBuilders.EventBuilder()
                 .setCategory(category)
                 .setAction(action)
                 .setLabel(label)

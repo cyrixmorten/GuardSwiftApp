@@ -20,10 +20,6 @@ public class Person extends ExtendedParseObject {
 		return person;
 	}
 
-	@Override
-	public String getParseClassName() {
-		return Person.class.getSimpleName();
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override

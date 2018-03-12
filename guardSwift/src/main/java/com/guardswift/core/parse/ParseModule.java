@@ -173,7 +173,7 @@ public class ParseModule {
         updateDialog.setCancelable(false);
 
 
-        // Perform logout, upload
+        // Perform logout, create
         logout(new SaveCallback() {
             @Override
             public void done(ParseException e) {

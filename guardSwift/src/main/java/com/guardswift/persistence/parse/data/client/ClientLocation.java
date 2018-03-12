@@ -18,10 +18,6 @@ public class ClientLocation extends ExtendedParseObject  {
     private static final String isCheckpoint = "isCheckpoint";
 
 
-    @Override
-    public String getParseClassName() {
-        return ClientLocation.class.getSimpleName();
-    }
 
     public static ClientLocation create(String location) {
         ClientLocation clientLocation = new ClientLocation();

@@ -16,10 +16,6 @@ public class ClientContact extends ExtendedParseObject {
 	public static final String email = "email";
 	public static final String receiveReports = "receiveReports";
 
-	@Override
-	public String getParseClassName() {
-		return ClientContact.class.getSimpleName();
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override

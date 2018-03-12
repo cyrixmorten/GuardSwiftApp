@@ -40,6 +40,7 @@ import com.guardswift.persistence.parse.data.client.Person;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
+import com.guardswift.persistence.parse.documentation.gps.TrackerData;
 import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.execution.task.TaskGroup;
@@ -219,8 +220,8 @@ public class GuardSwiftApplication extends InjectingApplication {
         ParseObject.registerSubclass(Guard.class);
         ParseObject.registerSubclass(Message.class);
         ParseObject.registerSubclass(Update.class);
-
         ParseObject.registerSubclass(Tracker.class);
+        ParseObject.registerSubclass(TrackerData.class);
 
         String applicationId = "guardswift";
 
@@ -331,7 +332,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         ActivityRecognitionService.start(this);
         FusedLocationTrackerService.start(this);
-        RegisterGeofencesIntentService.start(getInstance(), true);
+        RegisterGeofencesIntentService.start(getInstance());
 
         TrackerUploadJob.scheduleJob();
     }
@@ -346,7 +347,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
     private com.google.android.gms.analytics.Tracker tracker;
 
-    public synchronized com.google.android.gms.analytics.Tracker getTracker() {
+    public synchronized com.google.android.gms.analytics.Tracker getGoogleAnalyticsTracker() {
         if (tracker == null) {
 
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);

@@ -65,11 +65,6 @@ public class Client extends ExtendedParseObject implements Positioned {
     public static final String tasksRadius = "tasksRadius";
 
 
-    @Override
-    public String getParseClassName() {
-        return Client.class.getSimpleName();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public ParseQuery<Client> getAllNetworkQuery() {

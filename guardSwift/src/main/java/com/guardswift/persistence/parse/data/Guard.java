@@ -1,5 +1,8 @@
 package com.guardswift.persistence.parse.data;
 
+import android.location.Location;
+
+import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.Positioned;
 import com.guardswift.persistence.parse.query.GuardQueryBuilder;
@@ -39,10 +42,6 @@ public class Guard extends ExtendedParseObject implements Positioned {
     private static final String accessStatic = "accessStatic";
     private static final String roles = "roles";
 
-    @Override
-    public String getParseClassName() {
-        return Guard.class.getSimpleName();
-    }
 
     @SuppressWarnings("unchecked")
     @Override
@@ -100,6 +99,10 @@ public class Guard extends ExtendedParseObject implements Positioned {
 
     public boolean isOnline() {
         return has(isOnline) && getBoolean(isOnline);
+    }
+
+    public void setPosition(Location location) {
+        setPosition(ParseModule.geoPointFromLocation(location));
     }
 
     public void setPosition(ParseGeoPoint location) {

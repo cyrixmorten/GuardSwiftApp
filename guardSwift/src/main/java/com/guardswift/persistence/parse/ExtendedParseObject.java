@@ -52,7 +52,6 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
     public abstract <T extends ParseObject> ParseQuery<T> getAllNetworkQuery();
 
 
-    public abstract String getParseClassName();
     public String getPin() {
         return ParseObject.DEFAULT_PIN;
     };

@@ -107,7 +107,7 @@ public class AlarmReceiver extends FirebaseMessagingService {
                 }
 
                 // Update geofence to include new alarm
-                RegisterGeofencesIntentService.start(getApplicationContext(), true);
+                RegisterGeofencesIntentService.start(getApplicationContext(), 1);
 
                 Guard guard = task.getResult();
 
