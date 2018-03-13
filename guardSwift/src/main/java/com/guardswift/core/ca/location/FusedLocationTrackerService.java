@@ -94,9 +94,10 @@ public class FusedLocationTrackerService extends InjectingService {
         Log.d(TAG, "GPSTrackerService onCreate");
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-
-        wl.acquire();
+        if (pm != null) {
+            wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+            wl.acquire();
+        }
 
         this.startForeground(LocationNotification.NOTIFY_ID, LocationNotification.create(this, ""));
     }

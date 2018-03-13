@@ -35,7 +35,7 @@ public class GSIntents {
 
     public static void openPDF(Context context, File file) {
 
-        if (context != null && file == null) {
+        if (context == null || file == null) {
             ToastHelper.toast(context, context.getString(R.string.error_downloading_file));
             return;
         }

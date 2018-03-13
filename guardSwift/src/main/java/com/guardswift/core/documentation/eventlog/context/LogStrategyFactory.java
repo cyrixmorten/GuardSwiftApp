@@ -1,7 +1,5 @@
 package com.guardswift.core.documentation.eventlog.context;
 
-import android.content.Context;
-
 import com.google.common.collect.Lists;
 
 import java.util.List;
@@ -11,7 +9,7 @@ import java.util.List;
  */
 public class LogStrategyFactory implements LogContextFactory {
 
-    List<LogContextStrategy> logStrategies = Lists.newArrayList();
+    private List<LogContextStrategy> logStrategies = Lists.newArrayList();
 
     public LogStrategyFactory() {
 
@@ -20,7 +18,6 @@ public class LogStrategyFactory implements LogContextFactory {
         logStrategies.add(new LogCurrentLocationStrategy());
         logStrategies.add(new LogDeviceInfoStrategy());
         logStrategies.add(new LogTimestampStrategy());
-        logStrategies.add(new LogGuardSwiftVersionStrategy());
     }
 
     public List<LogContextStrategy> getStrategies() {

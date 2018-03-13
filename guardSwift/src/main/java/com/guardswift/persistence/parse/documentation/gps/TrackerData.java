@@ -13,6 +13,7 @@ import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.util.Device;
 import com.guardswift.util.Util;
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
@@ -35,6 +36,8 @@ public class TrackerData extends ExtendedParseObject {
         JSONObject json = locationToJSONObject(location);
         TrackerData td = new TrackerData();
 
+        Device device = new Device(GuardSwiftApplication.getInstance());
+
         try {
 
             td.put(TrackerData._activityType, json.getInt(TrackerData._activityType));
@@ -49,6 +52,9 @@ public class TrackerData extends ExtendedParseObject {
             td.put(TrackerData._clientTimeStamp, new Date());
             td.put(TrackerData._position, ParseModule.geoPointFromLocation(location));
             td.put(TrackerData._installation, com.parse.ParseInstallation.getCurrentInstallation());
+            td.put(TrackerData._batteryLevel, device.getBatteryLevelPct());
+
+            td.put(TrackerData._clientTimeStamp, new Date());
 
             if (guard != null) {
                 td.put(TrackerData._guard, guard);
@@ -107,12 +113,15 @@ public class TrackerData extends ExtendedParseObject {
     public static final String _latitude = "latitude";
     public static final String _longitude = "longitude";
 
+    public static final String _batteryLevel = "batteryLevel";
+
     public static final String _guard = "guard";
     public static final String _position = "position";
     public static final String _clientTimeStamp = "clientTimeStamp";
     public static final String _installation = "installation";
     public static final String _taskGroup = "taskGroup";
     public static final String _taskGroupStarted = "taskGroupStarted";
+
 
     private long time;
 

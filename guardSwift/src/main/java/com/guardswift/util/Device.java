@@ -2,11 +2,14 @@ package com.guardswift.util;
 
 import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NfcAdapter;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
@@ -69,9 +72,14 @@ public class Device {
 	public Boolean isOnline() {
 		ConnectivityManager cm = (ConnectivityManager) context
 				.getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo ni = cm.getActiveNetworkInfo();
-		if (ni != null && ni.isConnected())
-			return true;
+		NetworkInfo ni = null;
+		if (cm != null) {
+			ni = cm.getActiveNetworkInfo();
+			if (ni != null && ni.isConnected()) {
+				return true;
+			}
+		}
+
 
 		return false;
 	}
@@ -132,4 +140,13 @@ public class Device {
 		return enabled;
 	}
 
+	public float getBatteryLevelPct() {
+		IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+		Intent batteryStatus = context.registerReceiver(null, ifilter);
+
+		int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+		int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+		return level / (float)scale;
+	}
 }
