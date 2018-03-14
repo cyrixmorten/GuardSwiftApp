@@ -59,33 +59,25 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
     private static Location mLastGeofenceRebuildLocation;
     private static boolean mRebuildInProgress;
-    private static int retryCount;
 
     private ReactiveLocationProvider mReactiveLocationProvider;
     private Subscription mAddGeofencesSubscription;
     private PendingIntent mGeofencePendingIntent;
 
-    private RetryGeofenceRegistrationTimer retryTimer;
 
-    public static void start(Context context) {
-        RegisterGeofencesIntentService.start(context, 0);
-    }
 
-    public static void start(Context context, int retryCount) {
+    public static void start(Context context, boolean force) {
         // relying on previously set task_type
-        Log.d(TAG, "START retryCount: " + retryCount);
+        Log.d(TAG, "START");
 
-        boolean force = retryCount > 0;
 
         if (force) {
-            RegisterGeofencesIntentService.mLastGeofenceRebuildLocation = null;
+            RegisterGeofencesIntentService.mRebuildInProgress = false;
         }
 
         if (RegisterGeofencesIntentService.isRebuildingGeofence()) {
             return;
         }
-
-        RegisterGeofencesIntentService.retryCount = retryCount;
 
         context.startService(new Intent(context, RegisterGeofencesIntentService.class));
     }
@@ -101,30 +93,31 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         super("RegisterGeofencesIntentService");
     }
 
-    @Override
-    public void onDestroy() {
-        if (this.retryTimer != null) {
-            this.retryTimer.stop();
-            this.retryTimer = null;
-        }
-
-        super.onDestroy();
-
-
-    }
 
     @Override
     protected void onHandleIntent(Intent intent) {
         super.onHandleIntent(intent); // Inject to ObjectGraph
 
-        if (this.retryTimer == null) {
-            this.retryTimer = new RetryGeofenceRegistrationTimer(getApplicationContext());
-        }
 
         if (intent.hasExtra("clear")) {
             clear();
             return;
         }
+
+        rebuildGeofenceForTasks();
+    }
+
+    public static Location getLastRebuildLocation() {
+        return mLastGeofenceRebuildLocation;
+    }
+
+    public static boolean isRebuildingGeofence() {
+        return mRebuildInProgress;
+    }
+
+
+    private void rebuildGeofenceForTasks() {
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             new HandleException(TAG, "Missing location permission", new IllegalStateException("Missing permission"));
             return;
@@ -146,27 +139,12 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                 });
             }
         });
-
     }
 
-    public static Location getLastRebuildLocation() {
-        return mLastGeofenceRebuildLocation;
-    }
-
-    public static boolean isRebuildingGeofence() {
-        return mRebuildInProgress;
-    }
-
-
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
     private void rebuildGeofenceForTasks(final Location location) {
 
         Log.d(TAG, "rebuildGeofenceForTasks: " + location);
 
-        mLastGeofenceRebuildLocation = location;
         mRebuildInProgress = true;
 
         int withinKm = 2;
@@ -216,15 +194,13 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
             @Override
             public Task<Void> then(Task<Object> task) throws Exception {
                 if (task.isFaulted()) {
-                    new HandleException(getBaseContext(), TAG, "Failed to build geofences retryCount: " + RegisterGeofencesIntentService.retryCount, task.getError());
-
-                    retryTimer.start(RegisterGeofencesIntentService.retryCount + 1);
+                    new HandleException(getBaseContext(), TAG, "Failed to build geofences", task.getError());
                 } else {
                     EventBusController.postUIUpdate(location);
+                    mLastGeofenceRebuildLocation = location;
                 }
 
                 mRebuildInProgress = false;
-
 
                 return null;
             }

@@ -27,6 +27,7 @@ import com.guardswift.dagger.InjectingApplication;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.jobs.GSJobCreator;
+import com.guardswift.jobs.oneoff.RebuildGeofencesJob;
 import com.guardswift.jobs.periodic.TrackerUploadJob;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
@@ -332,8 +333,8 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         ActivityRecognitionService.start(this);
         FusedLocationTrackerService.start(this);
-        RegisterGeofencesIntentService.start(getInstance());
 
+        RebuildGeofencesJob.scheduleJob(false);
         TrackerUploadJob.scheduleJob();
     }
 
@@ -342,6 +343,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         FusedLocationTrackerService.stop(this);
         RegisterGeofencesIntentService.stop(this);
 
+        RebuildGeofencesJob.cancelJob();
         TrackerUploadJob.cancelJob();
     }
 

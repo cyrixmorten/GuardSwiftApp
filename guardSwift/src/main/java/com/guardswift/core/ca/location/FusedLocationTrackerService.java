@@ -22,6 +22,7 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
 import com.guardswift.eventbus.EventBusController;
+import com.guardswift.jobs.oneoff.RebuildGeofencesJob;
 import com.guardswift.notification.LocationNotification;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
@@ -256,7 +257,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
 
         if (triggerByDistance) {
-            RegisterGeofencesIntentService.start(getApplicationContext());
+            RebuildGeofencesJob.scheduleJob(false);
         }
     }
 

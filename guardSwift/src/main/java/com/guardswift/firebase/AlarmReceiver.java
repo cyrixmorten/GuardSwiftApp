@@ -5,8 +5,8 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.exceptions.LogError;
+import com.guardswift.jobs.oneoff.RebuildGeofencesJob;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -107,7 +107,7 @@ public class AlarmReceiver extends FirebaseMessagingService {
                 }
 
                 // Update geofence to include new alarm
-                RegisterGeofencesIntentService.start(getApplicationContext(), 1);
+                RebuildGeofencesJob.scheduleJob(true);
 
                 Guard guard = task.getResult();
 
