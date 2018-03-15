@@ -34,7 +34,7 @@
             <!--android:layout_alignParentEnd="true"-->
             <!--android:textSize="18dp"-->
             <!--app:bootstrapBrand="regular"-->
-            <!--app:fontAwesomeIcon="fa_pencil"-->
+            <!--createIcon="fa_pencil"-->
             <!--tools:ignore="SpUsage"/>-->
     </RelativeLayout>
 </android.support.v7.widget.CardView>

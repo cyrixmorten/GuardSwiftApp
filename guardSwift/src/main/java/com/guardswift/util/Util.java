@@ -21,6 +21,10 @@ public class Util {
     }
 
     public static String relativeTimeString(Date date) {
+        if (date == null) {
+            return "";
+        }
+
         return DateUtils.getRelativeTimeSpanString(date.getTime(),
                 new Date().getTime(), 0L, DateUtils.FORMAT_ABBREV_ALL)
                 .toString();

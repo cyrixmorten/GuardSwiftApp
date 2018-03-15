@@ -397,6 +397,7 @@
     <string name="inactivity_logout_message">Logget af grundet inaktivitet</string>
     <string name="info">Info</string>
     <string name="alarm_original_text">Vis alarm besked</string>
+    <string name="map">Kort</string>
     <string name="title_activity_maps">Map</string>
     <string name="automatic_arrival_area">Automatisk ankomst</string>
     <string name="arrival_radius_desc_regular">Gående tilsyn (grøn)</string>

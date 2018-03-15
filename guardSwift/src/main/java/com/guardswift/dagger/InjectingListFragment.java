@@ -88,7 +88,7 @@ public class InjectingListFragment extends ListFragment implements Injector {
 		refWatcher.watch(this);
 	}
 
-	// subclasses createWithFontAwesomeIcon their own method if needed
+	// subclasses create their own method if needed
 	public void onEventMainThread(UpdateUIEvent ev) {
 		// to make EventBus happy
 	}

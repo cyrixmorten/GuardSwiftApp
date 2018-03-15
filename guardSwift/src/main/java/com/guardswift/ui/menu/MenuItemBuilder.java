@@ -48,7 +48,7 @@ public class MenuItemBuilder {
 //        menu.add(context.getString(R.string.add_new))
 //                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
 //                .setIcon(
-//                        MenuItemIcons.createWithFontAwesomeIcon(context, FontAwesome.Icon.faw_plus_circle)
+//                        MenuItemIcons.create(context, FontAwesome.Icon.faw_plus_circle)
 //                )
 //                .setOnMenuItemClickListener(clickListener);
 //    }

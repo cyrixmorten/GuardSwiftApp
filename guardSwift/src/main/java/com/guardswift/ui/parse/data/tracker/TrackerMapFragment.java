@@ -2,10 +2,10 @@ package com.guardswift.ui.parse.data.tracker;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +17,6 @@ import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Polyline;
@@ -26,12 +25,11 @@ import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.core.parse.ParseModule;
-import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.documentation.gps.TrackerData;
 import com.guardswift.ui.activity.AbstractToolbarActivity;
 import com.guardswift.ui.activity.SlidingPanelActivity;
-import com.guardswift.ui.web.GoogleMapFragment;
+import com.guardswift.ui.map.BaseMapFragment;
 import com.guardswift.util.Util;
 import com.parse.ProgressCallback;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -58,7 +56,7 @@ import static com.guardswift.R.id.preview_chart;
 import static com.guardswift.R.id.tv_shown_timespan;
 import static com.guardswift.util.Util.dateFormatHourMinutes;
 
-public class TrackerMapFragment extends InjectingFragment implements OnMapReadyCallback {
+public class TrackerMapFragment extends BaseMapFragment {
 
     private static final String TAG = TrackerMapFragment.class.getSimpleName();
 
@@ -91,6 +89,10 @@ public class TrackerMapFragment extends InjectingFragment implements OnMapReadyC
 
     private final int RENDER_TRACK_MILISECONDS = 2000;
 
+    @Override
+    protected int getMapLayoutId() {
+        return R.id.layout_map;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -100,15 +102,13 @@ public class TrackerMapFragment extends InjectingFragment implements OnMapReadyC
 
         unbinder = ButterKnife.bind(this, rootView);
 
-        addMapFragment();
-
         setRetainInstance(true);
 
         return rootView;
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         FragmentActivity activity = getActivity();
@@ -179,36 +179,6 @@ public class TrackerMapFragment extends InjectingFragment implements OnMapReadyC
         }
     }
 
-    private void addMapFragment() {
-
-        final FragmentManager fm = getChildFragmentManager();
-
-        GoogleMapFragment mapFragment = (GoogleMapFragment) fm.findFragmentByTag("map");
-
-        if (mapFragment != null) {
-            Log.e(TAG, "reusing map");
-            fm.beginTransaction().attach(mapFragment).commit();
-
-            mapFragment.getMapAsync(this);
-
-        } else {
-            Log.e(TAG, "new map");
-            new Handler().postDelayed(new Runnable() {
-
-                @Override
-                public void run() {
-                    if (isAdded()) {
-
-                        GoogleMapFragment mapFragment = GoogleMapFragment
-                                .newInstance();
-                        fm.beginTransaction()
-                                .replace(R.id.layout_map, mapFragment, "map")
-                                .commitAllowingStateLoss();
-                    }
-                }
-            }, 500);
-        }
-    }
 
     public void setTracker(Tracker tracker) {
         this.tracker = tracker;

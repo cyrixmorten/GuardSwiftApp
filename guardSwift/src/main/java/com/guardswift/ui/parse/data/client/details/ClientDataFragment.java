@@ -1,14 +1,11 @@
 package com.guardswift.ui.parse.data.client.details;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.databinding.ObservableField;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,16 +13,14 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.guardswift.R;
-import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.databinding.FragmentClientDetailsBinding;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.query.ClientQueryBuilder;
-import com.guardswift.ui.web.GoogleMapFragment;
+import com.guardswift.ui.map.BaseMapFragment;
 import com.guardswift.util.ToastHelper;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -34,8 +29,7 @@ import com.parse.ParseQuery;
 import de.greenrobot.event.EventBus;
 
 
-public class ClientDataFragment extends InjectingFragment implements
-        OnMapReadyCallback {
+public class ClientDataFragment extends BaseMapFragment {
 
 
 
@@ -77,12 +71,9 @@ public class ClientDataFragment extends InjectingFragment implements
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-
+    protected int getMapLayoutId() {
+        return R.id.layout_map;
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -94,41 +85,9 @@ public class ClientDataFragment extends InjectingFragment implements
 
         binding.setClient(mClient);
 
-        addMapFragment();
-
         return view;
     }
 
-    private void addMapFragment() {
-
-        final FragmentManager fm = getChildFragmentManager();
-
-        GoogleMapFragment mapFragment = (GoogleMapFragment) fm.findFragmentByTag("map");
-
-        if (mapFragment != null) {
-            Log.e(TAG, "reusing map");
-            fm.beginTransaction().attach(mapFragment).commit();
-
-            mapFragment.getMapAsync(this);
-
-        } else {
-            Log.e(TAG, "new map");
-            new Handler().postDelayed(new Runnable() {
-
-                @Override
-                public void run() {
-                    if (isAdded()) {
-
-                        GoogleMapFragment mapFragment = GoogleMapFragment
-                                .newInstance();
-                        fm.beginTransaction()
-                                .replace(R.id.layout_map, mapFragment, "map")
-                                .commitAllowingStateLoss();
-                    }
-                }
-            }, 500);
-        }
-    }
 
 
     private class MapData {

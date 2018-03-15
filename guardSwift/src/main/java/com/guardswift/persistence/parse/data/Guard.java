@@ -34,6 +34,7 @@ public class Guard extends ExtendedParseObject implements Positioned {
     private static final String lastLogin = "lastLogin";
     private static final String lastLogout = "lastLogout";
     private static final String position = "position";
+    private static final String positionUpdatedAt = "positionUpdatedAt";
     private static final String isOnline = "isOnline";
 
     // access rights
@@ -109,11 +110,16 @@ public class Guard extends ExtendedParseObject implements Positioned {
         if (location == null)
             return;
 
+        put(Guard.positionUpdatedAt, new Date());
         put(Guard.position, location);
     }
 
     public ParseGeoPoint getPosition() {
         return getParseGeoPoint(position);
+    }
+
+    public Date getPositionUpdatedAt() {
+        return getDate(Guard.positionUpdatedAt);
     }
 
     public boolean canAccessRegularTasks() {
@@ -179,7 +185,7 @@ public class Guard extends ExtendedParseObject implements Positioned {
         }
 
         List<String> roles = getList(Guard.roles);
-        for (String guardRole: roles) {
+        for (String guardRole : roles) {
             if (guardRole.toLowerCase().equals(role.name().toLowerCase())) {
                 return true;
             }

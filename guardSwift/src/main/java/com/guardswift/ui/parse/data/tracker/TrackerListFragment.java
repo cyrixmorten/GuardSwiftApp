@@ -78,7 +78,7 @@ public class TrackerListFragment extends AbstractParseRecyclerFragment<Tracker, 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         new MenuItemBuilder(getContext())
-                .icon(MenuItemIcons.createWithFontAwesomeIcon(getContext(), FontAwesome.Icon.faw_calendar))
+                .icon(MenuItemIcons.create(getContext(), FontAwesome.Icon.faw_calendar))
                 .showAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
                 .addToMenu(menu, R.string.date, new MenuItem.OnMenuItemClickListener() {
                     @Override

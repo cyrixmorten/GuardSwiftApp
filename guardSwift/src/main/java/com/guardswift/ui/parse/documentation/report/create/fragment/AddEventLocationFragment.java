@@ -129,7 +129,7 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         new MenuItemBuilder(getContext())
-                .icon(MenuItemIcons.createWithFontAwesomeIcon(getContext(), FontAwesome.Icon.faw_plus_circle))
+                .icon(MenuItemIcons.create(getContext(), FontAwesome.Icon.faw_plus_circle))
                 .showAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
                 .addToMenu(menu, R.string.add_new, new MenuItem.OnMenuItemClickListener() {
                     @Override

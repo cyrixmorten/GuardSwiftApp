@@ -28,12 +28,14 @@
 
 package com.guardswift.dagger;
 
+import com.guardswift.ui.map.BaseMapFragment;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.client.details.ClientDataFragment;
 import com.guardswift.ui.parse.data.client.details.ClientDetailsViewpagerFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
+import com.guardswift.ui.parse.data.guard.GuardsMapFragment;
 import com.guardswift.ui.parse.data.tracker.TrackerListFragment;
 import com.guardswift.ui.parse.data.tracker.TrackerMapFragment;
 import com.guardswift.ui.parse.documentation.eventlog.AbstractEventFragment;
@@ -85,7 +87,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		AbstractParseRecyclerFragment.class,
 		AbstractTasksRecycleFragment.class,
 		// - Data
+		BaseMapFragment.class,
 		GuardListFragment.class,
+		GuardsMapFragment.class,
 		// -- Client
 		ClientDetailsViewpagerFragment.class,
 		ClientListFragment.class,
