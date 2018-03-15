@@ -678,6 +678,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
             }
         }
 
-        return false;
+        // if guard forget to select a taskgroup, always return true
+        return taskGroupStartedCache.getSelected() == null;
     }
 }
