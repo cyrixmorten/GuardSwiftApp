@@ -545,7 +545,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public boolean isWithinScheduledTime() {
         // always return true if debugging
         if (BuildConfig.DEBUG) {
-            //return true;
+            return true;
         }
 
         return isAfterScheduledStartTime() && isBeforeScheduledEndTime();
@@ -736,7 +736,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         if (taskGroupStartedCache.getSelected() != null) {
             if (getTaskGroupStarted() != null) {
                 boolean isMatch = getTaskGroupStarted().equals(taskGroupStartedCache.getSelected());
-                Log.d(TAG, "isMatch: " + isMatch);
+                //Log.d(TAG, "isMatch: " + isMatch);
                 return isMatch;
             }
         }

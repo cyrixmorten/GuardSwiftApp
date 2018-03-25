@@ -36,8 +36,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 511
-        versionName "5.1.1"
+        versionCode 512
+        versionName "5.1.2"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -143,12 +143,13 @@ dependencies {
     compile 'com.android.support:multidex:1.0.3'
     compile 'com.google.code.findbugs:jsr305:2.0.2'
     compile 'com.google.code.gson:gson:2.8.0'
-    compile 'com.android.support:support-v13:27.0.2'
-    compile 'com.android.support:design:27.0.2'
-    compile 'com.android.support:cardview-v7:27.0.2'
-    compile 'com.android.support:appcompat-v7:27.0.2'
-    compile 'com.android.support:preference-v7:27.0.2'
-    compile 'com.android.support:animated-vector-drawable:27.0.2'
+    compile 'com.android.support:support-v13:27.1.0'
+    compile 'com.android.support:design:27.1.0'
+    compile 'com.android.support:cardview-v7:27.1.0'
+    compile 'com.android.support:appcompat-v7:27.1.0'
+    compile 'com.android.support:preference-v7:27.1.0'
+    compile 'com.android.support:preference-v14:27.1.0'
+    compile 'com.android.support:animated-vector-drawable:27.1.0'
     compile 'com.google.firebase:firebase-messaging:11.8.0'
     compile 'com.google.android.gms:play-services-analytics:11.8.0'
     compile 'com.google.android.gms:play-services-gcm:11.8.0'
