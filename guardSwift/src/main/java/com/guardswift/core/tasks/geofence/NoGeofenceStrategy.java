@@ -1,7 +1,12 @@
 package com.guardswift.core.tasks.geofence;
 
 
+import android.location.Location;
+
 import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.parse.FindCallback;
+
+import java.util.ArrayList;
 
 public class NoGeofenceStrategy extends BaseGeofenceStrategy {
 
@@ -12,6 +17,11 @@ public class NoGeofenceStrategy extends BaseGeofenceStrategy {
 
     private NoGeofenceStrategy(ParseTask task) {
         super(task);
+    }
+
+    @Override
+    public void queryGeofencedTasks(int withinKm, Location fromLocation, FindCallback<ParseTask> callback) {
+        callback.done(new ArrayList<ParseTask>(), null);
     }
 
     @Override

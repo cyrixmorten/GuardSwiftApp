@@ -17,7 +17,7 @@ public interface TaskGeofenceStrategy {
     void enterGeofence();
     void exitGeofence();
 
-    int getGeofenceRadius();
+    int getGeofenceRadiusMeters();
 
     // TODO inline query in GeofencingModule
     Task<List<ParseTask>> queryGeofencedTasks(int withinKm, Location fromLocation);

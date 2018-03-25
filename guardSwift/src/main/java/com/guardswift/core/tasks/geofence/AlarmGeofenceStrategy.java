@@ -27,10 +27,6 @@ public class AlarmGeofenceStrategy extends BaseGeofenceStrategy {
         return TAG;
     }
 
-    @Override
-    public int getGeofenceRadius() {
-        return 300;
-    }
 
     @Override
     public void withinGeofence() {

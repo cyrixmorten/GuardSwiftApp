@@ -175,7 +175,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
                 List<Geofence> geofences = Lists.newArrayList();
                 for (ParseTask geofencedTask : tasks) {
                     ParseGeoPoint position = geofencedTask.getPosition();
-                    float radius = geofencedTask.getGeofenceStrategy().getGeofenceRadius();
+                    float radius = geofencedTask.getGeofenceStrategy().getGeofenceRadiusMeters();
 
                     Geofence geofence = createGeofence(geofencedTask.getObjectId(), position, radius);
                     geofences.add(geofence);

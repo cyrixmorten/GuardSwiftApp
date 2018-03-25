@@ -289,7 +289,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
             ParseGeoPoint clientPosition = task.getPosition();
             float distance = ParseModule.distanceBetweenMeters(location, clientPosition);
-            int radius = task.getGeofenceStrategy().getGeofenceRadius();
+            int radius = task.getGeofenceStrategy().getGeofenceRadiusMeters();
 
             if (distance <= radius) {
                 tasksWithinGeofence.add(task.getObjectId());

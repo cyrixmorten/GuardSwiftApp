@@ -43,9 +43,6 @@ public class RaidGeofenceStrategy extends BaseGeofenceStrategy {
 
         ParseGeoPoint C = task.getPosition();
 
-//        int geofenceRadius = getGeofenceRadius();
-//        double innerRadius = geofenceRadius*0.2;
-
         // First check - if update happened within the inner geofenceRadius
         if (B != null) {
             float LBC = ParseModule.distanceBetweenMeters(B, C);
@@ -113,34 +110,9 @@ public class RaidGeofenceStrategy extends BaseGeofenceStrategy {
 
             // segment intersects with geofence geofenceRadius
             if (LEC < task.getRadius()) {
-//                if (
-                        task.getAutomationStrategy().automaticArrival();
-//                        && BuildConfig.DEBUG) {
-//                    new EventLog.Builder(context).
-//                    taskPointer(task, ParseTask.EVENT_TYPE.ARRIVE).
-//                    event(context.getString(R.string.event_arriving)).
-//                    remarks("LEC " + LEC).
-//                    eventCode(EventLog.EventCodes.AUTOMATIC_ARRIVED).
-//                    automatic(true).
-//                    saveAsync();
-//                }
+                task.getAutomationStrategy().automaticArrival();
             }
-
-//            Log.e(TAG, "LEC: " + LEC + "  " + task.getTaskTitle(context) + " innerRadius: " + innerRadius);
-
-
         }
-    }
-
-    @Override
-    public void enterGeofence() {
-        super.enterGeofence();
-
-        // do nothing, rely on withinGeofence
-
-//        if (automationStrategy != null) {
-//            automationStrategy.automaticArrival(context);
-//        }
     }
 
     @Override
@@ -152,10 +124,6 @@ public class RaidGeofenceStrategy extends BaseGeofenceStrategy {
         }
     }
 
-    @Override
-    public int getGeofenceRadius() {
-        return 300;
-    }
 
     @Override
     public void queryGeofencedTasks(final int radiusKm, Location fromLocation, final FindCallback<ParseTask> callback) {

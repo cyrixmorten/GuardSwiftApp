@@ -132,7 +132,7 @@ public class GeofencingModule {
 
     }
 
-    public Task<Void> clearPinned() {
+    Task<Void> clearPinned() {
         return ExtendedParseObject.unpinAllInBackground(LDS_PIN);
     }
 

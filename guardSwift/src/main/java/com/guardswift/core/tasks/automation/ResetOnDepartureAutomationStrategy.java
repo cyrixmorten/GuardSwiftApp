@@ -3,7 +3,6 @@ package com.guardswift.core.tasks.automation;
 import android.content.Context;
 import android.util.Log;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.guardswift.R;
 import com.guardswift.core.tasks.controller.TaskController;
@@ -11,7 +10,6 @@ import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,7 +24,6 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
     private Timer timer;
 
     private static final Set<String> lockedTasks = Sets.newConcurrentHashSet();
-    private static final Map<String, TaskAutomationStrategy> instances = Maps.newConcurrentMap();
 
     public static TaskAutomationStrategy getInstance(ParseTask task) {
         return new ResetOnDepartureAutomationStrategy(task);

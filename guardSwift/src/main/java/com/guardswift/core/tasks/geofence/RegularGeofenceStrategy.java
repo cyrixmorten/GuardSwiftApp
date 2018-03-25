@@ -59,11 +59,6 @@ public class RegularGeofenceStrategy extends BaseGeofenceStrategy {
         return TAG;
     }
 
-    @Override
-    public int getGeofenceRadius() {
-        return 300;
-    }
-
 
     @Override
     public void queryGeofencedTasks(final int withinKm, Location fromLocation, final FindCallback<ParseTask> callback) {
