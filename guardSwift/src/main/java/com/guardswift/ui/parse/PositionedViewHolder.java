@@ -41,14 +41,26 @@ public class PositionedViewHolder extends RecyclerView.ViewHolder {
 
         private final Location deviceLocation;
 
-        private final AwesomeTextView vDistanceText;
-        private final AwesomeTextView vDistanceIcon;
+        private final ThreadLocal<AwesomeTextView> vDistanceText;
+        private final ThreadLocal<AwesomeTextView> vDistanceIcon;
 
-        public CalcDistanceAsync(Positioned positionedObject, PositionedViewHolder holder) {
+        public CalcDistanceAsync(Positioned positionedObject, final PositionedViewHolder holder) {
             this.positionedObject = positionedObject;
             this.deviceLocation = LocationModule.Recent.getLastKnownLocation();
-            this.vDistanceText = holder.vDistanceText;
-            this.vDistanceIcon = holder.vDistanceIcon;
+
+            this.vDistanceText = new ThreadLocal<AwesomeTextView>() {
+                @Override
+                protected AwesomeTextView initialValue() {
+                    return holder.vDistanceText;
+                }
+            };
+
+            this.vDistanceIcon = new ThreadLocal<AwesomeTextView>() {
+                @Override
+                protected AwesomeTextView initialValue() {
+                    return holder.vDistanceIcon;
+                }
+            };
         }
 
         @Override
@@ -68,34 +80,29 @@ public class PositionedViewHolder extends RecyclerView.ViewHolder {
         @Override
         protected void onPostExecute(ParseModule.DistanceStrings distanceStrings) {
             // default when missing location
-            vDistanceText.setMarkdownText("");
-            vDistanceText.setBootstrapBrand(DefaultBootstrapBrand.REGULAR);
-            vDistanceIcon.setBootstrapBrand(DefaultBootstrapBrand.REGULAR);
-            vDistanceIcon.setFontAwesomeIcon(FontAwesome.FA_MAP_MARKER);
+            AwesomeTextView distanceText = vDistanceText.get();
+            AwesomeTextView distanceIcon = vDistanceIcon.get();
+
+            if (distanceText == null || distanceIcon == null) {
+                return;
+            }
+
+            distanceText.setMarkdownText("");
+            distanceText.setBootstrapBrand(DefaultBootstrapBrand.REGULAR);
+            distanceIcon.setBootstrapBrand(DefaultBootstrapBrand.REGULAR);
+            distanceIcon.setFontAwesomeIcon(FontAwesome.FA_MAP_MARKER);
 
 
-            vDistanceText.setVisibility(View.GONE);
-            vDistanceIcon.setVisibility(View.GONE);
+            distanceText.setVisibility(View.GONE);
+            distanceIcon.setVisibility(View.GONE);
 
             if (distanceStrings != null) {
 
-                vDistanceText.setVisibility(View.VISIBLE);
-                vDistanceIcon.setVisibility(View.VISIBLE);
+                distanceText.setVisibility(View.VISIBLE);
+                distanceIcon.setVisibility(View.VISIBLE);
 
                 String type = distanceStrings.distanceType;
                 String value = distanceStrings.distanceValue;
-
-
-//            BootstrapBrand brand = DefaultBootstrapBrand.DANGER;
-//                if (tasksCache.isGeofenced(positionedObject)) {
-//                    brand = DefaultBootstrapBrand.INFO;
-//                }
-//                if (tasksCache.isMovedOutsideGeofence(positionedObject)) {
-//                    brand = DefaultBootstrapBrand.WARNING;
-//                }
-//                if (tasksCache.isWithinGeofence(positionedObject)) {
-//                    brand = DefaultBootstrapBrand.SUCCESS;
-//                }
 
 
                 BootstrapText text = new BootstrapText.Builder(GuardSwiftApplication.getInstance())
@@ -105,7 +112,7 @@ public class PositionedViewHolder extends RecyclerView.ViewHolder {
                         .addText(" ")
                         .build();
 
-                vDistanceText.setBootstrapText(text);
+                distanceText.setBootstrapText(text);
 
             }
             super.onPostExecute(distanceStrings);

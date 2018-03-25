@@ -2,7 +2,6 @@ package com.guardswift.ui.parse.execution;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -54,12 +53,9 @@ import com.parse.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -207,11 +203,11 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         }
 
-//        public void abort(final Context context, final ParseTask task) {
-//            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_aborted, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
+//        public void abort(final Context contextWeakReference, final ParseTask task) {
+//            new CommonDialogsBuilder.MaterialDialogs(contextWeakReference).okCancel(R.string.confirm_action, contextWeakReference.getString(R.string.mark_aborted, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
 //                @Override
 //                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-//                    AlarmTaskViewHolder.super.onActionAbort(context, task);
+//                    AlarmTaskViewHolder.super.onActionAbort(contextWeakReference, task);
 //                }
 //            }).show();
 //        }
@@ -220,7 +216,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         public void onActionFinish(final Context context, final ParseTask task) {
 
 //            if (task.isAccepted()) {
-//                abort(context, task);
+//                abort(contextWeakReference, task);
 //                return;
 //            }
 
@@ -272,7 +268,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //            vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
 //                @Override
 //                public void onClick(View view) {
-//                    TaskDescriptionActivity.start(context, task);
+//                    TaskDescriptionActivity.start(contextWeakReference, task);
 //                }
 //            });
 
@@ -301,7 +297,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 }
 
 //                if (task.isAccepted()) {
-//                    vBtnFinished.setText(context.getString(R.string.onActionAbort));
+//                    vBtnFinished.setText(contextWeakReference.getString(R.string.onActionAbort));
 //                }
 
                 if (task.isAborted() || task.isFinished()) {
@@ -314,7 +310,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
 //                if (alarmTask.getGuard() != null) {
 //                    description += "\n\n";
-//                    description += context.getString(R.string.guard) + ": " + alarmTask.getGuard().getName();
+//                    description += contextWeakReference.getString(R.string.guard) + ": " + alarmTask.getGuard().getName();
 //                }
 
                 vTaskDesc.setText(description);
@@ -415,7 +411,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 super.onActionArrive(context, task);
             } else {
                 // Show dialog explaining that time is outside scheduled
-//                new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.outside_schedule, R.string.arrived_outside_schedule, new MaterialDialog.SingleButtonCallback() {
+//                new CommonDialogsBuilder.MaterialDialogs(contextWeakReference).ok(R.string.outside_schedule, R.string.arrived_outside_schedule, new MaterialDialog.SingleButtonCallback() {
 //                    @Override
 //                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 // TODO date dialog (today or yesterday)
@@ -599,7 +595,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //            vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
 //                @Override
 //                public void onClick(View view) {
-//                    TaskDescriptionActivity.start(context, task);
+//                    TaskDescriptionActivity.start(contextWeakReference, task);
 //                }
 //            });
 
@@ -622,6 +618,8 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 vTimeStart.setText(task.getTimeStartString());
                 vTimeEnd.setText(task.getTimeEndString());
 
+                // vTimeStart.setTextColor(task.isAfterScheduledStartTime() ? Color.GREEN : Color.RED);
+                // vTimeEnd.setTextColor(task.isBeforeScheduledEndTime() ? Color.GREEN : Color.RED);
 
                 if (vInfoLayout.getChildCount() > 1) {
                     vInfoLayout.removeViewAt(0);
@@ -819,7 +817,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //            this.vBtnAborted.setOnClickListener(new View.OnClickListener() {
 //                @Override
 //                public void onClick(View view) {
-//                    onActionAbort(context, task);
+//                    onActionAbort(contextWeakReference, task);
 //                }
 //            });
 
@@ -835,39 +833,22 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         }
 
 
-        public void setRemoveItemCallback(RemoveItemCallback removeItemCallback) {
+        void setRemoveItemCallback(RemoveItemCallback removeItemCallback) {
             this.removeItemCallback = removeItemCallback;
         }
 
-        @SuppressWarnings("unchecked")
-        protected Task<ParseTask> performTaskAction(final Context context, final ParseTask task, final ACTION action) {
+        Task<ParseTask> performTaskAction(final Context context, final ParseTask task, final ACTION action) {
 
-            final TaskCompletionSource result = new TaskCompletionSource<>();
+            final TaskCompletionSource<ParseTask> result = new TaskCompletionSource<>();
 
             final ParseTask.TASK_STATE previousTaskState = task.getTaskState();
             final TaskController taskController = task.getController();
             if (taskController.canPerformAction(action, task)) {
-                new AsyncTask<Void, Void, ParseTask>() {
+                updateTaskState(context, previousTaskState, taskController.translatesToState(action));
+                // may perform LDS and should perhaps be done in background somehow
+                ParseTask updatedTask = taskController.performAction(action, task);
 
-                    @Override
-                    protected void onPreExecute() {
-                        ParseTask.TASK_STATE toState = taskController.translatesToState(action);
-                        updateTaskState(context, previousTaskState, toState);
-                        super.onPreExecute();
-                    }
-
-                    @Override
-                    protected ParseTask doInBackground(Void... voids) {
-                        // might contain LDS lookup
-                        return taskController.performAction(action, task);
-                    }
-
-                    @Override
-                    protected void onPostExecute(ParseTask updatedTask) {
-                        super.onPostExecute(updatedTask);
-                        result.setResult(updatedTask);
-                    }
-                }.execute();
+                result.setResult(updatedTask);
             } else {
                 result.setResult(task);
             }
@@ -876,7 +857,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         }
 
 
-        public void setTaskState(Context context, ParseTask task) {
+        void setTaskState(Context context, ParseTask task) {
             ParseTask.TASK_STATE state = task.getTaskState();
             updateTaskState(context, state);
         }
@@ -922,7 +903,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         private void updateTaskStateButtons(Context context, ParseTask.TASK_STATE state) {
             bootstrapActionButtonDefaults(context, this.vBtnArrived);
-//            bootstrapActionButtonDefaults(context, this.vBtnAborted);
+//            bootstrapActionButtonDefaults(contextWeakReference, this.vBtnAborted);
             bootstrapActionButtonDefaults(context, this.vBtnFinished);
 
             int colorRes = getTaskStateColorResource(state);
@@ -931,7 +912,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                     bootstrapActionButtonSelect(context, this.vBtnArrived, colorRes);
                     break;
 //                case ABORTED:
-//                    bootstrapActionButtonSelect(context, this.vBtnAborted, colorRes);
+//                    bootstrapActionButtonSelect(contextWeakReference, this.vBtnAborted, colorRes);
 //                    break;
                 case FINISHED:
                     bootstrapActionButtonSelect(context, this.vBtnFinished, colorRes);
@@ -1060,7 +1041,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         holder.update(context, task);
 
-        debugGeofenceStatus(task, holder);
+        //debugGeofenceStatus(task, holder);
 
         new PositionedViewHolder.CalcDistanceAsync(task, holder).execute();
 //        new UpdateTaskStateAsync(task, holder, isNew).execute();
@@ -1088,18 +1069,18 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //        linearLayout.addView(isGeofenced(task));
 //        linearLayout.addView(isWithinGeofence(task));
 //        linearLayout.addView(isOutsideGeofence(task));
-//        linearLayout.addView(isWithinScheduledTime(task));
+        //linearLayout.addView(isWithinScheduledTime(task));
 
-//        TextView tvTaskTypeString = new TextView(context);
+//        TextView tvTaskTypeString = new TextView(contextWeakReference);
 //        tvTaskTypeString.setText(task.getTaskTypeString());
 //        linearLayout.addView(tvTaskTypeString);
 //
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM HH:mm",
-                Locale.getDefault());
-        dateFormat.setTimeZone(TimeZone.getDefault());
-        TextView tvTaskType = new TextView(context);
-        tvTaskType.setText(dateFormat.format(task.getUpdatedAt()));
-        linearLayout.addView(tvTaskType);
+        //SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM HH:mm",
+        //        Locale.getDefault());
+        //dateFormat.setTimeZone(TimeZone.getDefault());
+        //TextView tvTaskType = new TextView(context);
+        //tvTaskType.setText(dateFormat.format(task.getUpdatedAt()));
+        //linearLayout.addView(tvTaskType);
     }
 
     private TextView isWithinScheduledTime(ParseTask task) {
@@ -1146,7 +1127,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //    private void setAnimation(View viewToAnimate, int position) {
 //        // If the bound view wasn't previously displayed on screen, it's animated
 //        if (position > lastPosition) {
-//            Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left);
+//            Animation animation = AnimationUtils.loadAnimation(contextWeakReference, android.R.anim.slide_in_left);
 //            viewToAnimate.startAnimation(animation);
 //            lastPosition = position;
 //        }
@@ -1211,88 +1192,6 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             notifyItemRemoved(position);
         }
     }
-
-
-    private class UpdateTaskStateAsync extends AsyncTask<Void, Void, ParseTask.TASK_STATE> {
-
-        private final ParseTask task;
-        private final TaskViewHolder holder;
-        private final ParseTask.TASK_STATE from_state;
-        private final boolean isNew;
-
-        public UpdateTaskStateAsync(ParseTask task, TaskViewHolder holder, ParseTask.TASK_STATE from_state, boolean isNew) {
-            this.task = task;
-            this.holder = holder;
-            this.from_state = from_state;
-            this.isNew = isNew;
-        }
-
-        public UpdateTaskStateAsync(ParseTask task, TaskViewHolder holder, boolean isNew) {
-            this.task = task;
-            this.holder = holder;
-            this.from_state = ParseTask.TASK_STATE.PENDING;
-            this.isNew = isNew;
-        }
-
-
-        @Override
-        protected ParseTask.TASK_STATE doInBackground(Void... voids) {
-            // might contain LDS lookup
-            return task.getTaskState();
-        }
-
-        @Override
-        protected void onPostExecute(ParseTask.TASK_STATE to_state) {
-
-
-            holder.updateTaskState(context, from_state, to_state, isNew, isNew);
-
-            super.onPostExecute(to_state);
-        }
-    }
-
-
-    ;
-
-//    private void setDistanceValue(ParseTask task, Location deviceLocation, LinearLayout distanceLayout, TextView distanceType, TextView distanceValue) {
-//
-//        if (deviceLocation == null) {
-//            return;
-//        }
-//
-//        ParseGeoPoint targetGeoPoint = task.getPosition();
-//        ParseModule.DistanceStrings distanceStrings = ParseModule.distanceBetweenString(
-//                deviceLocation, targetGeoPoint);
-//        distanceType.setText(distanceStrings.distanceType);
-//        distanceValue.setText(distanceStrings.distanceValue);
-//
-//
-//        Set<ParseTask> allGeofenced = tasksCache.getAllGeofencedTasks();
-//        Set<ParseTask> within = tasksCache.getWithinGeofence();
-//        Set<ParseTask> outside = tasksCache.getOutsideGeofence();
-//
-//        TextView[] colorViews = new TextView[]{distanceType, distanceValue};
-//        if (within.contains(task)) {
-//            setDistanceColor(R.color.button_success_gradient_dark, colorViews);
-//        } else if (outside.contains(task)) {
-//            setDistanceColor(R.color.button_warning_gradient_dark, colorViews);
-//        } else if (allGeofenced.contains(task)) {
-//            setDistanceColor(R.color.button_info_gradient_dark, colorViews);
-//        } else {
-//            setDistanceColor(R.color.button_inverse_disabled, colorViews);
-//        }
-//
-//        if (distanceLayout.getVisibility() == View.GONE) {
-//            distanceLayout.setVisibility(View.VISIBLE);
-//        }
-//    }
-//
-//    private void setDistanceColor(int color, TextView[] views) {
-//        int colorRes = context.getResources().getColor(color);
-//        for (TextView v: views) {
-//            v.setTextColor(colorRes);
-//        }
-//    }
 
 
 }

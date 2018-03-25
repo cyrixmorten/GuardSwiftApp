@@ -23,8 +23,7 @@ public class HandleException {
         Crashlytics.log(Log.ERROR, tag, message + " error: " + e.getMessage());
 
         if (e instanceof ParseException) {
-            ParseException parseException = (ParseException)e;
-            new ParseErrorHandler().handleParseError(context, parseException);
+            new ParseErrorHandler().handleParseError(context, (ParseException)e);
         }
 
         LogError.log(tag, message, e);

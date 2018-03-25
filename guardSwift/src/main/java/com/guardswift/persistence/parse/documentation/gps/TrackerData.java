@@ -57,7 +57,7 @@ public class TrackerData extends ExtendedParseObject {
             td.put(TrackerData._clientTimeStamp, new Date());
 
             if (guard != null) {
-                td.put(TrackerData._guard, guard);
+                td.put(TrackerData._guard, ParseObject.createWithoutData(Guard.class, guard.getObjectId()));
             }
 
             TaskGroupStarted selectedTaskGroup = GuardSwiftApplication.getInstance().getCacheFactory().getTaskGroupStartedCache().getSelected();

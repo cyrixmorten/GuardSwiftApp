@@ -19,6 +19,7 @@ import com.parse.ParseClassName;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseInstallation;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.ProgressCallback;
@@ -82,7 +83,7 @@ public class Tracker extends ExtendedParseObject {
                         tracker = new Tracker();
 
                         tracker.put(Tracker.sampleStart, started.toDate());
-                        tracker.put(Tracker.guard, guard);
+                        tracker.put(Tracker.guard, ParseObject.createWithoutData(Guard.class, guard.getObjectId()));
                         tracker.put(Tracker.installation, ParseInstallation.getCurrentInstallation());
                         tracker.put(ExtendedParseObject.owner, ParseUser.getCurrentUser());
                     } else {

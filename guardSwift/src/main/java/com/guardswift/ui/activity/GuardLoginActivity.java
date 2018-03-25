@@ -43,11 +43,9 @@ import com.guardswift.ui.drawer.GuardLoginNavigationDrawer;
 import com.guardswift.util.Device;
 import com.guardswift.util.ToastHelper;
 import com.guardswift.util.UpdateApp;
-import com.parse.GetCallback;
 import com.parse.GetFileCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
-import com.parse.ParseSession;
 import com.parse.ParseUser;
 import com.parse.ProgressCallback;
 import com.squareup.picasso.Picasso;
@@ -382,7 +380,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                     @Override
                     public Object then(Task<List<Update>> task) throws Exception {
                         if (task.isFaulted()) {
-                            new HandleException(TAG, "Fetch updates", task.getError());
+                            new HandleException(GuardLoginActivity.this, TAG, "Fetch updates", task.getError());
                             return null;
                         }
 

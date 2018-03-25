@@ -76,6 +76,8 @@ public class ActivityNotification {
         mBuilder.setContentText(ActivityDetectionModule.getHumanReadableNameFromType(context.getApplicationContext(), activity.getType()));
 
         NotificationManager mgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-        mgr.notify(NOTIFY_ID, mBuilder.build());
+        if (mgr != null) {
+            mgr.notify(NOTIFY_ID, mBuilder.build());
+        }
     }
 }

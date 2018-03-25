@@ -44,7 +44,7 @@ import com.parse.SaveCallback;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.MutableDateTime;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 
 import java.util.Date;
@@ -62,7 +62,9 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
 
     public enum TASK_TYPE {REGULAR, RAID, STATIC, ALARM}
+
     public enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINISHED}
+
     public enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER, LEAVE}
 
     public static final String taskGroup = "taskGroup";
@@ -113,7 +115,6 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public static final String timesArrived = "timesArrived";
 
 
-
     public static class STATUS {
         public static String PENDING = "pending";
         public static String ACCEPTED = "accepted";
@@ -142,40 +143,56 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
     public TaskGeofenceStrategy getGeofenceStrategy() {
         switch (this.getTaskType()) {
-            case ALARM: return AlarmGeofenceStrategy.getInstance(this);
-            case REGULAR: return RegularGeofenceStrategy.getInstance(this);
-            case RAID: return RaidGeofenceStrategy.getInstance(this);
-            case STATIC: return NoGeofenceStrategy.getInstance(this);
+            case ALARM:
+                return AlarmGeofenceStrategy.getInstance(this);
+            case REGULAR:
+                return RegularGeofenceStrategy.getInstance(this);
+            case RAID:
+                return RaidGeofenceStrategy.getInstance(this);
+            case STATIC:
+                return NoGeofenceStrategy.getInstance(this);
         }
         return null;
     }
 
     public TaskActivityStrategy getActivityStrategy() {
         switch (this.getTaskType()) {
-            case ALARM: return NoActivityStrategy.getInstance();
-            case REGULAR: return ArriveWhenNotInVehicleStrategy.getInstance(this);
-            case RAID: return NoActivityStrategy.getInstance();
-            case STATIC: return NoActivityStrategy.getInstance();
+            case ALARM:
+                return NoActivityStrategy.getInstance();
+            case REGULAR:
+                return ArriveWhenNotInVehicleStrategy.getInstance(this);
+            case RAID:
+                return NoActivityStrategy.getInstance();
+            case STATIC:
+                return NoActivityStrategy.getInstance();
         }
         return null;
     }
 
     public TaskAutomationStrategy getAutomationStrategy() {
         switch (this.getTaskType()) {
-            case ALARM: return FinishOnDepartureAutomationStrategy.getInstance(this);
-            case REGULAR: return StandardTaskAutomationStrategy.getInstance(this);
-            case RAID: return ResetOnDepartureAutomationStrategy.getInstance(this);
-            case STATIC: return NoAutomationStrategy.getInstance();
+            case ALARM:
+                return FinishOnDepartureAutomationStrategy.getInstance(this);
+            case REGULAR:
+                return StandardTaskAutomationStrategy.getInstance(this);
+            case RAID:
+                return ResetOnDepartureAutomationStrategy.getInstance(this);
+            case STATIC:
+                return NoAutomationStrategy.getInstance();
         }
         return null;
     }
 
     public TaskController getController() {
         switch (this.getTaskType()) {
-            case ALARM: return AlarmController.getInstance();
-            case REGULAR: return RegularController.getInstance();
-            case STATIC: return StaticTaskController.getInstance();
-            case RAID: return RaidController.getInstance();
+            case ALARM:
+                return AlarmController.getInstance();
+            case REGULAR:
+                return RegularController.getInstance();
+            case STATIC:
+                return StaticTaskController.getInstance();
+            case RAID:
+                return RaidController.getInstance();
         }
         return null;
     }
@@ -183,10 +200,14 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
     public int getEventCode() {
         switch (this.getTaskType()) {
-            case ALARM: return EventLog.EventCodes.ALARM_OTHER;
-            case REGULAR: return EventLog.EventCodes.REGULAR_OTHER;
-            case STATIC: return EventLog.EventCodes.STATIC_OTHER;
-            case RAID: return EventLog.EventCodes.RAID_OTHER;
+            case ALARM:
+                return EventLog.EventCodes.ALARM_OTHER;
+            case REGULAR:
+                return EventLog.EventCodes.REGULAR_OTHER;
+            case STATIC:
+                return EventLog.EventCodes.STATIC_OTHER;
+            case RAID:
+                return EventLog.EventCodes.RAID_OTHER;
         }
         return 0;
     }
@@ -194,10 +215,18 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public void setTaskType(TASK_TYPE taskType) {
         String taskTypeString = "";
         switch (taskType) {
-            case ALARM: taskTypeString = TASK_TYPE_STRING.ALARM; break;
-            case REGULAR: taskTypeString = TASK_TYPE_STRING.REGULAR; break;
-            case STATIC: taskTypeString = TASK_TYPE_STRING.STATIC; break;
-            case RAID: taskTypeString = TASK_TYPE_STRING.RAID; break;
+            case ALARM:
+                taskTypeString = TASK_TYPE_STRING.ALARM;
+                break;
+            case REGULAR:
+                taskTypeString = TASK_TYPE_STRING.REGULAR;
+                break;
+            case STATIC:
+                taskTypeString = TASK_TYPE_STRING.STATIC;
+                break;
+            case RAID:
+                taskTypeString = TASK_TYPE_STRING.RAID;
+                break;
         }
 
         put(ParseTask.taskType, taskTypeString);
@@ -209,17 +238,21 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
     public TASK_TYPE getTaskType() {
         switch (getTaskTypeString()) {
-            case "Alarm": return TASK_TYPE.ALARM;
-            case "Regular": return TASK_TYPE.REGULAR;
-            case "Static": return TASK_TYPE.STATIC;
-            case "Raid": return TASK_TYPE.RAID;
+            case "Alarm":
+                return TASK_TYPE.ALARM;
+            case "Regular":
+                return TASK_TYPE.REGULAR;
+            case "Static":
+                return TASK_TYPE.STATIC;
+            case "Raid":
+                return TASK_TYPE.RAID;
         }
 
         new HandleException(TAG, "Task missing taskType", null);
 
         return null;
     }
-    
+
     public boolean isAlarmTask() {
         return getTaskType().equals(TASK_TYPE.ALARM);
     }
@@ -240,7 +273,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public TaskGroupStarted getTaskGroupStarted() {
         return (TaskGroupStarted) getParseObject(ParseTask.taskGroupStarted);
     }
-    
+
     private void setStatus(String status) {
 
         // prevent abort notification to be broadcast by server
@@ -338,7 +371,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
         return true;
     }
-    
+
     public Guard getGuard() {
         return (Guard) getLDSFallbackParseObject(ParseTask.guard);
     }
@@ -404,7 +437,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public void deleteArrival() {
-        put(ParseTask.timesArrived, getTimesArrived()-1);
+        put(ParseTask.timesArrived, getTimesArrived() - 1);
     }
 
     public void reset() {
@@ -427,7 +460,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
         tasksCache.removeGeofence(this);
     }
-    
+
     public void addKnownStatus(String status) {
         addUnique(ParseTask.knownStatus, status);
     }
@@ -452,44 +485,70 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return getStatus().equals(STATUS.FINISHED);
     }
 
-    public boolean isWithinScheduledTime() {
-        // always return true if debugging
-        if (BuildConfig.DEBUG) {
-            return true;
-        }
-
+    public boolean isAfterScheduledStartTime() {
         if (isRegularTask() || isRaidTask()) {
-            DateTime timeStartOrg = new DateTime(getTimeStart());
-            DateTime timeEndOrg = new DateTime(getTimeEnd());
+            try {
+                DateTimeZone dtz = DateTimeZone.getDefault();
 
-            // To get basis of Date (year month day)
-            TaskGroupStarted selectedCircuitStarted = getTaskGroupStarted();
+                LocalDateTime plannedTimeStart = new LocalDateTime(getTimeStart(), dtz);
+                // use task date hour and minute components
+                LocalDateTime timeStart = new LocalDateTime(dtz)
+                        .withHourOfDay(plannedTimeStart.getHourOfDay())
+                        .withMinuteOfHour(plannedTimeStart.getMinuteOfHour());
 
-            if (selectedCircuitStarted == null)
-                return true; // lets be optimistic
+                // In case of time savings, add +1 hour
+                // https://stackoverflow.com/questions/5451152/how-to-handle-jodatime-illegal-instant-due-to-time-zone-offset-transition
+                if (dtz.isLocalDateTimeGap(timeStart)) {
+                    timeStart.withHourOfDay(plannedTimeStart.getHourOfDay() + 1);
+                }
 
-            MutableDateTime timeStart = new MutableDateTime(selectedCircuitStarted.getCreatedAt());
-            int startHour = timeStartOrg.getHourOfDay();
-            timeStart.setHourOfDay(startHour);
-            timeStart.setMinuteOfHour(timeStartOrg.getMinuteOfHour());
+                DateTime now = DateTime.now(dtz);
 
-            MutableDateTime timeEnd = new MutableDateTime(selectedCircuitStarted.getCreatedAt());
-            int endHour = timeEndOrg.getHourOfDay();
-            if (endHour < startHour)
-                timeEnd.addDays(1);
-
-            timeEnd.setHourOfDay(endHour);
-            timeEnd.setMinuteOfHour(timeEndOrg.getMinuteOfHour());
-
-            DateTime now = DateTime.now(DateTimeZone.getDefault());
-
-            boolean afterTimeStart = now.isAfter(timeStart);
-            boolean beforeTimeEnd = now.isBefore(timeEnd);
-
-            return afterTimeStart && beforeTimeEnd;
+                return now.isAfter(timeStart.toDateTime());
+            } catch (Exception e) {
+                new HandleException(TAG, "isAfterScheduledStartTime", e);
+            }
         }
 
         return true;
+    }
+
+    public boolean isBeforeScheduledEndTime() {
+        if (isRegularTask() || isRaidTask()) {
+            try {
+                DateTimeZone dtz = DateTimeZone.getDefault();
+
+                LocalDateTime plannedTimeEnd = new LocalDateTime(getTimeEnd(), dtz);
+                // use task date hour and minute components
+                LocalDateTime timeEnd = new LocalDateTime(dtz)
+                        .withHourOfDay(plannedTimeEnd.getHourOfDay())
+                        .withMinuteOfHour(plannedTimeEnd.getMinuteOfHour());
+
+                // In case of time savings, add +1 hour
+                // https://stackoverflow.com/questions/5451152/how-to-handle-jodatime-illegal-instant-due-to-time-zone-offset-transition
+                if (dtz.isLocalDateTimeGap(timeEnd)) {
+                    timeEnd.withHourOfDay(plannedTimeEnd.getHourOfDay() + 1);
+                }
+
+                DateTime now = DateTime.now(dtz);
+
+                return now.isBefore(timeEnd.toDateTime());
+            } catch (Exception e) {
+                new HandleException(TAG, "isBeforeScheduledEndTime", e);
+            }
+
+        }
+
+        return true;
+    }
+
+    public boolean isWithinScheduledTime() {
+        // always return true if debugging
+        if (BuildConfig.DEBUG) {
+            //return true;
+        }
+
+        return isAfterScheduledStartTime() && isBeforeScheduledEndTime();
     }
 
     public int getRadius() {
@@ -497,10 +556,14 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
             return getInt(geofenceRadius);
         }
         switch (this.getTaskType()) {
-            case ALARM: return DEFAULT_RADIUS_ALARM;
-            case REGULAR: return DEFAULT_RADIUS_REGULAR;
-            case STATIC: return 0;
-            case RAID: return DEFAULT_RADIUS_RAID;
+            case ALARM:
+                return DEFAULT_RADIUS_ALARM;
+            case REGULAR:
+                return DEFAULT_RADIUS_REGULAR;
+            case STATIC:
+                return 0;
+            case RAID:
+                return DEFAULT_RADIUS_RAID;
         }
 
         return 0;
@@ -672,7 +735,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
         if (taskGroupStartedCache.getSelected() != null) {
             if (getTaskGroupStarted() != null) {
-                boolean isMatch =  getTaskGroupStarted().equals(taskGroupStartedCache.getSelected());
+                boolean isMatch = getTaskGroupStarted().equals(taskGroupStartedCache.getSelected());
                 Log.d(TAG, "isMatch: " + isMatch);
                 return isMatch;
             }

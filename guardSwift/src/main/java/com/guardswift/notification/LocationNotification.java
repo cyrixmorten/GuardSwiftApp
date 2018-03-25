@@ -75,6 +75,8 @@ public class LocationNotification {
         mBuilder.setContentText(context.getString(R.string.latlng, location.getLatitude(), location.getLongitude()));
 
         NotificationManager mgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-        mgr.notify(NOTIFY_ID, mBuilder.build());
+        if (mgr != null) {
+            mgr.notify(NOTIFY_ID, mBuilder.build());
+        }
     }
 }

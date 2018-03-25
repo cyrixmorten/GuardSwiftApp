@@ -166,16 +166,6 @@ public class MainActivity extends InjectingAppCompatActivity {
 
     public Intent redirectToOtherActivityIntent() {
         Intent intent = null;
-//        if (ParseUser.getCurrentUser() == null) {
-//            Log.e(TAG, "Missing user - ParseLoginActivity");
-//            ParseLoginBuilder builder = new ParseLoginBuilder(MainActivity.this);
-//            intent = builder.build();
-//            startActivityForResult(builder.build(), 0);
-//            intent = new Intent(MainActivity.this,
-//                    ParseLoginActivity.class);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        } else
-
         if (!guardCache.isLoggedIn()) {
             intent = new Intent(MainActivity.this,
                     GuardLoginActivity.class);
