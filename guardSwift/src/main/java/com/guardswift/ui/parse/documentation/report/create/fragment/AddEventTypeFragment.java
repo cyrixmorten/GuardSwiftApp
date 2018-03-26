@@ -43,21 +43,21 @@ import butterknife.Unbinder;
 
 public class AddEventTypeFragment extends InjectingListFragment implements EventEntryFragment, UpdateFloatingActionButton {
 
-	protected static final String TAG = AddEventTypeFragment.class
-			.getSimpleName();
+    protected static final String TAG = AddEventTypeFragment.class
+            .getSimpleName();
 
-	public static AddEventTypeFragment newInstance(Client client) {
+    public static AddEventTypeFragment newInstance(Client client) {
 
         GuardSwiftApplication.getInstance().getCacheFactory().getClientCache().setSelected(client);
 
-		AddEventTypeFragment fragment = new AddEventTypeFragment();
-		Bundle args = new Bundle();
-		fragment.setArguments(args);
-		return fragment;
-	}
+        AddEventTypeFragment fragment = new AddEventTypeFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
-	public AddEventTypeFragment() {
-	}
+    public AddEventTypeFragment() {
+    }
 
 
     @Inject
@@ -65,41 +65,41 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
     @Inject
     EventTypeCache eventTypeCache;
 
-	private EventTypeParseAdapter mAdapter;
+    private EventTypeParseAdapter mAdapter;
 
-//    @BindView(R.id.header) TextView tv_header;
+    //    @BindView(R.id.header) TextView tv_header;
     @BindView(R.id.btn_footer)
     FloatingActionButton footerButton;
 
     private Unbinder unbinder;
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		// disableCroutons();
-		super.onCreate(savedInstanceState);
-	}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        // disableCroutons();
+        super.onCreate(savedInstanceState);
+    }
 
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
-		View rootView = inflater.inflate(R.layout.gs_listview_selectable_fab,
-				container, false);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.gs_listview_selectable_fab,
+                container, false);
 
-		unbinder = ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
-		// mAdapter = new AddEventTypeAdapter(getActivity());
-		mAdapter = new EventTypeParseAdapter(getActivity(),
-				new ParseQueryAdapter.QueryFactory<EventType>() {
+        // mAdapter = new AddEventTypeAdapter(getActivity());
+        mAdapter = new EventTypeParseAdapter(getActivity(),
+                new ParseQueryAdapter.QueryFactory<EventType>() {
 
-					@Override
-					public ParseQuery<EventType> create() {
-						return new EventTypeQueryBuilder(true)
-								.matchingIncludes(clientCache.getSelected())
+                    @Override
+                    public ParseQuery<EventType> create() {
+                        return new EventTypeQueryBuilder(true)
+                                .matchingIncludes(clientCache.getSelected())
                                 .sortByTimesUsed()
-								.build();
-					}
-				});
+                                .build();
+                    }
+                });
 
         mAdapter.addOnQueryLoadListener(new ParseQueryAdapter.OnQueryLoadListener<EventType>() {
             @Override
@@ -110,8 +110,8 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
             @Override
             public void onLoaded(List<EventType> eventTypes, Exception e) {
 
-				if (getActivity() == null || !isAdded())
-					return;
+                if (getActivity() == null || !isAdded())
+                    return;
 
                 loadPreselected();
 
@@ -119,7 +119,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
             }
         });
 
-		setListAdapter(mAdapter);
+        setListAdapter(mAdapter);
 
 //		tv_header.setText(getString(R.string.event_observed).toUpperCase(
 //				Locale.getDefault()));
@@ -147,36 +147,46 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    private AddEventHandler getEventHandler() {
+        if (getActivity() != null && getActivity() instanceof AddEventHandler) {
+            return ((AddEventHandler) getActivity());
+        }
+
+        return null;
+    }
+
     private void loadPreselected() {
 
-        String selectedEvent = ((AddEventHandler)getActivity()).getEventType();
+        if (getEventHandler() != null) {
+            String selectedEvent = getEventHandler().getEventType();
 
-        if (selectedEvent == null)
-            return;
-
-        for (int i = 0; i<getListView().getCount(); i++) {
-            EventType eventType = (EventType) getListView().getItemAtPosition(i);
-
-            if (eventType != null && eventType.getName().equals(selectedEvent)) {
-                getListView().setItemChecked(i, true);
-                eventTypeCache.setSelected(eventType);
+            if (selectedEvent == null)
                 return;
+
+            for (int i = 0; i < getListView().getCount(); i++) {
+                EventType eventType = (EventType) getListView().getItemAtPosition(i);
+
+                if (eventType != null && eventType.getName().equals(selectedEvent)) {
+                    getListView().setItemChecked(i, true);
+                    eventTypeCache.setSelected(eventType);
+                    return;
+                }
             }
         }
     }
 
 
     @Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-		EventType event = mAdapter.getItem(position);
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        EventType event = mAdapter.getItem(position);
 
 //        new EventRemark().updateAll(
 //                EventRemark.getQueryBuilder(false).matching(Client.Recent.getSelected()).matching(event)
 //                        .build());
         selectEvent(event);
 
-		super.onListItemClick(l, v, position, id);
-	}
+        super.onListItemClick(l, v, position, id);
+    }
 
     private void selectEvent(EventType eventType) {
         if (getActivity() == null) {
@@ -189,45 +199,48 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
         eventTypeCache.setSelected(eventType);
 
         // jump to next if amount is not needed
-        ((AddEventHandler) getActivity()).setEventType(eventType);
+        if (getEventHandler() != null) {
+            getEventHandler().setEventType(eventType);
+        }
     }
 
 
-
     @Override
-	public void onDestroyView() {
-		super.onDestroyView();
-		unbinder.unbind();
-	}
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
 
     @OnClick(R.id.btn_footer)
     public void addEventType() {
-        new MaterialDialog.Builder(getActivity())
-                .title(R.string.add_event_type)
-                .content(R.string.add_event_type_desc)
-                .inputType(InputType.TYPE_CLASS_TEXT)
-                .input(R.string.event, R.string.input_empty, new MaterialDialog.InputCallback() {
-                    @Override
-                    public void onInput(MaterialDialog dialog, CharSequence input) {
-                        if (input.length() > 0) {
-                             final EventType new_type = new EventType();
-                             new_type.setClient(clientCache.getSelected());
-                             new_type.setOwner(ParseUser.getCurrentUser());
-                             new_type.setName(input.toString());
-                             new_type.pinInBackground(new SaveCallback() {
-                                 @Override
-                                 public void done(ParseException e) {
-                                     selectEvent(new_type);
-                                     if (mAdapter != null) {
-                                         mAdapter.loadObjects();
-                                     }
-                                 }
-                             });
+        if (getActivity() != null) {
+            new MaterialDialog.Builder(getActivity())
+                    .title(R.string.add_event_type)
+                    .content(R.string.add_event_type_desc)
+                    .inputType(InputType.TYPE_CLASS_TEXT)
+                    .input(R.string.event, R.string.input_empty, new MaterialDialog.InputCallback() {
+                        @Override
+                        public void onInput(MaterialDialog dialog, CharSequence input) {
+                            if (input.length() > 0) {
+                                final EventType new_type = new EventType();
+                                new_type.setClient(clientCache.getSelected());
+                                new_type.setOwner(ParseUser.getCurrentUser());
+                                new_type.setName(input.toString());
+                                new_type.pinInBackground(new SaveCallback() {
+                                    @Override
+                                    public void done(ParseException e) {
+                                        selectEvent(new_type);
+                                        if (mAdapter != null) {
+                                            mAdapter.loadObjects();
+                                        }
+                                    }
+                                });
 
 
+                            }
                         }
-                    }
-                }).negativeText(android.R.string.cancel).show();
+                    }).negativeText(android.R.string.cancel).show();
+        }
     }
 
     @Override
@@ -258,36 +271,36 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
     }
 
     // @Override
-	// public void onViewStateRestored(Bundle savedInstanceState) {
-	// mAdapter.loadObjects();
-	// super.onViewStateRestored(savedInstanceState);
-	// }
+    // public void onViewStateRestored(Bundle savedInstanceState) {
+    // mAdapter.loadObjects();
+    // super.onViewStateRestored(savedInstanceState);
+    // }
 
-	// @OnClick(R.id.addUnique)
-	// public void addUnique(Button button) {
-	//
-	// GenericEditTextDialogFragment addDialog = GenericEditTextDialogFragment
-	// .newInstance(new GenericEditTextDialogInterface() {
-	//
-	// @Override
-	// public void okClicked(final String editTextString) {
-	// final EventType new_type = new EventType();
-	// new_type.setOwner(ParseUser.getCurrentUser());
-	// new_type.setName(editTextString);
-	// new_type.saveEventually();
-	// mAdapter.loadObjects();
-	//
-	// Toast.makeText(
-	// getActivity(),
-	// getString(R.string.successfully_added_var,
-	// editTextString), Toast.LENGTH_SHORT)
-	// .show();
-	// }
-	// }, R.string.add_type);
-	//
-	// getChildFragmentManager().beginTransaction().addToBackStack(null)
-	// .addUnique(addDialog, "addUnique").commit();
-	//
-	// }
+    // @OnClick(R.id.addUnique)
+    // public void addUnique(Button button) {
+    //
+    // GenericEditTextDialogFragment addDialog = GenericEditTextDialogFragment
+    // .newInstance(new GenericEditTextDialogInterface() {
+    //
+    // @Override
+    // public void okClicked(final String editTextString) {
+    // final EventType new_type = new EventType();
+    // new_type.setOwner(ParseUser.getCurrentUser());
+    // new_type.setName(editTextString);
+    // new_type.saveEventually();
+    // mAdapter.loadObjects();
+    //
+    // Toast.makeText(
+    // getActivity(),
+    // getString(R.string.successfully_added_var,
+    // editTextString), Toast.LENGTH_SHORT)
+    // .show();
+    // }
+    // }, R.string.add_type);
+    //
+    // getChildFragmentManager().beginTransaction().addToBackStack(null)
+    // .addUnique(addDialog, "addUnique").commit();
+    //
+    // }
 
 }

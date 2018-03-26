@@ -9,8 +9,6 @@ import com.guardswift.R;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.ToastHelper;
-import com.parse.ParseException;
-import com.parse.SaveCallback;
 import com.takisoft.fix.support.v7.preference.EditTextPreference;
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat;
 
@@ -85,12 +83,7 @@ public class GuardPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private void saveChange() {
-        guard.saveEventuallyAndNotify(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                GuardSwiftApplication.saveCurrentGuardAsLastActive();
-            }
-        });
+        guard.saveEventuallyAndNotify();
     }
 
 

@@ -51,7 +51,6 @@ import com.guardswift.persistence.parse.misc.Update;
 import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.ToastHelper;
-import com.parse.DeleteCallback;
 import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseACL;
@@ -178,14 +177,6 @@ public class GuardSwiftApplication extends InjectingApplication {
     }
 
 
-    public static void saveCurrentGuardAsLastActive() {
-        ParseObject.unpinAllInBackground(GuardCache.LAST_ACTIVE, new DeleteCallback() {
-            @Override
-            public void done(ParseException e) {
-                GuardSwiftApplication.getLoggedIn().pinInBackground(GuardCache.LAST_ACTIVE);
-            }
-        });
-    }
 
     public static Guard getLastActiveGuard() {
         ParseQuery<Guard> query = ParseQuery.getQuery(Guard.class);

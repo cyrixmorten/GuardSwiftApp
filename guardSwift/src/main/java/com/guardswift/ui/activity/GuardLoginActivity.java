@@ -172,7 +172,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         String packageName = context.getPackageName();
         PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+            if (pm != null && !pm.isIgnoringBatteryOptimizations(packageName)) {
                 intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                 intent.setData(Uri.parse("package:" + packageName));
                 context.startActivity(intent);
@@ -335,10 +335,10 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
                         parseModule.login(guard);
 
-                        GuardSwiftApplication.saveCurrentGuardAsLastActive();
-
                         Intent intent = new Intent(context, MainActivity.class);
                         context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
+
+                        GuardLoginActivity.this.finish();
 
                         return null;
                     }

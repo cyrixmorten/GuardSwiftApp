@@ -37,7 +37,7 @@ public class LogError {
 
             Guard guard = GuardSwiftApplication.getLoggedIn();
             if (guard != null) {
-                error.put("guard", guard);
+                error.put("guard", ParseObject.createWithoutData(Guard.class, guard.getObjectId()));
             }
 
             if (exception != null) {

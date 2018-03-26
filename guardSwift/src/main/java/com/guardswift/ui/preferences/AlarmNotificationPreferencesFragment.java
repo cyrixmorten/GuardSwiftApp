@@ -12,7 +12,6 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.query.GuardQueryBuilder;
 import com.guardswift.rest.GuardSwiftServer;
-import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.ToastHelper;
 import com.parse.FindCallback;
@@ -208,10 +207,10 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
                 final Boolean enable = (Boolean)newValue;
 
-                Guard.getQueryBuilder(true)
-                        .build().findInBackground(new FindCallback<Guard>() {
-                    @Override
-                    public void done(List<Guard> objects, ParseException e) {
+//                Guard.getQueryBuilder(true)
+//                        .build().findInBackground(new FindCallback<Guard>() {
+//                    @Override
+//                    public void done(List<Guard> objects, ParseException e) {
                         int alarmNotifyCount = 0;
                         for (Guard g: guards) {
                             alarmNotifyCount += (g.isAlarmSoundEnabled()) ? 1 : 0;
@@ -231,13 +230,9 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
                             guardNotification.setChecked(enable);
 
-                            // if current installation, update last active entry
-                            if (guard.equals(GuardSwiftApplication.getLoggedIn())) {
-                                GuardSwiftApplication.saveCurrentGuardAsLastActive();
-                            }
                         }
-                    }
-                });
+//                    }
+//                });
 
 
 
