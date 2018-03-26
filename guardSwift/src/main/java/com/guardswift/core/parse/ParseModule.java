@@ -12,6 +12,7 @@ import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule.ForApplication;
 import com.guardswift.persistence.cache.data.GuardCache;
+import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
@@ -47,15 +48,20 @@ public class ParseModule {
 
     private static final String TAG = ParseModule.class.getSimpleName();
 
-    private final Context context;
-    private final ParseTasksCache tasksCache;
-    private final GuardCache guardCache;
+    @Inject()
+    @ForApplication
+    Context context;
+
+    @Inject()
+    ParseTasksCache tasksCache;
+    @Inject()
+    GuardCache guardCache;
+    @Inject()
+    TaskGroupStartedCache circuitStartedCache;
+
 
     @Inject
-    public ParseModule(@ForApplication Context context) {
-        this.context = context;
-        this.tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
-        this.guardCache = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache();
+    public ParseModule() {
     }
 
 
@@ -77,6 +83,7 @@ public class ParseModule {
                 if (e != null) {
                     new HandleException(TAG, "Getting current session", e);
                     return;
+
                 }
 
                 guard.setSession(session);
@@ -219,13 +226,10 @@ public class ParseModule {
         GuardSwiftApplication.hasReadGroups.clear();
 
         guardCache.removeLoggedIn();
-        tasksCache.clear();
-
-        GuardSwiftApplication.getInstance().getCacheFactory().getTaskGroupStartedCache().clear();
+        tasksCache.clear(); // clear cached geofencing
+        circuitStartedCache.clear(); // clear taskGroup selection
 
         GuardSwiftApplication.getInstance().stopServices();
-
-
         GuardSwiftApplication.getInstance().teardownParseObjectsLocally(true);
     }
 
