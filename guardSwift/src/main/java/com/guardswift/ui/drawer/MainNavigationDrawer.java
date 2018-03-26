@@ -16,7 +16,6 @@ import com.google.common.collect.Maps;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingActivityModule;
-import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.persistence.parse.data.Guard;
@@ -24,7 +23,6 @@ import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.query.ClientQueryBuilder;
-import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
@@ -64,21 +62,21 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
 
     public static final int DRAWER_LOGOUT = 0;
 
-    private final Context context;
-    private final GuardCache guardCache;
-    private final TaskGroupStartedCache circuitStartedCache;
+    @Inject()
+    @InjectingActivityModule.ForActivity
+    Context context;
+
+    @Inject()
+    GuardCache guardCache;
+    @Inject()
+    TaskGroupStartedCache circuitStartedCache;
 
     private Drawer navigationDrawer;
     private FragmentDrawerCallback fragmentDrawerCallback;
 
 
     @Inject
-    public MainNavigationDrawer(@InjectingActivityModule.ForActivity Context context) {
-        this.context = context;
-
-        ParseCacheFactory parseCacheFactory = GuardSwiftApplication.getInstance().getCacheFactory();
-        this.guardCache = parseCacheFactory.getGuardCache();
-        this.circuitStartedCache = parseCacheFactory.getTaskGroupStartedCache();
+    public MainNavigationDrawer() {
     }
 
     public Drawer getDrawer() {
@@ -129,8 +127,31 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         CommonDrawerItems commonDrawerItems = new CommonDrawerItems(activity);
         navigationDrawer.addItems(commonDrawerItems.thisDevice());
         navigationDrawer.addItems(getGuardDataDrawerItem());
-        addTaskItems();
+
+        if (guardCache.getLoggedIn().canAccessAlarms()) {
+            navigationDrawer.addItems(getAlarmsDrawerItems());
+        }
+
+        if (guardCache.getLoggedIn().canAccessRegularTasks()) {
+            navigationDrawer.addItems(getActiveCircuitDrawerItems());
+        }
+
+
+        if (guardCache.getLoggedIn().canAccessStaticTasks()) {
+            navigationDrawer.addItems(getStaticGuardingItems());
+        }
+
         navigationDrawer.addItems(getAdminItems());
+
+        navigationDrawer.addStickyFooterItem(getLogoutDrawerItem());
+
+        IDrawerItem selected = getSelectedTaskGroupDrawerItem();
+
+        if (selected != null) {
+            navigationDrawer.setSelection(selected, true);
+        } else {
+            navigationDrawer.openDrawer();
+        }
 
         return navigationDrawer;
     }
@@ -150,34 +171,18 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                 .withActivity(activity)
                 .withHeaderBackground(R.drawable.header)
                 .addProfiles(
-                    new ProfileDrawerItem().withName(guardCache.getLoggedIn().getName()).withIcon(R.drawable.ic_person_black_36dp)
+                        new ProfileDrawerItem().withName(guardCache.getLoggedIn().getName()).withIcon(R.drawable.ic_person_black_36dp)
                 )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
-                    return false;
+                        return false;
                     }
                 })
                 .withSelectionListEnabledForSingleProfile(false).build();
     }
 
-    private void addTaskItems() {
-        if (guardCache.getLoggedIn().canAccessAlarms()) {
-            navigationDrawer.addItems(getAlarmsDrawerItems());
-        }
-
-        if (guardCache.getLoggedIn().canAccessRegularTasks()) {
-            navigationDrawer.addItems(getActiveCircuitDrawerItems());
-        }
-
-
-        if (guardCache.getLoggedIn().canAccessStaticTasks()) {
-            navigationDrawer.addItems(getStaticGuardingItems());
-        }
-
-
-        navigationDrawer.addStickyFooterItem(getLogoutDrawerItem());
-
+    private IDrawerItem getSelectedTaskGroupDrawerItem() {
 
         // Determine initial selection
         TaskGroupStarted selectedCircuitStarted = circuitStartedCache.getSelected();
@@ -191,11 +196,8 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                 }
             }
         }
-        if (selected != null) {
-            navigationDrawer.setSelection(selected, true);
-        } else {
-            navigationDrawer.openDrawer();
-        }
+
+        return selected;
     }
 
     private IDrawerItem existingStaticGuardingReports;
@@ -275,7 +277,6 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                 Log.d(TAG, "getName(): " + circuitStarted.getName());
                 IDrawerItem circuitItem = new PrimaryDrawerItem().withName(circuitStarted.getName()).withTag(circuitStarted);
                 circuitItems.add(circuitItem);
-                circuitStartedCache.addActive(circuitStarted);
             }
         } catch (ParseException e) {
             new HandleException(context, TAG, "getActiveCircuitDrawerItems", e);
@@ -348,7 +349,6 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
             }
         }, 500);
     }
-
 
 
     private IDrawerItem[] getAdminItems() {
