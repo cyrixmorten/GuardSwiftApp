@@ -23,6 +23,7 @@
 
     <!-- Download updates -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
