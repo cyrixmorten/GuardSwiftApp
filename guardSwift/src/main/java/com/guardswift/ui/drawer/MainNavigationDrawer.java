@@ -83,7 +83,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         return navigationDrawer;
     }
 
-    public Drawer initNavigationDrawer(FragmentActivity activity, Toolbar toolbar, final FragmentDrawerCallback fragmentDrawerCallback) {
+    public Drawer create(FragmentActivity activity, Toolbar toolbar, final FragmentDrawerCallback fragmentDrawerCallback) {
 
         this.fragmentDrawerCallback = fragmentDrawerCallback;
 
@@ -101,8 +101,6 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                             return false;
                         }
 
-                        long id = drawerItem.getIdentifier();
-
                         if (drawerItem.getTag() instanceof TaskGroupStarted) {
                             Log.w(TAG, "Clicked taskGroupStarted");
                             TaskGroupStarted clickedTaskGroupStarted = (TaskGroupStarted) drawerItem.getTag();
@@ -111,13 +109,18 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                                 if (taskGroupStarted != null && clickedTaskGroupStarted.getObjectId().equals(taskGroupStarted.getObjectId())) {
                                     Log.w(TAG, "Clicked " + taskGroupStarted.getName());
 
-                                    selectTaskGroupStarted(taskGroupStarted);
+                                    String dateSubtitle = DateUtils.formatDateTime(
+                                            context,
+                                            taskGroupStarted.getCreatedAt().getTime(),
+                                            DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE);
+
+                                    fragmentDrawerCallback.selectItem(RegularTaskViewPagerFragment.newInstance(taskGroupStarted), taskGroupStarted.getName(), dateSubtitle);
                                     return false; // close drawer
                                 }
                             }
                         }
 
-                        fragmentDrawerCallback.selectItem(id);
+                        fragmentDrawerCallback.selectItem(drawerItem.getIdentifier());
 
                         return false;
                     }
@@ -156,14 +159,6 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         return navigationDrawer;
     }
 
-    public void selectTaskGroupStarted(TaskGroupStarted taskGroupStarted) {
-        String dateSubtitle = DateUtils.formatDateTime(
-                context,
-                taskGroupStarted.getCreatedAt().getTime(),
-                DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE);
-
-        fragmentDrawerCallback.selectItem(RegularTaskViewPagerFragment.newInstance(context, taskGroupStarted), taskGroupStarted.getName(), dateSubtitle);
-    }
 
     private AccountHeader getHeader(Activity activity) {
         // Create navigation header

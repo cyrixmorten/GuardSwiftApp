@@ -11,11 +11,11 @@ import com.guardswift.R;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.eventbus.EventBusController;
-import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.drawer.MainNavigationDrawer;
+import com.guardswift.ui.drawer.MessagesDrawer;
 import com.guardswift.ui.drawer.ToolbarFragmentDrawerCallback;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.util.Device;
@@ -26,6 +26,8 @@ import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 
 import javax.inject.Inject;
 
+import bolts.Continuation;
+import bolts.Task;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -55,12 +57,12 @@ public class MainActivity extends InjectingAppCompatActivity {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    private Drawer messagesDrawer;
+    private MessagesDrawer messagesDrawer;
     private ToolbarFragmentDrawerCallback mainDrawerCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.e(TAG, "onCreate");
+        Log.i(TAG, "onCreate");
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.gs_activity_main);
@@ -68,20 +70,23 @@ public class MainActivity extends InjectingAppCompatActivity {
 
         setSupportActionBar(toolbar);
 
-
         if (!shouldRedirectToOtherActivity()) {
-            GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn());
-            initDrawer();
-            setSelectionFromIntent();
+            GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn()).onSuccess(new Continuation<Void, Object>() {
+                @Override
+                public Object then(Task<Void> task) throws Exception {
+
+                    initDrawer();
+
+                    return null;
+                }
+            });
         }
-
     }
 
-    public void onEventMainThread(BootstrapCompleted ev) {
-        initDrawer();
-    }
 
     public void initDrawer() {
+        Log.i(TAG, "initDrawer");
+
         mainDrawerCallback = new ToolbarFragmentDrawerCallback(this, toolbar, R.id.content);
         mainDrawerCallback.setActionCallback(new ToolbarFragmentDrawerCallback.SelectActionCallback() {
             public void selectAction(long action) {
@@ -91,51 +96,53 @@ public class MainActivity extends InjectingAppCompatActivity {
             }
         });
 
-        Drawer drawer = navigationDrawer.initNavigationDrawer(this, toolbar, mainDrawerCallback);
+        Drawer drawer = navigationDrawer.create(this, toolbar, mainDrawerCallback);
 
-        messagesDrawer = new DrawerBuilder()
+        messagesDrawer = new MessagesDrawer(this, new DrawerBuilder()
                 .withActivity(this)
                 .withDrawerGravity(Gravity.END)
                 .withCloseOnClick(false)
-                .append(drawer);
-    }
+                .append(drawer));
 
-
-
-
-    @Override
-    public void onBackPressed() {
-        if (messagesDrawer.isDrawerOpen()) {
-            messagesDrawer.closeDrawer();
-            return;
-        }
-        super.onBackPressed();
-    }
-
-    private void setSelectionFromIntent() {
         if (getIntent().hasExtra(SELECT_ALARMS)) {
             mainDrawerCallback.selectItem(AlarmsViewPagerFragment.newInstance(), R.string.alarms);
             navigationDrawer.getDrawer().closeDrawer();
         }
     }
 
+
+    @Override
+    public void onBackPressed() {
+        if (messagesDrawer != null) {
+            messagesDrawer.close();
+        }
+
+        super.onBackPressed();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
 
+        Log.i(TAG, "onResume");
         // 4.5.0: Prevent alarm sound from continuously playing
         // Can happen when multiple alarms overlap
         if (sounds.isPlayingAlarmSound()) {
             sounds.stopAlarm();
         }
-
-//        ParseLiveQueryClient liveQueryClient = GuardSwiftApplication.getInstance().getLiveQueryClient();
-//        if (liveQueryClient != null) {
-//            liveQueryClient.connectIfNeeded();
-//        }
     }
 
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
 
+        Log.i(TAG, "onPostResume");
+        if (shouldRedirectToOtherActivity()) {
+            startActivity(redirectToOtherActivityIntent());
+        } else {
+            EventBusController.postUIUpdate();
+        }
+    }
 
 
     // http://stackoverflow.com/questions/10216937/how-do-i-create-a-help-overlay-like-you-see-in-a-few-android-apps-and-ics
@@ -176,22 +183,8 @@ public class MainActivity extends InjectingAppCompatActivity {
 
 
     @Override
-    protected void onPostResume() {
-        Log.e(TAG, "onPostResume");
-        if (shouldRedirectToOtherActivity()) {
-            startActivity(redirectToOtherActivityIntent());
-        }
-
-        EventBusController.postUIUpdate();
-
-        super.onPostResume();
-    }
-
-
-
-    @Override
     protected void onDestroy() {
-        Log.d(TAG, "onDestroy");
+        Log.i(TAG, "onDestroy");
         messagesDrawer = null;
         navigationDrawer = null;
         mainDrawerCallback = null;
@@ -200,7 +193,7 @@ public class MainActivity extends InjectingAppCompatActivity {
             super.onDestroy();
         } catch (NullPointerException npe) {
             // https://code.google.com/p/android/issues/detail?id=216157
-            Log.e(TAG, "NPE: Bug workaround");
+            Log.i(TAG, "NPE: Bug workaround");
         }
 
     }
@@ -230,16 +223,11 @@ public class MainActivity extends InjectingAppCompatActivity {
     }
 
 
-
-    public Drawer getDrawer() {
-        return navigationDrawer.getDrawer();
+    public ToolbarFragmentDrawerCallback getMainDrawerCallback() {
+        return mainDrawerCallback;
     }
 
-    public MainNavigationDrawer getNavigationDrawer() {
-        return navigationDrawer;
-    }
-
-    public Drawer getMessagesDrawer() {
+    public MessagesDrawer getMessagesDrawer() {
         return messagesDrawer;
     }
 }

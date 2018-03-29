@@ -10,10 +10,10 @@ abstract class BaseNavigationDrawer {
     private static final String TAG = BaseNavigationDrawer.class.getSimpleName();
 
     abstract Drawer getDrawer();
-    abstract Drawer initNavigationDrawer(FragmentActivity activity, Toolbar toolbar, final FragmentDrawerCallback fragmentDrawerCallback);
+    abstract Drawer create(FragmentActivity activity, Toolbar toolbar, final FragmentDrawerCallback fragmentDrawerCallback);
 
-    public Drawer initNavigationDrawer(FragmentActivity activity, Toolbar toolbar, int viewId) {
-        return initNavigationDrawer(activity, toolbar, new ToolbarFragmentDrawerCallback(activity, toolbar, viewId));
+    public Drawer create(FragmentActivity activity, Toolbar toolbar, int viewId) {
+        return create(activity, toolbar, new ToolbarFragmentDrawerCallback(activity, toolbar, viewId));
     }
 
 

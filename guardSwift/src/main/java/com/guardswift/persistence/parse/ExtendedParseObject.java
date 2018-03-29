@@ -88,11 +88,6 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
 
     }
 
-    public <T extends ParseObject> Task<List<T>> updateAllAsync() {
-        ParseQuery<T> query = getAllNetworkQuery();
-        return updateAll(query, 1000);
-    }
-
     @SuppressWarnings("unchecked")
     public <T extends ParseObject> void updateAll(DataStoreCallback<T> callback) {
         updateAll((ParseQuery<T>) getAllNetworkQuery().setLimit(1000), callback);

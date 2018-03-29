@@ -46,7 +46,7 @@ public class GuardLoginNavigationDrawer extends BaseNavigationDrawer {
         return navigationDrawer;
     }
 
-    public Drawer initNavigationDrawer(final FragmentActivity activity, Toolbar toolbar, final FragmentDrawerCallback fragmentDrawerCallback) {
+    public Drawer create(final FragmentActivity activity, Toolbar toolbar, final FragmentDrawerCallback fragmentDrawerCallback) {
 
         this.fragmentDrawerCallback = fragmentDrawerCallback;
 

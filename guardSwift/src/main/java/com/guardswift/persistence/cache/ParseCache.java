@@ -79,17 +79,19 @@ public abstract class ParseCache<T extends ParseObject>  extends Preferences  {
         }
 
         String objectId = super.getString(key);
-        ParseQuery<T> query = ParseQuery.getQuery(subClass);
-        query.fromLocalDatastore();
-        try {
-            Log.w(TAG, "ParseCache LDS lookup - " + name + " : " + objectId);
-            T parseObject =  query.get(objectId);
-            cacheSingle.put(key, parseObject);
+        if (!objectId.isEmpty()) {
+            ParseQuery<T> query = ParseQuery.getQuery(subClass);
+            query.fromLocalDatastore();
+            try {
+                Log.w(TAG, "ParseCache LDS lookup - " + name + " : " + objectId);
+                T parseObject = query.get(objectId);
+                cacheSingle.put(key, parseObject);
 
-            return parseObject;
-        } catch (ParseException e) {
-            if (e.getCode() != ParseException.OBJECT_NOT_FOUND) {
-                new HandleException(TAG, subClass.getSimpleName() + " ParseCache get " + objectId, e);
+                return parseObject;
+            } catch (ParseException e) {
+                if (e.getCode() != ParseException.OBJECT_NOT_FOUND) {
+                    new HandleException(TAG, subClass.getSimpleName() + " ParseCache get " + objectId, e);
+                }
             }
         }
 

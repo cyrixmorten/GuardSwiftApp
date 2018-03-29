@@ -3,19 +3,16 @@ package com.guardswift.ui.parse.execution.regular;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.widget.PopupMenu;
-import android.text.InputType;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -25,7 +22,6 @@ import com.guardswift.core.exceptions.LogError;
 import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
-import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.execution.task.TaskGroup;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
@@ -35,15 +31,9 @@ import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
+import com.guardswift.ui.drawer.MessagesDrawer;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
-import com.guardswift.ui.view.drawer.OverflowMenuDrawerItem;
-import com.guardswift.util.ToastHelper;
-import com.guardswift.util.Util;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
-import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -57,13 +47,16 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import bolts.Continuation;
+import bolts.Task;
+
 public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment {
 
     protected static final String TAG = RegularTaskViewPagerFragment.class
             .getSimpleName();
 
 
-    public static RegularTaskViewPagerFragment newInstance(Context context, TaskGroupStarted circuitStarted) {
+    public static RegularTaskViewPagerFragment newInstance(TaskGroupStarted circuitStarted) {
 
         Log.e(TAG, "SHOW: " + circuitStarted.getName());
         GuardSwiftApplication.getInstance()
@@ -86,11 +79,12 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
 
     Map<String, Fragment> fragmentMap = Maps.newLinkedHashMap();
 
-    WeakReference<Drawer> messagesDrawerWeakReference;
+    private WeakReference<MessagesDrawer> messagesDrawerWeakReference;
     private MenuItem messagesMenu;
 
     private String nameOfSelectedTaskgroup;
     private MaterialDialog newTaskgroupAvailableDialog;
+    private MaterialDialog progressDialog;
 
     public RegularTaskViewPagerFragment() {
     }
@@ -109,23 +103,47 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     @Override
     public void onAttach(Context context) {
 
-        final WeakReference<Activity> activityWeakReference = new WeakReference<Activity>(getActivity());
-
         newTaskgroupAvailableDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).ok(R.string.update_data, getString(R.string.new_taskgroup_available), new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                try {
-                    List<ParseTask> currentTasks = new RegularRaidTaskQueryBuilder(true).build().find();
-                    List<TaskGroupStarted> currentTaskGroups = new TaskGroupStartedQueryBuilder(true).build().find();
 
-                    ParseObject.unpinAll(currentTasks);
-                    ParseObject.unpinAll(currentTaskGroups);
+                progressDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
 
-                    GuardSwiftApplication.getInstance().teardownParseObjectsLocally(false);
-                    GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(activityWeakReference.get(), guardCache.getLoggedIn());
-                } catch (ParseException e) {
-                    LogError.log(TAG, "Update to new TaskGroup", e);
-                }
+                new RegularRaidTaskQueryBuilder(true).build().findInBackground().onSuccessTask(new Continuation<List<ParseTask>, Task<Void>>() {
+                    @Override
+                    public Task<Void> then(Task<List<ParseTask>> task) throws Exception {
+                        Log.i(TAG, "Unpinning tasks");
+                        return ParseObject.unpinAllInBackground(task.getResult());
+                    }
+                }).onSuccessTask(new Continuation<Void, Task<List<TaskGroupStarted>>>() {
+                    @Override
+                    public Task<List<TaskGroupStarted>> then(Task<Void> task) throws Exception {
+                        return new TaskGroupStartedQueryBuilder(true).build().findInBackground();
+                    }
+                }).onSuccessTask(new Continuation<List<TaskGroupStarted>, Task<Void>>() {
+                    @Override
+                    public Task<Void> then(Task<List<TaskGroupStarted>> task) throws Exception {
+                        Log.i(TAG, "Unpinning tasksGroups");
+                        return ParseObject.unpinAllInBackground(task.getResult());
+                    }
+                }).onSuccessTask(new Continuation<Void, Task<Void>>() {
+                    @Override
+                    public Task<Void> then(Task<Void> task) throws Exception {
+                        Log.i(TAG, "Teardown and bootstrap");
+                        GuardSwiftApplication.getInstance().teardownParseObjectsLocally(false);
+
+                        return GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(null, guardCache.getLoggedIn());
+                    }
+                }).continueWith(new Continuation<Void, Object>() {
+                    @Override
+                    public Object then(Task<Void> task) throws Exception {
+                        if (task.isFaulted()) {
+                            LogError.log(TAG, "Update to new TaskGroup", task.getError());
+                        }
+                        return null;
+                    }
+                });
+
             }
         }).build();
 
@@ -134,14 +152,30 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
 
     public void onEventMainThread(BootstrapCompleted ev) {
 
+        Log.i(TAG, "BootstrapCompleted");
+
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+
         try {
             TaskGroupStarted pinnedTaskGroup = new TaskGroupStartedQueryBuilder(true).matchingName(nameOfSelectedTaskgroup).build().getFirst();
-            TaskGroupStarted selectedTaskGroup = taskGroupStartedCache.getSelected();
 
-            if (!pinnedTaskGroup.equals(selectedTaskGroup) && getActivity() instanceof MainActivity) {
-                MainActivity mainActivity = (MainActivity)getActivity();
+            if (!pinnedTaskGroup.equals(taskGroupStartedCache.getSelected()) && getActivity() instanceof MainActivity) {
 
-                mainActivity.getNavigationDrawer().selectTaskGroupStarted(pinnedTaskGroup);
+                Log.i(TAG, "pinnedTaskGroup not equal selected");
+
+                MainActivity mainActivity = (MainActivity) getActivity();
+
+                String dateSubtitle = DateUtils.formatDateTime(
+                        getContext(),
+                        pinnedTaskGroup.getCreatedAt().getTime(),
+                        DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE);
+
+                mainActivity.getMainDrawerCallback().setActionBarTitle(pinnedTaskGroup.getName(), dateSubtitle);
+
+                taskGroupStartedCache.setSelected(pinnedTaskGroup);
             }
         } catch (ParseException e) {
             LogError.log(TAG, "Check TaskGroup", e);
@@ -170,28 +204,102 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
         super.onResume();
     }
 
-    private int newMessagesCount(List<Message> messages) {
-        if (GuardSwiftApplication.hasReadGroups.contains(getGroupId())) {
-            return 0;
-        }
 
-        int newCount = 0;
+    @Override
+    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+        Log.i(TAG, "onCreateOptionsMenu");
 
-        Guard guard = GuardSwiftApplication.getLoggedIn();
-        Date lastLogout = guard.getLastLogout();
+        inflater.inflate(R.menu.taskgroup, menu);
 
-        for (Message message : messages) {
-            if (message.getGuard() == guard) {
-                continue;
-            }
-            if (message.getCreatedAt().after(lastLogout)) {
-                newCount++;
-            }
-        }
-        return newCount;
+        messagesMenu = menu.findItem(R.id.menu_messages);
+        messagesMenu.setVisible(false);
+
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
-    private String getGroupId() {
+
+    private void updateMessageMenuBadge(int messagesCount, final boolean hide) {
+        Log.i(TAG, "updateMessageMenuBadge: " + messagesCount + " " + hide);
+
+        if (messagesCount == 0) {
+            // Hide the badge https://github.com/mikepenz/Android-ActionItemBadge/issues/9
+            messagesCount = Integer.MIN_VALUE;
+        }
+
+        if (getActivity() != null && getContext() != null && messagesMenu != null) {
+
+//                IconicsDrawable messagesIcon = new IconicsDrawable(getContext())
+//                        .icon(GoogleMaterial.Icon.gmd_email)
+//                        .color(Color.DKGRAY)
+//                        .sizeDp(24);
+
+            final int finalMessagesCount = messagesCount;
+
+            new Handler(getContext().getMainLooper()).postAtFrontOfQueue(new Runnable() {
+                @Override
+                public void run() {
+                    ActionItemBadge.update(getActivity(), messagesMenu, ContextCompat.getDrawable(getContext(), R.drawable.ic_forum_black_24dp), ActionItemBadge.BadgeStyles.RED, finalMessagesCount);
+                    messagesMenu.setVisible(!hide);
+                }
+            });
+
+        }
+    }
+
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_messages) {
+            MessagesDrawer messagesDrawer = messagesDrawerWeakReference.get();
+            if (messagesDrawer != null) {
+                messagesDrawer.open();
+                ActionItemBadge.update(messagesMenu, Integer.MIN_VALUE);
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        Log.i(TAG, "onViewCreated");
+        super.onViewCreated(view, savedInstanceState);
+
+        Activity activity = getActivity();
+        if (activity instanceof MainActivity) {
+            MessagesDrawer messagesDrawer = ((MainActivity) activity).getMessagesDrawer();
+
+            messagesDrawerWeakReference = new WeakReference<>(messagesDrawer);
+
+            loadMessages();
+        }
+    }
+
+    private void loadMessages() {
+        Log.i(TAG, "loadMessages");
+
+
+        messagesDrawerWeakReference.get().loadMessages(getMessagesGroupId()).continueWith(new Continuation<List<Message>, Object>() {
+            @Override
+            public Object then(Task<List<Message>> task) throws Exception {
+                if (task.isFaulted()) {
+                    LogError.log(TAG, "Failed to load messages", task.getError());
+
+                    updateMessageMenuBadge(0, true);
+
+                    return null;
+                }
+
+                MessagesDrawer messagesDrawer = messagesDrawerWeakReference.get();
+                updateMessageMenuBadge(messagesDrawer.getNewMessagesCount(), false);
+
+                return null;
+            }
+        });
+    }
+
+    private String getMessagesGroupId() {
         TaskGroupStarted taskGroupStarted = taskGroupStartedCache.getSelected();
         if (taskGroupStarted != null) {
             TaskGroup taskGroup = taskGroupStarted.getTaskGroup();
@@ -202,234 +310,11 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
         return "";
     }
 
-    private boolean enableMessagesDrawer() {
-        return !getGroupId().isEmpty();
-    }
-
-    @Override
-    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-
-        inflater.inflate(R.menu.taskgroup, menu);
-
-        messagesMenu = menu.findItem(R.id.menu_messages);
-        messagesMenu.setVisible(false);
-
-        Message.getQueryBuilder(true, getGroupId()).build().findInBackground(new FindCallback<Message>() {
-            @Override
-            public void done(List<Message> messages, ParseException e) {
-                if (getActivity() == null || !isAdded()) {
-                    return;
-                }
-
-
-//                IconicsDrawable messagesIcon = new IconicsDrawable(getContext())
-//                        .icon(GoogleMaterial.Icon.gmd_email)
-//                        .color(Color.DKGRAY)
-//                        .sizeDp(24);
-
-
-                int messagesCount = newMessagesCount(messages);
-
-                if (messagesCount == 0) {
-                    // Hide the badge https://github.com/mikepenz/Android-ActionItemBadge/issues/9
-                    messagesCount = Integer.MIN_VALUE;
-                }
-
-                ActionItemBadge.update(getActivity(), messagesMenu, ContextCompat.getDrawable(getActivity(), R.drawable.ic_forum_black_24dp), ActionItemBadge.BadgeStyles.RED, messagesCount);
-
-                messagesMenu.setVisible(true);
-            }
-        });
-
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_messages) {
-            messagesDrawerWeakReference.get().openDrawer();
-            GuardSwiftApplication.hasReadGroups.add(getGroupId());
-            ActionItemBadge.update(messagesMenu, Integer.MIN_VALUE);
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
-    private PrimaryDrawerItem addMessageItem() {
-        PrimaryDrawerItem addMessageItem = new PrimaryDrawerItem().withName(R.string.add_message);
-
-        addMessageItem.withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-
-                addMessageDialog();
-
-                return false;
-            }
-        });
-
-        return addMessageItem;
-    }
-
-    private OverflowMenuDrawerItem createMessageItem(final Message message) {
-        final OverflowMenuDrawerItem drawerItem = new OverflowMenuDrawerItem();
-
-        drawerItem.withName(message.getGuard().getName());
-
-        Date createdAt = (message.getCreatedAt() != null) ? message.getCreatedAt() : new Date();
-        drawerItem.withBottomEndCaption(Util.relativeTimeString(createdAt));
-
-        drawerItem.withDescription(message.getMessage());
-        drawerItem.withSelectable(false);
-        drawerItem.withDisabledTextColor(ContextCompat.getColor(getActivity(), R.color.md_black_1000));
-
-
-        if (GuardSwiftApplication.getLoggedIn() == message.getGuard()) {
-            drawerItem.withMenu(R.menu.message_options);
-        }
-
-        drawerItem.withOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()) {
-                    case R.id.edit: {
-                        editMessageDialog(drawerItem, message);
-                        break;
-                    }
-                    case R.id.delete: {
-                        deleteMessageDialog(drawerItem, message);
-                        break;
-                    }
-                }
-                return false;
-            }
-        });
-
-        return drawerItem;
-    }
-
-    private void addMessageDialog() {
-        openMessageDialog(null, null);
-    }
-
-    private void editMessageDialog(OverflowMenuDrawerItem drawerItem, Message message) {
-        openMessageDialog(drawerItem, message);
-    }
-
-    private void openMessageDialog(final OverflowMenuDrawerItem drawerItem, final Message editMessage) {
-        final boolean editMode = drawerItem != null && editMessage != null;
-
-        MaterialDialog dialog = new MaterialDialog.Builder(getActivity())
-                .title(R.string.add_message)
-                .inputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES)
-                .input(getString(R.string.message), (editMode) ? editMessage.getMessage() : getString(R.string.input_empty), new MaterialDialog.InputCallback() {
-                    @Override
-                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-
-                        Drawer messagesDrawer = messagesDrawerWeakReference.get();
-
-                        String editTextString = input.toString();
-                        if (!editTextString.isEmpty()) {
-                            if (editMode) {
-                                editMessage.setMessage(editTextString);
-                                editMessage.saveEventually();
-
-                                messagesDrawer.updateItem(drawerItem.withDescription(editTextString));
-                            } else {
-                                Message message = Message.newInstance(getGroupId(), editTextString);
-                                message.saveEventually();
-
-                                messagesDrawer.addItemAtPosition(createMessageItem(message), 0);
-                                messagesDrawer.closeDrawer();
-
-                                ToastHelper.toast(getContext(), getString(R.string.message_saved));
-                            }
-                        }
-                    }
-                }).negativeText(android.R.string.cancel).build();
-
-        EditText editText = dialog.getInputEditText();
-
-        if (editText != null) {
-            editText.setSingleLine(true);
-//          editText.setLines(4); // desired number of lines
-            editText.setHorizontallyScrolling(false);
-            editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        }
-
-        dialog.show();
-    }
-
-    private void deleteMessageDialog(final OverflowMenuDrawerItem drawerItem, final Message message) {
-
-        new CommonDialogsBuilder.MaterialDialogs(getActivity()).yesNo(R.string.confirm_delete_message, message.getMessage(), new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-
-                Drawer messagesDrawer = messagesDrawerWeakReference.get();
-
-                int position = messagesDrawer.getPosition(drawerItem);
-                messagesDrawer.removeItemByPosition(position);
-
-                message.unpinInBackground();
-                message.deleteEventually();
-            }
-        }).show();
-    }
-
-
-    private void loadMessages() {
-        final Drawer messagesDrawer = messagesDrawerWeakReference.get();
-
-        if (messagesDrawer == null) {
-            return;
-        }
-
-        messagesDrawer.removeAllItems();
-
-        Message.getQueryBuilder(true, getGroupId()).build().addDescendingOrder(Message.createdAt).findInBackground(new FindCallback<Message>() {
-            @Override
-            public void done(List<Message> messages, ParseException e) {
-                if (getActivity() == null) {
-                    return;
-                }
-
-                for (Message message : messages) {
-                    messagesDrawer.addItem(createMessageItem(message));
-                }
-
-            }
-        });
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity) {
-            Drawer messagesDrawer = ((MainActivity) activity).getMessagesDrawer();
-
-            if (messagesDrawer != null) {
-                messagesDrawerWeakReference = new WeakReference<>(messagesDrawer);
-
-                messagesDrawer.removeAllStickyFooterItems();
-                messagesDrawer.addStickyFooterItem(addMessageItem());
-
-                messagesDrawer.getDrawerLayout().setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
-                if (enableMessagesDrawer()) {
-                    loadMessages();
-                }
-            }
-        }
-    }
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();
 
-        Log.d(TAG, "onDestroyView");
+        Log.i(TAG, "onDestroyView");
 
         messagesDrawerWeakReference = null;
         messagesMenu = null;

@@ -144,7 +144,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
         setSupportActionBar(toolbar);
 
-        navigationDrawer.initNavigationDrawer(this, toolbar, R.id.content);
+        navigationDrawer.create(this, toolbar, R.id.content);
 
 
         version.setText(device.getVersionName());

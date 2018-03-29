@@ -34,7 +34,7 @@ public class ToolbarFragmentDrawerCallback implements FragmentDrawerCallback {
         this.actionCallback = actionCallback;
     }
 
-    private void setActionBarTitle(final String title, final String subtitle) {
+    public void setActionBarTitle(final String title, final String subtitle) {
         new Handler().post(new Runnable() {
             @Override
             public void run() {

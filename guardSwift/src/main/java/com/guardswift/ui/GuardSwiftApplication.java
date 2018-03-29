@@ -356,9 +356,6 @@ public class GuardSwiftApplication extends InjectingApplication {
         return parseCacheFactory;
     }
 
-    public Task<Void> bootstrapParseObjectsLocally(final Activity activity, Guard guard) {
-        return bootstrapParseObjectsLocally(activity, guard, false);
-    }
 
     public boolean isBootstrapInProgress() {
         return bootstrapInProgress;
@@ -369,9 +366,12 @@ public class GuardSwiftApplication extends InjectingApplication {
     private MaterialDialog retryBootstrapDialog;
     private MaterialDialog updateDialog;
 
-    public Task<Void> bootstrapParseObjectsLocally(final Activity activity, final Guard guard, boolean performInBackground) {
+    public Task<Void> bootstrapParseObjectsLocally(final Activity activity, final Guard guard) {
 
         if (parseObjectsBootstrapped || bootstrapInProgress) {
+            Log.i(TAG, "bootstrapParseObjectsLocally aborting");
+            Log.i(TAG, "parseObjectsBootstrapped: " + parseObjectsBootstrapped);
+            Log.i(TAG, "bootstrapInProgress: " + bootstrapInProgress);
             return Task.forResult(null);
         }
 
@@ -390,18 +390,11 @@ public class GuardSwiftApplication extends InjectingApplication {
                     .content(R.string.please_wait)
                     .progress(false, 0, true).build();
 
-            if (!performInBackground) {
-                updateDialog.show();
-            }
         }
 
-        final Continuation<List<ParseObject>, List<ParseObject>> updateClassSuccess = new Continuation<List<ParseObject>, List<ParseObject>>() {
+        final Continuation<List<ParseObject>, Void> updateClassSuccess = new Continuation<List<ParseObject>, Void>() {
             @Override
-            public List<ParseObject> then(Task<List<ParseObject>> task) throws Exception {
-
-                if (task.getResult() != null && !task.getResult().isEmpty()) {
-                    Log.d(TAG, task.getResult().get(0).getClassName());
-                }
+            public Void then(Task<List<ParseObject>> task) throws Exception {
 
                 int currentProgress = updateClassProgress.incrementAndGet();
                 int outOfTotal = updateClassTotal.get();
@@ -414,7 +407,7 @@ public class GuardSwiftApplication extends InjectingApplication {
                 }
 
 
-                Log.d(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
+                Log.i(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
 
                 return null;
             }
@@ -426,48 +419,35 @@ public class GuardSwiftApplication extends InjectingApplication {
         EventType eventType = new EventType();
         updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(eventType, eventType.getAllNetworkQuery()));
 
-        Client client = new Client();
-//        updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(client, client.getAllNetworkQuery()));
-
-//        updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(guard, guard.getAllNetworkQuery()));
-
-        ParseTask task = new ParseTask();
         TaskGroupStarted taskGroupStarted = new TaskGroupStarted();
-        Message message = new Message();
 
         if (guard.canAccessRegularTasks()) {
-//            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new RegularRaidTaskQueryBuilder(false).build()));
             updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(taskGroupStarted, new TaskGroupStartedQueryBuilder(false).whereActive().build()));
-//            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(message, message.getAllNetworkQuery()));
         }
-//        if (guard.canAccessAlarms()) {
-//            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new AlarmTaskQueryBuilder(false).build()));
-//        }
-//        if (guard.canAccessStaticTasks()) {
-//            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(task, new StaticTaskQueryBuilder(false).build()));
-//        }
 
         updateClassTotal.set(updateQueries.size());
 
-        Task<List<ParseObject>> resultTask = Task.forResult(null);
+        Task<Void> resultTask = Task.forResult(null);
 
         for (final Pair<ExtendedParseObject,ParseQuery> objectQueryPair: updateQueries) {
 
             final ExtendedParseObject parseObject = objectQueryPair.first;
             final ParseQuery<ParseObject> query = objectQueryPair.second;
 
-            resultTask = resultTask.onSuccessTask(new Continuation<List<ParseObject>, Task<List<ParseObject>>>() {
+            resultTask = resultTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<List<ParseObject>> then(Task<List<ParseObject>> task) throws Exception {
+                public Task<Void> then(Task<Void> task) throws Exception {
                     return parseObject.updateAll(query, 1000).onSuccess(updateClassSuccess);
                 }
             });
         }
 
         return resultTask
-                .continueWithTask(new Continuation<List<ParseObject>, Task<List<ParseObject>>>() {
+                .continueWithTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<List<ParseObject>> then(Task<List<ParseObject>> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) throws Exception {
+
+                        Log.i(TAG, "Bootstrap done");
 
                         // no matter what happens e.g. success/error, the dialog should be dismissed
                         if (updateDialog != null) {
@@ -477,40 +457,42 @@ public class GuardSwiftApplication extends InjectingApplication {
                         bootstrapInProgress = false;
 
                         if (task.isFaulted()) {
-                            Log.d(TAG, "Bootstrap failed");
+                            Log.i(TAG, "Bootstrap failed");
                             new HandleException(TAG, "bootstrapParseObjectsLocally", task.getError());
 
 
-                            if (getLoggedIn() != null) {
-                                retryBootstrapDialog = new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
-                                        bootstrapParseObjectsLocally(activity, guard);
-                                    }
-                                }).cancelable(false).show();
-                            } else {
-                                ToastHelper.toast(activity, getString(R.string.error_an_error_occured));
+                            if (activity != null) {
+                                if (getLoggedIn() != null) {
+                                    retryBootstrapDialog = new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {
+                                        @Override
+                                        public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
+                                            bootstrapParseObjectsLocally(activity, guard);
+                                        }
+                                    }).cancelable(false).show();
+                                } else {
+                                    ToastHelper.toast(activity, getString(R.string.error_an_error_occured));
+                                }
                             }
 
 
-//                            throw task.getError();
+                            return Task.forError(task.getError());
                         }
 
 
-                        return task;
+                        return Task.forResult(null);
                     }
                 })
-                .onSuccess(new Continuation<List<ParseObject>, Void>() {
+                .onSuccess(new Continuation<Void, Void>() {
                     @Override
-                    public Void then(Task<List<ParseObject>> task) throws Exception {
+                    public Void then(Task<Void> task) throws Exception {
 
-                        Log.d(TAG, "Bootstrap success");
+                        Log.i(TAG, "Bootstrap success");
+
+                        EventBusController.post(new BootstrapCompleted());
 
                         parseObjectsBootstrapped = true;
 
                         startServices();
-
-                        EventBusController.post(new BootstrapCompleted());
 
                         return null;
                     }
