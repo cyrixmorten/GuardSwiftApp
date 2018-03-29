@@ -137,7 +137,6 @@
         <activity
             android:name=".ui.dialog.activity.AlarmDialogActivity"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait"
             android:showOnLockScreen="true"
             android:theme="@style/AppTheme.Light.Dialog" />
 

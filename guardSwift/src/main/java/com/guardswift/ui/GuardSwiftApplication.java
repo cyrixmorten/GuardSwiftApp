@@ -388,7 +388,7 @@ public class GuardSwiftApplication extends InjectingApplication {
             updateDialog = new MaterialDialog.Builder(activity)
                     .title(R.string.working)
                     .content(R.string.please_wait)
-                    .progress(false, 0, true).build();
+                    .progress(false, 0, true).show();
 
         }
 
@@ -452,6 +452,7 @@ public class GuardSwiftApplication extends InjectingApplication {
                         // no matter what happens e.g. success/error, the dialog should be dismissed
                         if (updateDialog != null) {
                             updateDialog.dismiss();
+                            updateDialog = null;
                         }
 
                         bootstrapInProgress = false;

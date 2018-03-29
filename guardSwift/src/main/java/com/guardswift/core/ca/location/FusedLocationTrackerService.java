@@ -23,13 +23,14 @@ import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.jobs.oneoff.RebuildGeofencesJob;
-import com.guardswift.notification.LocationNotification;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.documentation.gps.TrackerData;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.ui.notification.LocationNotification;
+import com.guardswift.ui.notification.NotificationID;
 import com.guardswift.util.Util;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
@@ -100,7 +101,7 @@ public class FusedLocationTrackerService extends InjectingService {
             wl.acquire();
         }
 
-        this.startForeground(LocationNotification.NOTIFY_ID, LocationNotification.create(this, ""));
+        this.startForeground(NotificationID.LOCATION, LocationNotification.create(this, ""));
     }
 
 

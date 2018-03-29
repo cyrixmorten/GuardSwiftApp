@@ -17,7 +17,7 @@ import com.guardswift.persistence.cache.task.TaskCache;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
-import com.guardswift.ui.notification.AlarmNotification;
+import com.guardswift.ui.notification.AlarmNotifications;
 import com.guardswift.util.Sounds;
 
 import java.util.concurrent.TimeUnit;
@@ -57,6 +57,8 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
             Intent i = new Intent(context, AlarmDialogActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(i);
+
+            AlarmNotifications.show(context, alarm);
         }
 
     }
@@ -65,20 +67,25 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-
         Log.d(TAG, "onCreate");
-        createAndShowAlarmDialog(alarm);
+
+        createAndShowAlarmDialog();
     }
 
 
-    private void stopAlarm() {
+    private void playAlarmSound() {
+        currentAlarmSound = alarm.isAborted() ? Sounds.ALARM_CANCELLED : Sounds.ALARM_NEW;
+        mSounds.playSoundRepeating(currentAlarmSound);
+    }
+
+    private void stopAlarmSound() {
         mSounds.stopAlarm();
         snoozeHandler.removeCallbacks(snoozeRunnable);
         AlarmDialogActivity.alarm = null;
     }
 
     private void snoozeAlarm() {
-        stopAlarm();
+        stopAlarmSound();
         snoozeHandler.postDelayed(snoozeRunnable, TimeUnit.MINUTES.toMillis(1));
     }
 
@@ -94,20 +101,18 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
     @Override
     protected void onDestroy() {
-        stopAlarm();
+        stopAlarmSound();
         super.onDestroy();
     }
 
 
-    private void createAndShowAlarmDialog(final ParseTask alarm) {
+    private void createAndShowAlarmDialog() {
 
         if (isDestroyed()) {
             return;
         }
 
-        currentAlarmSound = alarm.isAborted() ? Sounds.ALARM_CANCELLED : Sounds.ALARM_NEW;
-        mSounds.playSoundRepeating(currentAlarmSound);
-
+        playAlarmSound();
         Log.d(TAG, "createAndShowAlarmDialog");
 
 //        String formattedDate = android.text.format.DateUtils.formatDateTime(AlarmDialogActivity.this,
@@ -136,6 +141,7 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
                 if (alarm.isPending()) {
                     AlarmController.getInstance().performAction(AlarmController.ACTION.ACCEPT, alarm, false);
                 }
+
                 AlarmDialogActivity.this.finish();
 
                 Intent intent = new Intent(AlarmDialogActivity.this, MainActivity.class);
@@ -143,8 +149,8 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
                 intent.putExtra(MainActivity.SELECT_ALARMS, true);
                 AlarmDialogActivity.this.startActivity(intent);
 
-                stopAlarm();
-                AlarmNotification.cancel(AlarmDialogActivity.this);
+                AlarmNotifications.cancel(AlarmDialogActivity.this);
+                stopAlarmSound();
             }
         })
         .cancelable(false)

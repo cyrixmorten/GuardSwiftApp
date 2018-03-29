@@ -24,12 +24,14 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.common.collect.Lists;
 import com.guardswift.R;
 import com.guardswift.core.ca.activity.ActivityDetectionModule;
+import com.guardswift.core.exceptions.LogError;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.documentation.gps.TrackerData;
 import com.guardswift.ui.activity.AbstractToolbarActivity;
 import com.guardswift.ui.activity.SlidingPanelActivity;
 import com.guardswift.ui.map.BaseMapFragment;
+import com.guardswift.util.ToastHelper;
 import com.guardswift.util.Util;
 import com.parse.ProgressCallback;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -162,7 +164,7 @@ public class TrackerMapFragment extends BaseMapFragment {
         mTrackerData = trackerData;
         mPositions = getTrack(trackerData);
 
-        if (mActionBar != null) {
+        if (mActionBar != null && mTrackerData.length > 0) {
             TrackerData first = mTrackerData[0];
             TrackerData last = mTrackerData[mTrackerData.length - 1];
 
@@ -194,7 +196,7 @@ public class TrackerMapFragment extends BaseMapFragment {
                 @Override
                 public void done(final TrackerData[] trackerData, Exception e) {
                     if (e != null) {
-                        Log.e(TAG, "Unable to download file", e);
+                        LogError.log(TAG, "Unable to download trackerData for Tracker: " + tracker.getObjectId(), e);
                         return;
                     }
 
@@ -226,8 +228,12 @@ public class TrackerMapFragment extends BaseMapFragment {
 
 
 
-                    zoomFit(googleMap, mPositions);
-                    addPolyLines(googleMap, mPositions);
+                    if (!mPositions.isEmpty()) {
+                        zoomFit(googleMap, mPositions);
+                        addPolyLines(googleMap, mPositions);
+                    } else {
+                        ToastHelper.toast(getContext(), getString(R.string.error_downloading_file));
+                    }
 
                 }
             });

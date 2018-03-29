@@ -20,7 +20,8 @@ import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
-import com.guardswift.notification.ActivityNotification;
+import com.guardswift.ui.notification.ActivityNotification;
+import com.guardswift.ui.notification.NotificationID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +63,7 @@ public class ActivityRecognitionService extends InjectingService {
 
         wl.acquire();
 
-        this.startForeground(ActivityNotification.NOTIFY_ID, ActivityNotification.create(this, getString(R.string.activity_still)));
+        this.startForeground(NotificationID.ACTIVITY, ActivityNotification.create(this, getString(R.string.activity_still)));
     }
 
 

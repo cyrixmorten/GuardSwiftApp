@@ -166,6 +166,14 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        this.updateDialog = null;
+
+    }
+
     @SuppressLint("BatteryLife")
     private void ignoreBatteryOptimizations() {
         Intent intent = new Intent();

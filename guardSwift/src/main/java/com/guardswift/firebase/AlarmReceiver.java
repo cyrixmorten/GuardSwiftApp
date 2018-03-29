@@ -11,7 +11,6 @@ import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
-import com.guardswift.ui.notification.AlarmNotification;
 
 import org.joda.time.DateTime;
 import org.joda.time.Seconds;
@@ -117,7 +116,6 @@ public class AlarmReceiver extends FirebaseMessagingService {
                 if (guard.isAlarmSoundEnabled() && someTimePast) {
 
                     AlarmDialogActivity.start(AlarmReceiver.this, alarm);
-                    AlarmNotification.show(AlarmReceiver.this, alarm);
 
                     lastAlarmReceive = new DateTime();
                 }

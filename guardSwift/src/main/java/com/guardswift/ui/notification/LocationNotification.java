@@ -1,4 +1,4 @@
-package com.guardswift.notification;
+package com.guardswift.ui.notification;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -19,7 +19,7 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class LocationNotification {
 
-    public static final int NOTIFY_ID = 101;
+
 
     private static boolean channelCreated;
     private static NotificationCompat.Builder mBuilder;
@@ -48,10 +48,12 @@ public class LocationNotification {
         return CHANNEL_ID;
     }
 
-    public static Notification create(Context context, String contentText) {
-
+    private static PendingIntent getPendingIntent(Context context) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+        return PendingIntent.getActivity(context, 0, notificationIntent, 0);
+    }
+
+    public static Notification create(Context context, String contentText) {
 
         String channelId = "";
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -64,7 +66,7 @@ public class LocationNotification {
                 .setContentTitle(context.getText(R.string.gps_position))
                 .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_launcher)
-                .setContentIntent(pendingIntent)
+                .setContentIntent(getPendingIntent(context))
                 .setColor(Color.BLUE)
                 .setColorized(true);
 
@@ -76,7 +78,7 @@ public class LocationNotification {
 
         NotificationManager mgr = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         if (mgr != null) {
-            mgr.notify(NOTIFY_ID, mBuilder.build());
+            mgr.notify(NotificationID.LOCATION, mBuilder.build());
         }
     }
 }

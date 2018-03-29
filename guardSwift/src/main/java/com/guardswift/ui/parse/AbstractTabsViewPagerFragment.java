@@ -115,7 +115,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
 //        });
 
 //         Setting the ViewPager For the SlidingTabsLayout
-        if (getTabbedFragments().keySet().size() > 1) {
+        if (getTabbedFragments() != null && getTabbedFragments().keySet().size() > 1) {
 //            tabs.setViewPager(mViewPager);
             tabs.setVisibility(View.VISIBLE);
 
