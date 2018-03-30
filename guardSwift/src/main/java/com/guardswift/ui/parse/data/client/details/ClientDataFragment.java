@@ -1,7 +1,7 @@
 package com.guardswift.ui.parse.data.client.details;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.databinding.ObservableField;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -16,12 +16,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.guardswift.R;
 import com.guardswift.databinding.FragmentClientDetailsBinding;
 import com.guardswift.persistence.parse.data.client.Client;
-import com.guardswift.persistence.parse.query.ClientQueryBuilder;
 import com.guardswift.ui.map.BaseMapFragment;
-import com.guardswift.util.ToastHelper;
-import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseQuery;
 
 public class ClientDataFragment extends BaseMapFragment {
 
@@ -46,27 +42,19 @@ public class ClientDataFragment extends BaseMapFragment {
     public ClientDataFragment() {
     }
 
-    private ObservableClient mClient;
-
-
+    private Client.ObservableClient mClientObservable;
+    private ClientViewModel mClientViewModel;
+    private String objectId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-
-            String objectId = getArguments().getString(ARG_CLIENT_ID, "");
-
-            ParseQuery<Client> query = new ClientQueryBuilder(false).matchingObjectId(objectId).build();
-            try {
-                Client client = query.getFirst();
-                mClient = new ObservableClient(client);
-            } catch (ParseException e) {
-                ToastHelper.toast(getContext(), e.getMessage());
-            }
+            objectId = getArguments().getString(ARG_CLIENT_ID, "");
         }
 
+        mClientViewModel = ViewModelProviders.of(this).get(ClientViewModel.class);
 
     }
 
@@ -79,9 +67,13 @@ public class ClientDataFragment extends BaseMapFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        FragmentClientDetailsBinding binding = FragmentClientDetailsBinding.inflate(inflater);
+        final FragmentClientDetailsBinding binding = FragmentClientDetailsBinding.inflate(inflater);
 
-        binding.setClient(mClient);
+        mClientViewModel.getClient(this.objectId)
+                .observe(this, (client) -> {
+                    mClientObservable = new Client.ObservableClient(client);
+                    binding.setClient(mClientObservable);
+                });
 
         return binding.getRoot();
     }
@@ -99,20 +91,35 @@ public class ClientDataFragment extends BaseMapFragment {
 
         Log.d(TAG, "onMapReady");
 
+        mClientViewModel.getClient(this.objectId).observe(this, client -> {
+            if (client == null) {
+                return;
+            }
 
-        ParseGeoPoint position = mClient.position.get();
-        LatLng mapPosition = new LatLng(position.getLatitude(), position.getLongitude());
+            ParseGeoPoint position = client.getPosition();
+            LatLng mapPosition = new LatLng(position.getLatitude(), position.getLongitude());
 
-        map.addMarker(new MarkerOptions()
-                .position(mapPosition)
-                .title(mClient.name.get())
-                .snippet(mClient.fullAddress.get()));
+            map.addMarker(new MarkerOptions()
+                    .position(mapPosition)
+                    .title(client.getName())
+                    .snippet(client.getFullAddress()));
 
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(mapPosition, 15));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(mapPosition, 15));
 
 
-        map.getUiSettings().setAllGesturesEnabled(false);
-        map.getUiSettings().setZoomControlsEnabled(true);
+            map.getUiSettings().setAllGesturesEnabled(false);
+            map.getUiSettings().setZoomControlsEnabled(true);
+        });
+    }
+
+    private void save() {
+        mClientViewModel.getClient(this.objectId).observe(this, client -> {
+            if (client == null) {
+                return;
+            }
+
+            client.updateFromObservable(mClientObservable);
+        });
     }
 
     @Override
@@ -122,27 +129,7 @@ public class ClientDataFragment extends BaseMapFragment {
 
 
 
-    public static class ObservableClient {
 
-//        ObservableArrayMap<String, Object> client = new ObservableArrayMap<>();
-
-        public final ObservableField<String> id = new ObservableField<>();
-        public final ObservableField<String> name = new ObservableField<>();
-        public final ObservableField<String> fullAddress = new ObservableField<>();
-        public final ObservableField<ParseGeoPoint> position = new ObservableField<>();
-
-        private Client client;
-
-        ObservableClient(Client client) {
-            this.client = client;
-
-            id.set(client.getId());
-            name.set(client.getName());
-            fullAddress.set(client.getFullAddress());
-            position.set(client.getPosition());
-        }
-
-    }
 
 
 }

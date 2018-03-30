@@ -7,7 +7,7 @@
 
         <variable
             name="client"
-            type="com.guardswift.ui.parse.data.client.details.ClientDataFragment.ObservableClient" />
+            type="com.guardswift.persistence.parse.data.client.Client.ObservableClient" />
     </data>
 
     <ScrollView

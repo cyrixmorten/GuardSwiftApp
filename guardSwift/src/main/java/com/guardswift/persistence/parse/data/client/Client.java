@@ -1,6 +1,7 @@
 package com.guardswift.persistence.parse.data.client;
 
 import android.content.Context;
+import android.databinding.ObservableField;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +32,28 @@ import butterknife.ButterKnife;
 @ParseClassName("Client")
 public class Client extends ExtendedParseObject implements Positioned {
 
+
+
+    public static class ObservableClient {
+
+        public final ObservableField<String> id = new ObservableField<>();
+        public final ObservableField<String> name = new ObservableField<>();
+        public final ObservableField<String> fullAddress = new ObservableField<>();
+        public final ObservableField<ParseGeoPoint> position = new ObservableField<>();
+
+        public ObservableClient(Client client) {
+            if (client != null) {
+                id.set(client.getId());
+                name.set(client.getName());
+                fullAddress.set(client.getFullAddress());
+                position.set(client.getPosition());
+            }
+        }
+    }
+
+    public void updateFromObservable(ObservableClient observableClient) {
+
+    }
 
     public static final String clientId = "clientId";
     public static final String name = "name";
