@@ -97,13 +97,15 @@ public class MainActivity extends InjectingAppCompatActivity {
             }
         });
 
-        Drawer drawer = navigationDrawer.create(this, toolbar, mainDrawerCallback);
+        Drawer mainNavigationDrawer = navigationDrawer.create(this, toolbar, mainDrawerCallback);
 
         messagesDrawer = new MessagesDrawer(this, new DrawerBuilder()
                 .withActivity(this)
                 .withDrawerGravity(Gravity.END)
                 .withCloseOnClick(false)
-                .append(drawer));
+                .append(mainNavigationDrawer));
+
+        mainNavigationDrawer.openDrawer();
     }
 
 

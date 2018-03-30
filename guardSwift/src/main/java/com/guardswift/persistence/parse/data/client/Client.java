@@ -234,7 +234,7 @@ public class Client extends ExtendedParseObject implements Positioned {
     }
 
     public ParseGeoPoint getPosition() {
-        return getParseGeoPoint(position);
+        return has(position) ? getParseGeoPoint(position) : new ParseGeoPoint(0,0);
     }
 
     public List<ClientContact> getContactsWithNames() {

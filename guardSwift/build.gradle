@@ -18,13 +18,18 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
+// https://stackoverflow.com/questions/18328730/how-to-create-a-release-signed-apk-file-using-gradle
+def keystorePropertiesFile = rootProject.file("./keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     signingConfigs {
         selfsigned {
-            keyAlias 'guardswift'
-            keyPassword 'cH99fvFx'
-            storeFile file('/Users/cyrixmorten/Dropbox/Arbejde/GuardSwift/keystore/cyrix.keystore')
-            storePassword 'cH99fvFx'
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
         }
     }
     compileSdkVersion 27
@@ -36,8 +41,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 514
-        versionName "5.1.4"
+        versionCode 515
+        versionName "5.1.5"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -90,76 +95,76 @@ dependencies {
 
     // Local jar dependencies
 
-    //    compile fileTree(include: ['*.jar'], dir: 'libs/alexandra')
-    compile('com.mikepenz:materialdrawer:5.9.1@aar') {
+    //    implementation fileTree(include: ['*.jar'], dir: 'libs/alexandra')
+    implementation('com.mikepenz:materialdrawer:5.9.1@aar') {
         transitive = true
     }
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
     }
-    compile('com.github.hotchemi:permissionsdispatcher:2.4.0') {
+    implementation('com.github.hotchemi:permissionsdispatcher:2.4.0') {
         // if you don't use android.app.Fragment you can exclude support for them
         exclude module: "support-v13"
     }
     annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:2.4.0"
-    compile 'com.google.maps.android:android-maps-utils:0.5'
-    compile 'com.evernote:android-job:1.2.4'
-    compile 'com.sothree.slidinguppanel:library:3.3.1'
-    compile 'com.github.lecho:hellocharts-library:1.5.8@aar'
-    compile 'com.mikepenz:actionitembadge:3.3.1@aar'
-    compile 'com.mikepenz:iconics-core:2.8.4@aar'
-    compile 'com.mikepenz:google-material-typeface:2.2.0.1@aar'
-    compile 'com.mikepenz:fontawesome-typeface:4.6.0.3@aar'
-    compile 'com.mikepenz:fastadapter-commons:2.5.2@aar'
-    compile 'com.afollestad.material-dialogs:core:0.9.4.4'
-    compile 'net.sf.jopt-simple:jopt-simple:4.9'
-    compile 'com.squareup.retrofit2:retrofit:2.0.2'
-    compile 'com.parse:parseui-login-android:0.0.1'
-    compile 'com.parse:parseui-widget-android:0.0.1'
-    compile 'com.parse:parse-android:1.16.5'
-    compile 'com.parse:parse-livequery-android:1.0.4'
-    compile 'com.squareup:javawriter:2.5.1'
-    compile 'javax.inject:javax.inject:1'
-    compile 'com.jakewharton:butterknife:8.5.1'
+    implementation 'com.google.maps.android:android-maps-utils:0.5'
+    implementation 'com.evernote:android-job:1.2.4'
+    implementation 'com.sothree.slidinguppanel:library:3.3.1'
+    implementation 'com.github.lecho:hellocharts-library:1.5.8@aar'
+    implementation 'com.mikepenz:actionitembadge:3.3.1@aar'
+    implementation 'com.mikepenz:iconics-core:2.8.4@aar'
+    implementation 'com.mikepenz:google-material-typeface:2.2.0.1@aar'
+    implementation 'com.mikepenz:fontawesome-typeface:4.6.0.3@aar'
+    implementation 'com.mikepenz:fastadapter-commons:2.5.2@aar'
+    implementation 'com.afollestad.material-dialogs:core:0.9.4.4'
+    implementation 'net.sf.jopt-simple:jopt-simple:4.9'
+    implementation 'com.squareup.retrofit2:retrofit:2.0.2'
+    implementation 'com.parse:parseui-login-android:0.0.1'
+    implementation 'com.parse:parseui-widget-android:0.0.1'
+    implementation 'com.parse:parse-android:1.16.5'
+    implementation 'com.parse:parse-livequery-android:1.0.4'
+    implementation 'com.squareup:javawriter:2.5.1'
+    implementation 'javax.inject:javax.inject:1'
+    implementation 'com.jakewharton:butterknife:8.5.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
-    compile 'com.squareup.dagger:dagger:1.2.2'
+    implementation 'com.squareup.dagger:dagger:1.2.2'
     annotationProcessor 'com.squareup.dagger:dagger-compiler:1.2.2'
-    compile 'de.greenrobot:eventbus:2.4.1'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.beardedhen:androidbootstrap:2.0.0'
-    compile 'com.getbase:floatingactionbutton:1.10.1'
-    compile 'com.github.thomper:sweet-alert-dialog:v1.4.0'
-    compile 'com.code-troopers.betterpickers:library:3.1.0'
-    compile 'com.malinskiy:superrecyclerview:1.1.4'
-    compile 'com.takisoft.fix:preference-v7:27.0.2.0'
-    //    compile 'pl.charmas.android:android-reactive-location2:2.0@aar'
-    //    compile 'io.reactivex.rxjava2:rxjava:2.0.0'
-    //    compile 'io.reactivex.rxjava2:rxandroid:2.0.0'
-    compile 'pl.charmas.android:android-reactive-location:0.10@aar'
-    compile 'io.reactivex:rxandroid:1.2.0'
-    compile 'io.reactivex:rxjava:1.2.3'
-    compile 'net.danlew:android.joda:2.9.9'
-    compile 'com.google.guava:guava:23.3-android'
-    compile 'com.android.support:multidex:1.0.3'
-    compile 'com.google.code.findbugs:jsr305:2.0.2'
-    compile 'com.google.code.gson:gson:2.8.0'
-    compile 'com.android.support:support-v13:27.1.0'
-    compile 'com.android.support:design:27.1.0'
-    compile 'com.android.support:cardview-v7:27.1.0'
-    compile 'com.android.support:appcompat-v7:27.1.0'
-    compile 'com.android.support:preference-v7:27.1.0'
-    compile 'com.android.support:preference-v14:27.1.0'
-    compile 'com.android.support:animated-vector-drawable:27.1.0'
-    compile 'com.google.firebase:firebase-messaging:11.8.0'
-    compile 'com.google.android.gms:play-services-analytics:11.8.0'
-    compile 'com.google.android.gms:play-services-gcm:11.8.0'
-    compile 'com.google.android.gms:play-services-maps:11.8.0'
-    compile 'com.google.android.gms:play-services-location:11.8.0'
-    compile 'com.google.android.gms:play-services-places:11.8.0'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.4'
-//    debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    implementation 'de.greenrobot:eventbus:2.4.1'
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.beardedhen:androidbootstrap:2.0.0'
+    implementation 'com.getbase:floatingactionbutton:1.10.1'
+    implementation 'com.github.thomper:sweet-alert-dialog:v1.4.0'
+    implementation 'com.code-troopers.betterpickers:library:3.1.0'
+    implementation 'com.malinskiy:superrecyclerview:1.1.4'
+    implementation 'com.takisoft.fix:preference-v7:27.0.2.0'
+    //    implementation 'pl.charmas.android:android-reactive-location2:2.0@aar'
+    //    implementation 'io.reactivex.rxjava2:rxjava:2.0.0'
+    //    implementation 'io.reactivex.rxjava2:rxandroid:2.0.0'
+    implementation 'pl.charmas.android:android-reactive-location:0.10@aar'
+    implementation 'io.reactivex:rxandroid:1.2.0'
+    implementation 'io.reactivex:rxjava:1.2.3'
+    implementation 'net.danlew:android.joda:2.9.9'
+    implementation 'com.google.guava:guava:23.3-android'
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.google.code.findbugs:jsr305:2.0.2'
+    implementation 'com.google.code.gson:gson:2.8.0'
+    implementation 'com.android.support:support-v13:27.1.0'
+    implementation 'com.android.support:design:27.1.0'
+    implementation 'com.android.support:cardview-v7:27.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.0'
+    implementation 'com.android.support:preference-v7:27.1.0'
+    implementation 'com.android.support:preference-v14:27.1.0'
+    implementation 'com.android.support:animated-vector-drawable:27.1.0'
+    implementation 'com.google.firebase:firebase-messaging:12.0.1'
+    implementation 'com.google.android.gms:play-services-analytics:12.0.1'
+    implementation 'com.google.android.gms:play-services-gcm:12.0.1'
+    implementation 'com.google.android.gms:play-services-maps:12.0.1'
+    implementation 'com.google.android.gms:play-services-location:12.0.1'
+    implementation 'com.google.android.gms:play-services-places:12.0.1'
+    testImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+//    debugImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 }
 
 apply plugin: 'com.google.gms.google-services'

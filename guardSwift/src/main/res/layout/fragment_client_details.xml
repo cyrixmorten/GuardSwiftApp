@@ -51,6 +51,11 @@
                     android:text="@{client.name}"
                     tools:text="Client name"/>
 
+                <TextView android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{client.fullAddress}"
+                    tools:text="Client address"/>
+
             </LinearLayout>
 
         </LinearLayout>
