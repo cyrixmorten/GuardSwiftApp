@@ -1,10 +1,12 @@
 package com.guardswift.ui.parse.data.client.details;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.databinding.ObservableField;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,10 +44,12 @@ public class ClientDataFragment extends BaseMapFragment {
 
 
         Bundle args = new Bundle();
-        args.putString("id", client.getObjectId());
+        args.putString(ARG_CLIENT_ID, client.getObjectId());
         fragment.setArguments(args);
         return fragment;
     }
+
+    private static final String ARG_CLIENT_ID = "id";
 
     public ClientDataFragment() {
     }
@@ -58,15 +62,19 @@ public class ClientDataFragment extends BaseMapFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (getArguments() != null) {
 
-        ParseQuery<Client> query = new ClientQueryBuilder(false).matchingObjectId(getArguments().getString("id")).build();
-//        query.setCachePolicy(ParseQuery.CachePolicy.CACHE_ELSE_NETWORK);
-        try {
-            Client client = query.getFirst();
-            mClient = new ObservableClient(client);
-        } catch (ParseException e) {
-            ToastHelper.toast(getContext(), e.getMessage());
+            String objectId = getArguments().getString(ARG_CLIENT_ID, "");
+
+            ParseQuery<Client> query = new ClientQueryBuilder(false).matchingObjectId(objectId).build();
+            try {
+                Client client = query.getFirst();
+                mClient = new ObservableClient(client);
+            } catch (ParseException e) {
+                ToastHelper.toast(getContext(), e.getMessage());
+            }
         }
+
 
     }
 
@@ -76,7 +84,7 @@ public class ClientDataFragment extends BaseMapFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         FragmentClientDetailsBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_client_details, container, false);
@@ -116,9 +124,17 @@ public class ClientDataFragment extends BaseMapFragment {
     @Override
     public void onMapReady(GoogleMap map) {
 
+        Context context = getContext();
+
+        if (context == null) {
+            return;
+        }
+
         Log.d(TAG, "onMapReady");
 
         mapData = new MapData();
+
+
 
         ParseGeoPoint position = mClient.position.get();
         LatLng mapPosition = new LatLng(position.getLatitude(), position.getLongitude());
@@ -133,7 +149,7 @@ public class ClientDataFragment extends BaseMapFragment {
         // Zoom in, animating the camera.
 //		map.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
 //		map.setIndoorEnabled(true);
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             map.setMyLocationEnabled(true);
         }
 

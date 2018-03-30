@@ -17,7 +17,7 @@ import com.guardswift.persistence.cache.task.TaskCache;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
-import com.guardswift.ui.notification.AlarmNotifications;
+import com.guardswift.ui.notification.AlarmNotification;
 import com.guardswift.util.Sounds;
 
 import java.util.concurrent.TimeUnit;
@@ -57,8 +57,6 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
             Intent i = new Intent(context, AlarmDialogActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(i);
-
-            AlarmNotifications.show(context, alarm);
         }
 
     }
@@ -69,7 +67,12 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
         super.onCreate(bundle);
         Log.d(TAG, "onCreate");
 
-        createAndShowAlarmDialog();
+        if (alarm != null) {
+            createAndShowAlarmDialog();
+            AlarmNotification.show(this, alarm);
+        } else {
+            finish();
+        }
     }
 
 
@@ -81,7 +84,6 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
     private void stopAlarmSound() {
         mSounds.stopAlarm();
         snoozeHandler.removeCallbacks(snoozeRunnable);
-        AlarmDialogActivity.alarm = null;
     }
 
     private void snoozeAlarm() {
@@ -101,7 +103,11 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
     @Override
     protected void onDestroy() {
+        
         stopAlarmSound();
+
+        AlarmDialogActivity.alarm = null;
+
         super.onDestroy();
     }
 
@@ -149,7 +155,7 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
                 intent.putExtra(MainActivity.SELECT_ALARMS, true);
                 AlarmDialogActivity.this.startActivity(intent);
 
-                AlarmNotifications.cancel(AlarmDialogActivity.this);
+                AlarmNotification.cancel(AlarmDialogActivity.this);
                 stopAlarmSound();
             }
         })

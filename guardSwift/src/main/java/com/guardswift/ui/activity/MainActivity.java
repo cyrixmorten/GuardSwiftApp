@@ -13,21 +13,16 @@ import com.guardswift.dagger.InjectingAppCompatActivity;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
-import com.guardswift.persistence.parse.execution.task.ParseTask;
-import com.guardswift.persistence.parse.query.AlarmTaskQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.drawer.MainNavigationDrawer;
 import com.guardswift.ui.drawer.MessagesDrawer;
 import com.guardswift.ui.drawer.ToolbarFragmentDrawerCallback;
-import com.guardswift.ui.notification.AlarmNotifications;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.util.Device;
 import com.guardswift.util.Sounds;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
-import com.parse.GetCallback;
-import com.parse.ParseException;
 
 import javax.inject.Inject;
 
@@ -86,13 +81,6 @@ public class MainActivity extends InjectingAppCompatActivity {
                 }
             });
 
-            new AlarmTaskQueryBuilder(false).build().getFirstInBackground(new GetCallback<ParseTask>() {
-                @Override
-                public void done(ParseTask parseTask, ParseException e) {
-//                    AlarmDialogActivity.start(MainActivity.this, parseTask);
-                    AlarmNotifications.show(MainActivity.this, parseTask);
-                }
-            });
         }
     }
 

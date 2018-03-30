@@ -17,7 +17,7 @@ import com.guardswift.ui.activity.MainActivity;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
 
-public class AlarmNotifications {
+public class AlarmNotification {
 
 
 

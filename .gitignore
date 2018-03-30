@@ -46,3 +46,5 @@ obj/
 *.ipr
 *~
 *.swp
+
+*/**/release/
