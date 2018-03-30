@@ -1,5 +1,7 @@
 package com.guardswift.persistence.parse.misc;
 
+import android.util.Log;
+
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;
 import com.guardswift.util.Device;
@@ -53,6 +55,8 @@ public class Update extends ExtendedParseObject {
 
     public boolean isNewerThanInstalled() {
         int currentVersion = new Device().getVersionCode();
+        Log.d(TAG, "currentVersion: " + currentVersion);
+        Log.d(TAG, "getVersionNumber(): " + getVersionNumber());
         return currentVersion < getVersionNumber();
     }
 

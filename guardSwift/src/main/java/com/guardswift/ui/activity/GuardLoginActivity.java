@@ -383,23 +383,25 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
 
     private void checkForNewUpdates() {
-        new Update.QueryBuilder(false).build().addDescendingOrder(Update.versionNumber).findInBackground()
-                .continueWith(new Continuation<List<Update>, Object>() {
+        Log.i(TAG, "checkForNewUpdates");
+
+        if (installInProgress) {
+            return;
+        }
+
+        new Update.QueryBuilder(false).build().addDescendingOrder(Update.versionNumber).getFirstInBackground()
+                .continueWith(new Continuation<Update, Object>() {
                     @Override
-                    public Object then(Task<List<Update>> task) throws Exception {
+                    public Object then(Task<Update> task) throws Exception {
                         if (task.isFaulted()) {
                             new HandleException(GuardLoginActivity.this, TAG, "Fetch updates", task.getError());
                             return null;
                         }
 
-                        boolean hasNew = false;
-                        List<Update> updates = task.getResult();
-                        for (Update update : updates) {
-                            hasNew = hasNew || update.isNewerThanInstalled();
-                        }
+                        Update update = task.getResult();
 
-                        if (hasNew) {
-                            showDownloadOption(updates);
+                        if (update.isNewerThanInstalled()) {
+                            showDownloadOption(update);
                         }
 
                         return null;
@@ -411,12 +413,13 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     private MaterialDialog updateDialog;
     private String updateVersionName = "";
 
-    private void showDownloadOption(List<Update> updates) {
+    private void showDownloadOption(final Update targetUpdate) {
+        Log.i(TAG, "showDownloadOption");
 
-        if (isFinishing() || updates.isEmpty())
+        if (isFinishing()) {
             return;
+        }
 
-        final Update targetUpdate = updates.get(0);
 
         runOnUiThread(new Runnable() {
             @Override
@@ -449,13 +452,19 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         });
     }
 
+    private boolean installInProgress;
+
     @NeedsPermission({Manifest.permission.WRITE_EXTERNAL_STORAGE})
     public void downloadAndInstall(Update update) {
+        Log.i(TAG, "downloadAndInstall");
+
         ParseFile apkFile = update.getUpdateFile();
         if (apkFile == null) {
             ToastHelper.toast(this, getString(R.string.file_not_found));
             return;
         }
+
+        installInProgress = true;
 
         final MaterialDialog downloadDialog = new MaterialDialog.Builder(this)
                 .title(R.string.downloading_update)
@@ -463,27 +472,33 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                 .progress(false, 100, false)
                 .show();
 
-        ProgressCallback progressCallback = new ProgressCallback() {
-            @Override
-            public void done(Integer percentDone) {
-                downloadDialog.setProgress(percentDone);
-            }
-        };
 
+        Log.i(TAG, "downloading update");
         apkFile.getFileInBackground(new GetFileCallback() {
             @Override
             public void done(File file, ParseException e) {
+
+                Log.i(TAG, "downloading update done: " + (e == null));
+
                 if (e != null) {
                     new HandleException(TAG, "Failed to download update", e);
+                    installInProgress = false;
                     return;
                 }
 
-                UpdateApp.fromFile(file);
+                UpdateApp.fromFile(GuardLoginActivity.this, file);
 
                 downloadDialog.dismiss();
 
             }
-        }, progressCallback);
+        }, new ProgressCallback() {
+            @Override
+            public void done(Integer percentDone) {
+                Log.i(TAG, "downloading update: " + percentDone);
+
+                downloadDialog.setProgress(percentDone);
+            }
+        });
     }
 
 
