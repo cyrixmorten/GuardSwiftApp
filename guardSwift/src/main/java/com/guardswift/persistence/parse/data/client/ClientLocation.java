@@ -26,8 +26,6 @@ public class ClientLocation extends ExtendedParseObject  {
         return clientLocation;
     }
 
-    ;
-
     @SuppressWarnings("unchecked")
     @Override
     public ParseQuery<ClientLocation> getAllNetworkQuery() {

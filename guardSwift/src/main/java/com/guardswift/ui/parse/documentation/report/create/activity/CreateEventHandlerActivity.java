@@ -172,8 +172,6 @@ public class CreateEventHandlerActivity extends
         }
     }
 
-    ;
-
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt(STATE_PAGE, currentPage);
@@ -199,8 +197,6 @@ public class CreateEventHandlerActivity extends
     private Client getClient() {
         return taskCache.getLastSelected().getClient();
     }
-
-    ;
 
 
     @Override
@@ -368,11 +364,7 @@ public class CreateEventHandlerActivity extends
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
     }
 
-    ;
-
     public void onPageScrollStateChanged(int state) {
     }
-
-    ;
 
 }

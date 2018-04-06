@@ -328,7 +328,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 //        })
                 .continueWithTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
                         if (task.isFaulted()) {
                             handleFailedLogin("updateAllClasses", task.getError());
                         }
@@ -337,7 +337,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                 })
                 .onSuccess(new Continuation<Void, Void>() {
                     @Override
-                    public Void then(Task<Void> task) throws Exception {
+                    public Void then(Task<Void> task) {
 
                         mGuardIdView.setText("");
 
@@ -392,7 +392,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         new Update.QueryBuilder(false).build().addDescendingOrder(Update.versionNumber).getFirstInBackground()
                 .continueWith(new Continuation<Update, Object>() {
                     @Override
-                    public Object then(Task<Update> task) throws Exception {
+                    public Object then(Task<Update> task) {
                         if (task.isFaulted()) {
                             new HandleException(GuardLoginActivity.this, TAG, "Fetch updates", task.getError());
                             return null;

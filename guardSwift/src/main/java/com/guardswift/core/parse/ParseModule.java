@@ -112,18 +112,18 @@ public class ParseModule {
         if (guard != null) {
             Tracker.upload(context, progressCallback, false).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     return new EventLog.Builder(context).event(context.getString(R.string.logout)).eventCode(EventLog.EventCodes.GUARD_LOGOUT).automatic(inactivity).build().saveInBackground();
                 }
             }).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     guard.setOnline(false);
                     return guard.saveInBackground();
                 }
             }).continueWithTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     if (task.isFaulted()) {
                         new HandleException(context, TAG, "logout", task.getError());
                         if (saveCallback != null) {

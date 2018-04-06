@@ -269,7 +269,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
 
 
     public interface OnDataSetChangedListener {
-        public void onDataSetChanged();
+        void onDataSetChanged();
     }
 
     private final List<OnDataSetChangedListener> mDataSetListeners;

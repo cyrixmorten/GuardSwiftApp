@@ -82,7 +82,7 @@ public class OverflowMenuDrawerItem extends BaseDescribeableDrawerItem<OverflowM
         //bind the basic view parts
         bindViewHelper(viewHolder);
 
-        TextView captionTv = (TextView) viewHolder.itemView.findViewById(R.id.material_drawer_bottom_end_caption);
+        TextView captionTv = viewHolder.itemView.findViewById(R.id.material_drawer_bottom_end_caption);
         captionTv.setText(mBottomEndCaption);
 
         if (this.mShowOptions) {
@@ -127,7 +127,7 @@ public class OverflowMenuDrawerItem extends BaseDescribeableDrawerItem<OverflowM
 
         public ViewHolder(View view) {
             super(view);
-            this.menu = (ImageButton) view.findViewById(R.id.material_drawer_menu_overflow);
+            this.menu = view.findViewById(R.id.material_drawer_menu_overflow);
         }
     }
 }

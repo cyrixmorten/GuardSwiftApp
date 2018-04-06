@@ -54,7 +54,7 @@ public class Sounds {
 		// remeber what the user's volume was set to before we change it.
 		userVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_ALARM);
 
-         v = (Vibrator) context.getSystemService(context.VIBRATOR_SERVICE);
+         v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 		Log.e(TAG, "Sounds created");
 
 	}

@@ -77,7 +77,7 @@ public class DownloadReport {
 
         findReportFromTask(task).continueWith(new Continuation<Report, Void>() {
             @Override
-            public Void then(Task<Report> task) throws Exception {
+            public Void then(Task<Report> task) {
                 if (task.isFaulted()) {
                     new HandleException(TAG, "Error finding report from task", task.getError());
 

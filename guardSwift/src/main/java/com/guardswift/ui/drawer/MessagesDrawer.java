@@ -79,7 +79,7 @@ public class MessagesDrawer {
 
         return Message.getQueryBuilder(false, groupId).build().addDescendingOrder(Message.createdAt).findInBackground().onSuccess(new Continuation<List<Message>, List<Message>>() {
             @Override
-            public List<Message> then(Task<List<Message>> task) throws Exception {
+            public List<Message> then(Task<List<Message>> task) {
                 List<Message> messages = task.getResult();
 
                 updateMessages(messages);

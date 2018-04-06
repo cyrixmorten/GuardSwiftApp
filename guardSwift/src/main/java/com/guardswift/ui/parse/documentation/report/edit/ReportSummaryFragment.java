@@ -145,7 +145,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
         task.findReport(false).onSuccess(new Continuation<Report, Object>() {
 
             @Override
-            public Object then(Task<Report> reportTask) throws Exception {
+            public Object then(Task<Report> reportTask) {
                 report = reportTask.getResult();
 
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -164,7 +164,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
             }
         }).continueWith(new Continuation<Object, Object>() {
             @Override
-            public Object then(Task<Object> task) throws Exception {
+            public Object then(Task<Object> task) {
                 if (task.getError() != null) {
                     Log.e(TAG, "update", task.getError());
                     new HandleException(getContext(), TAG, "find report matching task", task.getError());
@@ -183,7 +183,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
 
         CloudFunctions.sendReport(report).continueWith(new Continuation<Void, Object>() {
             @Override
-            public Object then(Task<Void> task) throws Exception {
+            public Object then(Task<Void> task) {
                 if (task.isFaulted()) {
                     sendReportFailedWithError(task.getError());
                     return null;

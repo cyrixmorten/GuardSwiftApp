@@ -103,7 +103,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
                         task.saveInBackground().continueWith(new Continuation<Void, Object>() {
                             @Override
-                            public Object then(Task<Void> taskResult) throws Exception {
+                            public Object then(Task<Void> taskResult) {
                                 Exception error = taskResult.getError();
                                 if (error != null) {
                                     loadingDialog.cancel();
@@ -759,7 +759,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
                     performTaskAction(context, task, ACTION.ARRIVE).onSuccess(new Continuation<ParseTask, Object>() {
                         @Override
-                        public Object then(Task<ParseTask> task) throws Exception {
+                        public Object then(Task<ParseTask> task) {
                             update(context, task.getResult());
                             return null;
                         }
@@ -1052,7 +1052,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             return;
         }
 
-        LinearLayout linearLayout = (LinearLayout) holder.vContentBody.findViewById(R.id.layout_debug_geofence);
+        LinearLayout linearLayout = holder.vContentBody.findViewById(R.id.layout_debug_geofence);
         if (linearLayout == null) {
             linearLayout = new LinearLayout(context);
             linearLayout.setLayoutParams(new LinearLayout.LayoutParams(

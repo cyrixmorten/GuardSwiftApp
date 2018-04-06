@@ -69,7 +69,7 @@ public class AlarmReceiver extends FirebaseMessagingService {
 
         fetchAlarm.onSuccessTask(new Continuation<ParseTask, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<ParseTask> task) throws Exception {
+            public Task<Void> then(Task<ParseTask> task) {
 
                 alarmCapture.set(task.getResult());
 
@@ -90,7 +90,7 @@ public class AlarmReceiver extends FirebaseMessagingService {
             }
         }).continueWith(new Continuation<Guard, Object>() {
             @Override
-            public Object then(Task<Guard> task) throws Exception {
+            public Object then(Task<Guard> task) {
                 ParseTask alarm = alarmCapture.get();
 
                 if (task.isFaulted() || alarm == null) {

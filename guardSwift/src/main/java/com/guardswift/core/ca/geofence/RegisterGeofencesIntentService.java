@@ -128,7 +128,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
             public void call(final Location deviceLocation) {
                 AsyncExecutor.create().execute(new AsyncExecutor.RunnableEx() {
                     @Override
-                    public void run() throws Exception {
+                    public void run() {
                         clearGeofence(new DeleteCallback() {
                             @Override
                             public void done(ParseException e) {
@@ -150,7 +150,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         int withinKm = 2;
         geofencingModule.queryAllGeofenceTasks(withinKm, location).onSuccess(new Continuation<Set<ParseTask>, Object>() {
             @Override
-            public Object then(Task<Set<ParseTask>> taskObject) throws Exception {
+            public Object then(Task<Set<ParseTask>> taskObject) {
                 List<ParseTask> tasks = Lists.newCopyOnWriteArrayList(taskObject.getResult());
 
                 Log.d(TAG, "All tasks in geofence: " + tasks.size());
@@ -192,7 +192,7 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
             }
         }).continueWithTask(new Continuation<Object, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Object> task) throws Exception {
+            public Task<Void> then(Task<Object> task) {
                 if (task.isFaulted()) {
                     new HandleException(getBaseContext(), TAG, "Failed to build geofences", task.getError());
                 } else {

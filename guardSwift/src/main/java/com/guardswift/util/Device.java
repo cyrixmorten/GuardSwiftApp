@@ -75,9 +75,7 @@ public class Device {
 		NetworkInfo ni = null;
 		if (cm != null) {
 			ni = cm.getActiveNetworkInfo();
-			if (ni != null && ni.isConnected()) {
-				return true;
-			}
+            return ni != null && ni.isConnected();
 		}
 
 
@@ -109,10 +107,7 @@ public class Device {
     /* Checks if external storage is available for read and write */
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 
 	public void setScreenOn(boolean screenOn) {

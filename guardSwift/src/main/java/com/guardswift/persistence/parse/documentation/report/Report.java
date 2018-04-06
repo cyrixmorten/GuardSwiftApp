@@ -20,7 +20,7 @@ public class Report extends ExtendedParseObject {
 
     public List<EventLog> getEventLogs() {
         List<EventLog> logs = getList(eventLogs);
-        return (logs != null) ? logs : Lists.<EventLog>newArrayList();
+        return (logs != null) ? logs : Lists.newArrayList();
     }
 
 

@@ -21,9 +21,10 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
     private final ParseTask task;
 
 
+    // Saved in a static map because there can be multiple instances of this strategy per task
     private static Map<String, ArriveOnStillTimer> arriveOnStillTimerMap = Maps.newConcurrentMap();
-    private ArriveOnStillTimer arriveOnStillTimer;
 
+    private ArriveOnStillTimer arriveOnStillTimer;
 
 
     public static TaskActivityStrategy getInstance(ParseTask task) {
@@ -35,14 +36,10 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
 
         if (task.getObjectId() != null) {
             ArriveOnStillTimer arriveOnStillTimer = arriveOnStillTimerMap.get(task.getObjectId());
-            if (arriveOnStillTimer == null) {
-                arriveOnStillTimer = new ArriveOnStillTimer(task, new TriggerArrival() {
 
-                    @Override
-                    public void trigger() {
-                        arriveIfNear();
-                    }
-                });
+            // Create on timer per task
+            if (arriveOnStillTimer == null) {
+                arriveOnStillTimer = new ArriveOnStillTimer(task, this::arriveIfNear);
 
                 arriveOnStillTimerMap.put(task.getObjectId(), arriveOnStillTimer);
             }
@@ -67,19 +64,23 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
             return;
         }
 
-        if (activity.getType() != DetectedActivity.IN_VEHICLE) {
-            if (activity.getType() == DetectedActivity.STILL) {
-                // We want to ensure that the guard is not just waiting for a red light or crossroads inside vehicle, delaying arrival
-                if (!arriveOnStillTimer.running()) {
-                    arriveOnStillTimer.start();
-                }
-                return;
-            } else if (activity.getType() == DetectedActivity.ON_FOOT) {
-                arriveOnStillTimer.stop();
-            }
+        int activityType = activity.getType();
 
+        if (activityType == DetectedActivity.STILL || activityType == DetectedActivity.TILTING) {
+            // Might have arrived and got out of vehicle, lets wait a minute and see
+            if (!arriveOnStillTimer.running()) {
+                arriveOnStillTimer.start();
+            }
+        } else if (activityType == DetectedActivity.ON_FOOT) {
+            // Pretty sure the guard is out of the vehicle, no need to wait to check
+            arriveOnStillTimer.stop();
             arriveIfNear();
+        } else if (activityType == DetectedActivity.IN_VEHICLE) {
+            // Never mind, driving by
+            arriveOnStillTimer.stop();
+
         }
+
     }
 
 

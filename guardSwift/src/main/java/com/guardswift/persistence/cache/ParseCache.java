@@ -104,7 +104,7 @@ public abstract class ParseCache<T extends ParseObject>  extends Preferences  {
         super.addUnique(key, object.getObjectId());
 
         // update collection
-        Set<T> cache = (cacheCollection.containsKey(key)) ? cacheCollection.get(key) : Sets.<T>newConcurrentHashSet();
+        Set<T> cache = (cacheCollection.containsKey(key)) ? cacheCollection.get(key) : Sets.newConcurrentHashSet();
         boolean add = cache.add(object);
         cacheCollection.put(key, cache);
 
@@ -117,7 +117,7 @@ public abstract class ParseCache<T extends ParseObject>  extends Preferences  {
         super.removeUnique(key, object.getObjectId());
 
         // update collection
-        Set<T> cache = (cacheCollection.containsKey(key)) ? cacheCollection.get(key) : Sets.<T>newConcurrentHashSet();
+        Set<T> cache = (cacheCollection.containsKey(key)) ? cacheCollection.get(key) : Sets.newConcurrentHashSet();
         boolean remove = cache.remove(object);
         cacheCollection.put(key, cache);
 
@@ -130,7 +130,7 @@ public abstract class ParseCache<T extends ParseObject>  extends Preferences  {
         super.clearSet(key);
 
         // clear collection
-        cacheCollection.put(key, Sets.<T>newConcurrentHashSet());
+        cacheCollection.put(key, Sets.newConcurrentHashSet());
     }
 
     @SuppressWarnings("unchecked")

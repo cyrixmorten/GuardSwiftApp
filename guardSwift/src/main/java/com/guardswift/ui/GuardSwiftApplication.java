@@ -394,7 +394,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         final Continuation<List<ParseObject>, Void> updateClassSuccess = new Continuation<List<ParseObject>, Void>() {
             @Override
-            public Void then(Task<List<ParseObject>> task) throws Exception {
+            public Void then(Task<List<ParseObject>> task) {
 
                 int currentProgress = updateClassProgress.incrementAndGet();
                 int outOfTotal = updateClassTotal.get();
@@ -436,7 +436,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
             resultTask = resultTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
                 @Override
-                public Task<Void> then(Task<Void> task) throws Exception {
+                public Task<Void> then(Task<Void> task) {
                     return parseObject.updateAll(query, 1000).onSuccess(updateClassSuccess);
                 }
             });
@@ -445,7 +445,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         return resultTask
                 .continueWithTask(new Continuation<Void, Task<Void>>() {
                     @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
+                    public Task<Void> then(Task<Void> task) {
 
                         Log.i(TAG, "Bootstrap done");
 
@@ -485,7 +485,7 @@ public class GuardSwiftApplication extends InjectingApplication {
                 })
                 .onSuccess(new Continuation<Void, Void>() {
                     @Override
-                    public Void then(Task<Void> task) throws Exception {
+                    public Void then(Task<Void> task) {
 
                         Log.i(TAG, "Bootstrap success");
 

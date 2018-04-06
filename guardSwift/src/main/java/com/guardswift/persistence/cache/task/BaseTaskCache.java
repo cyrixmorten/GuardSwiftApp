@@ -40,7 +40,7 @@ public abstract class BaseTaskCache<T extends ParseTask> extends ParseCache<T> i
     @SuppressWarnings("unchecked")
     @Override
     public Set<ParseTask> getArrived() {
-        return (Set<ParseTask>) (Set<?>) getSet(ARRIVED);
+        return (Set<ParseTask>) getSet(ARRIVED);
     }
 
     @SuppressWarnings("unchecked")
@@ -52,7 +52,7 @@ public abstract class BaseTaskCache<T extends ParseTask> extends ParseCache<T> i
     @SuppressWarnings("unchecked")
     @Override
     public Set<ParseTask> getAllGeofencedTasks() {
-        return (Set<ParseTask>) (Set<?>) getSet(GEOFENCED_ALL);
+        return (Set<ParseTask>) getSet(GEOFENCED_ALL);
     }
 
     @SuppressWarnings("unchecked")
@@ -102,13 +102,13 @@ public abstract class BaseTaskCache<T extends ParseTask> extends ParseCache<T> i
     @SuppressWarnings("unchecked")
     @Override
     public Set<ParseTask> getWithinGeofence() {
-        return (Set<ParseTask>) (Set<?>) getSet(GEOFENCE_WITHIN);
+        return (Set<ParseTask>) getSet(GEOFENCE_WITHIN);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Set<ParseTask> getOutsideGeofence() {
-        return (Set<ParseTask>) (Set<?>) getSet(GEOFENCE_OUTSIDE);
+        return (Set<ParseTask>) getSet(GEOFENCE_OUTSIDE);
     }
 
 

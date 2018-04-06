@@ -16,11 +16,13 @@ public class Analytics {
     private static final String TAG = Analytics.class.getSimpleName();
 
 
-    public static enum EventLabelGuess {Correct, Incorrect, Missed};
-    public static enum EventLabelTask {Overview, Details};
-    public static enum CreateEventlogAction {New, Copy, Edit, Filter, Autocomplete};
+    public enum EventLabelGuess {Correct, Incorrect, Missed}
 
-    public static enum EventAction {Arrival, Departure, CreateEvent};
+    public enum EventLabelTask {Overview, Details}
+
+    public enum CreateEventlogAction {New, Copy, Edit, Filter, Autocomplete}
+
+    public enum EventAction {Arrival, Departure, CreateEvent}
 
     public static void sendScreenName(String screenName) {
 

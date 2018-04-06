@@ -12,7 +12,7 @@ import de.greenrobot.event.EventBus;
  */
 public class EventBusController {
 
-    public static class ForceUIUpdate {};
+    public static class ForceUIUpdate {}
 
     public static void post(Object object) {
         EventBus.getDefault().post(object);

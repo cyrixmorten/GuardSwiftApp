@@ -73,7 +73,7 @@ public class MainActivity extends InjectingAppCompatActivity {
         if (!shouldRedirectToOtherActivity()) {
             GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(this, guardCache.getLoggedIn()).onSuccess(new Continuation<Void, Object>() {
                 @Override
-                public Object then(Task<Void> task) throws Exception {
+                public Object then(Task<Void> task) {
 
                     initDrawer();
 

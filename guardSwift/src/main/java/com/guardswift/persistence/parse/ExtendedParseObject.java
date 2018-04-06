@@ -54,8 +54,7 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
 
     public String getPin() {
         return ParseObject.DEFAULT_PIN;
-    };
-
+    }
 
 
     public  Task<Object> unpinAllPinnedToClass() {
@@ -63,14 +62,14 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
         return unpinAllInBackground(getPin())
         .continueWithTask(new Continuation<Void, Task<Integer>>() {
             @Override
-            public Task<Integer> then(Task<Void> task) throws Exception {
+            public Task<Integer> then(Task<Void> task) {
                 Log.w(TAG, "Successfully unpinned " + getPin());
 
                 return new ParseQuery<ParseObject>(getPin()).fromLocalDatastore().countInBackground();
             }
         }).continueWith(new Continuation<Integer, Object>() {
                     @Override
-                    public Object then(Task<Integer> task) throws Exception {
+                    public Object then(Task<Integer> task) {
                         if (task.getError() != null) {
                             new HandleException(TAG, "unpin class" + getPin(), task.getError());
                         }
@@ -265,7 +264,7 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
                                                                 final String pin, final DataStoreCallback<T> callback) {
 
         if (objects == null) {
-            callback.success(Lists.<T>newArrayList());
+            callback.success(Lists.newArrayList());
             return;
         }
         ParseObject.pinAllInBackground(pin, objects, new SaveCallback() {

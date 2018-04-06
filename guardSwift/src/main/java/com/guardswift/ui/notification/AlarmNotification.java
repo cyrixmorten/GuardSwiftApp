@@ -56,6 +56,7 @@ public class AlarmNotification {
     }
 
     private static Notification create(Context context, ParseTask alarm) {
+        context = context.getApplicationContext();
 
         String channelId = "";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

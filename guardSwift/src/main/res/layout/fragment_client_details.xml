@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -38,23 +37,45 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/small_padding"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="@dimen/small_padding">
 
-                <TextView android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@{client.id}"
-                    tools:text="Client id"/>
+                    android:orientation="horizontal">
 
-                <TextView android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{client.name}"
-                    tools:text="Client name"/>
+                    <TextView
+                        style="@style/Base.TextAppearance.AppCompat.Title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@{client.name}"
+                        tools:text="name" />
 
-                <TextView android:layout_width="wrap_content"
+                    <TextView
+                        style="@style/Base.TextAppearance.AppCompat.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0"
+                        android:text="@{client.id}"
+                        tools:text="id" />
+
+                </LinearLayout>
+
+                <TextView
+                    style="@style/Base.TextAppearance.AppCompat.Subhead"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{client.fullAddress}"
-                    tools:text="Client address"/>
+                    android:text="@{client.street + ' ' + client.streetNumber}"
+                    tools:text="Street and street number" />
+
+                <TextView
+                    style="@style/Base.TextAppearance.AppCompat.Subhead"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{client.postalCode + ' ' + client.city}"
+                    tools:text="Postal code and city" />
 
             </LinearLayout>
 

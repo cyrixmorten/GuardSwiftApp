@@ -51,7 +51,7 @@ public class GeofencingModule {
 
         findTasksMatching(strings).onSuccess(new Continuation<List<ParseTask>, Object>() {
             @Override
-            public Object then(Task<List<ParseTask>> listTask) throws Exception {
+            public Object then(Task<List<ParseTask>> listTask) {
 
 
                 for (ParseTask task : listTask.getResult()) {
@@ -74,7 +74,7 @@ public class GeofencingModule {
 
         findTasksMatching(strings).onSuccess(new Continuation<List<ParseTask>, Object>() {
             @Override
-            public Object then(Task<List<ParseTask>> listTask) throws Exception {
+            public Object then(Task<List<ParseTask>> listTask) {
 
 //                Log.w(TAG, "enterGeofence tasks: " + listTask.getResult().size());
                 for (ParseTask task : listTask.getResult()) {
@@ -99,7 +99,7 @@ public class GeofencingModule {
 
         findTasksMatching(strings).onSuccess(new Continuation<List<ParseTask>, Object>() {
             @Override
-            public Object then(Task<List<ParseTask>> listTask) throws Exception {
+            public Object then(Task<List<ParseTask>> listTask) {
 
 //                Log.w(TAG, "exitGeofence tasks: " + listTask.getResult().size());
                 for (ParseTask task : listTask.getResult()) {
@@ -139,7 +139,7 @@ public class GeofencingModule {
     private void pinGeofenceTasks(final List<ParseTask> tasks) {
         clearPinned().continueWith(new Continuation<Void, Object>() {
             @Override
-            public Object then(Task<Void> task) throws Exception {
+            public Object then(Task<Void> task) {
                 if (task.isFaulted()) {
                     LogError.log(TAG, "Unpin existing geoenced", task.getError());
                 }
@@ -170,7 +170,7 @@ public class GeofencingModule {
             Task<List<ParseTask>> geofencedTasks = geofenceStrategy.queryGeofencedTasks(withinKm, fromLocation);
             geofencedTasks.onSuccess(new Continuation<List<ParseTask>, Object>() {
                 @Override
-                public Object then(Task<List<ParseTask>> listTask) throws Exception {
+                public Object then(Task<List<ParseTask>> listTask) {
                     for (ParseTask taskObject : listTask.getResult()) {
                         geofenceResults.add(taskObject);
                     }
@@ -195,7 +195,7 @@ public class GeofencingModule {
         Task.whenAll(queryGeofenceTasks).continueWith(new Continuation<Void, Void>() {
 
             @Override
-            public Void then(Task<Void> result) throws Exception {
+            public Void then(Task<Void> result) {
                 if (result.isCancelled() || result.isFaulted()) {
                     promise.setError(result.getError());
                 } else {
@@ -231,7 +231,7 @@ public class GeofencingModule {
         Task<List<ParseTask>> geofencedTask = geofencedQueryLDS.findInBackground();
         geofencedTask.continueWith(new Continuation<List<ParseTask>, Object>() {
             @Override
-            public Object then(Task<List<ParseTask>> task) throws Exception {
+            public Object then(Task<List<ParseTask>> task) {
                 if (task.getError() != null) {
                     new HandleException(TAG, "findTasksMatching", task.getError());
 //                        Log.e(TAG, "findTasksMatching failed for " + ParseTask.getParseClassName());
@@ -244,7 +244,7 @@ public class GeofencingModule {
 //                            Log.w(TAG, "Updating failed objectIds in LDS");
                         new ParseTask().updateAll(geofencedQueryNetwork, 100).continueWith(new Continuation<List<ParseTask>, Object>() {
                             @Override
-                            public Object then(Task<List<ParseTask>> task) throws Exception {
+                            public Object then(Task<List<ParseTask>> task) {
                                 if (task.getError() != null) {
                                     new HandleException(TAG, "findTasksMatching recover", task.getError());
                                     return null;
@@ -268,7 +268,7 @@ public class GeofencingModule {
         Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
 
             @Override
-            public Void then(Task<Void> result) throws Exception {
+            public Void then(Task<Void> result) {
                 if (result.isCancelled() || result.isFaulted()) {
                     promise.setError(result.getError());
                 } else {

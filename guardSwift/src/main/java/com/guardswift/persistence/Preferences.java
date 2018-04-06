@@ -145,7 +145,7 @@ public class Preferences {
 
     public void clearSet(@NonNull String key) {
          {
-            sharedPrefs.edit().putStringSet(key, Sets.<String>newConcurrentHashSet()).apply();
+            sharedPrefs.edit().putStringSet(key, Sets.newConcurrentHashSet()).apply();
         }
     }
 

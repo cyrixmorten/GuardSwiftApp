@@ -38,14 +38,20 @@ public class Client extends ExtendedParseObject implements Positioned {
 
         public final ObservableField<String> id = new ObservableField<>();
         public final ObservableField<String> name = new ObservableField<>();
-        public final ObservableField<String> fullAddress = new ObservableField<>();
+        public final ObservableField<String> street = new ObservableField<>();
+        public final ObservableField<String> streetNumber = new ObservableField<>();
+        public final ObservableField<String> postalCode = new ObservableField<>();
+        public final ObservableField<String> city = new ObservableField<>();
         public final ObservableField<ParseGeoPoint> position = new ObservableField<>();
 
         public ObservableClient(Client client) {
             if (client != null) {
                 id.set(client.getId());
                 name.set(client.getName());
-                fullAddress.set(client.getFullAddress());
+                street.set(client.getStreet());
+                streetNumber.set(client.getStreetNumber());
+                postalCode.set(client.getPostalCode());
+                city.set(client.getCity());
                 position.set(client.getPosition());
             }
         }
@@ -74,7 +80,6 @@ public class Client extends ExtendedParseObject implements Positioned {
     public static final String zipcode = "zipcode";
     // <--
 
-    public static final String email = "email";
     //    public static final String number = "number";
     public static final String position = "position";
 
@@ -130,12 +135,7 @@ public class Client extends ExtendedParseObject implements Positioned {
 
 
             final String phoneNumber = contact.getPhoneNumber();
-            contactView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    GSIntents.dialPhoneNumber(context, phoneNumber);
-                }
-            });
+            contactView.setOnClickListener(view -> GSIntents.dialPhoneNumber(context, phoneNumber));
             layout.addView(contactView);
         }
         return layout;
@@ -193,29 +193,50 @@ public class Client extends ExtendedParseObject implements Positioned {
         return getName();
     }
 
+    public String getStreet() {
+        return  getStringSafe(Client.street);
+    }
+
+    public String getStreetNumber() {
+        return getStringSafe(Client.streetNumber);
+    }
+
+    public String getStreetWithNumber() {
+        return  getStreet() + " " + getStreetNumber();
+    }
+
+    public String getPostalCode() {
+        return getStringSafe(Client.postalCode);
+    }
+
+    public String getCity() {
+        return getStringSafe(Client.postalCode);
+    }
+
+    @Deprecated
     public String getAddressName() {
         return has(Client.addressName) ? getString(Client.addressName) : getStringSafe(Client.street);
     }
 
-
+    @Deprecated
     public String getAddressNumber() {
         return has(Client.addressNumber) ? getString(Client.addressNumber) : getStringSafe(Client.streetNumber);
     }
 
+
+    @Deprecated
     public String getFullAddress() {
         return getString(fullAddress);
     }
 
+    @Deprecated
     public String getCityName() {
         return has(Client.cityName) ? getString(Client.cityName) : getStringSafe(Client.city);
     }
 
+    @Deprecated
     public String getZipcode() {
         return has(Client.zipcode) ? getString(Client.zipcode) : getStringSafe(Client.postalCode);
-    }
-
-    public String getEmail() {
-        return getString(email);
     }
 
 

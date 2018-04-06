@@ -126,12 +126,12 @@ public class Tracker extends ExtendedParseObject {
 
         return deleteExistingGPSParseFile(context).onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
                 return file.saveInBackground(progressCallback);
             }
         }).onSuccessTask(new Continuation<Void, Task<Void>>() {
             @Override
-            public Task<Void> then(Task<Void> task) throws Exception {
+            public Task<Void> then(Task<Void> task) {
 
                 put(Tracker.gpsFile, file);
                 put(Tracker.inProgress, partialUpload);
@@ -140,7 +140,7 @@ public class Tracker extends ExtendedParseObject {
             }
         }).continueWith(new Continuation<Void, Void>() {
             @Override
-            public Void then(Task<Void> task) throws Exception {
+            public Void then(Task<Void> task) {
                 if (task.isFaulted()) {
                     new HandleException(context, TAG, "Error saving GPS file", task.getError());
                     return null;

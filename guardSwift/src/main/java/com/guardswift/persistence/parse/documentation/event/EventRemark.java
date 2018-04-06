@@ -30,11 +30,10 @@ public class EventRemark extends ExtendedParseObject {
 		eventRemark.setGuard(guard);
         eventRemark.setDefaultOwner();
         return eventRemark;
-    };
+    }
 
 
-
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
 	@Override
 	public ParseQuery<EventRemark> getAllNetworkQuery() {
 		return new EventRemarkQueryBuilder(false).build();

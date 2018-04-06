@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
@@ -14,7 +13,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.common.collect.Maps;
 import com.guardswift.R;
@@ -22,10 +20,8 @@ import com.guardswift.core.exceptions.LogError;
 import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
-import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.execution.task.TaskGroup;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
-import com.guardswift.persistence.parse.misc.Message;
 import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
 import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
@@ -34,21 +30,15 @@ import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.drawer.MessagesDrawer;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
-import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 
 import org.joda.time.DateTime;
 
-import java.lang.ref.WeakReference;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-
-import bolts.Continuation;
-import bolts.Task;
 
 public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment {
 
@@ -79,7 +69,7 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
 
     Map<String, Fragment> fragmentMap = Maps.newLinkedHashMap();
 
-    private WeakReference<MessagesDrawer> messagesDrawerWeakReference;
+    private MessagesDrawer messagesDrawer;
     private MenuItem messagesMenu;
 
     private String nameOfSelectedTaskgroup;
@@ -103,48 +93,28 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     @Override
     public void onAttach(Context context) {
 
-        newTaskgroupAvailableDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).ok(R.string.update_data, getString(R.string.new_taskgroup_available), new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+        newTaskgroupAvailableDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).ok(R.string.update_data, getString(R.string.new_taskgroup_available), (dialog, which) -> {
 
-                progressDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
+            progressDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
 
-                new RegularRaidTaskQueryBuilder(true).build().findInBackground().onSuccessTask(new Continuation<List<ParseTask>, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<List<ParseTask>> task) throws Exception {
-                        Log.i(TAG, "Unpinning tasks");
-                        return ParseObject.unpinAllInBackground(task.getResult());
-                    }
-                }).onSuccessTask(new Continuation<Void, Task<List<TaskGroupStarted>>>() {
-                    @Override
-                    public Task<List<TaskGroupStarted>> then(Task<Void> task) throws Exception {
-                        return new TaskGroupStartedQueryBuilder(true).build().findInBackground();
-                    }
-                }).onSuccessTask(new Continuation<List<TaskGroupStarted>, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<List<TaskGroupStarted>> task) throws Exception {
-                        Log.i(TAG, "Unpinning tasksGroups");
-                        return ParseObject.unpinAllInBackground(task.getResult());
-                    }
-                }).onSuccessTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) throws Exception {
-                        Log.i(TAG, "Teardown and bootstrap");
-                        GuardSwiftApplication.getInstance().teardownParseObjectsLocally(false);
+            new RegularRaidTaskQueryBuilder(true).build().findInBackground().onSuccessTask(task -> {
+                Log.i(TAG, "Unpinning tasks");
+                return ParseObject.unpinAllInBackground(task.getResult());
+            }).onSuccessTask(task -> new TaskGroupStartedQueryBuilder(true).build().findInBackground()).onSuccessTask(task -> {
+                Log.i(TAG, "Unpinning tasksGroups");
+                return ParseObject.unpinAllInBackground(task.getResult());
+            }).onSuccessTask(task -> {
+                Log.i(TAG, "Teardown and bootstrap");
+                GuardSwiftApplication.getInstance().teardownParseObjectsLocally(false);
 
-                        return GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(null, guardCache.getLoggedIn());
-                    }
-                }).continueWith(new Continuation<Void, Object>() {
-                    @Override
-                    public Object then(Task<Void> task) throws Exception {
-                        if (task.isFaulted()) {
-                            LogError.log(TAG, "Update to new TaskGroup", task.getError());
-                        }
-                        return null;
-                    }
-                });
+                return GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(null, guardCache.getLoggedIn());
+            }).continueWith(task -> {
+                if (task.isFaulted()) {
+                    LogError.log(TAG, "Update to new TaskGroup", task.getError());
+                }
+                return null;
+            });
 
-            }
         }).build();
 
         super.onAttach(context);
@@ -185,17 +155,14 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     @Override
     public void onResume() {
         // Detect if there is newer taskGroupStarted available
-        new TaskGroupStartedQueryBuilder(false).matching(taskGroupStartedCache.getSelected().getTaskGroup()).whereActive().build().getFirstInBackground(new GetCallback<TaskGroupStarted>() {
-            @Override
-            public void done(TaskGroupStarted object, ParseException e) {
-                if (object != null && getActivity() != null) {
-                    Date latestCreatedAt = object.getCreatedAt();
-                    Date currentCreatedAt = taskGroupStartedCache.getSelected().getCreatedAt();
+        new TaskGroupStartedQueryBuilder(false).matching(taskGroupStartedCache.getSelected().getTaskGroup()).whereActive().build().getFirstInBackground((object, e) -> {
+            if (object != null && getActivity() != null) {
+                Date latestCreatedAt = object.getCreatedAt();
+                Date currentCreatedAt = taskGroupStartedCache.getSelected().getCreatedAt();
 
-                    if (new DateTime(latestCreatedAt).isAfter(new DateTime(currentCreatedAt))) {
-                        if (!newTaskgroupAvailableDialog.isShowing()) {
-                            newTaskgroupAvailableDialog.show();
-                        }
+                if (new DateTime(latestCreatedAt).isAfter(new DateTime(currentCreatedAt))) {
+                    if (!newTaskgroupAvailableDialog.isShowing()) {
+                        newTaskgroupAvailableDialog.show();
                     }
                 }
             }
@@ -235,12 +202,9 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
 
             final int finalMessagesCount = messagesCount;
 
-            new Handler(getContext().getMainLooper()).postAtFrontOfQueue(new Runnable() {
-                @Override
-                public void run() {
-                    ActionItemBadge.update(getActivity(), messagesMenu, ContextCompat.getDrawable(getContext(), R.drawable.ic_forum_black_24dp), ActionItemBadge.BadgeStyles.RED, finalMessagesCount);
-                    messagesMenu.setVisible(!hide);
-                }
+            new Handler(getContext().getMainLooper()).postAtFrontOfQueue(() -> {
+                ActionItemBadge.update(getActivity(), messagesMenu, ContextCompat.getDrawable(getContext(), R.drawable.ic_forum_black_24dp), ActionItemBadge.BadgeStyles.RED, finalMessagesCount);
+                messagesMenu.setVisible(!hide);
             });
 
         }
@@ -251,7 +215,6 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_messages) {
-            MessagesDrawer messagesDrawer = messagesDrawerWeakReference.get();
             if (messagesDrawer != null) {
                 messagesDrawer.open();
                 ActionItemBadge.update(messagesMenu, Integer.MIN_VALUE);
@@ -268,9 +231,7 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
 
         Activity activity = getActivity();
         if (activity instanceof MainActivity) {
-            MessagesDrawer messagesDrawer = ((MainActivity) activity).getMessagesDrawer();
-
-            messagesDrawerWeakReference = new WeakReference<>(messagesDrawer);
+            messagesDrawer = ((MainActivity) activity).getMessagesDrawer();
 
             loadMessages();
         }
@@ -279,23 +240,22 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     private void loadMessages() {
         Log.i(TAG, "loadMessages");
 
+        if (messagesDrawer == null) {
+            return;
+        }
 
-        messagesDrawerWeakReference.get().loadMessages(getMessagesGroupId()).continueWith(new Continuation<List<Message>, Object>() {
-            @Override
-            public Object then(Task<List<Message>> task) throws Exception {
-                if (task.isFaulted()) {
-                    LogError.log(TAG, "Failed to load messages", task.getError());
+        messagesDrawer.loadMessages(getMessagesGroupId()).continueWith(task -> {
+            if (task.isFaulted()) {
+                LogError.log(TAG, "Failed to load messages", task.getError());
 
-                    updateMessageMenuBadge(0, true);
-
-                    return null;
-                }
-
-                MessagesDrawer messagesDrawer = messagesDrawerWeakReference.get();
-                updateMessageMenuBadge(messagesDrawer.getNewMessagesCount(), false);
+                updateMessageMenuBadge(0, true);
 
                 return null;
             }
+
+            updateMessageMenuBadge(messagesDrawer.getNewMessagesCount(), false);
+
+            return null;
         });
     }
 
@@ -316,7 +276,7 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
 
         Log.i(TAG, "onDestroyView");
 
-        messagesDrawerWeakReference = null;
+        messagesDrawer = null;
         messagesMenu = null;
         fragmentMap = null;
 

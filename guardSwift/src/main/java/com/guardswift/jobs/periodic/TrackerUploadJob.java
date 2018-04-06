@@ -27,7 +27,7 @@ public class TrackerUploadJob extends Job {
     protected Result onRunJob(Params params) {
         Tracker.upload(GuardSwiftApplication.getInstance(), null, true).continueWith(new Continuation<Void, Object>() {
             @Override
-            public Object then(Task<Void> task) throws Exception {
+            public Object then(Task<Void> task) {
                 if (task.isFaulted()) {
                     new HandleException(TAG, "Failed to perform periodic Tracker create", task.getError());
                     return null;

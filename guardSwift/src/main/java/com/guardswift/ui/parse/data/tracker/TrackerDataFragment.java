@@ -31,7 +31,7 @@ public class TrackerDataFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_empty_table,
                 container, false);
 
-        TableLayout table = (TableLayout)rootView.findViewById(R.id.layout_table);
+        TableLayout table = rootView.findViewById(R.id.layout_table);
 
 //        map.put("Tidspunkt",  ;
 //        map.put("Hastighed",  );
@@ -65,8 +65,8 @@ public class TrackerDataFragment extends Fragment {
     private TableRow createRow(LayoutInflater inflater, String key, String value) {
         TableRow row = new TableRow(getContext());
         View keyValueRow =  inflater.inflate(R.layout.gs_view_key_value, row, true);
-        TextView keyView = (TextView)keyValueRow.findViewById(R.id.tv_key);
-        TextView valueView = (TextView)keyValueRow.findViewById(R.id.tv_value);
+        TextView keyView = keyValueRow.findViewById(R.id.tv_key);
+        TextView valueView = keyValueRow.findViewById(R.id.tv_value);
         keyView.setText(key);
         valueView.setText(value);
 
