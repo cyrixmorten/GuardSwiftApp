@@ -3,17 +3,11 @@ package com.guardswift.core.tasks.automation;
 import android.content.Context;
 import android.util.Log;
 
-import com.google.common.collect.Sets;
 import com.guardswift.R;
 import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
-
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.TimeUnit;
 
 public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrategy {
 
@@ -21,9 +15,8 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
 
     private final ParseTask task;
 
-    private Timer timer;
-
-    private static final Set<String> lockedTasks = Sets.newConcurrentHashSet();
+//    private Timer timer;
+//    private static final Set<String> lockedTasks = Sets.newConcurrentHashSet();
 
     public static TaskAutomationStrategy getInstance(ParseTask task) {
         return new ResetOnDepartureAutomationStrategy(task);
@@ -35,10 +28,10 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
 
     @Override
     public void automaticArrival() {
-        if (lockedTasks.contains(task.getObjectId())) {
-            // task is locked for arrivals
-            return;
-        }
+//        if (lockedTasks.contains(task.getObjectId())) {
+//            // task is locked for arrivals
+//            return;
+//        }
         if (task.isWithinScheduledTime() && task.matchesSelectedTaskGroupStarted()) {
             Context context = GuardSwiftApplication.getInstance();
             TaskController controller = task.getController();
@@ -46,7 +39,7 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
                 Log.w(TAG, "automaticArrival " + task.getTaskType() + " " + task.getClientName());
                 Sounds.getInstance(context).playNotification(R.raw.arrived);
                 controller.performAutomaticAction(TaskController.ACTION.ARRIVE, task);
-                startLockTimer();
+//                startLockTimer();
             }
         }
 
@@ -60,30 +53,30 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
     }
 
 
-    private void startLockTimer() {
-        final String objectId = task.getObjectId();
-
-        lockedTasks.add(objectId);
-
-        //set a new TriggerTask
-        timer = new Timer();
-
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                lockedTasks.remove(objectId);
-
-                ResetOnDepartureAutomationStrategy.this.clearLockTimer();
-            }
-        }, TimeUnit.MINUTES.toMillis(10));
-    }
-    private void clearLockTimer() {
-
-        //stop the timer, if it's not already null
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
+//    private void startLockTimer() {
+//        final String objectId = task.getObjectId();
+//
+//        lockedTasks.add(objectId);
+//
+//        //set a new TriggerTask
+//        timer = new Timer();
+//
+//        timer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                lockedTasks.remove(objectId);
+//
+//                ResetOnDepartureAutomationStrategy.this.clearLockTimer();
+//            }
+//        }, TimeUnit.MINUTES.toMillis(10));
+//    }
+//    private void clearLockTimer() {
+//
+//        //stop the timer, if it's not already null
+//        if (timer != null) {
+//            timer.cancel();
+//            timer = null;
+//        }
+//    }
 
 }
