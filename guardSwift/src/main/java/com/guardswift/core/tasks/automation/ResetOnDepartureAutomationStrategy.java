@@ -3,11 +3,17 @@ package com.guardswift.core.tasks.automation;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.common.collect.Maps;
 import com.guardswift.R;
+import com.guardswift.core.ca.location.LocationModule;
+import com.guardswift.core.parse.ParseModule;
+import com.guardswift.core.tasks.TriggerTimer;
 import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.Sounds;
+
+import java.util.Map;
 
 public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrategy {
 
@@ -15,8 +21,10 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
 
     private final ParseTask task;
 
-//    private Timer timer;
-//    private static final Set<String> lockedTasks = Sets.newConcurrentHashSet();
+    // Saved in a static map because there can be multiple instances of this strategy per task
+    private static Map<String, TriggerTimer> departTimerMap = Maps.newConcurrentMap();
+
+    private TriggerTimer triggerTimer;
 
     public static TaskAutomationStrategy getInstance(ParseTask task) {
         return new ResetOnDepartureAutomationStrategy(task);
@@ -24,14 +32,34 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
 
     private ResetOnDepartureAutomationStrategy(ParseTask task) {
         this.task = task;
+
+        if (task.getObjectId() != null) {
+            TriggerTimer triggerTimer = departTimerMap.get(task.getObjectId());
+
+            // Create one timer per task
+            if (triggerTimer == null) {
+                triggerTimer = new TriggerTimer(this::resetIfOutside, 30);
+
+                departTimerMap.put(task.getObjectId(), triggerTimer);
+            }
+
+            this.triggerTimer = triggerTimer;
+        }
+    }
+
+    private void resetIfOutside() {
+        float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getPosition());
+
+        if (distanceToClient > task.getRadius()) {
+            this.automaticDeparture();
+        } else {
+            // reset the timer to check again in a short moment
+            triggerTimer.start();
+        }
     }
 
     @Override
     public void automaticArrival() {
-//        if (lockedTasks.contains(task.getObjectId())) {
-//            // task is locked for arrivals
-//            return;
-//        }
         if (task.isWithinScheduledTime() && task.matchesSelectedTaskGroupStarted()) {
             Context context = GuardSwiftApplication.getInstance();
             TaskController controller = task.getController();
@@ -39,7 +67,10 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
                 Log.w(TAG, "automaticArrival " + task.getTaskType() + " " + task.getClientName());
                 Sounds.getInstance(context).playNotification(R.raw.arrived);
                 controller.performAutomaticAction(TaskController.ACTION.ARRIVE, task);
-//                startLockTimer();
+
+                if (!triggerTimer.running()) {
+                    triggerTimer.start();
+                }
             }
         }
 
@@ -50,33 +81,10 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
         Log.w(TAG, "automaticDeparture " + task.getTaskType() + " " + task.getClientName());
         TaskController controller = task.getController();
         controller.performAutomaticAction(TaskController.ACTION.RESET, task);
+
+        triggerTimer.stop();
     }
 
 
-//    private void startLockTimer() {
-//        final String objectId = task.getObjectId();
-//
-//        lockedTasks.add(objectId);
-//
-//        //set a new TriggerTask
-//        timer = new Timer();
-//
-//        timer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                lockedTasks.remove(objectId);
-//
-//                ResetOnDepartureAutomationStrategy.this.clearLockTimer();
-//            }
-//        }, TimeUnit.MINUTES.toMillis(10));
-//    }
-//    private void clearLockTimer() {
-//
-//        //stop the timer, if it's not already null
-//        if (timer != null) {
-//            timer.cancel();
-//            timer = null;
-//        }
-//    }
 
 }
