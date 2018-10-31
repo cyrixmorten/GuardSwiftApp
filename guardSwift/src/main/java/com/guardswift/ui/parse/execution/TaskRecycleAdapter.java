@@ -26,7 +26,6 @@ import com.beardedhen.androidbootstrap.AwesomeTextView;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapSize;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
-import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.tasks.controller.TaskController;
@@ -596,8 +595,8 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 vTimeStart.setText(task.getTimeStartString());
                 vTimeEnd.setText(task.getTimeEndString());
 
-                // vTimeStart.setTextColor(task.isAfterScheduledStartTime() ? Color.GREEN : Color.RED);
-                // vTimeEnd.setTextColor(task.isBeforeScheduledEndTime() ? Color.GREEN : Color.RED);
+                vTimeStart.setTextColor(task.isAfterScheduledStartTime() ? Color.GRAY : Color.RED);
+                vTimeEnd.setTextColor(task.isBeforeScheduledEndTime() ? Color.GRAY : Color.RED);
 
                 if (vInfoLayout.getChildCount() > 1) {
                     vInfoLayout.removeViewAt(0);
@@ -1012,16 +1011,16 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         holder.update(context, task);
 
-        //debugGeofenceStatus(task, holder);
+//        debugGeofenceStatus(task, holder);
 
         new PositionedViewHolder.CalcDistanceAsync(task, holder).execute();
 //        new UpdateTaskStateAsync(task, holder, isNew).execute();
     }
 
     private void debugGeofenceStatus(ParseTask task, TaskViewHolder holder) {
-        if (!BuildConfig.DEBUG) {
-            return;
-        }
+//        if (!BuildConfig.DEBUG) {
+//            return;
+//        }
 
         LinearLayout linearLayout = holder.vContentBody.findViewById(R.id.layout_debug_geofence);
         if (linearLayout == null) {
@@ -1040,7 +1039,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //        linearLayout.addView(isGeofenced(task));
 //        linearLayout.addView(isWithinGeofence(task));
 //        linearLayout.addView(isOutsideGeofence(task));
-        //linearLayout.addView(isWithinScheduledTime(task));
+        linearLayout.addView(isWithinScheduledTime(task));
 
 //        TextView tvTaskTypeString = new TextView(contextWeakReference);
 //        tvTaskTypeString.setText(task.getTaskTypeString());
@@ -1056,8 +1055,10 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
     private TextView isWithinScheduledTime(ParseTask task) {
         TextView tv = new TextView(context);
-        tv.setText(" TIME ");
-        tv.setTextColor((task.isWithinScheduledTime()) ? Color.GREEN : Color.RED);
+        String isAfterStart = task.isAfterScheduledStartTime() ? "yes" : "no";
+        String isBeforeEnd = task.isBeforeScheduledEndTime() ? "yes" : "no";
+        tv.setText(" After start: " + isAfterStart + " Before end: " + isBeforeEnd);
+        tv.setTextColor((task.isAfterScheduledStartTime()) ? Color.GREEN : Color.RED);
 
         return tv;
     }
