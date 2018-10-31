@@ -69,7 +69,7 @@
     <string name="learning_checkpoint">Gathering information about checkpoint</string>
     <string name="logout_confirm">Logout of GuardSwift?</string>
     <string name="logout_success">Successfully logged out!</string>
-    <string name="mark_arrived">Arrive</string>
+    <string name="mark_arrived">Report arrived at %1$s</string>
     <string name="mark_finished">Finish</string>
     <string name="marked_arrived">%1$s arrived %2$s</string>
     <string name="marked_circuitunit_taken">%1$s attending parseTask %2$s</string>
