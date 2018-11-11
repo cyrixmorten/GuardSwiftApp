@@ -49,18 +49,15 @@ public class GeofencingModule {
 //        Log.d(TAG, "-- onWithin " + Arrays.toString(strings));
 
 
-        findTasksMatching(strings).onSuccess(new Continuation<List<ParseTask>, Object>() {
-            @Override
-            public Object then(Task<List<ParseTask>> listTask) {
+        findTasksMatching(strings).onSuccess(listTask -> {
 
 
-                for (ParseTask task : listTask.getResult()) {
-                    task.getGeofenceStrategy().withinGeofence();
-                }
-
-
-                return null;
+            for (ParseTask task : listTask.getResult()) {
+                task.getGeofenceStrategy().withinGeofence();
             }
+
+
+            return null;
         });
 
     }
@@ -72,20 +69,17 @@ public class GeofencingModule {
 
 //            Log.w(TAG, "-- !onEnter! " + Arrays.toString(strings));
 
-        findTasksMatching(strings).onSuccess(new Continuation<List<ParseTask>, Object>() {
-            @Override
-            public Object then(Task<List<ParseTask>> listTask) {
+        findTasksMatching(strings).onSuccess(listTask -> {
 
 //                Log.w(TAG, "enterGeofence tasks: " + listTask.getResult().size());
-                for (ParseTask task : listTask.getResult()) {
-                    task.getGeofenceStrategy().enterGeofence();
-                    tasksCache.moveWithinGeofence(task);
+            for (ParseTask task : listTask.getResult()) {
+                task.getGeofenceStrategy().enterGeofence();
+                tasksCache.moveWithinGeofence(task);
 //                    Log.w(TAG, "enterGeofence: " + task.getClientName() + " " + tasksCache.isWithinGeofence(task));
-                }
-
-
-                return null;
             }
+
+
+            return null;
         });
 
     }
@@ -97,19 +91,16 @@ public class GeofencingModule {
 
 //            Log.w(TAG, "-- !onExit! " + Arrays.toString(strings));
 
-        findTasksMatching(strings).onSuccess(new Continuation<List<ParseTask>, Object>() {
-            @Override
-            public Object then(Task<List<ParseTask>> listTask) {
+        findTasksMatching(strings).onSuccess(listTask -> {
 
 //                Log.w(TAG, "exitGeofence tasks: " + listTask.getResult().size());
-                for (ParseTask task : listTask.getResult()) {
-                    task.getGeofenceStrategy().exitGeofence();
-                    tasksCache.moveOutsideGeofence(task);
+            for (ParseTask task : listTask.getResult()) {
+                task.getGeofenceStrategy().exitGeofence();
+                tasksCache.moveOutsideGeofence(task);
 //                    Log.w(TAG, "exitGeofence: " + task.getClientName() + "  " + tasksCache.isMovedOutsideGeofence(task));
-                }
-
-                return null;
             }
+
+            return null;
         });
 //        }
     }
@@ -137,17 +128,14 @@ public class GeofencingModule {
     }
 
     private void pinGeofenceTasks(final List<ParseTask> tasks) {
-        clearPinned().continueWith(new Continuation<Void, Object>() {
-            @Override
-            public Object then(Task<Void> task) {
-                if (task.isFaulted()) {
-                    LogError.log(TAG, "Unpin existing geoenced", task.getError());
-                }
-
-                ExtendedParseObject.pinAllInBackground(LDS_PIN, tasks);
-
-                return null;
+        clearPinned().continueWith(task -> {
+            if (task.isFaulted()) {
+                LogError.log(TAG, "Unpin existing geoenced", task.getError());
             }
+
+            ExtendedParseObject.pinAllInBackground(LDS_PIN, tasks);
+
+            return null;
         });
     }
 
@@ -168,44 +156,32 @@ public class GeofencingModule {
 
         for (final TaskGeofenceStrategy geofenceStrategy : geofenceStrategies) {
             Task<List<ParseTask>> geofencedTasks = geofenceStrategy.queryGeofencedTasks(withinKm, fromLocation);
-            geofencedTasks.onSuccess(new Continuation<List<ParseTask>, Object>() {
-                @Override
-                public Object then(Task<List<ParseTask>> listTask) {
-                    for (ParseTask taskObject : listTask.getResult()) {
-                        geofenceResults.add(taskObject);
-                    }
-                    return null;
+            geofencedTasks.onSuccess(listTask -> {
+                geofenceResults.addAll(listTask.getResult());
+                return null;
+            }).continueWith(task -> {
+                Exception e = task.getError();
+                if (e != null) {
+                    new HandleException(TAG, "Failed to query geofence for: " + geofenceStrategy.getName(), e);
+                    throw e;
                 }
-            }).continueWith(new Continuation<Object, Object>() {
-                @Override
-                public Object then(Task<Object> task) throws Exception {
-                    Exception e = task.getError();
-                    if (e != null) {
-                        new HandleException(TAG, "Failed to query geofence for: " + geofenceStrategy.getName(), e);
-                        throw e;
-                    }
-                    return null;
-                }
+                return null;
             });
 
 
             queryGeofenceTasks.add(geofencedTasks);
         }
 
-        Task.whenAll(queryGeofenceTasks).continueWith(new Continuation<Void, Void>() {
+        Task.whenAll(queryGeofenceTasks).continueWith((Continuation<Void, Void>) result -> {
+            if (result.isCancelled() || result.isFaulted()) {
+                promise.setError(result.getError());
+            } else {
 
-            @Override
-            public Void then(Task<Void> result) {
-                if (result.isCancelled() || result.isFaulted()) {
-                    promise.setError(result.getError());
-                } else {
+                pinGeofenceTasks(Lists.newArrayList(geofenceResults));
 
-                    pinGeofenceTasks(Lists.newArrayList(geofenceResults));
-
-                    promise.setResult(geofenceResults);
-                }
-                return null;
+                promise.setResult(geofenceResults);
             }
+            return null;
         });
 
         return promise.getTask();
@@ -229,53 +205,43 @@ public class GeofencingModule {
         final ParseQuery<ParseTask> geofencedQueryNetwork = new TaskQueryBuilder(LDS_PIN).matchingObjectIds(geofenceIds).build();
         ParseQuery<ParseTask> geofencedQueryLDS = new ParseQuery<>(geofencedQueryNetwork).fromLocalDatastore();
         Task<List<ParseTask>> geofencedTask = geofencedQueryLDS.findInBackground();
-        geofencedTask.continueWith(new Continuation<List<ParseTask>, Object>() {
-            @Override
-            public Object then(Task<List<ParseTask>> task) {
-                if (task.getError() != null) {
-                    new HandleException(TAG, "findTasksMatching", task.getError());
+        geofencedTask.continueWith(task -> {
+            if (task.getError() != null) {
+                new HandleException(TAG, "findTasksMatching", task.getError());
 //                        Log.e(TAG, "findTasksMatching failed for " + ParseTask.getParseClassName());
 //                        Log.e(TAG, Arrays.toString(objectIdsArray));
 
 
-                    if (task.getError() instanceof ParseException && ((ParseException) task.getError()).getCode() == ParseException.OBJECT_NOT_FOUND) {
-                        // attempt to recover
-                        // might be deprecated due to GuardSwiftApplication bootstrapParseObjectsLocally
+                if (task.getError() instanceof ParseException && ((ParseException) task.getError()).getCode() == ParseException.OBJECT_NOT_FOUND) {
+                    // attempt to recover
+                    // might be deprecated due to GuardSwiftApplication bootstrapParseObjectsLocally
 //                            Log.w(TAG, "Updating failed objectIds in LDS");
-                        new ParseTask().updateAll(geofencedQueryNetwork, 100).continueWith(new Continuation<List<ParseTask>, Object>() {
-                            @Override
-                            public Object then(Task<List<ParseTask>> task) {
-                                if (task.getError() != null) {
-                                    new HandleException(TAG, "findTasksMatching recover", task.getError());
-                                    return null;
-                                }
+                    new ParseTask().updateAll(geofencedQueryNetwork, 100).continueWith(task1 -> {
+                        if (task1.getError() != null) {
+                            new HandleException(TAG, "findTasksMatching recover", task1.getError());
+                            return null;
+                        }
 //                                    Log.w(TAG, "Successfully updated LDS for " + ParseTask.getParseClassName() + " " + Arrays.toString(objectIdsArray));
-                                return null;
-                            }
-                        });
-                    }
-
-                } else if (task.getResult() != null) {
-                    geofenceResults.addAll(task.getResult());
+                        return null;
+                    });
                 }
-                return null;
+
+            } else if (task.getResult() != null) {
+                geofenceResults.addAll(task.getResult());
             }
+            return null;
         });
 
 
         tasks.add(geofencedTask);
 
-        Task.whenAll(tasks).continueWith(new Continuation<Void, Void>() {
-
-            @Override
-            public Void then(Task<Void> result) {
-                if (result.isCancelled() || result.isFaulted()) {
-                    promise.setError(result.getError());
-                } else {
-                    promise.setResult(geofenceResults);
-                }
-                return null;
+        Task.whenAll(tasks).continueWith((Continuation<Void, Void>) result -> {
+            if (result.isCancelled() || result.isFaulted()) {
+                promise.setError(result.getError());
+            } else {
+                promise.setResult(geofenceResults);
             }
+            return null;
         });
 
         return promise.getTask();

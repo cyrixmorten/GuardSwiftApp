@@ -4,13 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.text.format.DateFormat;
 import android.util.Log;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
 import com.guardswift.core.tasks.controller.AlarmController;
 import com.guardswift.persistence.cache.task.TaskCache;
@@ -141,23 +138,20 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
         Log.d(TAG, "alarmBody: " + alarmMessage);
 
-        new CommonDialogsBuilder.MaterialDialogs(AlarmDialogActivity.this).ok(R.string.alarm, alarmMessage, new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                if (alarm.isPending()) {
-                    AlarmController.getInstance().performAction(AlarmController.ACTION.ACCEPT, alarm, false);
-                }
-
-                AlarmDialogActivity.this.finish();
-
-                Intent intent = new Intent(AlarmDialogActivity.this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                intent.putExtra(MainActivity.SELECT_ALARMS, true);
-                AlarmDialogActivity.this.startActivity(intent);
-
-                AlarmNotification.cancel(AlarmDialogActivity.this);
-                stopAlarmSound();
+        new CommonDialogsBuilder.MaterialDialogs(AlarmDialogActivity.this).ok(R.string.alarm, alarmMessage, (dialog, which) -> {
+            if (alarm.isPending()) {
+                AlarmController.getInstance().performAction(AlarmController.ACTION.ACCEPT, alarm, false);
             }
+
+            AlarmDialogActivity.this.finish();
+
+            Intent intent = new Intent(AlarmDialogActivity.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            intent.putExtra(MainActivity.SELECT_ALARMS, true);
+            AlarmDialogActivity.this.startActivity(intent);
+
+            AlarmNotification.cancel(AlarmDialogActivity.this);
+            stopAlarmSound();
         })
         .cancelable(false)
         .canceledOnTouchOutside(false)

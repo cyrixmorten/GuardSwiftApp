@@ -11,7 +11,6 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.common.collect.Lists;
@@ -28,18 +27,16 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
 import bolts.Continuation;
 import bolts.Task;
 import de.greenrobot.event.util.AsyncExecutor;
-import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
-import rx.Observable;
-import rx.Subscription;
-import rx.functions.Action1;
-import rx.functions.Func1;
+import io.reactivex.disposables.Disposable;
+import pl.charmas.android.reactivelocation2.ReactiveLocationProvider;
+
+import static com.guardswift.util.rx.UnsubscribeIfPresent.dispose;
 
 
 /**
@@ -60,8 +57,9 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
     private static Location mLastGeofenceRebuildLocation;
     private static boolean mRebuildInProgress;
 
-    private ReactiveLocationProvider mReactiveLocationProvider;
-    private Subscription mAddGeofencesSubscription;
+    private Disposable lastKnownLocationDisposable;
+    private Disposable addGeofencesDisposable;
+    private Disposable removeGeofencesDisposable;
     private PendingIntent mGeofencePendingIntent;
 
 
@@ -118,26 +116,15 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
     private void rebuildGeofenceForTasks() {
 
+        dispose(lastKnownLocationDisposable);
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             new HandleException(TAG, "Missing location permission", new IllegalStateException("Missing permission"));
             return;
         }
 
-        new ReactiveLocationProvider(getApplicationContext()).getLastKnownLocation().subscribe(new Action1<Location>() {
-            @Override
-            public void call(final Location deviceLocation) {
-                AsyncExecutor.create().execute(new AsyncExecutor.RunnableEx() {
-                    @Override
-                    public void run() {
-                        clearGeofence(new DeleteCallback() {
-                            @Override
-                            public void done(ParseException e) {
-                                rebuildGeofenceForTasks(deviceLocation);
-                            }
-                        });
-                    }
-                });
-            }
+        lastKnownLocationDisposable = new ReactiveLocationProvider(getApplicationContext()).getLastKnownLocation().subscribe(location -> {
+            AsyncExecutor.create().execute(() -> clearGeofence(e -> rebuildGeofenceForTasks(location)));
         });
     }
 
@@ -148,62 +135,56 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         mRebuildInProgress = true;
 
         int withinKm = 2;
-        geofencingModule.queryAllGeofenceTasks(withinKm, location).onSuccess(new Continuation<Set<ParseTask>, Object>() {
-            @Override
-            public Object then(Task<Set<ParseTask>> taskObject) {
-                List<ParseTask> tasks = Lists.newCopyOnWriteArrayList(taskObject.getResult());
+        geofencingModule.queryAllGeofenceTasks(withinKm, location).onSuccess(taskObject -> {
+            List<ParseTask> tasks = Lists.newCopyOnWriteArrayList(taskObject.getResult());
 
-                Log.d(TAG, "All tasks in geofence: " + tasks.size());
+            Log.d(TAG, "All tasks in geofence: " + tasks.size());
 
-                // weed away finished tasks
-                for (ParseObject parseObjectTask : tasks) {
-                    ParseTask task = (ParseTask) parseObjectTask;
-                    if (task.isFinished()) {
-                        tasks.remove(parseObjectTask);
-                    }
+            // weed away finished tasks
+            for (ParseObject parseObjectTask : tasks) {
+                ParseTask task = (ParseTask) parseObjectTask;
+                if (task.isFinished()) {
+                    tasks.remove(parseObjectTask);
                 }
-
-                Log.d(TAG, "Found tasks scheduled for geofencing: " + tasks.size());
-                if (tasks.size() > 100) {
-                    String message = "Geofence task size limit reached for user " + ParseUser.getCurrentUser().getUsername() + " at " + LocationModule.Recent.getLastKnownLocation().toString() + " with " + tasks.size() + " tasks";
-                    new HandleException(getBaseContext(), TAG, "100+ geofences", new IllegalStateException(message));
-                    Crashlytics.log(message);
-                    tasks = tasks.subList(0, 99);
-                }
-
-                List<ParseTask> geofencedTasks = Lists.newArrayList();
-                List<Geofence> geofences = Lists.newArrayList();
-                for (ParseTask geofencedTask : tasks) {
-                    ParseGeoPoint position = geofencedTask.getPosition();
-                    float radius = geofencedTask.getGeofenceStrategy().getGeofenceRadiusMeters();
-
-                    Geofence geofence = createGeofence(geofencedTask.getObjectId(), position, radius);
-                    geofences.add(geofence);
-
-                    geofencedTasks.add(geofencedTask);
-                }
-
-                addGeofences(geofences);
-
-                tasksCache.setAllGeofencedTasks(geofencedTasks);
-
-
-                return null;
             }
-        }).continueWithTask(new Continuation<Object, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Object> task) {
-                if (task.isFaulted()) {
-                    new HandleException(getBaseContext(), TAG, "Failed to build geofences", task.getError());
-                } else {
-                    EventBusController.postUIUpdate(location);
-                    mLastGeofenceRebuildLocation = location;
-                }
 
-                mRebuildInProgress = false;
-
-                return null;
+            Log.d(TAG, "Found tasks scheduled for geofencing: " + tasks.size());
+            if (tasks.size() > 100) {
+                String message = "Geofence task size limit reached for user " + ParseUser.getCurrentUser().getUsername() + " at " + LocationModule.Recent.getLastKnownLocation().toString() + " with " + tasks.size() + " tasks";
+                new HandleException(getBaseContext(), TAG, "100+ geofences", new IllegalStateException(message));
+                Crashlytics.log(message);
+                tasks = tasks.subList(0, 99);
             }
+
+            List<ParseTask> geofencedTasks = Lists.newArrayList();
+            List<Geofence> geofences = Lists.newArrayList();
+            for (ParseTask geofencedTask : tasks) {
+                ParseGeoPoint position = geofencedTask.getPosition();
+                float radius = geofencedTask.getGeofenceStrategy().getGeofenceRadiusMeters();
+
+                Geofence geofence = createGeofence(geofencedTask.getObjectId(), position, radius);
+                geofences.add(geofence);
+
+                geofencedTasks.add(geofencedTask);
+            }
+
+            addGeofences(geofences);
+
+            tasksCache.setAllGeofencedTasks(geofencedTasks);
+
+
+            return null;
+        }).continueWithTask((Continuation<Object, Task<Void>>) task -> {
+            if (task.isFaulted()) {
+                new HandleException(getBaseContext(), TAG, "Failed to build geofences", task.getError());
+            } else {
+                EventBusController.postUIUpdate(location);
+                mLastGeofenceRebuildLocation = location;
+            }
+
+            mRebuildInProgress = false;
+
+            return null;
         });
 
 
@@ -227,14 +208,10 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
 
         geofencingModule.clearPinned();
 
-        if (mAddGeofencesSubscription != null && !mAddGeofencesSubscription.isUnsubscribed()) {
-            mAddGeofencesSubscription.unsubscribe();
-            mAddGeofencesSubscription = null;
-        }
+        dispose(lastKnownLocationDisposable);
+        dispose(addGeofencesDisposable);
+        dispose(removeGeofencesDisposable);
 
-        if (mReactiveLocationProvider != null) {
-            mReactiveLocationProvider = null;
-        }
         super.onDestroy();
     }
 
@@ -244,52 +221,35 @@ public class RegisterGeofencesIntentService extends InjectingIntentService {
         if (geofences.isEmpty())
             return;
 
-        mReactiveLocationProvider = new ReactiveLocationProvider(getApplicationContext());
+        ReactiveLocationProvider reactiveLocationProvider = new ReactiveLocationProvider(getApplicationContext());
 
         final GeofencingRequest geofencingRequest = new GeofencingRequest.Builder().addGeofences(geofences).build();
-        mAddGeofencesSubscription = mReactiveLocationProvider
+        addGeofencesDisposable = reactiveLocationProvider
                 .removeGeofences(createRequestPendingIntent())
-                .flatMap(new Func1<Status, Observable<Status>>() {
-                    @Override
-                    public Observable<Status> call(Status pendingIntentRemoveGeofenceResult) {
-                        if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            throw new IllegalStateException("Missing permission");
-                        }
-                        return mReactiveLocationProvider.addGeofences(createRequestPendingIntent(), geofencingRequest);
+                .flatMap(status -> {
+                    if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        throw new IllegalStateException("Missing permission");
                     }
-                }).subscribe(new Action1<Status>() {
-                    @Override
-                    public void call(Status addGeofenceResult) {
-//                        EventBus.getDefault().postSticky(new GeofenceCompleteEvent());
-                        Log.i(TAG, "AddGeofenceResult success!!");
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        new HandleException(getBaseContext(), TAG, "AddGeofenceResult subscription failed!", throwable);
-                    }
+                    return reactiveLocationProvider.addGeofences(createRequestPendingIntent(), geofencingRequest);
+                }).subscribe(status -> {
+                    Log.i(TAG, "AddGeofenceResult success!!");
+                }, throwable -> {
+                    new HandleException(getBaseContext(), TAG, "AddGeofenceResult subscription failed!", throwable);
                 });
 
     }
 
     private void clearGeofence(final DeleteCallback callback) {
-        mReactiveLocationProvider = new ReactiveLocationProvider(getApplicationContext());
-        mReactiveLocationProvider.removeGeofences(createRequestPendingIntent()).subscribe(new Action1<Status>() {
-            @Override
-            public void call(Status pendingIntentRemoveGeofenceResult) {
-                if (callback != null) {
-                    callback.done(null);
-                }
+        removeGeofencesDisposable = new ReactiveLocationProvider(getApplicationContext()).removeGeofences(createRequestPendingIntent()).subscribe(status -> {
+            if (callback != null) {
+                callback.done(null);
             }
-        }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                if (callback != null) {
-                    callback.done(new ParseException(throwable));
-                }
+        }, throwable -> {
+            if (callback != null) {
+                callback.done(new ParseException(throwable));
+            }
 
-                new HandleException(getBaseContext(), TAG, "Error removing geofences", throwable);
-            }
+            new HandleException(getBaseContext(), TAG, "Error removing geofences", throwable);
         });
     }
 

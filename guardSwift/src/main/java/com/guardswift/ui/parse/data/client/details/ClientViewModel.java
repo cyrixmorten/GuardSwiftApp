@@ -7,8 +7,6 @@ import android.arch.lifecycle.ViewModel;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.query.ClientQueryBuilder;
-import com.parse.GetCallback;
-import com.parse.ParseException;
 
 public class ClientViewModel extends ViewModel {
 
@@ -21,16 +19,13 @@ public class ClientViewModel extends ViewModel {
 
             client = new MutableLiveData<>();
 
-            new ClientQueryBuilder(false).matchingObjectId(objectId).build().getFirstInBackground(new GetCallback<Client>() {
-                @Override
-                public void done(Client object, ParseException e) {
-                    if (e != null) {
-                        new HandleException("ClientViewModel", "Failed to load", e);
-                        return;
-                    }
-
-                    client.setValue(object);
+            new ClientQueryBuilder(false).matchingObjectId(objectId).build().getFirstInBackground((object, e) -> {
+                if (e != null) {
+                    new HandleException("ClientViewModel", "Failed to load", e);
+                    return;
                 }
+
+                client.setValue(object);
             });
         }
         return client;

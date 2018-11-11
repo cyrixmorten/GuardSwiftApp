@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
+        <variable
+            name="handler"
+            type="com.guardswift.ui.parse.data.client.details.ClientDataFragment" />
 
         <variable
             name="client"
@@ -40,28 +45,30 @@
                 android:orientation="vertical"
                 android:padding="@dimen/small_padding">
 
-                <LinearLayout
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    style="@style/Base.TextAppearance.AppCompat.Title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:text="@={client.id}"
+                    tools:text="id"
+                    android:hint="@string/id"
+                    android:singleLine="true"
+                    android:imeOptions="actionNext"
+                    app:met_floatingLabel="normal"/>
 
-                    <TextView
-                        style="@style/Base.TextAppearance.AppCompat.Title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@{client.name}"
-                        tools:text="name" />
 
-                    <TextView
-                        style="@style/Base.TextAppearance.AppCompat.Title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0"
-                        android:text="@{client.id}"
-                        tools:text="id" />
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    style="@style/Base.TextAppearance.AppCompat.Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@={client.name}"
+                    tools:text="name"
+                    android:hint="@string/name"
+                    android:imeOptions="actionDone"
+                    android:singleLine="true"
 
-                </LinearLayout>
+                    app:met_floatingLabel="normal"/>
+
 
                 <TextView
                     style="@style/Base.TextAppearance.AppCompat.Subhead"
@@ -76,6 +83,12 @@
                     android:layout_height="wrap_content"
                     android:text="@{client.postalCode + ' ' + client.city}"
                     tools:text="Postal code and city" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{handler::save}"
+                    android:text="Gem" />
 
             </LinearLayout>
 
