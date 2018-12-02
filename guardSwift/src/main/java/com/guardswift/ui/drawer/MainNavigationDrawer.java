@@ -94,36 +94,33 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                 .withActivity(activity)
                 .withToolbar(toolbar)
                 .withSelectedItem(-1) // defaults to no selection
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        if (drawerItem == null) {
-                            return false;
-                        }
-
-                        if (drawerItem.getTag() instanceof TaskGroupStarted) {
-                            Log.w(TAG, "Clicked taskGroupStarted");
-                            TaskGroupStarted clickedTaskGroupStarted = (TaskGroupStarted) drawerItem.getTag();
-                            for (IDrawerItem item : circuitItems) {
-                                TaskGroupStarted taskGroupStarted = (TaskGroupStarted) item.getTag();
-                                if (taskGroupStarted != null && clickedTaskGroupStarted.getObjectId().equals(taskGroupStarted.getObjectId())) {
-                                    Log.w(TAG, "Clicked " + taskGroupStarted.getName());
-
-                                    String dateSubtitle = DateUtils.formatDateTime(
-                                            context,
-                                            taskGroupStarted.getCreatedAt().getTime(),
-                                            DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE);
-
-                                    fragmentDrawerCallback.selectItem(RegularTaskViewPagerFragment.newInstance(taskGroupStarted), taskGroupStarted.getName(), dateSubtitle);
-                                    return false; // close drawer
-                                }
-                            }
-                        }
-
-                        fragmentDrawerCallback.selectItem(drawerItem.getIdentifier());
-
+                .withOnDrawerItemClickListener((view, position, drawerItem) -> {
+                    if (drawerItem == null) {
                         return false;
                     }
+
+                    if (drawerItem.getTag() instanceof TaskGroupStarted) {
+                        Log.w(TAG, "Clicked taskGroupStarted");
+                        TaskGroupStarted clickedTaskGroupStarted = (TaskGroupStarted) drawerItem.getTag();
+                        for (IDrawerItem item : circuitItems) {
+                            TaskGroupStarted taskGroupStarted = (TaskGroupStarted) item.getTag();
+                            if (taskGroupStarted != null && clickedTaskGroupStarted.getObjectId().equals(taskGroupStarted.getObjectId())) {
+                                Log.w(TAG, "Clicked " + taskGroupStarted.getName());
+
+                                String dateSubtitle = DateUtils.formatDateTime(
+                                        context,
+                                        taskGroupStarted.getCreatedAt().getTime(),
+                                        DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE);
+
+                                fragmentDrawerCallback.selectItem(RegularTaskViewPagerFragment.newInstance(taskGroupStarted), taskGroupStarted.getName(), dateSubtitle);
+                                return false; // close drawer
+                            }
+                        }
+                    }
+
+                    fragmentDrawerCallback.selectItem(drawerItem.getIdentifier());
+
+                    return false;
                 })
                 .build();
 
@@ -168,12 +165,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                 .addProfiles(
                         new ProfileDrawerItem().withName(guardCache.getLoggedIn().getName()).withIcon(R.drawable.ic_person_black_36dp)
                 )
-                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
-                    @Override
-                    public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
-                        return false;
-                    }
-                })
+                .withOnAccountHeaderListener((view, profile, currentProfile) -> false)
                 .withSelectionListEnabledForSingleProfile(false).build();
     }
 
@@ -201,34 +193,23 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         List<IDrawerItem> staticItems = Lists.newArrayList();
         IDrawerItem staticHeader = new SectionDrawerItem().withName(R.string.static_guarding);
 
-        existingStaticGuardingReports = new PrimaryDrawerItem().withName(context.getString(R.string.existing_reports)).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                fragmentDrawerCallback.selectItem(StaticTaskViewPagerFragment.newInstance(), context.getString(R.string.static_guarding_reports));
-                return true;
-            }
+        existingStaticGuardingReports = new PrimaryDrawerItem().withName(context.getString(R.string.existing_reports)).withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            fragmentDrawerCallback.selectItem(StaticTaskViewPagerFragment.newInstance(), context.getString(R.string.static_guarding_reports));
+            return true;
         });
 
-        IDrawerItem createNewStaticGuardingReport = new PrimaryDrawerItem().withName(context.getString(R.string.create_new)).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                ClientListFragment clientListFragment = ClientListFragment.newInstance(ClientQueryBuilder.SORT_BY.DISTANCE);
-                clientListFragment.setOnClientSelectedListener(new ClientListFragment.OnClientSelectedListener() {
-                    @Override
-                    public void clientSelected(Client client) {
-                        createReport(client);
-                    }
-                });
-                fragmentDrawerCallback.selectItem(clientListFragment, context.getString(R.string.new_static_guarding), context.getString(R.string.select_client));
-                return false;
-            }
+        IDrawerItem createNewStaticGuardingReport = new PrimaryDrawerItem().withName(context.getString(R.string.create_new)).withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            ClientListFragment clientListFragment = ClientListFragment.newInstance(ClientQueryBuilder.SORT_BY.DISTANCE);
+            clientListFragment.setOnClientSelectedListener(this::createReport);
+            fragmentDrawerCallback.selectItem(clientListFragment, context.getString(R.string.new_static_guarding), context.getString(R.string.select_client));
+            return false;
         });
 
         staticItems.add(staticHeader);
         staticItems.add(createNewStaticGuardingReport);
         staticItems.add(existingStaticGuardingReports);
 
-        return staticItems.toArray(new IDrawerItem[staticItems.size()]);
+        return staticItems.toArray(new IDrawerItem[0]);
     }
 
     private List<IDrawerItem> circuitItems;
@@ -290,59 +271,43 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         IDrawerItem alarmHeader = new SectionDrawerItem().withName(R.string.title_drawer_alarms);
         alarmItems.add(alarmHeader);
 
-        IDrawerItem alarmItem = new PrimaryDrawerItem().withName(R.string.alarms).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                fragmentDrawerCallback.selectItem(AlarmsViewPagerFragment.newInstance(), R.string.alarms);
-                return false;
-            }
+        IDrawerItem alarmItem = new PrimaryDrawerItem().withName(R.string.alarms).withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            fragmentDrawerCallback.selectItem(AlarmsViewPagerFragment.newInstance(), R.string.alarms);
+            return false;
         });
         alarmItems.add(alarmItem);
 
-        IDrawerItem alarmPreferences = new PrimaryDrawerItem().withName(R.string.settings).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                fragmentDrawerCallback.selectItem(AlarmNotificationPreferencesFragment.newInstance(), R.string.settings_alarm);
-                return false;
-            }
+        IDrawerItem alarmPreferences = new PrimaryDrawerItem().withName(R.string.settings).withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            fragmentDrawerCallback.selectItem(AlarmNotificationPreferencesFragment.newInstance(), R.string.settings_alarm);
+            return false;
         });
         alarmItems.add(alarmPreferences);
 
-        return alarmItems.toArray(new IDrawerItem[alarmItems.size()]);
+        return alarmItems.toArray(new IDrawerItem[0]);
     }
 
     private void createReport(final Client client) {
         final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(context).indeterminate(client.getName(), R.string.creating_report).show();
         // fake a bit of delay to ensure that the dialog is shown/readable
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
+        new Handler(Looper.getMainLooper()).postDelayed(() -> ParseTask.createStaticTask(client, (task, e) -> {
 
-                ParseTask.createStaticTask(client, new GetCallback<ParseTask>() {
-                    @Override
-                    public void done(ParseTask task, ParseException e) {
+            dialog.dismiss();
 
-                        dialog.dismiss();
-
-                        if (e != null) {
-                            if (context != null) {
-                                new CommonDialogsBuilder.MaterialDialogs(context).missingInternetContent().show();
-                            }
-                            new HandleException(TAG, "save static report", e);
-                            return;
-                        }
-
-                        // show as pending
-                        fragmentDrawerCallback.selectItem(StaticTaskViewPagerFragment.newInstance(), context.getString(R.string.static_guarding_reports));
-                        if (existingStaticGuardingReports != null) {
-                            navigationDrawer.setSelection(existingStaticGuardingReports);
-                        }
-
-                    }
-                });
-
+            if (e != null) {
+                if (context != null) {
+                    new CommonDialogsBuilder.MaterialDialogs(context).missingInternetContent().show();
+                }
+                new HandleException(TAG, "save static report", e);
+                return;
             }
-        }, 500);
+
+            // show as pending
+            fragmentDrawerCallback.selectItem(StaticTaskViewPagerFragment.newInstance(), context.getString(R.string.static_guarding_reports));
+            if (existingStaticGuardingReports != null) {
+                navigationDrawer.setSelection(existingStaticGuardingReports);
+            }
+
+        }), 500);
     }
 
 
@@ -355,34 +320,25 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         // DATA
         IDrawerItem dataHeader = new SectionDrawerItem().withName(R.string.title_drawer_data);
         dataItems.add(dataHeader);
-        dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_guards)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                GenericToolbarActivity.start(context, R.string.title_drawer_guards, GuardListFragment.newInstance());
-                return false;
-            }
+        dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_guards)).withSelectable(false).withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            GenericToolbarActivity.start(context, R.string.title_drawer_guards, GuardListFragment.newInstance());
+            return false;
         }));
-        dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_clients)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                ClientListFragment clientListFragment = ClientListFragment.newInstance(ClientQueryBuilder.SORT_BY.NAME);
-                GenericToolbarActivity.start(context, R.string.title_drawer_clients, clientListFragment);
-                return false;
-            }
+        dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_clients)).withSelectable(false).withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            ClientListFragment clientListFragment = ClientListFragment.newInstance(ClientQueryBuilder.SORT_BY.NAME);
+            GenericToolbarActivity.start(context, R.string.title_drawer_clients, clientListFragment);
+            return false;
         }));
 
 
         IDrawerItem adminHeader = new SectionDrawerItem().withName(R.string.title_drawer_admin);
         dataItems.add(adminHeader);
-        dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_gps_history)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                GenericToolbarActivity.start(context, R.string.title_drawer_gps_history, TrackerListFragment.newInstance());
-                return false;
-            }
+        dataItems.add(new PrimaryDrawerItem().withName(context.getString(R.string.title_drawer_gps_history)).withSelectable(false).withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            GenericToolbarActivity.start(context, R.string.title_drawer_gps_history, TrackerListFragment.newInstance());
+            return false;
         }));
 
-        return dataItems.toArray(new IDrawerItem[dataItems.size()]);
+        return dataItems.toArray(new IDrawerItem[0]);
     }
 
     private IDrawerItem getLogoutDrawerItem() {
@@ -390,12 +346,9 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
     }
 
     private IDrawerItem getGuardDataDrawerItem() {
-        return new PrimaryDrawerItem().withName(context.getString(R.string.my_data)).withSelectable(false).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-            @Override
-            public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                GenericToolbarActivity.start(context, R.string.settings, R.string.my_data, GuardPreferencesFragment.newInstance());
-                return false;
-            }
+        return new PrimaryDrawerItem().withName(context.getString(R.string.my_data)).withSelectable(false).withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            GenericToolbarActivity.start(context, R.string.settings, R.string.my_data, GuardPreferencesFragment.newInstance());
+            return false;
         });
     }
 

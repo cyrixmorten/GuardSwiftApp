@@ -42,6 +42,7 @@ public class ClientDataFragment extends BaseMapFragment {
     public ClientDataFragment() {
     }
 
+
     private Client.ObservableClient mClientObservable;
     private ClientViewModel mClientViewModel;
     private String objectId;
@@ -55,7 +56,6 @@ public class ClientDataFragment extends BaseMapFragment {
         }
 
         mClientViewModel = ViewModelProviders.of(this).get(ClientViewModel.class);
-
     }
 
     @Override
@@ -74,6 +74,8 @@ public class ClientDataFragment extends BaseMapFragment {
                     mClientObservable = new Client.ObservableClient(client);
                     binding.setClient(mClientObservable);
                 });
+
+        binding.setHandler(this);
 
         return binding.getRoot();
     }
@@ -112,13 +114,17 @@ public class ClientDataFragment extends BaseMapFragment {
         });
     }
 
-    private void save() {
+    public void save(View v) {
+        Log.d(TAG, "SAVE");
         mClientViewModel.getClient(this.objectId).observe(this, client -> {
             if (client == null) {
+                Log.d(TAG, "CLIENT NULL");
                 return;
             }
 
+            Log.d(TAG, "CLIENT UPDATE");
             client.updateFromObservable(mClientObservable);
+            client.saveEventuallyAndNotify();
         });
     }
 

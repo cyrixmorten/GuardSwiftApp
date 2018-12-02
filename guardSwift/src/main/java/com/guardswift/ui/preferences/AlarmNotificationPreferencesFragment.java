@@ -17,6 +17,7 @@ import com.guardswift.util.ToastHelper;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.takisoft.fix.support.v7.preference.PreferenceCategory;
 import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat;
 
@@ -223,13 +224,19 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
 
                             guardNotification.setChecked(true);
                         } else {
-                            guard.enableAlarmNotification(enable);
-                            guard.enableAlarmSound(enable);
-                            guard.enableAlarmSMS(enable);
-                            guard.saveEventuallyAndNotify();
+                            showLoading();
 
-                            guardNotification.setChecked(enable);
+                            guard.enableAlarm(enable);
+                            guard.saveInBackground(e -> {
+                                if (isAdded()) {
+                                    if (e != null) {
+                                        ToastHelper.toast(getContext(), getString(R.string.error_an_error_occured));
+                                    }
 
+                                    guardNotification.setChecked(enable);
+                                    dismissLoading();
+                                }
+                            });
                         }
 //                    }
 //                });

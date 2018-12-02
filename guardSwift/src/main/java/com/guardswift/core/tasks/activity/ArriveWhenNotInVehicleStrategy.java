@@ -6,15 +6,13 @@ import com.google.android.gms.location.DetectedActivity;
 import com.google.common.collect.Maps;
 import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.parse.ParseModule;
+import com.guardswift.core.tasks.TriggerTimer;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 
 import java.util.Map;
 
 public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
 
-    interface TriggerArrival {
-        void trigger();
-    }
 
     private static final String TAG = ArriveWhenNotInVehicleStrategy.class.getSimpleName();
 
@@ -22,9 +20,9 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
 
 
     // Saved in a static map because there can be multiple instances of this strategy per task
-    private static Map<String, ArriveOnStillTimer> arriveOnStillTimerMap = Maps.newConcurrentMap();
+    private static Map<String, TriggerTimer> arriveOnStillTimerMap = Maps.newConcurrentMap();
 
-    private ArriveOnStillTimer arriveOnStillTimer;
+    private TriggerTimer triggerTimer;
 
 
     public static TaskActivityStrategy getInstance(ParseTask task) {
@@ -35,23 +33,23 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
         this.task = task;
 
         if (task.getObjectId() != null) {
-            ArriveOnStillTimer arriveOnStillTimer = arriveOnStillTimerMap.get(task.getObjectId());
+            TriggerTimer triggerTimer = arriveOnStillTimerMap.get(task.getObjectId());
 
-            // Create on timer per task
-            if (arriveOnStillTimer == null) {
-                arriveOnStillTimer = new ArriveOnStillTimer(task, this::arriveIfNear);
+            // Create one timer per task
+            if (triggerTimer == null) {
+                triggerTimer = new TriggerTimer(this::arriveIfNear, 60);
 
-                arriveOnStillTimerMap.put(task.getObjectId(), arriveOnStillTimer);
+                arriveOnStillTimerMap.put(task.getObjectId(), triggerTimer);
             }
 
-            this.arriveOnStillTimer = arriveOnStillTimer;
+            this.triggerTimer = triggerTimer;
         }
     }
 
     private void arriveIfNear() {
         float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getPosition());
 
-        Log.d(TAG, "distanceToClient: " + distanceToClient);
+        Log.d(TAG, "arriveIfNear: " + distanceToClient + " < " + task.getRadius() + " - " + task.getClientName());
 
         if (distanceToClient < task.getRadius()) {
             task.getAutomationStrategy().automaticArrival();
@@ -66,18 +64,23 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
 
         int activityType = activity.getType();
 
+        Log.d(TAG, "handleActivityInsideGeofence: " + activityType + " - " + task.getClientName());
+
         if (activityType == DetectedActivity.STILL || activityType == DetectedActivity.TILTING) {
+
+            Log.d(TAG, "triggerTimer.running: " + triggerTimer.running());
+
             // Might have arrived and got out of vehicle, lets wait a minute and see
-            if (!arriveOnStillTimer.running()) {
-                arriveOnStillTimer.start();
+            if (!triggerTimer.running()) {
+                triggerTimer.start();
             }
         } else if (activityType == DetectedActivity.ON_FOOT) {
             // Pretty sure the guard is out of the vehicle, no need to wait to check
-            arriveOnStillTimer.stop();
+            triggerTimer.stop();
             arriveIfNear();
         } else if (activityType == DetectedActivity.IN_VEHICLE) {
             // Never mind, driving by
-            arriveOnStillTimer.stop();
+            triggerTimer.stop();
 
         }
 
@@ -90,7 +93,7 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
             return;
         }
 
-        if (activity.getType() == DetectedActivity.IN_VEHICLE && activity.getConfidence() == 100) {
+        if (activity.getType() == DetectedActivity.IN_VEHICLE && activity.getConfidence() > 80) {
             task.getAutomationStrategy().automaticDeparture();
         }
     }

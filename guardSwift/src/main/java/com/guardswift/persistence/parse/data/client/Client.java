@@ -3,6 +3,7 @@ package com.guardswift.persistence.parse.data.client;
 import android.content.Context;
 import android.databinding.ObservableField;
 import android.support.v7.widget.LinearLayoutCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,8 +33,6 @@ import butterknife.ButterKnife;
 @ParseClassName("Client")
 public class Client extends ExtendedParseObject implements Positioned {
 
-
-
     public static class ObservableClient {
 
         public final ObservableField<String> id = new ObservableField<>();
@@ -48,7 +47,7 @@ public class Client extends ExtendedParseObject implements Positioned {
             if (client != null) {
                 id.set(client.getId());
                 name.set(client.getName());
-                street.set(client.getStreet());
+                street.set(client.getFullAddress());
                 streetNumber.set(client.getStreetNumber());
                 postalCode.set(client.getPostalCode());
                 city.set(client.getCity());
@@ -58,27 +57,20 @@ public class Client extends ExtendedParseObject implements Positioned {
     }
 
     public void updateFromObservable(ObservableClient observableClient) {
-
+        setClientId(observableClient.id.get());
+        setName(observableClient.name.get());
     }
 
     public static final String clientId = "clientId";
     public static final String name = "name";
 
-    // since version 4.0.0
+    public static final String placeId = "placeId";
     public static final String street = "street";
     public static final String streetNumber = "streetNumber";
     public static final String postalCode = "postalCode";
     public static final String city = "city";
     public static final String formattedAddress = "formattedAddress";
-    // <--
-
-    // dreprecated since version 4.0.0
-    public static final String addressName = "addressName";
-    public static final String addressNumber = "addressNumber";
     public static final String fullAddress = "fullAddress";
-    public static final String cityName = "cityName";
-    public static final String zipcode = "zipcode";
-    // <--
 
     //    public static final String number = "number";
     public static final String position = "position";
@@ -89,7 +81,6 @@ public class Client extends ExtendedParseObject implements Positioned {
     public static final String contacts = "contacts";
     public static final String automatic = "automatic"; // e.g. alarm client
 
-    public static final String fingerprints = "fingerprints";
     public static final String tasksRadius = "tasksRadius";
 
 
@@ -176,11 +167,24 @@ public class Client extends ExtendedParseObject implements Positioned {
         put(key, radiusMap);
     }
 
+    public void setPlaceId(String placeId) {
+        put(Client.placeId, placeId);
+    }
 
+    public void setClientId(String clientId) {
+        put(Client.clientId, clientId);
+    }
+
+    public void setName(String name) {
+        Log.d(TAG, name);
+        put(Client.name, name);
+    }
 
     public ParseObject getOwner() {
         return getParseObject(owner);
     }
+
+
 
     public String getName() {
         return getString(name);
@@ -193,7 +197,7 @@ public class Client extends ExtendedParseObject implements Positioned {
         return getName();
     }
 
-    public String getStreet() {
+    public String getStreetName() {
         return  getStringSafe(Client.street);
     }
 
@@ -202,7 +206,7 @@ public class Client extends ExtendedParseObject implements Positioned {
     }
 
     public String getStreetWithNumber() {
-        return  getStreet() + " " + getStreetNumber();
+        return  getStreetName() + " " + getStreetNumber();
     }
 
     public String getPostalCode() {
@@ -210,40 +214,16 @@ public class Client extends ExtendedParseObject implements Positioned {
     }
 
     public String getCity() {
-        return getStringSafe(Client.postalCode);
+        return  getStringSafe(Client.city);
     }
 
-    @Deprecated
-    public String getAddressName() {
-        return has(Client.addressName) ? getString(Client.addressName) : getStringSafe(Client.street);
-    }
-
-    @Deprecated
-    public String getAddressNumber() {
-        return has(Client.addressNumber) ? getString(Client.addressNumber) : getStringSafe(Client.streetNumber);
-    }
-
-
-    @Deprecated
     public String getFullAddress() {
         return getString(fullAddress);
     }
 
-    @Deprecated
-    public String getCityName() {
-        return has(Client.cityName) ? getString(Client.cityName) : getStringSafe(Client.city);
-    }
-
-    @Deprecated
-    public String getZipcode() {
-        return has(Client.zipcode) ? getString(Client.zipcode) : getStringSafe(Client.postalCode);
-    }
-
-
     public String getId() {
         return (has(clientId)) ? getString(clientId) : "";
     }
-
 
     public List<Person> getPeople() {
         if (has(people)) return getList(people);
@@ -308,7 +288,5 @@ public class Client extends ExtendedParseObject implements Positioned {
         }
         return new ArrayList<>();
     }
-
-
 
 }

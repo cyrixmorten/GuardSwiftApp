@@ -18,7 +18,6 @@ public class FinishOnDepartureAutomationStrategy implements TaskAutomationStrate
 
     private final ParseTask task;
 
-    private static Map<String, TaskAutomationStrategy> instances = Maps.newConcurrentMap();
 
     public static TaskAutomationStrategy getInstance(ParseTask task) {
         return new FinishOnDepartureAutomationStrategy(task);

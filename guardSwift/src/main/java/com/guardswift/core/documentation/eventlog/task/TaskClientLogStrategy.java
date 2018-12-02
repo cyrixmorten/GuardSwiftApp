@@ -34,13 +34,13 @@ class TaskClientLogStrategy implements LogTaskStrategy {
         toParseObject.put(EventLog.client, ParseObject.createWithoutData(Client.class, client.getObjectId()));
         if (client.has(Client.name))
             toParseObject.put(EventLog.clientName, client.getName());
-        toParseObject.put(EventLog.clientAddress, client.getAddressName());
-        toParseObject.put(EventLog.clientAddressNumber, client.getAddressNumber());
-        toParseObject.put(EventLog.clientCity, client.getCityName());
-        toParseObject.put(EventLog.clientZipcode, client.getZipcode());
-        String clientFullAddress = client.getAddressName() + " "
-                + client.getAddressNumber() + " " + client.getZipcode() + " "
-                + client.getCityName();
+        toParseObject.put(EventLog.clientAddress, client.getStreetName());
+        toParseObject.put(EventLog.clientAddressNumber, client.getStreetNumber());
+        toParseObject.put(EventLog.clientCity, client.getCity());
+        toParseObject.put(EventLog.clientZipcode, client.getPostalCode());
+        String clientFullAddress = client.getStreetName() + " "
+                + client.getStreetNumber() + " " + client.getPostalCode() + " "
+                + client.getCity();
         toParseObject.put(EventLog.clientFullAddress, clientFullAddress);
     }
 

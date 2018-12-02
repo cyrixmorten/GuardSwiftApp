@@ -21,7 +21,7 @@ public class NoGeofenceStrategy extends BaseGeofenceStrategy {
 
     @Override
     public void queryGeofencedTasks(int withinKm, Location fromLocation, FindCallback<ParseTask> callback) {
-        callback.done(new ArrayList<ParseTask>(), null);
+        callback.done(new ArrayList<>(), null);
     }
 
     @Override

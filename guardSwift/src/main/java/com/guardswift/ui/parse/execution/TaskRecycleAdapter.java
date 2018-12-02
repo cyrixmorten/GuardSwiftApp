@@ -414,14 +414,11 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //                    @Override
 //                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 // TODO date dialog (today or yesterday)
-                addArrivalEvent(context, task, new GetCallback<ParseTask>() {
-                    @Override
-                    public void done(ParseTask task, ParseException e) {
-                        task.setArrived();
-                        task.saveEventually();
+                addArrivalEvent(context, task, (task1, e) -> {
+                    task1.setArrived();
+                    task1.saveEventually();
 
-                        update(context, task);
-                    }
+                    update(context, task1);
                 });
 //                    }
 //                }).show();
@@ -436,28 +433,17 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         @Override
         public void onActionFinish(final Context context, final ParseTask task) {
-            confirmIfMissingSupervisions(context, task, new GetCallback<ParseTask>() {
-                @Override
-                public void done(ParseTask object, ParseException e) {
-                    // Either not missing supervisions, or finish despite
-                    finishWithChecks(context, task);
-                }
+            confirmIfMissingSupervisions(context, task, (object, e) -> {
+                // Either not missing supervisions, or finish despite
+                finishWithChecks(context, task);
             });
         }
 
         private void finishWithChecks(final Context context, final ParseTask task) {
             if (task.getTimesArrived() == 0 && fragmentManager != null) {
-                missingArrivalTimestampDialog(context, new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        addArrivalEvent(context, task, new GetCallback<ParseTask>() {
-                            @Override
-                            public void done(ParseTask object, ParseException e) {
-                                RegularTaskViewHolder.super.onActionFinish(context, task);
-                            }
-                        });
-                    }
-                });
+                missingArrivalTimestampDialog(context, (dialog, which) ->
+                        addArrivalEvent(context, task, (object, e) ->
+                                RegularTaskViewHolder.super.onActionFinish(context, task)));
             } else {
                 Log.e(TAG, "Should show missing arrival dialog but had no fragment manager");
                 RegularTaskViewHolder.super.onActionFinish(context, task);
@@ -473,12 +459,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 new CommonDialogsBuilder.MaterialDialogs(context).okCancel(
                         R.string.missing_supervisions,
                         context.getString(R.string.confirm_finish_missing_supervisions, diff),
-                        new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                okCallback.done(task, null);
-                            }
-                        })
+                        (dialog, which) -> okCallback.done(task, null))
                         .canceledOnTouchOutside(false)
                         .show();
             } else {
@@ -493,25 +474,22 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             // TODO date dialog (today or yesterday)
             RadialTimePickerDialogFragment timePickerDialog = new RadialTimePickerDialogFragment()
                     .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
-                    .setOnTimeSetListener(new RadialTimePickerDialogFragment.OnTimeSetListener() {
-                        @Override
-                        public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-                            final Calendar cal = Calendar.getInstance();
-                            cal.setTime(new Date());
-                            cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                            cal.set(Calendar.MINUTE, minute);
+                    .setOnTimeSetListener((dialog, hourOfDay, minute) -> {
+                        final Calendar cal = Calendar.getInstance();
+                        cal.setTime(new Date());
+                        cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        cal.set(Calendar.MINUTE, minute);
 
 
-                            new EventLog.Builder(context)
-                                    .taskPointer(task, ParseTask.EVENT_TYPE.ARRIVE)
-                                    .event(context.getString(R.string.event_arrived))
-                                    .automatic(false)
-                                    .deviceTimeStamp(cal.getTime())
-                                    .eventCode(EventLog.EventCodes.REGULAR_ARRIVED).saveAsync();
+                        new EventLog.Builder(context)
+                                .taskPointer(task, ParseTask.EVENT_TYPE.ARRIVE)
+                                .event(context.getString(R.string.event_arrived))
+                                .automatic(false)
+                                .deviceTimeStamp(cal.getTime())
+                                .eventCode(EventLog.EventCodes.REGULAR_ARRIVED).saveAsync();
 
 
-                            callback.done(task, null);
-                        }
+                        callback.done(task, null);
                     })
                     .setThemeDark()
                     .setForced24hFormat();
@@ -753,18 +731,11 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         public void onActionArrive(final Context context, final ParseTask task) {
 
-            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived), new MaterialDialog.SingleButtonCallback() {
-                @Override
-                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                    performTaskAction(context, task, ACTION.ARRIVE).onSuccess(new Continuation<ParseTask, Object>() {
-                        @Override
-                        public Object then(Task<ParseTask> task) {
-                            update(context, task.getResult());
-                            return null;
-                        }
-                    });
-                }
-            }).show();
+            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived, task.getClientName()), (materialDialog, dialogAction) ->
+                    performTaskAction(context, task, ACTION.ARRIVE).onSuccess(task1 -> {
+                        update(context, task1.getResult());
+                        return null;
+                    })).show();
         }
 
         public void onActionAbort(final Context context, ParseTask task) {
