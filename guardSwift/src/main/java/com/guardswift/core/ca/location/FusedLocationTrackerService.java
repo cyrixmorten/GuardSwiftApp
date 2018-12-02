@@ -41,12 +41,13 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
-import pl.charmas.android.reactivelocation.ReactiveLocationProvider;
-import rx.Observable;
-import rx.Subscription;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import pl.charmas.android.reactivelocation2.ReactiveLocationProvider;
+
+import static com.guardswift.util.rx.UnsubscribeIfPresent.dispose;
+
 
 public class FusedLocationTrackerService extends InjectingService {
 
@@ -74,11 +75,8 @@ public class FusedLocationTrackerService extends InjectingService {
     private static final int DISTANCE_METERS_FOR_GEOFENCEREBUILD = 1500;
     private static final int DISTANCE_METERS_FOR_UIUPDATE = 20;
 
-    private Subscription locationSubscription;
-
-
+    private Disposable locationDisposable;
     private Location mLastUIUpdateLocation;
-
     private Tracker tracker;
 
 
@@ -144,25 +142,15 @@ public class FusedLocationTrackerService extends InjectingService {
     @Override
     public void onDestroy() {
         Log.i(TAG, "Stopping GPSTrackerService");
-        if (hasGooglePlayServices()) {
-            unsubscribeLocationUpdates();
-        }
+
+        dispose(locationDisposable);
+
         wl.release();
+
         super.onDestroy();
     }
 
 
-    public void unsubscribeLocationUpdates() {
-        if (locationSubscription != null && !locationSubscription.isUnsubscribed()) {
-            Log.i(TAG, "Unsubscribe location updates");
-            try {
-                locationSubscription.unsubscribe();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            locationSubscription = null;
-        }
-    }
 
 
     private boolean hasGooglePlayServices() {
@@ -172,7 +160,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
     private void requestLocationUpdates() {
 
-        unsubscribeLocationUpdates(); // in case we are already listening
+        dispose(locationDisposable); // in case we are already listening
 
         LocationRequest request = LocationRequest.create() //standard GMS LocationRequest
                 .setPriority(LOCATION_PRIORITY)
@@ -186,48 +174,33 @@ public class FusedLocationTrackerService extends InjectingService {
             return;
         }
 
-        locationSubscription = locationProvider.getUpdatedLocation(request)
+        locationDisposable = locationProvider.getUpdatedLocation(request)
                 .observeOn(Schedulers.from(Executors.newSingleThreadExecutor()))
-                .onErrorResumeNext(new Func1<Throwable, Observable<Location>>() {
-                    @Override
-                    public Observable<Location> call(Throwable throwable) {
-                        Location location = new android.location.Location("");
-                        location.setAccuracy(100); // do not let past filter
-                        return Observable.just(location);
-                    }
+                .onErrorResumeNext(throwable -> {
+                    Location location = new android.location.Location("");
+                    location.setAccuracy(100); // do not let past filter
+                    return Observable.just(location);
                 })
-                .filter(new Func1<Location, Boolean>() {
-                    @Override
-                    public Boolean call(Location location) {
-                        return (mLastUIUpdateLocation == null || location.getAccuracy() < 30);
+                .filter(location -> (mLastUIUpdateLocation == null || location.getAccuracy() < 30))
+                .subscribe(location -> {
+                    if (guardCache.isLoggedIn()) {
+
+                        LocationModule.Recent.setLastKnownLocation(location);
+
+                        rebuildGeofencesIfDistanceThresholdReached(location);
+                        inspectDistanceToGeofencedTasks(location);
+                        updateUIIfDistanceThresholdReached(location);
+
+                        LocationNotification.update(FusedLocationTrackerService.this, location);
+
+                        uploadLocation(location);
+                    } else {
+                        stopSelf();
                     }
-                })
-                .subscribe(new Action1<Location>() {
-                    @Override
-                    public void call(Location location) {
-
-                        if (guardCache.isLoggedIn()) {
-
-                            LocationModule.Recent.setLastKnownLocation(location);
-
-                            rebuildGeofencesIfDistanceThresholdReached(location);
-                            inspectDistanceToGeofencedTasks(location);
-                            updateUIIfDistanceThresholdReached(location);
-
-                            LocationNotification.update(FusedLocationTrackerService.this, location);
-
-                            uploadLocation(location);
-                        } else {
-                            stopSelf();
-                        }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e(TAG, "Error on Fused Location observable", throwable);
-                        Crashlytics.logException(throwable);
-                        new HandleException(TAG, "Error on Fused Location observable", throwable);
-                    }
+                }, throwable -> {
+                    Log.e(TAG, "Error on Fused Location observable", throwable);
+                    Crashlytics.logException(throwable);
+                    new HandleException(TAG, "Error on Fused Location observable", throwable);
                 });
     }
 

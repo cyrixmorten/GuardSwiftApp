@@ -13,15 +13,13 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = GeofenceBroadcastReceiver.class.getSimpleName();
 
-    private GeofencingModule geofencingModule;
-
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
         Log.e(TAG, "GeofenceBroadcastReceiver");
 
-        geofencingModule = new GeofencingModule();
+        GeofencingModule geofencingModule = new GeofencingModule();
 
         GeofencingEvent event = GeofencingEvent.fromIntent(intent);
         if (event != null) {

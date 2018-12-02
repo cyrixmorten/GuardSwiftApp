@@ -80,10 +80,9 @@ import bolts.Continuation;
 import bolts.Task;
 import de.greenrobot.event.EventBus;
 import io.fabric.sdk.android.Fabric;
+import io.reactivex.plugins.RxJavaPlugins;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
-import rx.plugins.RxJavaErrorHandler;
-import rx.plugins.RxJavaPlugins;
 
 
 public class GuardSwiftApplication extends InjectingApplication {
@@ -146,13 +145,10 @@ public class GuardSwiftApplication extends InjectingApplication {
         setupFabric();
         setupJobs();
 
-        RxJavaPlugins.getInstance().registerErrorHandler(new RxJavaErrorHandler() {
-            @Override
-            public void handleError(Throwable e) {
-                new HandleException(TAG, "RxJava", e);
-            }
+        // Global capture of RxJava errors
+        RxJavaPlugins.setErrorHandler(throwable -> {
+            new HandleException(TAG, "RxJava", throwable);
         });
-
 
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
 

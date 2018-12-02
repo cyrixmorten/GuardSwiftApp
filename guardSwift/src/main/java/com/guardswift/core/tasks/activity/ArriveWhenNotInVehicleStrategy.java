@@ -49,7 +49,7 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
     private void arriveIfNear() {
         float distanceToClient = ParseModule.distanceBetweenMeters(LocationModule.Recent.getLastKnownLocation(), task.getPosition());
 
-        Log.d(TAG, "distanceToClient: " + distanceToClient);
+        Log.d(TAG, "arriveIfNear: " + distanceToClient + " < " + task.getRadius() + " - " + task.getClientName());
 
         if (distanceToClient < task.getRadius()) {
             task.getAutomationStrategy().automaticArrival();
@@ -64,7 +64,12 @@ public class ArriveWhenNotInVehicleStrategy implements TaskActivityStrategy {
 
         int activityType = activity.getType();
 
+        Log.d(TAG, "handleActivityInsideGeofence: " + activityType + " - " + task.getClientName());
+
         if (activityType == DetectedActivity.STILL || activityType == DetectedActivity.TILTING) {
+
+            Log.d(TAG, "triggerTimer.running: " + triggerTimer.running());
+
             // Might have arrived and got out of vehicle, lets wait a minute and see
             if (!triggerTimer.running()) {
                 triggerTimer.start();

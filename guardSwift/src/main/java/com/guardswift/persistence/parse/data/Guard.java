@@ -156,6 +156,12 @@ public class Guard extends ExtendedParseObject implements Positioned {
         return getBoolean(Guard.alarmNotify);
     }
 
+    public void enableAlarm(boolean enable) {
+        enableAlarmNotification(enable);
+        enableAlarmSound(enable);
+        enableAlarmSMS(enable);
+    }
+
     public void enableAlarmNotification(boolean enable) {
         put(Guard.alarmNotify, enable);
     }

@@ -78,26 +78,31 @@ public class RaidGeofenceStrategy extends BaseGeofenceStrategy {
 
 
             // compute the value t of the closest point to the circle center (Cx, Cy)
-//            double t = Dx*(Cx-Ax) + Dy*(Cy-Ay);
+            double t = Dx*(Cx-Ax) + Dy*(Cy-Ay);
 
 
             // compute the coordinates of the point E on line and closest to C
-//            double Ex = t*Dx+Ax;
-//            double Ey = t*Dy+Ay;
+            double Nx = t*Dx+Ax;
+            double Ny = t*Dy+Ay;
 
 
-//            Location E = new Location("");
-//            E.setLatitude(Ex);
-//            E.setLongitude(Ey);
+            Location N = new Location("");
+            N.setLatitude(Nx);
+            N.setLongitude(Ny);
 
             // compute the euclidean distance from E to C
-//            double LEC = ParseModule.distanceBetweenMeters(E, C); // convert to meters
+            double NLEC = ParseModule.distanceBetweenMeters(N, C); // convert to meters
+
+            if (NLEC < task.getRadius()) {
+                task.getAutomationStrategy().automaticArrival();
+                return;
+            }
 
             Float[] tcandidates = new Float[]{LAB/2, LAB/2-(LAB/4), LAB/2+(LAB/4)};
             double LEC = Double.MAX_VALUE;
-            for (Float t: tcandidates) {
-                double Ex = t*Dx+Ax;
-                double Ey = t*Dy+Ay;
+            for (Float tC: tcandidates) {
+                double Ex = tC*Dx+Ax;
+                double Ey = tC*Dy+Ay;
 
                 Location E = new Location("");
                 E.setLatitude(Ex);
