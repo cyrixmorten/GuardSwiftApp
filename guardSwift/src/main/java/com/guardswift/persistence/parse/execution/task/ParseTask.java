@@ -772,9 +772,8 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
         if (taskGroupStartedCache.getSelected() != null) {
             if (getTaskGroupStarted() != null) {
-                boolean isMatch = getTaskGroupStarted().equals(taskGroupStartedCache.getSelected());
-                //Log.d(TAG, "isMatch: " + isMatch);
-                return isMatch;
+                Log.d(TAG, "matchesSelectedTaskGroupStarted: " + getTaskGroupStarted().getObjectId() + " == " + taskGroupStartedCache.getSelected().getObjectId());
+                return getTaskGroupStarted().equals(taskGroupStartedCache.getSelected());
             }
         }
 

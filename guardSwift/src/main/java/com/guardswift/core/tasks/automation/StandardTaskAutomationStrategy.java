@@ -29,6 +29,10 @@ public class StandardTaskAutomationStrategy implements TaskAutomationStrategy {
     public void automaticArrival() {
         Context context = GuardSwiftApplication.getInstance();
 
+        Log.d(TAG, "automaticArrival: " + task.getClientName());
+
+        Log.d(TAG, " - isWithinScheduledTime: " + task.isWithinScheduledTime());
+        Log.d(TAG, " - matchesSelectedTaskGroupStarted: " + task.matchesSelectedTaskGroupStarted());
 
         TaskController controller = task.getController();
         if (task.isWithinScheduledTime() && task.matchesSelectedTaskGroupStarted()) {
