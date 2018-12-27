@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 
 import com.guardswift.R;
 import com.guardswift.core.parse.ParseModule;
@@ -15,13 +14,11 @@ import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.drawer.MainNavigationDrawer;
-import com.guardswift.ui.drawer.MessagesDrawer;
 import com.guardswift.ui.drawer.ToolbarFragmentDrawerCallback;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.util.Device;
 import com.guardswift.util.Sounds;
 import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 
 import javax.inject.Inject;
@@ -57,7 +54,6 @@ public class MainActivity extends InjectingAppCompatActivity {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
 
-    private MessagesDrawer messagesDrawer;
     private ToolbarFragmentDrawerCallback mainDrawerCallback;
 
     @Override
@@ -89,34 +85,18 @@ public class MainActivity extends InjectingAppCompatActivity {
         Log.i(TAG, "initDrawer");
 
         mainDrawerCallback = new ToolbarFragmentDrawerCallback(this, toolbar, R.id.content);
-        mainDrawerCallback.setActionCallback(new ToolbarFragmentDrawerCallback.SelectActionCallback() {
-            public void selectAction(long action) {
-                if (action == MainNavigationDrawer.DRAWER_LOGOUT) {
-                    showLogoutDialog();
-                }
+        mainDrawerCallback.setActionCallback(action -> {
+            if (action == MainNavigationDrawer.DRAWER_LOGOUT) {
+                showLogoutDialog();
             }
         });
 
         Drawer mainNavigationDrawer = navigationDrawer.create(this, toolbar, mainDrawerCallback);
 
-        messagesDrawer = new MessagesDrawer(this, new DrawerBuilder()
-                .withActivity(this)
-                .withDrawerGravity(Gravity.END)
-                .withCloseOnClick(false)
-                .append(mainNavigationDrawer));
 
         mainNavigationDrawer.openDrawer();
     }
 
-
-    @Override
-    public void onBackPressed() {
-        if (messagesDrawer != null) {
-            messagesDrawer.close();
-        }
-
-        super.onBackPressed();
-    }
 
     @Override
     protected void onResume() {
@@ -147,27 +127,6 @@ public class MainActivity extends InjectingAppCompatActivity {
         }
     }
 
-
-    // http://stackoverflow.com/questions/10216937/how-do-i-create-a-help-overlay-like-you-see-in-a-few-android-apps-and-ics
-    // public void onCoachMark(){
-    //
-    // final Dialog dialog = new Dialog(this);
-    // dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-    // dialog.getWindow().setBackgroundDrawable(new
-    // ColorDrawable(android.graphics.Color.TRANSPARENT));
-    // dialog.setContentView(R.layout.coach_mark);
-    // dialog.setCanceledOnTouchOutside(true);
-    // //for dismissing anywhere you touch
-    // View masterView = dialog.findViewById(R.id.coach_mark_master_view);
-    // masterView.setOnClickListener(new View.OnClickListener() {
-    // @Override
-    // public void onClick(View view) {
-    // dialog.dismiss();
-    // }
-    // });
-    // dialog.show();
-    // }
-
     // preventing multiple calls of startActivity in redirectToOtherActivityIntent
     public boolean shouldRedirectToOtherActivity() {
         return redirectToOtherActivityIntent() != null;
@@ -188,7 +147,6 @@ public class MainActivity extends InjectingAppCompatActivity {
     @Override
     protected void onDestroy() {
         Log.i(TAG, "onDestroy");
-        messagesDrawer = null;
         navigationDrawer = null;
         mainDrawerCallback = null;
 
@@ -210,16 +168,13 @@ public class MainActivity extends InjectingAppCompatActivity {
                 .setContentText(getString(R.string.logout_confirm))
                 .setConfirmText(getString(android.R.string.yes))
                 .setCancelText(getString(android.R.string.no))
-                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                    @Override
-                    public void onClick(final SweetAlertDialog sDialog) {
+                .setConfirmClickListener(sDialog -> {
 
-                        logoutDialog.cancel();
+                    logoutDialog.cancel();
 
-                        parseModule.logout(MainActivity.this);
+                    parseModule.logout(MainActivity.this);
 
 
-                    }
                 });
 
         logoutDialog.show();
@@ -230,7 +185,4 @@ public class MainActivity extends InjectingAppCompatActivity {
         return mainDrawerCallback;
     }
 
-    public MessagesDrawer getMessagesDrawer() {
-        return messagesDrawer;
-    }
 }

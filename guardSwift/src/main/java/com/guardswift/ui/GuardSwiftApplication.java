@@ -46,7 +46,6 @@ import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.execution.task.TaskGroup;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
-import com.guardswift.persistence.parse.misc.Message;
 import com.guardswift.persistence.parse.misc.Update;
 import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
@@ -206,7 +205,6 @@ public class GuardSwiftApplication extends InjectingApplication {
         ParseObject.registerSubclass(EventType.class);
         ParseObject.registerSubclass(EventRemark.class);
         ParseObject.registerSubclass(Guard.class);
-        ParseObject.registerSubclass(Message.class);
         ParseObject.registerSubclass(Update.class);
         ParseObject.registerSubclass(Tracker.class);
         ParseObject.registerSubclass(TrackerData.class);
