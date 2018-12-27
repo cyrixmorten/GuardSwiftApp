@@ -90,16 +90,10 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 
         // mAdapter = new AddEventTypeAdapter(getActivity());
         mAdapter = new EventTypeParseAdapter(getActivity(),
-                new ParseQueryAdapter.QueryFactory<EventType>() {
-
-                    @Override
-                    public ParseQuery<EventType> create() {
-                        return new EventTypeQueryBuilder(true)
-                                .matchingIncludes(clientCache.getSelected())
-                                .sortByTimesUsed()
-                                .build();
-                    }
-                });
+                () -> new EventTypeQueryBuilder(true)
+                        .matchingIncludes(clientCache.getSelected())
+                        .sortByTimesUsed()
+                        .build());
 
         mAdapter.addOnQueryLoadListener(new ParseQueryAdapter.OnQueryLoadListener<EventType>() {
             @Override
@@ -136,12 +130,9 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
         new MenuItemBuilder(getContext())
                 .icon(MenuItemIcons.create(getContext(), FontAwesome.Icon.faw_plus_circle))
                 .showAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-                .addToMenu(menu, R.string.add_new, new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        addEventType();
-                        return false;
-                    }
+                .addToMenu(menu, R.string.add_new, menuItem -> {
+                    addEventType();
+                    return false;
                 });
 
         super.onCreateOptionsMenu(menu, inflater);
@@ -180,9 +171,6 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
     public void onListItemClick(ListView l, View v, int position, long id) {
         EventType event = mAdapter.getItem(position);
 
-//        new EventRemark().updateAll(
-//                EventRemark.getQueryBuilder(false).matching(Client.Recent.getSelected()).matching(event)
-//                        .build());
         selectEvent(event);
 
         super.onListItemClick(l, v, position, id);
@@ -218,26 +206,20 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
                     .title(R.string.add_event_type)
                     .content(R.string.add_event_type_desc)
                     .inputType(InputType.TYPE_CLASS_TEXT)
-                    .input(R.string.event, R.string.input_empty, new MaterialDialog.InputCallback() {
-                        @Override
-                        public void onInput(MaterialDialog dialog, CharSequence input) {
-                            if (input.length() > 0) {
-                                final EventType new_type = new EventType();
-                                new_type.setClient(clientCache.getSelected());
-                                new_type.setOwner(ParseUser.getCurrentUser());
-                                new_type.setName(input.toString());
-                                new_type.pinInBackground(new SaveCallback() {
-                                    @Override
-                                    public void done(ParseException e) {
-                                        selectEvent(new_type);
-                                        if (mAdapter != null) {
-                                            mAdapter.loadObjects();
-                                        }
-                                    }
-                                });
+                    .input(R.string.event, R.string.input_empty, (dialog, input) -> {
+                        if (input.length() > 0) {
+                            final EventType new_type = new EventType();
+                            new_type.setClient(clientCache.getSelected());
+                            new_type.setOwner(ParseUser.getCurrentUser());
+                            new_type.setName(input.toString());
+                            new_type.pinInBackground(e -> {
+                                selectEvent(new_type);
+                                if (mAdapter != null) {
+                                    mAdapter.loadObjects();
+                                }
+                            });
 
 
-                            }
                         }
                     }).negativeText(android.R.string.cancel).show();
         }
@@ -270,37 +252,5 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 //        floatingActionButton.show();
     }
 
-    // @Override
-    // public void onViewStateRestored(Bundle savedInstanceState) {
-    // mAdapter.loadObjects();
-    // super.onViewStateRestored(savedInstanceState);
-    // }
-
-    // @OnClick(R.id.addUnique)
-    // public void addUnique(Button button) {
-    //
-    // GenericEditTextDialogFragment addDialog = GenericEditTextDialogFragment
-    // .newInstance(new GenericEditTextDialogInterface() {
-    //
-    // @Override
-    // public void okClicked(final String editTextString) {
-    // final EventType new_type = new EventType();
-    // new_type.setOwner(ParseUser.getCurrentUser());
-    // new_type.setName(editTextString);
-    // new_type.saveEventually();
-    // mAdapter.loadObjects();
-    //
-    // Toast.makeText(
-    // getActivity(),
-    // getString(R.string.successfully_added_var,
-    // editTextString), Toast.LENGTH_SHORT)
-    // .show();
-    // }
-    // }, R.string.add_type);
-    //
-    // getChildFragmentManager().beginTransaction().addToBackStack(null)
-    // .addUnique(addDialog, "addUnique").commit();
-    //
-    // }
 
 }

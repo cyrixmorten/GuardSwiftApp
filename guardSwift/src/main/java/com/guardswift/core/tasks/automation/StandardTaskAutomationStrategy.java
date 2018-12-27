@@ -48,10 +48,10 @@ public class StandardTaskAutomationStrategy implements TaskAutomationStrategy {
     public void automaticDeparture() {
         Context context = GuardSwiftApplication.getInstance();
         TaskController controller = task.getController();
-        if (controller.canPerformAutomaticAction(TaskController.ACTION.RESET, task)) {
+        if (controller.canPerformAutomaticAction(TaskController.ACTION.PENDING, task)) {
             Log.w(TAG, "automaticDeparture " + task.getTaskType() + " " + task.getClientName());
             Sounds.getInstance(context).playNotification(R.raw.departure);
-            controller.performAutomaticAction(TaskController.ACTION.RESET, task);
+            controller.performAutomaticAction(TaskController.ACTION.PENDING, task);
         }
     }
 

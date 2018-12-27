@@ -41,11 +41,6 @@ public class RegularController extends BaseTaskController {
 
         Log.e(TAG, "invoking action: " + action.toString());
 
-        if (!canPerformAction(action, task)) {
-            Log.e(TAG, "unable to apply action to task " + action);
-            return task;
-        }
-
         EventLog.Builder event = null;
 
         switch (action) {
@@ -61,8 +56,12 @@ public class RegularController extends BaseTaskController {
                         .eventCode(EventLog.EventCodes.REGULAR_ARRIVED);
 
 
-                task.setArrived();
-                tasksCache.addArrived(task);
+                if (automatic) {
+                    task.setArrived();
+                    tasksCache.addArrived(task);
+                }
+                
+                task.incrementArrivedCount();
 
                 break;
             case ABORT:
@@ -95,15 +94,15 @@ public class RegularController extends BaseTaskController {
 
                 break;
 
-            case RESET:
+            case PENDING:
 
                 event = new EventLog.Builder(ctx)
-                        .taskPointer(task, ParseTask.EVENT_TYPE.LEAVE)
+                        .taskPointer(task, ParseTask.EVENT_TYPE.PENDING)
                         .event(ctx.getString(R.string.event_left))
                         .automatic(automatic)
-                        .eventCode(EventLog.EventCodes.REGULAR_LEFT);
+                        .eventCode(EventLog.EventCodes.REGULAR_PENDING);
 
-                task.reset();
+                task.setPending();
                 tasksCache.removeArrived(task);
                 break;
             case OPEN_WRITE_REPORT:

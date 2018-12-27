@@ -2,8 +2,8 @@ package com.guardswift.ui.parse.execution;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.CardView;
@@ -20,14 +20,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.AwesomeTextView;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapSize;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
+import com.guardswift.core.ca.location.FusedLocationTrackerService;
+import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
@@ -47,7 +49,7 @@ import com.guardswift.util.OpenLocalPDF;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.parse.GetCallback;
-import com.parse.ParseException;
+import com.parse.Parse;
 import com.parse.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
@@ -56,7 +58,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import bolts.Continuation;
 import bolts.Task;
 import bolts.TaskCompletionSource;
 import butterknife.BindView;
@@ -246,6 +247,11 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         @Override
         public void update(final Context context, final ParseTask task) {
             super.update(context, task);
+
+            if (task.isRegularTask() || task.isRaidTask()) {
+                vBtnPending.setVisibility(View.VISIBLE);
+
+            }
 
             if (task.isAlarmTask()) {
 //                vBtnAborted.setVisibility(View.GONE);
@@ -577,6 +583,8 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         @BindViews({R.id.content_colorBorder_top, R.id.content_colorBorder_bottom})
         List<ImageView> vColorBorders;
 
+        @BindView(R.id.task_state_active)
+        BootstrapButton vBtnPending;
         @BindView(R.id.task_state_arrived)
         BootstrapButton vBtnArrived;
         @BindView(R.id.task_state_accepted)
@@ -656,13 +664,20 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         }
 
+        public void onActionPending(final Context context, final ParseTask task) {
+
+            if (ParseModule.distanceToMeters(task.getPosition()) <= task.getRadius()) {
+                new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.manual_pending, context.getString(R.string.manual_pending_distance, task.getRadius())).show();
+                return;
+            }
+
+            performTaskAction(context, task, ACTION.PENDING);
+        }
+
         public void onActionArrive(final Context context, final ParseTask task) {
 
-            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_arrived, task.getClientName()), (materialDialog, dialogAction) ->
-                    performTaskAction(context, task, ACTION.ARRIVE).onSuccess(task1 -> {
-                        update(context, task1.getResult());
-                        return null;
-                    })).show();
+            new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.manual_arrival, context.getString(R.string.manual_arrival_no_longer_possible)).show();
+
         }
 
         public void onActionAbort(final Context context, ParseTask task) {
@@ -678,10 +693,11 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             super(v);
             ButterKnife.bind(this, v);
 
-            this.vBtnAccepted.setBootstrapSize(DefaultBootstrapSize.LG);
-            this.vBtnArrived.setBootstrapSize(DefaultBootstrapSize.LG);
+            this.vBtnPending.setBootstrapSize(DefaultBootstrapSize.MD);
+            this.vBtnAccepted.setBootstrapSize(DefaultBootstrapSize.MD);
+            this.vBtnArrived.setBootstrapSize(DefaultBootstrapSize.MD);
 //            this.vBtnAborted.setBootstrapSize(DefaultBootstrapSize.LG);
-            this.vBtnFinished.setBootstrapSize(DefaultBootstrapSize.LG);
+            this.vBtnFinished.setBootstrapSize(DefaultBootstrapSize.MD);
 
             setRemoveItemCallback(removeItemCallback);
 
@@ -693,17 +709,8 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             this.cardview.setOnClickListener(view -> onActionOpen(context, task));
 
             this.vBtnAccepted.setOnClickListener(view -> onActionAccept(context, task));
-
+            this.vBtnPending.setOnClickListener(view -> onActionPending(context, task));
             this.vBtnArrived.setOnClickListener(view -> onActionArrive(context, task));
-
-//            this.vBtnAborted.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    onActionAbort(contextWeakReference, task);
-//                }
-//            });
-
-
             this.vBtnFinished.setOnClickListener(view -> onActionFinish(context, task));
 
         }
@@ -780,12 +787,16 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         }
 
         private void updateTaskStateButtons(Context context, ParseTask.TASK_STATE state) {
+            bootstrapActionButtonDefaults(context, this.vBtnPending);
             bootstrapActionButtonDefaults(context, this.vBtnArrived);
 //            bootstrapActionButtonDefaults(contextWeakReference, this.vBtnAborted);
             bootstrapActionButtonDefaults(context, this.vBtnFinished);
 
             int colorRes = getTaskStateColorResource(state);
             switch (state) {
+                case PENDING:
+                    bootstrapActionButtonSelect(context, this.vBtnPending, colorRes);
+                    break;
                 case ARRIVED:
                     bootstrapActionButtonSelect(context, this.vBtnArrived, colorRes);
                     break;
@@ -808,7 +819,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         private void bootstrapActionButtonSelect(Context context, BootstrapButton button, int colorRes) {
             button.setSelected(true);
-            button.setEnabled(false);
+            button.setEnabled(true);
             button.setTextColor(context.getResources().getColor(R.color.bootstrap_gray_lighter));
             button.setBackgroundResource(colorRes);
         }

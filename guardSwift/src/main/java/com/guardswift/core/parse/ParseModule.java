@@ -333,6 +333,12 @@ public class ParseModule {
         return from.distanceTo(to);
     }
 
+    public static float distanceToMeters(ParseGeoPoint targetGeoPoint) {
+        Location lastLocation = LocationModule.Recent.getLastKnownLocation();
+
+        return lastLocation != null ? ParseModule.distanceBetweenMeters(lastLocation, targetGeoPoint) : Float.MAX_VALUE;
+    }
+
     public static float distanceBetweenMeters(Location deviceLocation,
                                               ParseGeoPoint targetGeoPoint) {
         if (deviceLocation == null || targetGeoPoint == null) {

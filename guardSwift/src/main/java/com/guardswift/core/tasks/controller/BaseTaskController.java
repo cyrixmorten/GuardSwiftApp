@@ -16,13 +16,13 @@ public abstract class BaseTaskController implements TaskController {
     private boolean actionAllowedByTaskState(ACTION action, ParseTask task) {
         switch (task.getTaskState()) {
             case PENDING:
-                return action != ACTION.ABORT && action != ACTION.RESET;
+                return action != ACTION.ABORT && action != ACTION.PENDING;
             case ACCEPTED:
                 return action != ACTION.ACCEPT;
             case ARRIVED:
                 return action != ACTION.ARRIVE;
             case ABORTED:
-                return action != ACTION.ABORT && action != ACTION.RESET;
+                return action != ACTION.ABORT && action != ACTION.PENDING;
             case FINISHED:
                 return action != ACTION.FINISH;
         }
