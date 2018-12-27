@@ -452,4 +452,5 @@
     <string name="new_taskgroup_available">Ny kreds tilgængelig\n\nAlle kredse nulstilles en gang i døgnet og det ser ud til at denne kreds er blevet nulstillet siden sidst du loggede på systemet\n\nTryk OK for at skifte til den seneste kreds</string>
     <string name="active">Aktiv</string>
     <string name="id">id</string>
+    <string name="title_tasks_all">Alle opgaver</string>
 </resources>

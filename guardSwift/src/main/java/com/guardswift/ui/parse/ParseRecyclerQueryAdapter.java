@@ -72,11 +72,11 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
 
     private ParseQuery<T> liveQuery;
 
-    public void onAttatch(Context context) {
+    public void onAttach(Context context) {
         this.context = context;
     }
 
-    public void onDetatch() {
+    public void onDetach() {
         this.context = null;
 
         unsubscribeLiveQuery();
@@ -85,7 +85,6 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
 
 
     private final QueryFactory<T> mFactory;
-    private final boolean hasStableIds;
     private final List<T> mItems;
 
     public ParseRecyclerQueryAdapter(final QueryFactory<T> factory) {
@@ -93,7 +92,6 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
         mItems = new ArrayList<>();
         mDataSetListeners = Lists.newCopyOnWriteArrayList();
         mQueryListeners = Lists.newCopyOnWriteArrayList();
-        this.hasStableIds = true;
 
         setHasStableIds(true);
     }
@@ -107,10 +105,6 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
 
     @Override
     public long getItemId(int position) {
-//        if (hasStableIds) {
-//            return position;
-//        }
-//        return super.getItemId(position);
         return getItem(position).getObjectId().hashCode();
     }
 
@@ -129,28 +123,22 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
 
 
 
-    public synchronized void loadObjects() {
+    synchronized void loadObjects() {
         dispatchOnLoading();
         final ParseQuery<T> query = mFactory.create();
-        query.findInBackground(new FindCallback<T>() {
+        query.findInBackground((queriedItems, e) -> {
 
-            @Override
-            public void done(
-                    List<T> queriedItems,
-                    @Nullable ParseException e) {
+            if (queriedItems != null && e == null) {
+                Log.d(TAG, "queriedItems: " + queriedItems.size());
 
-                if (queriedItems != null && e == null) {
-                    Log.d(TAG, "queriedItems: " + queriedItems.size());
-
-                    showResults(queriedItems);
-                }
-
-                if (e != null) {
-                    Log.e(TAG, "Adapter load", e);
-                }
-
-                dispatchOnLoaded(queriedItems, e);
+                showResults(queriedItems);
             }
+
+            if (e != null) {
+                Log.e(TAG, "Adapter load", e);
+            }
+
+            dispatchOnLoaded(queriedItems, e);
         });
 
 //        subscribeLiveQuery(query);
@@ -170,40 +158,34 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
 
         SubscriptionHandling<T> subscriptionHandling = liveQueryClient.subscribe(query);
 
-        subscriptionHandling.handleEvents(new SubscriptionHandling.HandleEventsCallback<T>() {
-            @Override
-            public void onEvents(ParseQuery<T> query, final SubscriptionHandling.Event event, final T object) {
+        subscriptionHandling.handleEvents((query1, event, object) -> {
 
-                Log.d(TAG, "onEvent: " + event.name());
+            Log.d(TAG, "onEvent: " + event.name());
 
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                    switch (event) {
-                        case CREATE: {
-                            addItem(object);
-                            break;
-                        }
-                        case ENTER: {
-                            addItem(object);
-                            break;
-                        }
-                        case UPDATE: {
-                            updateItem(object);
-                            break;
-                        }
-                        case LEAVE: {
-                            removeItem(object);
-                            break;
-                        }
-                        case DELETE: {
-                            removeItem(object);
-                            break;
-                        }
-                    }
-                    }
-                });
+            new Handler(Looper.getMainLooper()).post(() -> {
+            switch (event) {
+                case CREATE: {
+                    addItem(object);
+                    break;
+                }
+                case ENTER: {
+                    addItem(object);
+                    break;
+                }
+                case UPDATE: {
+                    updateItem(object);
+                    break;
+                }
+                case LEAVE: {
+                    removeItem(object);
+                    break;
+                }
+                case DELETE: {
+                    removeItem(object);
+                    break;
+                }
             }
+            });
         });
     }
 

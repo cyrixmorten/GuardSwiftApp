@@ -80,7 +80,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         @BindView(R.id.aTvClock)
         AwesomeTextView iconClock;
 
-        public StaticTaskViewHolder(View v) {
+        StaticTaskViewHolder(View v) {
             super(v, null);
 
             vTimeEnd.setVisibility(View.GONE);
@@ -91,44 +91,35 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             super.onActionOpen(context, task);
 
             if (task.isPending()) {
-                new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.static_guarding_report, context.getString(R.string.begin_static_guarding_at_client, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                        // show indeterminate progress
-                        final MaterialDialog loadingDialog = new CommonDialogsBuilder.MaterialDialogs(context).indeterminate(R.string.report_creating).show();
+                new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.static_guarding_report, context.getString(R.string.begin_static_guarding_at_client, task.getClientName()), (materialDialog, dialogAction) -> {
+                    // show indeterminate progress
+                    final MaterialDialog loadingDialog = new CommonDialogsBuilder.MaterialDialogs(context).indeterminate(R.string.report_creating).show();
 
-                        Guard guard = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().getLoggedIn();
-                        task.setStartedBy(guard);
+                    Guard guard = GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache().getLoggedIn();
+                    task.setStartedBy(guard);
 
-                        task.saveInBackground().continueWith(new Continuation<Void, Object>() {
-                            @Override
-                            public Object then(Task<Void> taskResult) {
-                                Exception error = taskResult.getError();
-                                if (error != null) {
-                                    loadingDialog.cancel();
-                                    new CommonDialogsBuilder.MaterialDialogs(context).missingInternetContent().show();
+                    task.saveInBackground().continueWith(taskResult -> {
+                        Exception error = taskResult.getError();
+                        if (error != null) {
+                            loadingDialog.cancel();
+                            new CommonDialogsBuilder.MaterialDialogs(context).missingInternetContent().show();
 
-                                    new HandleException(context, TAG, "Failed to start static task", error);
-                                    return null;
-                                }
+                            new HandleException(context, TAG, "Failed to start static task", error);
+                            return null;
+                        }
 
-                                task.addReportEntry(context, context.getString(R.string.started), null, new GetCallback<EventLog>() {
-                                    @Override
-                                    public void done(EventLog object, ParseException e) {
-                                        GenericToolbarActivity.start(context,
-                                                context.getString(R.string.title_report),
-                                                task.getClientAddress(),
-                                                ReportEditViewPagerFragment.newInstance(task));
+                        task.addReportEntry(context, context.getString(R.string.started), null, (object, e) -> {
+                            GenericToolbarActivity.start(context,
+                                    context.getString(R.string.title_report),
+                                    task.getClientAddress(),
+                                    ReportEditViewPagerFragment.newInstance(task));
 
-                                        loadingDialog.cancel();
-                                    }
-                                });
-
-                                return null;
-
-                            }
+                            loadingDialog.cancel();
                         });
-                    }
+
+                        return null;
+
+                    });
                 }).show();
             } else {
                 GenericToolbarActivity.start(context,
@@ -141,12 +132,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         @Override
         protected void setupTaskActionButtons(final Context context, final ParseTask task) {
-            this.cardview.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onActionOpen(context, task);
-                }
-            });
+            this.cardview.setOnClickListener(view -> onActionOpen(context, task));
         }
 
         @Override
@@ -182,7 +168,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         TextView vDate;
 
 
-        public AlarmTaskViewHolder(View v, RemoveItemCallback removeItemCallback) {
+        AlarmTaskViewHolder(View v, RemoveItemCallback removeItemCallback) {
             super(v, removeItemCallback);
         }
 
@@ -220,12 +206,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //            }
 
             // arrived
-            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_finished), new MaterialDialog.SingleButtonCallback() {
-                        @Override
-                        public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                            AlarmTaskViewHolder.super.onActionFinish(context, task);
-                        }
-                    }
+            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_finished), (materialDialog, dialogAction) -> AlarmTaskViewHolder.super.onActionFinish(context, task)
             ).show();
 
         }
@@ -235,33 +216,20 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         protected void setupTaskActionButtons(final Context context, final ParseTask task) {
             super.setupTaskActionButtons(context, task);
 
-            vBtnViewReport.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    GenericToolbarActivity.start(context,
-                            context.getString(R.string.title_report),
-                            task.getClient().getFullAddress(),
-                            ReportEditViewPagerFragment.newInstance(task));
-                }
-            });
+            vBtnViewReport.setOnClickListener(view -> GenericToolbarActivity.start(context,
+                    context.getString(R.string.title_report),
+                    task.getClient().getFullAddress(),
+                    ReportEditViewPagerFragment.newInstance(task)));
 
-            vBtnAddNewEvent.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    CreateEventHandlerActivity.start(context, task);
-                }
-            });
+            vBtnAddNewEvent.setOnClickListener(view -> CreateEventHandlerActivity.start(context, task));
 
-            vBtnReportHistory.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient(), ParseTask.TASK_TYPE.ALARM);
-                    GenericToolbarActivity.start(
-                            context,
-                            context.getString(R.string.reports),
-                            task.getClient().getFullAddress(),
-                            fragment);
-                }
+            vBtnReportHistory.setOnClickListener(view -> {
+                Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient(), ParseTask.TASK_TYPE.ALARM);
+                GenericToolbarActivity.start(
+                        context,
+                        context.getString(R.string.reports),
+                        task.getClient().getFullAddress(),
+                        fragment);
             });
 
 //            vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
@@ -272,12 +240,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //            });
 
 
-            vBtnClientContacts.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new CommonDialogsBuilder.MaterialDialogs(context).clientContacts(task.getClient()).show();
-                }
-            });
+            vBtnClientContacts.setOnClickListener(view -> new CommonDialogsBuilder.MaterialDialogs(context).clientContacts(task.getClient()).show());
         }
 
         @Override
@@ -337,12 +300,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                         Button g4spdf = new Button(new ContextThemeWrapper(context, android.R.style.Widget_DeviceDefault_Button_Borderless), null, android.R.style.Widget_DeviceDefault_Button_Borderless);
                         g4spdf.setId(R.id.button_central_pdf);
                         g4spdf.setText(context.getString(R.string.alarm_panels));
-                        g4spdf.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                new OpenLocalPDF(context, "G4S").execute();
-                            }
-                        });
+                        g4spdf.setOnClickListener(view -> new OpenLocalPDF(context, "G4S").execute());
                         vContentFooter.addView(g4spdf);
                     }
                 }
@@ -352,12 +310,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                     Button originalAlarm = new Button(new ContextThemeWrapper(context, android.R.style.Widget_DeviceDefault_Button_Borderless), null, android.R.style.Widget_DeviceDefault_Button_Borderless);
                     originalAlarm.setId(R.id.button_original_alarm_text);
                     originalAlarm.setText(context.getString(R.string.alarm_original_text));
-                    originalAlarm.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.alarm, task.getOriginal()).show();
-                        }
-                    });
+                    originalAlarm.setOnClickListener(view -> new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.alarm, task.getOriginal()).show());
                     vContentFooter.addView(originalAlarm);
                 }
 
@@ -381,7 +334,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         private FragmentManager fragmentManager;
 
-        public RegularTaskViewHolder(View v, RemoveItemCallback removeItemCallback, FragmentManager fragmentManager) {
+        RegularTaskViewHolder(View v, RemoveItemCallback removeItemCallback, FragmentManager fragmentManager) {
             super(v, removeItemCallback);
 
             this.fragmentManager = fragmentManager;
@@ -510,26 +463,23 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             new MaterialDialog.Builder(context)
                     .title(R.string.extra_time_spend)
                     .items(R.array.extra_time_minutes_strings)
-                    .itemsCallbackSingleChoice(0, new MaterialDialog.ListCallbackSingleChoice() {
-                        @Override
-                        public boolean onSelection(MaterialDialog dialog, View view, int index, CharSequence value) {
-                            String[] extra_time_values = context.getResources()
-                                    .getStringArray(
-                                            R.array.extra_time_minutes_values);
-                            int minutes = Integer
-                                    .parseInt(extra_time_values[index]);
-                            if (minutes != 0) {
-                                new EventLog.Builder(context)
-                                        .taskPointer(task, ParseTask.EVENT_TYPE.OTHER)
-                                        .event(context.getString(R.string.event_extra_time))
-                                        .amount(minutes)
-                                        .remarks(value.toString())
-                                        .eventCode(EventLog.EventCodes.REGULAR_EXTRA_TIME).saveAsync();
-                            }
-
-
-                            return true;
+                    .itemsCallbackSingleChoice(0, (dialog, view, index, value) -> {
+                        String[] extra_time_values = context.getResources()
+                                .getStringArray(
+                                        R.array.extra_time_minutes_values);
+                        int minutes = Integer
+                                .parseInt(extra_time_values[index]);
+                        if (minutes != 0) {
+                            new EventLog.Builder(context)
+                                    .taskPointer(task, ParseTask.EVENT_TYPE.OTHER)
+                                    .event(context.getString(R.string.event_extra_time))
+                                    .amount(minutes)
+                                    .remarks(value.toString())
+                                    .eventCode(EventLog.EventCodes.REGULAR_EXTRA_TIME).saveAsync();
                         }
+
+
+                        return true;
                     })
                     .positiveText(android.R.string.ok)
                     .negativeText(android.R.string.cancel)
@@ -540,33 +490,20 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         protected void setupTaskActionButtons(final Context context, final ParseTask task) {
             super.setupTaskActionButtons(context, task);
 
-            vBtnViewReport.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    GenericToolbarActivity.start(context,
-                            context.getString(R.string.title_report),
-                            task.getClientAddress(),
-                            ReportEditViewPagerFragment.newInstance(task));
-                }
-            });
+            vBtnViewReport.setOnClickListener(view -> GenericToolbarActivity.start(context,
+                    context.getString(R.string.title_report),
+                    task.getClientAddress(),
+                    ReportEditViewPagerFragment.newInstance(task)));
 
-            vBtnAddNewEvent.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    CreateEventHandlerActivity.start(context, task);
-                }
-            });
+            vBtnAddNewEvent.setOnClickListener(view -> CreateEventHandlerActivity.start(context, task));
 
-            vBtnReportHistory.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient(), ParseTask.TASK_TYPE.REGULAR);
-                    GenericToolbarActivity.start(
-                            context,
-                            context.getString(R.string.reports),
-                            task.getClientAddress(),
-                            fragment);
-                }
+            vBtnReportHistory.setOnClickListener(view -> {
+                Fragment fragment = ReportHistoryListFragment.newInstance(task.getClient(), ParseTask.TASK_TYPE.REGULAR);
+                GenericToolbarActivity.start(
+                        context,
+                        context.getString(R.string.reports),
+                        task.getClientAddress(),
+                        fragment);
             });
 
 //            vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
@@ -577,12 +514,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //            });
 
 
-            vBtnClientContacts.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new CommonDialogsBuilder.MaterialDialogs(context).clientContacts(task.getClient()).show();
-                }
-            });
+            vBtnClientContacts.setOnClickListener(view -> new CommonDialogsBuilder.MaterialDialogs(context).clientContacts(task.getClient()).show());
         }
 
         public void update(final Context context, final ParseTask task) {
@@ -620,12 +552,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 vInfo.setText(infoText);
 
                 vBtnAddExtraTime.setVisibility(View.VISIBLE);
-                vBtnAddExtraTime.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        extraTimeDialog(context, task);
-                    }
-                });
+                vBtnAddExtraTime.setOnClickListener(view -> extraTimeDialog(context, task));
 
                 setupTaskActionButtons(context, task);
 
@@ -692,7 +619,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         Button vBtnClientContacts;
 
 
-        protected RemoveItemCallback removeItemCallback;
+        RemoveItemCallback removeItemCallback;
 
         public void update(Context context, ParseTask task) {
             tvGuardName.setText((task.getGuard() != null) ? task.getGuard().getName() : "");
@@ -703,12 +630,12 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         }
 
-        protected void expandFooter() {
+        void expandFooter() {
             AnimationHelper.expand(vContentFooter);
             selectedItems.put(getAdapterPosition(), true);
         }
 
-        protected void collapseFooter() {
+        void collapseFooter() {
             AnimationHelper.collapse(vContentFooter);
             selectedItems.delete(getAdapterPosition());
         }
@@ -747,7 +674,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         }
 
 
-        public TaskViewHolder(View v, RemoveItemCallback removeItemCallback) {
+        TaskViewHolder(View v, RemoveItemCallback removeItemCallback) {
             super(v);
             ButterKnife.bind(this, v);
 
@@ -763,26 +690,11 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         protected void setupTaskActionButtons(final Context context, final ParseTask task) {
 
 
-            this.cardview.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onActionOpen(context, task);
-                }
-            });
+            this.cardview.setOnClickListener(view -> onActionOpen(context, task));
 
-            this.vBtnAccepted.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onActionAccept(context, task);
-                }
-            });
+            this.vBtnAccepted.setOnClickListener(view -> onActionAccept(context, task));
 
-            this.vBtnArrived.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onActionArrive(context, task);
-                }
-            });
+            this.vBtnArrived.setOnClickListener(view -> onActionArrive(context, task));
 
 //            this.vBtnAborted.setOnClickListener(new View.OnClickListener() {
 //                @Override
@@ -792,13 +704,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 //            });
 
 
-            this.vBtnFinished.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    onActionFinish(context, task);
-                }
-            });
+            this.vBtnFinished.setOnClickListener(view -> onActionFinish(context, task));
 
         }
 
@@ -814,7 +720,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             final ParseTask.TASK_STATE previousTaskState = task.getTaskState();
             final TaskController taskController = task.getController();
             if (taskController.canPerformAction(action, task)) {
-                updateTaskState(context, previousTaskState, taskController.translatesToState(action));
+                updateTaskState(context, task, previousTaskState, taskController.translatesToState(action));
                 // may perform LDS and should perhaps be done in background somehow
                 ParseTask updatedTask = taskController.performAction(action, task);
 
@@ -832,7 +738,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             updateTaskState(context, state);
         }
 
-        public void updateTaskState(Context context, ParseTask.TASK_STATE toState) {
+        void updateTaskState(Context context, ParseTask.TASK_STATE toState) {
             int color = getTaskStateColor(context, toState);
             updateTaskStateButtons(context, toState);
             for (View border : this.vColorBorders) {
@@ -841,13 +747,13 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             tintBackgroundColor(this.cardview, color, 50);
         }
 
-        public void removeTask() {
+        void removeTask() {
             if (removeItemCallback != null) {
                 removeItemCallback.removeAt(getAdapterPosition());
             }
         }
 
-        public void updateTaskState(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState) {
+        void updateTaskState(Context context, ParseTask task, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState) {
 
             boolean fromActiveState = fromState == ParseTask.TASK_STATE.PENDING || fromState == ParseTask.TASK_STATE.ACCEPTED || fromState == ParseTask.TASK_STATE.ARRIVED;
             boolean toFinishedState = toState == ParseTask.TASK_STATE.FINISHED || toState == ParseTask.TASK_STATE.ABORTED;
@@ -855,18 +761,20 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             boolean fromFinishedState = fromState == ParseTask.TASK_STATE.FINISHED || fromState == ParseTask.TASK_STATE.ABORTED;
             boolean toActiveState = toState == ParseTask.TASK_STATE.PENDING || toState == ParseTask.TASK_STATE.ACCEPTED || toState == ParseTask.TASK_STATE.ARRIVED;
 
-            if (fromActiveState && toFinishedState) {
-                removeTask();
-                return;
-            }
-            if (fromFinishedState && toActiveState) {
-                removeTask();
-                return;
+            if (task.isAlarmTask() || task.isStaticTask()) {
+                if (fromActiveState && toFinishedState) {
+                    removeTask();
+                    return;
+                }
+                if (fromFinishedState && toActiveState) {
+                    removeTask();
+                    return;
+                }
             }
             updateTaskState(context, fromState, toState, false, true);
         }
 
-        public void updateTaskState(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState, boolean isNew, boolean animate) {
+        void updateTaskState(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState, boolean isNew, boolean animate) {
             updateTaskStateColor(context, fromState, toState, isNew, animate);
             updateTaskStateButtons(context, toState);
         }
@@ -1109,13 +1017,10 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         void removeAt(int position);
     }
 
-    private RemoveItemCallback defaultRemoveItemCallback = new RemoveItemCallback() {
-        @Override
-        public void removeAt(int position) {
-            // saw crash reports due to java.lang.ArrayIndexOutOfBoundsException by getAdapterPosition() returning -1
-            if (position >= 0) {
-                removeItemAt(position);
-            }
+    private RemoveItemCallback defaultRemoveItemCallback = position -> {
+        // saw crash reports due to java.lang.ArrayIndexOutOfBoundsException by getAdapterPosition() returning -1
+        if (position >= 0) {
+            removeItemAt(position);
         }
     };
 
@@ -1154,7 +1059,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         return holder;
     }
 
-    public void removeItemAt(int position) {
+    private void removeItemAt(int position) {
         getItems().remove(position);
 
         // TODO RecyclerView bug https://github.com/lucasr/twoway-view/issues/134

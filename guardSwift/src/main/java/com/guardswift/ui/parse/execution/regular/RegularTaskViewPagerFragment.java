@@ -69,8 +69,9 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         fragmentMap = Maps.newLinkedHashMap();
-        fragmentMap.put(getString(R.string.title_tasks_new), ActiveRegularTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
-        fragmentMap.put(getString(R.string.title_tasks_old), FinishedRegularTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
+        fragmentMap.put(getString(R.string.title_tasks_all), RegularAndRaidTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
+        //fragmentMap.put(getString(R.string.title_tasks_new), ActiveRegularTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
+        //fragmentMap.put(getString(R.string.title_tasks_old), FinishedRegularTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
 
         nameOfSelectedTaskGroup = taskGroupStartedCache.getSelected().getName();
 
