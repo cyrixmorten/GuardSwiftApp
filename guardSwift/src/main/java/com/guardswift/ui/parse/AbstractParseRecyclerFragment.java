@@ -3,7 +3,6 @@ package com.guardswift.ui.parse;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -118,7 +117,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
         Log.d(TAG, "onAttach");
         super.onAttach(context);
         if (mAdapter != null) {
-            mAdapter.onAttatch(getActivity());
+            mAdapter.onAttach(getActivity());
         }
     }
 
@@ -127,7 +126,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
         Log.d(TAG, "onDetach");
         super.onDetach();
         if (mAdapter != null) {
-            mAdapter.onDetatch();
+            mAdapter.onDetach();
         }
     }
 
@@ -150,13 +149,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
         mRecycleView.setLayoutManager(llm);
 
         mRecycleView.setRefreshingColorResources(android.R.color.holo_orange_light, android.R.color.holo_blue_light, android.R.color.holo_green_light, android.R.color.holo_red_light);
-        mRecycleView.setRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
-            @Override
-            public void onRefresh() {
-                reloadAdapter();
-            }
-        });
+        mRecycleView.setRefreshListener(this::reloadAdapter);
 
         reloadAdapter();
 
@@ -225,14 +218,6 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
         @Override
         public void onLoading() {
             mLoading = true;
-
-            if (mRecycleView != null) {
-                if (mAdapter != null && mAdapter.getItems().isEmpty()) {
-//                    mRecycleView.showProgress();
-                } else {
-//                    mRecycleView.setRefreshing(true);
-                }
-            }
         }
     };
 
@@ -251,7 +236,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
 
     public void onEventMainThread(UpdateUIEvent ev) {
         if (!mLoading && isRelevantUIEvent(ev)) {
-            mAdapter.notifyDataSetChanged();
+            //mAdapter.notifyDataSetChanged();
         }
     }
 

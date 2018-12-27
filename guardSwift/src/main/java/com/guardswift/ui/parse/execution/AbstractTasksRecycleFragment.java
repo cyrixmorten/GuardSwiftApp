@@ -44,23 +44,23 @@ public abstract class AbstractTasksRecycleFragment extends AbstractParseRecycler
         }
 
         if (obj instanceof ParseTask) {
-            ParseTask task = (ParseTask) obj;
-
-            switch (ev.getAction()) {
-                case CREATE: {
-                    getAdapter().addItem(task);
-                    break;
-                }
-                case UPDATE: {
-                    getAdapter().updateItem(task);
-                    break;
-                }
-                case DELETE: {
-                    getAdapter().removeItem(task);
-                    break;
-                }
-            }
-            return false;
+            isRelevant = true;
+//            ParseTask task = (ParseTask) obj;
+//
+//            switch (ev.getAction()) {
+//                case CREATE: {
+//                    getAdapter().addItem(task);
+//                    break;
+//                }
+//                case UPDATE: {
+//                    getAdapter().updateItem(task);
+//                    break;
+//                }
+//                case DELETE: {
+//                    getAdapter().removeItem(task);
+//                    break;
+//                }
+//            }
         }
 
         Log.d(TAG, "Abstract isRelevantUIEvent " + isRelevant);

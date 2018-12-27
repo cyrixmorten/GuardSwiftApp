@@ -54,10 +54,10 @@ public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapt
 	}
 
 	@Override
-	public void onDetatch() {
+	public void onDetach() {
 		ClientAdapter.clientClicked = null;
 
-		super.onDetatch();
+		super.onDetach();
 	}
 
 	@Override
