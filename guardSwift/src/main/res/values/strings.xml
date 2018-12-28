@@ -67,6 +67,7 @@
     <string name="action_set_arrived">Meld ankommet</string>
     <string name="action_set_finished">Meld afsluttet</string>
     <string name="event_accept">Accepter</string>
+    <string name="event_pending">Afventer</string>
     <string name="event_arrived">Ankommet</string>
     <string name="event_finished">Afsluttet</string>
     <string name="event_aborted">Afbrudt</string>
@@ -452,4 +453,10 @@
     <string name="new_taskgroup_available">Ny kreds tilgængelig\n\nAlle kredse nulstilles en gang i døgnet og det ser ud til at denne kreds er blevet nulstillet siden sidst du loggede på systemet\n\nTryk OK for at skifte til den seneste kreds</string>
     <string name="active">Aktiv</string>
     <string name="id">id</string>
+    <string name="title_tasks_all">Alle opgaver</string>
+    <string name="manual_arrival">Manuel ankomst</string>
+    <string name="manual_arrival_no_longer_possible">Det er ikke længere muligt manuelt at melde ankommet.\n\nGå til \'Rapport\' og vælg \'Tilføj ankomst\' øverst i højre hjørne for manuelt at skrive tidspunkt for ankomst til rapporten.</string>
+    <string name="manual_pending">Afvente position</string>
+    <string name="manual_pending_distance">Kan ikke sætte opgaven i afvente position.\n\nSkal mindst %1$d meter væk fra kunden.</string>
+    <string name="add_arrival">Tilføj ankomst</string>
 </resources>

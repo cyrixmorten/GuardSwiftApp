@@ -40,13 +40,8 @@ public class EventTypeParseAdapter extends ParseQueryAdapter<EventType> {
 
 
 		return v;
-
 	}
 
-	@Override
-	public EventType getItem(int index) {
-		return super.getItem(index);
-	}
 
 	@Override
 	public View getNextPageView(View v, ViewGroup parent) {

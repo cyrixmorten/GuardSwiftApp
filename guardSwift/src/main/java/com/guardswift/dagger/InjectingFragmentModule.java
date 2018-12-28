@@ -56,6 +56,7 @@ import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.ui.parse.execution.alarm.FinishedAlarmsFragment;
 import com.guardswift.ui.parse.execution.regular.ActiveRegularTasksFragment;
 import com.guardswift.ui.parse.execution.regular.FinishedRegularTasksFragment;
+import com.guardswift.ui.parse.execution.regular.RegularAndRaidTasksFragment;
 import com.guardswift.ui.parse.execution.regular.RegularTaskViewPagerFragment;
 import com.guardswift.ui.parse.execution.statictask.ActiveStaticTasksFragment;
 import com.guardswift.ui.parse.execution.statictask.FinishedStaticTasksFragment;
@@ -109,6 +110,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		FinishedStaticTasksFragment.class,
 		// -- Regular
 		RegularTaskViewPagerFragment.class,
+		RegularAndRaidTasksFragment.class,
         ActiveRegularTasksFragment.class,
 		FinishedRegularTasksFragment.class,
 		// Add event

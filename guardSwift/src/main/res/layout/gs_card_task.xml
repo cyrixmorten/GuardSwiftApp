@@ -49,8 +49,19 @@
                 android:clickable="true"
                 android:maxLines="1"
                 android:text="@string/event_accept"
-                bootstrap:bootstrapSize="lg"
+                bootstrap:bootstrapSize="md"
                 android:visibility="gone"/>
+
+
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/task_state_active"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:maxLines="1"
+                android:text="@string/event_pending"
+                bootstrap:bootstrapSize="md" />
 
             <com.beardedhen.androidbootstrap.BootstrapButton
                 android:id="@+id/task_state_arrived"
@@ -60,7 +71,8 @@
                 android:clickable="true"
                 android:maxLines="1"
                 android:text="@string/event_arrived"
-                bootstrap:bootstrapSize="lg" />
+                bootstrap:bootstrapSize="md" />
+
 
 
             <!--<com.beardedhen.androidbootstrap.BootstrapButton-->
@@ -71,7 +83,7 @@
                 <!--android:clickable="true"-->
                 <!--android:maxLines="1"-->
                 <!--android:text="@string/event_aborted"-->
-                <!--bootstrap:bootstrapSize="lg" />-->
+                <!--bootstrap:bootstrapSize="md" />-->
 
             <com.beardedhen.androidbootstrap.BootstrapButton
                 android:id="@+id/task_state_finished"
@@ -81,7 +93,7 @@
                 android:clickable="true"
                 android:maxLines="1"
                 android:text="@string/event_finished"
-                bootstrap:bootstrapSize="lg" />
+                bootstrap:bootstrapSize="md" />
 
         </LinearLayout>
 

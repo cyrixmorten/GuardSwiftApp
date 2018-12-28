@@ -1,17 +1,10 @@
 package com.guardswift.ui.parse.execution.regular;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.common.collect.Maps;
@@ -20,16 +13,13 @@ import com.guardswift.core.exceptions.LogError;
 import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
-import com.guardswift.persistence.parse.execution.task.TaskGroup;
 import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
 import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
-import com.guardswift.ui.drawer.MessagesDrawer;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
-import com.mikepenz.actionitembadge.library.ActionItemBadge;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 
@@ -69,11 +59,8 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
 
     Map<String, Fragment> fragmentMap = Maps.newLinkedHashMap();
 
-    private MessagesDrawer messagesDrawer;
-    private MenuItem messagesMenu;
-
-    private String nameOfSelectedTaskgroup;
-    private MaterialDialog newTaskgroupAvailableDialog;
+    private String nameOfSelectedTaskGroup;
+    private MaterialDialog newTaskGroupAvailableDialog;
     private MaterialDialog progressDialog;
 
     public RegularTaskViewPagerFragment() {
@@ -82,10 +69,11 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         fragmentMap = Maps.newLinkedHashMap();
-        fragmentMap.put(getString(R.string.title_tasks_new), ActiveRegularTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
-        fragmentMap.put(getString(R.string.title_tasks_old), FinishedRegularTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
+        fragmentMap.put(getString(R.string.title_tasks_all), RegularAndRaidTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
+        //fragmentMap.put(getString(R.string.title_tasks_new), ActiveRegularTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
+        //fragmentMap.put(getString(R.string.title_tasks_old), FinishedRegularTasksFragment.newInstance(getContext(), taskGroupStartedCache.getSelected()));
 
-        nameOfSelectedTaskgroup = taskGroupStartedCache.getSelected().getName();
+        nameOfSelectedTaskGroup = taskGroupStartedCache.getSelected().getName();
 
         super.onCreate(savedInstanceState);
     }
@@ -93,7 +81,7 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     @Override
     public void onAttach(Context context) {
 
-        newTaskgroupAvailableDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).ok(R.string.update_data, getString(R.string.new_taskgroup_available), (dialog, which) -> {
+        newTaskGroupAvailableDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).ok(R.string.update_data, getString(R.string.new_taskgroup_available), (dialog, which) -> {
 
             progressDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
 
@@ -130,7 +118,7 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
         }
 
         try {
-            TaskGroupStarted pinnedTaskGroup = new TaskGroupStartedQueryBuilder(true).matchingName(nameOfSelectedTaskgroup).build().getFirst();
+            TaskGroupStarted pinnedTaskGroup = new TaskGroupStartedQueryBuilder(true).matchingName(nameOfSelectedTaskGroup).build().getFirst();
 
             if (!pinnedTaskGroup.equals(taskGroupStartedCache.getSelected()) && getActivity() instanceof MainActivity) {
 
@@ -161,8 +149,8 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
                 Date currentCreatedAt = taskGroupStartedCache.getSelected().getCreatedAt();
 
                 if (new DateTime(latestCreatedAt).isAfter(new DateTime(currentCreatedAt))) {
-                    if (!newTaskgroupAvailableDialog.isShowing()) {
-                        newTaskgroupAvailableDialog.show();
+                    if (!newTaskGroupAvailableDialog.isShowing()) {
+                        newTaskGroupAvailableDialog.show();
                     }
                 }
             }
@@ -172,103 +160,6 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     }
 
 
-    @Override
-    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-        Log.i(TAG, "onCreateOptionsMenu");
-
-        inflater.inflate(R.menu.taskgroup, menu);
-
-        messagesMenu = menu.findItem(R.id.menu_messages);
-        messagesMenu.setVisible(false);
-
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-
-    private void updateMessageMenuBadge(int messagesCount, final boolean hide) {
-        Log.i(TAG, "updateMessageMenuBadge: " + messagesCount + " " + hide);
-
-        if (messagesCount == 0) {
-            // Hide the badge https://github.com/mikepenz/Android-ActionItemBadge/issues/9
-            messagesCount = Integer.MIN_VALUE;
-        }
-
-        if (getActivity() != null && getContext() != null && messagesMenu != null) {
-
-//                IconicsDrawable messagesIcon = new IconicsDrawable(getContext())
-//                        .icon(GoogleMaterial.Icon.gmd_email)
-//                        .color(Color.DKGRAY)
-//                        .sizeDp(24);
-
-            final int finalMessagesCount = messagesCount;
-
-            new Handler(getContext().getMainLooper()).postAtFrontOfQueue(() -> {
-                ActionItemBadge.update(getActivity(), messagesMenu, ContextCompat.getDrawable(getContext(), R.drawable.ic_forum_black_24dp), ActionItemBadge.BadgeStyles.RED, finalMessagesCount);
-                messagesMenu.setVisible(!hide);
-            });
-
-        }
-    }
-
-
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_messages) {
-            if (messagesDrawer != null) {
-                messagesDrawer.open();
-                ActionItemBadge.update(messagesMenu, Integer.MIN_VALUE);
-            }
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        Log.i(TAG, "onViewCreated");
-        super.onViewCreated(view, savedInstanceState);
-
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity) {
-            messagesDrawer = ((MainActivity) activity).getMessagesDrawer();
-
-            loadMessages();
-        }
-    }
-
-    private void loadMessages() {
-        Log.i(TAG, "loadMessages");
-
-        if (messagesDrawer == null) {
-            return;
-        }
-
-        messagesDrawer.loadMessages(getMessagesGroupId()).continueWith(task -> {
-            if (task.isFaulted()) {
-                LogError.log(TAG, "Failed to load messages", task.getError());
-
-                updateMessageMenuBadge(0, true);
-
-                return null;
-            }
-
-            updateMessageMenuBadge(messagesDrawer.getNewMessagesCount(), false);
-
-            return null;
-        });
-    }
-
-    private String getMessagesGroupId() {
-        TaskGroupStarted taskGroupStarted = taskGroupStartedCache.getSelected();
-        if (taskGroupStarted != null) {
-            TaskGroup taskGroup = taskGroupStarted.getTaskGroup();
-            if (taskGroup != null) {
-                return taskGroup.getObjectId();
-            }
-        }
-        return "";
-    }
 
     @Override
     public void onDestroyView() {
@@ -276,8 +167,6 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
 
         Log.i(TAG, "onDestroyView");
 
-        messagesDrawer = null;
-        messagesMenu = null;
         fragmentMap = null;
 
     }

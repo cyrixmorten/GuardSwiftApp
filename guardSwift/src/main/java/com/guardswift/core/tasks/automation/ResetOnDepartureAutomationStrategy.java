@@ -80,7 +80,7 @@ public class ResetOnDepartureAutomationStrategy implements TaskAutomationStrateg
     public void automaticDeparture() {
         Log.w(TAG, "automaticDeparture " + task.getTaskType() + " " + task.getClientName());
         TaskController controller = task.getController();
-        controller.performAutomaticAction(TaskController.ACTION.RESET, task);
+        controller.performAutomaticAction(TaskController.ACTION.PENDING, task);
 
         triggerTimer.stop();
     }

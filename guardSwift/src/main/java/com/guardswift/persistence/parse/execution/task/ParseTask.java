@@ -65,7 +65,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
     public enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINISHED}
 
-    public enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER, LEAVE}
+    public enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER, PENDING}
 
     public static final String taskGroup = "taskGroup";
     public static final String taskGroupStarted = "taskGroupStarted";
@@ -433,16 +433,14 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public void setArrived() {
         setStatus(STATUS.ARRIVED);
         setGuardCurrent();
+    }
+
+    public void incrementArrivedCount() {
         increment(ParseTask.timesArrived);
     }
 
     public void deleteArrival() {
         put(ParseTask.timesArrived, getTimesArrived() - 1);
-    }
-
-    public void reset() {
-        setGuard(null);
-        setPending();
     }
 
     public void setAborted() {
@@ -491,41 +489,40 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return taskGroupStarted != null && taskGroupStarted.isDataAvailable() ? taskGroupStarted.getCreatedAt() : new Date();
     }
 
+    private LocalDateTime getAdjustedTime(Date hourAndMinute, DateTimeZone dtz) {
+
+
+        LocalDateTime taskGroupStartTime = new LocalDateTime(getTaskGroupStartedDate(), dtz);
+        LocalDateTime hourAndMinuteDateTime = new LocalDateTime(hourAndMinute, dtz);
+
+        // use task date hour and minute components
+        LocalDateTime time =  new LocalDateTime(dtz)
+                .withDayOfMonth(taskGroupStartTime.getDayOfMonth())
+                .withHourOfDay(hourAndMinuteDateTime.getHourOfDay())
+                .withMinuteOfHour(hourAndMinuteDateTime.getMinuteOfHour());
+
+        // In case of time savings, add +1 hour
+        // https://stackoverflow.com/questions/5451152/how-to-handle-jodatime-illegal-instant-due-to-time-zone-offset-transition
+        if (dtz.isLocalDateTimeGap(time)) {
+            time = time.plusHours(1);
+        }
+
+
+        if (hourAndMinuteDateTime.getHourOfDay() <= taskGroupStartTime.getHourOfDay()) {
+            time = time.plusDays(1);
+        }
+
+        return time;
+    }
+
+
     public boolean isAfterScheduledStartTime() {
         if (isRegularTask() || isRaidTask()) {
             try {
                 DateTimeZone dtz = DateTimeZone.getDefault();
+                LocalDateTime timeStart = getAdjustedTime(getTimeStart(), dtz);
 
-                LocalDateTime taskGroupCreation = new LocalDateTime(getTaskGroupStartedDate(), dtz);
-                LocalDateTime plannedTimeStart = new LocalDateTime(getTimeStart(), dtz);
-                // use task date hour and minute components
-                LocalDateTime timeStart = new LocalDateTime(dtz)
-                        .withDayOfMonth(taskGroupCreation.getDayOfMonth())
-                        .withHourOfDay(plannedTimeStart.getHourOfDay())
-                        .withMinuteOfHour(plannedTimeStart.getMinuteOfHour());
-
-                // In case of time savings, add +1 hour
-                // https://stackoverflow.com/questions/5451152/how-to-handle-jodatime-illegal-instant-due-to-time-zone-offset-transition
-                if (dtz.isLocalDateTimeGap(timeStart)) {
-                    timeStart = timeStart.plusHours(1);
-                }
-
-                boolean startingAfterMidnight = timeStart.getHourOfDay() <= taskGroupCreation.getHourOfDay();
-
-                Log.d(TAG, "startingAfterMidnight: " + taskGroupCreation.getHourOfDay() + " " + timeStart.getHourOfDay() + " = " + startingAfterMidnight);
-
-                DateTime now = DateTime.now(dtz);
-
-                // are we passing midnight
-                if (startingAfterMidnight) {
-                    timeStart = timeStart.plusDays(1);
-                }
-
-                boolean withinTimeStart = now.isAfter(timeStart.toDateTime());
-
-                Log.d(TAG, "withinTimeStart: " + withinTimeStart);
-
-                return withinTimeStart;
+                return DateTime.now(dtz).isAfter(timeStart.toDateTime());
             } catch (Exception e) {
                 new HandleException(TAG, "isAfterScheduledStartTime", e);
             }
@@ -538,38 +535,9 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         if (isRegularTask() || isRaidTask()) {
             try {
                 DateTimeZone dtz = DateTimeZone.getDefault();
+                LocalDateTime timeEnd = getAdjustedTime(getTimeEnd(), dtz);
 
-                LocalDateTime taskGroupCreation = new LocalDateTime(getTaskGroupStartedDate(), dtz);
-                LocalDateTime plannedTimeEnd = new LocalDateTime(getTimeEnd(), dtz);
-
-                // use task date hour and minute components
-                LocalDateTime timeEnd = new LocalDateTime(dtz)
-                        .withDayOfMonth(taskGroupCreation.getDayOfMonth())
-                        .withHourOfDay(plannedTimeEnd.getHourOfDay())
-                        .withMinuteOfHour(plannedTimeEnd.getMinuteOfHour());
-
-                // In case of time savings, add +1 hour
-                // https://stackoverflow.com/questions/5451152/how-to-handle-jodatime-illegal-instant-due-to-time-zone-offset-transition
-                if (dtz.isLocalDateTimeGap(timeEnd)) {
-                    timeEnd = timeEnd.plusHours(1);
-                }
-
-                boolean endingAfterMidnight = timeEnd.getHourOfDay() <= taskGroupCreation.getHourOfDay();
-
-                Log.d(TAG, "endingAfterMidnight: " + taskGroupCreation.getHourOfDay() + " " + timeEnd.getHourOfDay() + " = " + endingAfterMidnight);
-
-                DateTime now = DateTime.now(dtz);
-
-                // are we passing midnight
-                if (endingAfterMidnight) {
-                    timeEnd = timeEnd.plusDays(1);
-                }
-
-                boolean withinTimeEnd = now.isBefore(timeEnd.toDateTime());
-
-                Log.d(TAG, "withinTimeEnd: " + withinTimeEnd);
-
-                return withinTimeEnd;
+                return DateTime.now(dtz).isBefore(timeEnd.toDateTime());
             } catch (Exception e) {
                 new HandleException(TAG, "isBeforeScheduledEndTime", e);
             }

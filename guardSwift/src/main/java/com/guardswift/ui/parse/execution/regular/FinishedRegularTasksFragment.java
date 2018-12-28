@@ -17,18 +17,18 @@ public class FinishedRegularTasksFragment extends AbstractTasksRecycleFragment {
 
 	protected static final String TAG = FinishedRegularTasksFragment.class.getSimpleName();
 
-	public static FinishedRegularTasksFragment newInstance(Context context, TaskGroupStarted circuitStarted) {
+	public static FinishedRegularTasksFragment newInstance(Context context, TaskGroupStarted taskGroupStarted) {
 
         GuardSwiftApplication.getInstance()
                 .getCacheFactory()
                 .getTaskGroupStartedCache()
-                .setSelected(circuitStarted);
+                .setSelected(taskGroupStarted);
 
         return new FinishedRegularTasksFragment();
 	}
 
     @Inject
-    TaskGroupStartedCache circuitStartedCache;
+    TaskGroupStartedCache taskGroupStarted;
 
 	public FinishedRegularTasksFragment() {
 	}
@@ -36,18 +36,12 @@ public class FinishedRegularTasksFragment extends AbstractTasksRecycleFragment {
 
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
-        return new ParseQueryAdapter.QueryFactory<ParseTask>() {
-
-            @Override
-            public ParseQuery<ParseTask> create() {
-                return
-                        new RegularRaidTaskQueryBuilder(false).
-                        matchingEnded(circuitStartedCache.getSelected()).
-                        isRunToday().
-                        sortBy(RegularRaidTaskQueryBuilder.SORTBY_ID).
-                        build();
-            }
-        };
+        return () ->
+                new RegularRaidTaskQueryBuilder(false).
+                    matchingEnded(taskGroupStarted.getSelected()).
+                    isRunToday().
+                    sortBy(RegularRaidTaskQueryBuilder.SORTBY_ID).
+                    build();
     }
 
 

@@ -1,6 +1,7 @@
 package com.guardswift.ui.parse;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
@@ -73,7 +74,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.viewpager_slidingtab_fab,
                 container, false);
@@ -89,7 +90,7 @@ public abstract class AbstractTabsViewPagerFragment extends InjectingFragment {
             public void onPageSelected(int position) {
                 Fragment fragment = mPagerAdapter.getItem(mViewPager.getCurrentItem());
                 for (Fragment frag : mPagerAdapter.getFragments()) {
-                    if (frag != null && frag instanceof FragmentVisibilityListener) {
+                    if (frag instanceof FragmentVisibilityListener) {
                         if (frag.equals(fragment)) {
                             Log.w(TAG, "Fragment became visible: " + position);
                             ((FragmentVisibilityListener)frag).fragmentBecameVisible();
