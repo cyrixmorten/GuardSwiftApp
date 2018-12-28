@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.tasks.controller.TaskController;
@@ -36,7 +37,11 @@ import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
+import org.joda.time.DateTime;
+
 import java.io.File;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -70,6 +75,8 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
     private MenuItem pdfMenu;
 
+    private MaterialDialog progressDialog;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         task = ParseTasksCache.getLastSelected();
@@ -94,6 +101,8 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
         menu.findItem(R.id.menu_add_arrival).setOnMenuItemClickListener((menuItem) -> {
             task.getController().performAction(TaskController.ACTION.ARRIVE, task);
+
+            showProgressDialog();
             return true;
         });
 
@@ -149,12 +158,47 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         }
     }
 
+    private void showProgressDialog() {
+        progressDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
+    }
+
+    private void dissmissProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+    }
+
+    private void updateArrivalTime(EventLog eventLog) {
+        final DateTime timestamp = new DateTime();
+
+        RadialTimePickerDialogFragment timePickerDialog = new RadialTimePickerDialogFragment()
+                .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
+                .setOnTimeSetListener((dialog, hourOfDay, minute) -> {
+                    final Calendar cal = Calendar.getInstance();
+                    cal.setTime(new Date());
+                    cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                    cal.set(Calendar.MINUTE, minute);
+
+
+                    eventLog.setDeviceTimestamp(cal.getTime());
+
+                    eventLog.saveEventuallyAndNotify();
+                })
+                .setThemeDark()
+                .setForced24hFormat();
+
+        timePickerDialog.show(getChildFragmentManager(), "FRAG_TAG_ARRIVAL_TIME_PICKER");
+    }
+
     @Override
     protected boolean isRelevantUIEvent(UpdateUIEvent ev) {
         boolean isEventLog = ev.getObject() instanceof EventLog;
 
 
         if (isEventLog) {
+            dissmissProgressDialog();
+
             EventLog eventLog = (EventLog) ev.getObject();
 
             if (eventLog.getTask().equals(this.task)) {
@@ -162,6 +206,10 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
                     case CREATE: {
                         getAdapter().addItem(eventLog);
                         setPDFMenuEnabled(true);
+
+                        if (eventLog.isArrivalEvent()) {
+                            updateArrivalTime(eventLog);
+                        }
                         break;
                     }
                     case UPDATE: {

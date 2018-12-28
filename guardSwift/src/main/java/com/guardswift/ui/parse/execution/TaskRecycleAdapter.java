@@ -870,7 +870,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                     color = R.color.bootstrap_brand_danger;
                     break;
                 case FINISHED:
-                    color = R.color.bootstrap_gray_light;
+                    color = R.color.bootstrap_brand_danger;
                     break;
             }
             return color;

@@ -236,7 +236,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
 
     }
 
-    public synchronized void showResults(List<T> results) {
+    private synchronized void showResults(List<T> results) {
         mItems.clear();
         mItems.addAll(results);
         Collections.sort(mItems);
@@ -266,7 +266,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
         }
     }
 
-    protected synchronized void fireOnDataSetChanged() {
+    private synchronized void fireOnDataSetChanged() {
         for (int i = 0; i < mDataSetListeners.size(); i++) {
             mDataSetListeners.get(i).onDataSetChanged();
         }
@@ -289,11 +289,9 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
         }
     }
 
-    public synchronized void removeOnQueryLoadListener(
+    synchronized void removeOnQueryLoadListener(
             OnQueryLoadListener<T> listener) {
-        if (mQueryListeners.contains(listener)) {
-            mQueryListeners.remove(listener);
-        }
+        mQueryListeners.remove(listener);
     }
 
     private synchronized void dispatchOnLoading() {
