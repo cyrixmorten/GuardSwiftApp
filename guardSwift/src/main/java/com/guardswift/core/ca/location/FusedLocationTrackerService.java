@@ -79,7 +79,6 @@ public class FusedLocationTrackerService extends InjectingService {
     private Location mLastUIUpdateLocation;
     private Tracker tracker;
 
-
     @Inject
     ParseTasksCache tasksCache;
     @Inject
@@ -207,14 +206,14 @@ public class FusedLocationTrackerService extends InjectingService {
     private void uploadLocation(Location location) {
         tracker.appendLocation(getApplicationContext(), location);
 
-        Guard guard = guardCache.getLoggedIn();
-        if (guard != null) {
-
-            TrackerData trackerData = TrackerData.create(location, guardCache.getLoggedIn());
-            guard.setPosition(location);
-
-            ParseObject.saveAllInBackground(Lists.newArrayList(guard, trackerData));
-        }
+//        Guard guard = guardCache.getLoggedIn();
+//        if (guard != null) {
+//
+//            TrackerData trackerData = TrackerData.create(location, guardCache.getLoggedIn());
+//            guard.setPosition(location);
+//
+//            ParseObject.saveAllInBackground(Lists.newArrayList(guard, trackerData));
+//        }
     }
 
 
