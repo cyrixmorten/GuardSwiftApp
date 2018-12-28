@@ -83,7 +83,7 @@ public class EventLog extends ExtendedParseObject {
         public static final int REGULAR_ARRIVED = 101;
         public static final int REGULAR_FINISHED = 102;
         public static final int REGULAR_ABORT = 103;
-        public static final int REGULAR_LEFT = 108;
+        public static final int REGULAR_PENDING = 108;
         public static final int REGULAR_OTHER = 104;
         public static final int REGULAR_EXTRA_TIME = 105;
 

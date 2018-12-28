@@ -51,8 +51,12 @@ public class RaidController extends BaseTaskController {
                         .location(task.getFullAddress())
                         .eventCode(EventLog.EventCodes.RAID_ARRIVED);
 
-                task.setArrived();
-                tasksCache.addArrived(task);
+                if (automatic) {
+                    task.setArrived();
+                    tasksCache.addArrived(task);
+                }
+
+                task.incrementArrivedCount();
 
                 break;
             case FINISH:
@@ -69,10 +73,10 @@ public class RaidController extends BaseTaskController {
                 tasksCache.removeArrived(task);
 
                 break;
-            case RESET:
+            case PENDING:
 
                 tasksCache.removeArrived(task);
-                task.reset();
+                task.setPending();
 
                 break;
             case OPEN_WRITE_REPORT:

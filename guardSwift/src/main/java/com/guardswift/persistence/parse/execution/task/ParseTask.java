@@ -65,7 +65,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
     public enum TASK_STATE {PENDING, ACCEPTED, ARRIVED, ABORTED, FINISHED}
 
-    public enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER, LEAVE}
+    public enum EVENT_TYPE {BEGIN, ARRIVE, ABORT, CHECKPOINT, FINISH, DEPARTURE, ACCEPT, GEOFENCE_ENTER, GEOFENCE_EXIT, GEOFENCE_ENTER_GPS, GEOFENCE_EXIT_GPS, OTHER, PENDING}
 
     public static final String taskGroup = "taskGroup";
     public static final String taskGroupStarted = "taskGroupStarted";
@@ -433,16 +433,14 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public void setArrived() {
         setStatus(STATUS.ARRIVED);
         setGuardCurrent();
+    }
+
+    public void incrementArrivedCount() {
         increment(ParseTask.timesArrived);
     }
 
     public void deleteArrival() {
         put(ParseTask.timesArrived, getTimesArrived() - 1);
-    }
-
-    public void reset() {
-        setGuard(null);
-        setPending();
     }
 
     public void setAborted() {

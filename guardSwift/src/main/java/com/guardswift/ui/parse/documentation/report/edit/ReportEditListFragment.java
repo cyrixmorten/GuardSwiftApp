@@ -13,6 +13,7 @@ import android.view.View;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
+import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
@@ -29,6 +30,7 @@ import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventH
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.view.DownloadReport;
 import com.guardswift.util.GSIntents;
+import com.guardswift.util.ToastHelper;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
@@ -90,18 +92,17 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
         inflater.inflate(R.menu.task_report, menu);
 
+        menu.findItem(R.id.menu_add_arrival).setOnMenuItemClickListener((menuItem) -> {
+            task.getController().performAction(TaskController.ACTION.ARRIVE, task);
+            return true;
+        });
+
         pdfMenu = menu.findItem(R.id.menu_pdf);
-        pdfMenu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-                new DownloadReport(getContext()).execute(task, new DownloadReport.CompletedCallback() {
-                    @Override
-                    public void done(File file, Exception e) {
-                        GSIntents.openPDF(getContext(), file);
-                    }
-                });
-                return false;
-            }
+        pdfMenu.setOnMenuItemClickListener(menuItem -> {
+
+            new DownloadReport(getContext()).execute(task, (file, e) -> GSIntents.openPDF(getContext(), file));
+
+            return true;
         });
 
         super.onCreateOptionsMenu(menu, inflater);
@@ -109,17 +110,12 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
     @Override
     protected ParseQueryAdapter.QueryFactory<EventLog> createNetworkQueryFactory() {
-        return new ParseQueryAdapter.QueryFactory<EventLog>() {
-            @Override
-            public ParseQuery<EventLog> create() {
-                return new EventLogQueryBuilder(false)
-                        .matching(task)
-                        .matching(task.getTaskGroupStarted())
-                        .orderByDescendingTimestamp()
-                        .whereIsReportEntry()
-                        .build();
-            }
-        };
+        return () -> new EventLogQueryBuilder(false)
+                .matching(task)
+                .matching(task.getTaskGroupStarted())
+                .orderByDescendingTimestamp()
+                .whereIsReportEntry()
+                .build();
     }
 
     @Override
@@ -191,28 +187,22 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         this.fab = floatingActionButton;
 
         fab.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_note_add_white_18dp));
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ParseTask task = ParseTasksCache.getLastSelected();
+        fab.setOnClickListener(view -> {
+            ParseTask task = ParseTasksCache.getLastSelected();
 
-                if (task.isStaticTask()) {
-                    final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
-                    task.addReportEntry(context, "", null, new GetCallback<EventLog>() {
-                        @Override
-                        public void done(EventLog eventLog, ParseException e) {
-                            if (e != null) {
-                                new HandleException(TAG, "Create new static report entry", e);
-                            }
+            if (task.isStaticTask()) {
+                final MaterialDialog dialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
+                task.addReportEntry(context, "", null, (eventLog, e) -> {
+                    if (e != null) {
+                        new HandleException(TAG, "Create new static report entry", e);
+                    }
 
-                            UpdateEventHandlerActivity.newInstance(getContext(), eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS);
+                    UpdateEventHandlerActivity.newInstance(getContext(), eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS);
 
-                            dialog.dismiss();
-                        }
-                    });
-                } else {
-                    CreateEventHandlerActivity.start(getContext(), task);
-                }
+                    dialog.dismiss();
+                });
+            } else {
+                CreateEventHandlerActivity.start(getContext(), task);
             }
         });
     }
@@ -220,12 +210,9 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
 
     private void showFloatingActionButton(long delay) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (fab != null && fragmentVisible) {
-                    fab.show();
-                }
+        new Handler().postDelayed(() -> {
+            if (fab != null && fragmentVisible) {
+                fab.show();
             }
         }, delay);
     }
