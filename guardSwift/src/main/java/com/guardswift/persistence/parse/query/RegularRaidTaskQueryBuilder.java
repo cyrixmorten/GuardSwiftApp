@@ -35,7 +35,8 @@ public class RegularRaidTaskQueryBuilder extends ParseQueryBuilder<ParseTask> {
 
     @Override
     public ParseQuery<ParseTask> build() {
-        query.include(ParseTask.taskGroupStarted);
+        query.include(ParseTask.taskGroup); // to get reset time
+        query.include(ParseTask.taskGroupStarted); // may not be needed
         query.include(ParseTask.client);
         query.include(ParseTask.client + "." + Client.contacts);
         query.include(ParseTask.client + "." + Client.roomLocations);
