@@ -11,7 +11,6 @@ import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.helpers.RecyclerViewClickListener;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
-import com.guardswift.ui.parse.data.client.details.ClientDetailsViewpagerFragment;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
@@ -68,9 +67,7 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
                     // Custom click handler
                     onClientSelectedListener.clientSelected(client);
                 }
-                else {
-                    GenericToolbarActivity.start(getContext(), client.getName(), client.getFullAddress(), ClientDetailsViewpagerFragment.newInstance(client));
-                }
+
             }
         });
     }

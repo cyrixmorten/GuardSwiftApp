@@ -1,7 +1,0 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_description" android:title="Runderings beskrivelse" android:icon="@android:drawable/ic_input_add"/>
-    <item android:id="@+id/menu_client" android:title="Kunde information" android:icon="@android:drawable/ic_input_add"/>
-    <!--<group android:id="@+id/menu_helpgroup">-->
-        <!--<item android:id="@+id/menu_help" android:title="Hjælp" android:icon="@android:drawable/ic_menu_help"/>-->
-    <!--</group>-->
-</menu>

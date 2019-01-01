@@ -1,0 +1,113 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:bootstrap="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="vertical"
+        android:padding="@dimen/small_padding"
+        tools:ctx="com.guardswift.ui.activity.MainActivity">
+
+        <Button
+            android:id="@+id/button_choose_client"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/choose_client"/>
+
+        <LinearLayout
+            android:id="@+id/layout_task_form"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/walking_or_driving"/>
+
+            <RadioGroup
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/micro_padding">
+
+                <RadioButton
+                    android:id="@+id/radio_button_walking"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/walking"/>
+
+                <RadioButton
+                    android:id="@+id/radio_button_driving"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/driving"/>
+
+            </RadioGroup>
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/planned_week_days"/>
+
+            <LinearLayout
+                android:id="@+id/layout_week_days"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/micro_padding"
+                android:orientation="vertical">
+
+
+            </LinearLayout>
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/planned_timespan_desc"/>
+
+            <Button
+                android:id="@+id/button_time_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/earliest_time"/>
+
+            <Button
+                android:id="@+id/button_time_end"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/latest_time"/>
+
+            <TextView
+                style="@style/TextAppearance.AppCompat.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/extra_task_expire_date"/>
+
+            <Button
+                android:id="@+id/button_expire_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/expire_date"/>
+
+        </LinearLayout>
+
+        <com.beardedhen.androidbootstrap.BootstrapButton
+            android:id="@+id/button_create_task"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/create_task"
+            bootstrap:bootstrapBrand="primary"
+            bootstrap:bootstrapSize="lg"
+            bootstrap:roundedCorners="true" />
+
+    </LinearLayout>
+
+</ScrollView>
