@@ -89,36 +89,6 @@ public class TaskGroupStarted extends ExtendedParseObject{
     }
 
 
-    public void incrementExtras() {
-        put(hasExtras, true);
-        increment(extrasCount);
-        saveEventually();
-    }
-
-    // public List<DistrictWatch> getDistrictWatches() {
-    // return getSet(districtWatches);
-    // }
-
-    // public boolean isChecklistStartConfirmed() {
-    // return has(checklistStartConfirmed);
-    // }
-    //
-    // public boolean isChecklistEndConfirmed() {
-    // return has(checklistEndConfirmed);
-    // }
-    //
-    // public void confirmChecklistStart(List<String> checklist) {
-    // put(checklistStartConfirmed, checklist);
-    // }
-    //
-    // public void confirmChecklistEnd(List<String> checklist) {
-    // put(checklistEndConfirmed, checklist);
-    // }
-    //
-    // public void setName(String name) {
-    // put(CircuitStarted.name, name);
-    // }
-
     public ParseTask.TASK_TYPE getTaskType() {
         return ParseTask.TASK_TYPE.REGULAR;
     }
@@ -127,104 +97,16 @@ public class TaskGroupStarted extends ExtendedParseObject{
         return getString(name);
     }
 
-    // public void setOwner(ParseObject owner) {
-    // put(CircuitStarted.owner, owner);
-    // }
 
     public ParseObject getOwner() {
         return getParseObject(owner);
     }
 
-    // public void setGuard(Guard guard) {
-    // put(CircuitStarted.guard, guard);
-    // }
-
-    //
-    // public Guard getGuard() {
-    // return (Guard) getParseObject(guard);
-    // }
-
-    // public void setCircuit(Circuit taskGroup) {
-    // put(CircuitStarted.taskGroup, taskGroup);
-    // put(CircuitStarted.districtWatches, taskGroup.getDistrictWatches());
-    // }
 
     public TaskGroup getTaskGroup() {
         return (TaskGroup) getParseObject(taskGroup);
     }
 
-    // public void setTimeStartedNow() {
-    // put(CircuitStarted.timeStarted, new Date());
-    // }
 
-    // public void setTimeStarted(Date date) {
-    // put(CircuitStarted.timeStarted, date);
-    // }
-
-    public Date getTimeStarted() {
-        return getDate(timeStarted);
-    }
-
-    // public void setTimeEndedNow() {
-    // put(CircuitStarted.timeEnded, new Date());
-    // }
-
-    public Date getTimeEnded() {
-        return getDate(timeEnded);
-    }
-
-    public void incrementEventCount() {
-        if (!has(eventCount)) {
-            put(TaskGroupStarted.eventCount, 1);
-            return;
-        }
-        increment(TaskGroupStarted.eventCount);
-    }
-
-    // public void setTimeStart(int hour, int minute) {
-    // put(CircuitStarted.timeStartHour, hour);
-    // put(CircuitStarted.timeStartMinute, minute);
-    // }
-    //
-    // public void setTimeEnd(int hour, int minute) {
-    // put(CircuitStarted.timeEndHour, hour);
-    // put(CircuitStarted.timeEndMinute, minute);
-    // }
-    //
-    // public int getTimeStartHour() {
-    // return getInt(CircuitStarted.timeEndHour);
-    // }
-    //
-    // public void setTimeStartString(String timeStartString) {
-    // put(CircuitStarted.timeStartString, timeStartString);
-    // }
-    //
-    // public String getTimeStartString() {
-    // return getString(CircuitStarted.timeStartString);
-    // }
-    //
-    // public void setTimeEndString(String timeEndString) {
-    // put(CircuitStarted.timeEndString, timeEndString);
-    // }
-    //
-    // public String getTimeEndString() {
-    // return getString(CircuitStarted.timeEndString);
-    // }
-    //
-    // public void setTimeStartSortable(int timeStartSortable) {
-    // put(CircuitStarted.timeStartSortable, timeStartSortable);
-    // }
-    //
-    // public int getTimeStartSortable() {
-    // return getInt(timeStartSortable);
-    // }
-    //
-    // public void setTimeEndSortable(int timeEndSortable) {
-    // put(CircuitStarted.timeEndSortable, timeEndSortable);
-    // }
-    //
-    // public int getTimeEndSortable() {
-    // return getInt(timeEndSortable);
-    // }
 
 }

@@ -269,6 +269,10 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return getTaskType().equals(TASK_TYPE.STATIC);
     }
 
+    public TaskGroup getTaskGroup() {
+        return (TaskGroup) getParseObject(ParseTask.taskGroup);
+    }
+
 
     public TaskGroupStarted getTaskGroupStarted() {
         return (TaskGroupStarted) getParseObject(ParseTask.taskGroupStarted);
@@ -483,20 +487,20 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return getStatus().equals(STATUS.FINISHED);
     }
 
-    private Date getTaskGroupStartedDate() {
-        TaskGroupStarted taskGroupStarted = getTaskGroupStarted();
+    private Date getTaskGroupResetDate() {
+        TaskGroup taskGroup = getTaskGroup();
 
-        return taskGroupStarted != null && taskGroupStarted.isDataAvailable() ? taskGroupStarted.getCreatedAt() : new Date();
+        return taskGroup != null && taskGroup.isDataAvailable() ? taskGroup.getAdjustedResetDate() : new Date();
     }
 
     private LocalDateTime getAdjustedTime(Date hourAndMinute, DateTimeZone dtz) {
 
 
-        LocalDateTime taskGroupStartTime = new LocalDateTime(getTaskGroupStartedDate(), dtz);
+        LocalDateTime taskGroupResetTime = new LocalDateTime(getTaskGroupResetDate(), dtz);
         LocalDateTime hourAndMinuteDateTime = new LocalDateTime(hourAndMinute, dtz);
 
         // use task date hour and minute components
-        LocalDateTime time = taskGroupStartTime
+        LocalDateTime time = taskGroupResetTime
                 .withHourOfDay(hourAndMinuteDateTime.getHourOfDay())
                 .withMinuteOfHour(hourAndMinuteDateTime.getMinuteOfHour());
 
@@ -506,7 +510,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
             time = time.plusHours(1);
         }
 
-        if (hourAndMinuteDateTime.getHourOfDay() <= taskGroupStartTime.getHourOfDay()) {
+        if (hourAndMinuteDateTime.getHourOfDay() <= taskGroupResetTime.getHourOfDay()) {
             time = time.plusDays(1);
         }
 
