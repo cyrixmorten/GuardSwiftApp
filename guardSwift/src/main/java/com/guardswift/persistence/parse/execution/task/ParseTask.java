@@ -496,8 +496,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         LocalDateTime hourAndMinuteDateTime = new LocalDateTime(hourAndMinute, dtz);
 
         // use task date hour and minute components
-        LocalDateTime time =  new LocalDateTime(dtz)
-                .withDayOfMonth(taskGroupStartTime.getDayOfMonth())
+        LocalDateTime time = taskGroupStartTime
                 .withHourOfDay(hourAndMinuteDateTime.getHourOfDay())
                 .withMinuteOfHour(hourAndMinuteDateTime.getMinuteOfHour());
 
@@ -506,7 +505,6 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         if (dtz.isLocalDateTimeGap(time)) {
             time = time.plusHours(1);
         }
-
 
         if (hourAndMinuteDateTime.getHourOfDay() <= taskGroupStartTime.getHourOfDay()) {
             time = time.plusDays(1);
