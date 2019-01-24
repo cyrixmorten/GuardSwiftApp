@@ -2,6 +2,7 @@ package com.guardswift.ui.parse;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -96,7 +97,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
         }
     }
 
-    private void reloadAdapter() {
+    protected void reloadAdapter() {
         if (mAdapter != null) {
             if (GuardSwiftApplication.getInstance().isBootstrapInProgress()) {
                 Log.w(TAG, "reloadAdapter: application is bootstrapping");
@@ -132,7 +133,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_recycle_tasks,
@@ -171,8 +172,8 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
         return mAdapter;
     }
 
-    protected void setReloadOnResume(boolean reloadOnResume) {
-        this.reloadOnResume = reloadOnResume;
+    protected void setReloadOnResume() {
+        this.reloadOnResume = true;
     }
 
     @Override

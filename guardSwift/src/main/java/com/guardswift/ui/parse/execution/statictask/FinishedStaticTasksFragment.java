@@ -16,7 +16,7 @@ public class FinishedStaticTasksFragment extends AbstractTasksRecycleFragment {
 	}
 
 	public FinishedStaticTasksFragment() {
-        this.setReloadOnResume(true);
+        this.setReloadOnResume();
     }
 
 

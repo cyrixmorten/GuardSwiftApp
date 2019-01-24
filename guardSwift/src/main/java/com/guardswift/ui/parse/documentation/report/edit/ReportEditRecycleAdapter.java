@@ -1,15 +1,10 @@
 package com.guardswift.ui.parse.documentation.report.edit;
 
-import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
@@ -24,8 +19,6 @@ import com.parse.ParseQueryAdapter;
 import org.joda.time.DateTime;
 
 import java.lang.ref.WeakReference;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Calendar;
 
 import static android.view.View.GONE;
@@ -39,11 +32,11 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
 
     private static final String TAG = ReportEditRecycleAdapter.class.getSimpleName();
 
-    public static class ReportViewHolder extends RecyclerView.ViewHolder {
+    static class ReportViewHolder extends RecyclerView.ViewHolder {
 
-        public EventLogCard eventLogCard;
+        EventLogCard eventLogCard;
 
-        public ReportViewHolder(EventLogCard eventLogCard) {
+        ReportViewHolder(EventLogCard eventLogCard) {
             super(eventLogCard);
 
             this.eventLogCard = eventLogCard;
@@ -53,7 +46,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
 
     private WeakReference<FragmentActivity> activityWeakReference;
 
-    public ReportEditRecycleAdapter(FragmentActivity activity, ParseQueryAdapter.QueryFactory<EventLog> queryFactory) {
+    ReportEditRecycleAdapter(FragmentActivity activity, ParseQueryAdapter.QueryFactory<EventLog> queryFactory) {
         super(queryFactory);
         this.activityWeakReference = new WeakReference<>(activity);
     }
@@ -114,117 +107,71 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
         }
 
 
-        eventLogCard.onEventClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_TYPE);
-            }
-        });
+        eventLogCard.onEventClickListener(view -> UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_TYPE));
 
 
-        eventLogCard.onAmountClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View view) {
-                new CommonDialogsBuilder.BetterPicks(activity.getSupportFragmentManager())
-                        .enterEventAmount(eventLog.getEvent(),
-                                new NumberPickerDialogFragment.NumberPickerDialogHandlerV2() {
-                                    @Override
-                                    public void onDialogNumberSet(int reference, BigInteger number, double decimal, boolean isNegative, BigDecimal fullNumber) {
-                                        // update locally
-                                        eventLog.setAmount(number.intValue());
-                                        // update card
-                                        eventLogCard.setEventLog(eventLog);
-                                        // save online
-                                        eventLog.saveEventuallyAndNotify();
-                                    }
-                                })
-                        .show();
-            }
-        });
+        eventLogCard.onAmountClickListener(view -> new CommonDialogsBuilder.BetterPicks(activity.getSupportFragmentManager())
+                .enterEventAmount(eventLog.getEvent(),
+                        (reference, number, decimal, isNegative, fullNumber) -> {
+                            // update locally
+                            eventLog.setAmount(number.intValue());
+                            // update card
+                            eventLogCard.setEventLog(eventLog);
+                            // save online
+                            eventLog.saveEventuallyAndNotify();
+                        })
+                .show());
 
-        eventLogCard.onPeopleClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_PEOPLE);
-            }
-        });
+        eventLogCard.onPeopleClickListener(view -> UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_PEOPLE));
 
-        eventLogCard.onLocationsClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_LOCATIONS);
-            }
-        });
+        eventLogCard.onLocationsClickListener(view -> UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_LOCATIONS));
 
-        eventLogCard.onDeleteClickListener(new View.OnClickListener()
+        eventLogCard.onDeleteClickListener(view -> new CommonDialogsBuilder.MaterialDialogs(activity).okCancel(R.string.delete, activity.getString(R.string.confirm_delete, eventLog.getSummaryString()), (materialDialog, dialogAction) -> {
 
-                                           {
-                                               @Override
-                                               public void onClick(View view) {
-                                                   new CommonDialogsBuilder.MaterialDialogs(activity).okCancel(R.string.delete, activity.getString(R.string.confirm_delete, eventLog.getSummaryString()), new MaterialDialog.SingleButtonCallback() {
-                                                       @Override
-                                                       public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                    int position1 = holder.getAdapterPosition();
+                    getItems().remove(position1);
+                    if (position1 > 0) {
+                        notifyItemRemoved(position1);
+                    } else {
+                        notifyDataSetChanged();
+                    }
 
-                                                           int position = holder.getAdapterPosition();
-                                                           getItems().remove(position);
-                                                           if (position > 0) {
-                                                               notifyItemRemoved(position);
-                                                           } else {
-                                                               notifyDataSetChanged();
-                                                           }
+                    if (eventLog.isArrivalEvent() && eventLog.getTask() != null) {
+                        ParseTask task = eventLog.getTask();
+                        task.deleteArrival();
+                        task.saveEventuallyAndNotify();
+                    }
 
-                                                           if (eventLog.isArrivalEvent() && eventLog.getTask() != null) {
-                                                               ParseTask task = eventLog.getTask();
-                                                               task.deleteArrival();
-                                                               task.saveEventuallyAndNotify();
-                                                           }
-
-                                                           eventLog.deleteEventually();
-                                                       }
-                                                   }).show();
-                                               }
-                                           }
+                    eventLog.deleteEventually();
+                }).show()
 
         );
 
-        eventLogCard.onTimestampClickListener(new View.OnClickListener()
+        eventLogCard.onTimestampClickListener(view -> {
+            final DateTime timestamp = new DateTime(eventLog.getDeviceTimestamp());
 
-                                              {
-                                                  @Override
-                                                  public void onClick(View view) {
-                                                      final DateTime timestamp = new DateTime(eventLog.getDeviceTimestamp());
-
-                                                      RadialTimePickerDialogFragment timePickerDialog = new RadialTimePickerDialogFragment()
-                                                              .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
-                                                              .setOnTimeSetListener(new RadialTimePickerDialogFragment.OnTimeSetListener() {
-                                                                  @Override
-                                                                  public void onTimeSet(RadialTimePickerDialogFragment dialog, int hourOfDay, int minute) {
-                                                                      final Calendar cal = Calendar.getInstance();
-                                                                      cal.setTime(timestamp.toDate());
-                                                                      cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                                                                      cal.set(Calendar.MINUTE, minute);
-                                                                      // update locally
-                                                                      eventLog.setDeviceTimestamp(cal.getTime());
-                                                                      // update card
-                                                                      eventLogCard.setEventLog(eventLog);
-                                                                      // update online
-                                                                      eventLog.saveEventuallyAndNotify();
-                                                                  }
-                                                              })
-                                                              .setThemeDark()
-                                                              .setForced24hFormat();
-                                                      timePickerDialog.show(activity.getSupportFragmentManager(), "FRAG_TAG_TIME_PICKER");
-                                                  }
-                                              }
+            RadialTimePickerDialogFragment timePickerDialog = new RadialTimePickerDialogFragment()
+                    .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
+                    .setOnTimeSetListener((dialog, hourOfDay, minute) -> {
+                        final Calendar cal = Calendar.getInstance();
+                        cal.setTime(timestamp.toDate());
+                        cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        cal.set(Calendar.MINUTE, minute);
+                        // update locally
+                        eventLog.setDeviceTimestamp(cal.getTime());
+                        // update card
+                        eventLogCard.setEventLog(eventLog);
+                        // update online
+                        eventLog.saveEventuallyAndNotify();
+                    })
+                    .setThemeDark()
+                    .setForced24hFormat();
+            timePickerDialog.show(activity.getSupportFragmentManager(), "FRAG_TAG_TIME_PICKER");
+        }
 
         );
 
-        eventLogCard.onRemarksClickListener(new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View view) {
-                                                    UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS);
-                                                }
-                                            }
+        eventLogCard.onRemarksClickListener(view -> UpdateEventHandlerActivity.newInstance(activity, eventLog, UpdateEventHandler.REQUEST_EVENT_REMARKS)
         );
     }
 }

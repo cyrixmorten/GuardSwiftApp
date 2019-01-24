@@ -2,7 +2,6 @@ package com.guardswift.ui.parse.documentation.report.create.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.text.InputType;
 import android.util.Log;
@@ -13,7 +12,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -33,12 +31,11 @@ import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHand
 import com.guardswift.util.Device;
 import com.guardswift.util.StringUtil;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.parse.ParseException;
-import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -62,8 +59,7 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
         return fragment;
     }
 
-    public AddEventPeopleFragment() {
-    }
+    public AddEventPeopleFragment() {}
 
     @Inject
     ClientCache clientCache;
@@ -128,12 +124,9 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
         new MenuItemBuilder(getContext())
                 .icon(MenuItemIcons.create(getContext(), FontAwesome.Icon.faw_plus_circle))
                 .showAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-                .addToMenu(menu, R.string.add_new, new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
-                        addPerson();
-                        return false;
-                    }
+                .addToMenu(menu, R.string.add_new, menuItem -> {
+                    addPerson();
+                    return false;
                 });
 
 
@@ -151,32 +144,24 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
     public void onActivityCreated(Bundle savedState) {
         super.onActivityCreated(savedState);
 
-        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-                                           final int people_index, long arg3) {
-                new MaterialDialog.Builder(getActivity())
-                        .title(R.string.action)
-                        .items(R.array.edit_delete)
-                        .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
-                            @Override
-                            public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
-                                switch (which) {
-                                    case 0:
-                                        performEdit(people_index);
-                                        break;
-                                    case 1:
-                                        performDelete(people_index);
-                                        break;
-                                }
-                                return true;
-                            }
-                        })
-                        .alwaysCallSingleChoiceCallback()
-                        .show();
-                return true;
-            }
+        getListView().setOnItemLongClickListener((arg0, arg1, people_index, arg3) -> {
+            new MaterialDialog.Builder(getActivity())
+                    .title(R.string.action)
+                    .items(R.array.edit_delete)
+                    .itemsCallbackSingleChoice(-1, (dialog, view, which, text) -> {
+                        switch (which) {
+                            case 0:
+                                performEdit(people_index);
+                                break;
+                            case 1:
+                                performDelete(people_index);
+                                break;
+                        }
+                        return true;
+                    })
+                    .alwaysCallSingleChoiceCallback()
+                    .show();
+            return true;
         });
     }
 
@@ -186,14 +171,11 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
         new MaterialDialog.Builder(getActivity())
                 .title(R.string.edit)
                 .inputType(InputType.TYPE_CLASS_TEXT)
-                .input(null, person.getName(), new MaterialDialog.InputCallback() {
-                    @Override
-                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        String editTextString = input.toString();
-                        if (!editTextString.isEmpty()) {
-                            person.setName(editTextString);
-                            saveClient();
-                        }
+                .input(null, person.getName(), (dialog, input) -> {
+                    String editTextString = input.toString();
+                    if (!editTextString.isEmpty()) {
+                        person.setName(editTextString);
+                        saveClient();
                     }
                 }).negativeText(android.R.string.cancel).show();
     }
@@ -219,15 +201,12 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
                 .title(R.string.add_person)
                 .content(R.string.new_person_example)
                 .inputType(InputType.TYPE_CLASS_TEXT)
-                .input(R.string.new_person, R.string.input_empty, new MaterialDialog.InputCallback() {
-                    @Override
-                    public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
-                        String editTextString = input.toString();
-                        if (!editTextString.isEmpty()) {
-                            Person person = Person.create(editTextString.trim());
-                            mClient.addPerson(person);
-                            saveClient();
-                        }
+                .input(R.string.new_person, R.string.input_empty, (dialog, input) -> {
+                    String editTextString = input.toString();
+                    if (!editTextString.isEmpty()) {
+                        Person person = Person.create(editTextString.trim());
+                        mClient.addPerson(person);
+                        saveClient();
                     }
                 }).negativeText(android.R.string.cancel).show();
     }
@@ -239,16 +218,13 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
         }
 
 
-        mClient.saveEventuallyAndNotify(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e != null) {
-                    Toast.makeText(getActivity(), getString(R.string.error_an_error_occured), Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                updatePeople();
+        mClient.saveEventuallyAndNotify(e -> {
+            if (e != null) {
+                Toast.makeText(getActivity(), getString(R.string.error_an_error_occured), Toast.LENGTH_LONG).show();
+                return;
             }
+
+            updatePeople();
         });
 
     }
@@ -262,17 +238,17 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
     }
 
     private void updateSelections() {
-        String people = "";
+        StringBuilder people = new StringBuilder();
 
         SparseBooleanArray checked = getListView().getCheckedItemPositions();
         for (int i = 0; i < getListView().getCount(); i++) {
             if (checked.get(i)) {
-                people += all_options.get(i) + ", ";
+                people.append(all_options.get(i)).append(", ");
             }
         }
-        people = StringUtil.removeLast(people, ",").trim();
+        people = new StringBuilder(StringUtil.removeLast(people.toString(), ",").trim());
 
-        ((AddEventHandler) getActivity()).setPeople(people);
+        ((AddEventHandler) Objects.requireNonNull(getActivity())).setPeople(people.toString());
     }
 
     private void resetSelections() {
@@ -339,12 +315,7 @@ public class AddEventPeopleFragment extends InjectingListFragment implements Eve
     @Override
     public void updateFloatingActionButton(Context context, FloatingActionButton floatingActionButton) {
         floatingActionButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_person_add_white_18dp));
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addPerson();
-            }
-        });
+        floatingActionButton.setOnClickListener(view -> addPerson());
         floatingActionButton.show();
     }
 }

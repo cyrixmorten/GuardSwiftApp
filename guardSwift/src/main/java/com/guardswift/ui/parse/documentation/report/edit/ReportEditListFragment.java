@@ -37,12 +37,11 @@ import org.joda.time.DateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
 public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventLog, ReportEditRecycleAdapter.ReportViewHolder> implements UpdateFloatingActionButton, FragmentVisibilityListener {
-
-    private static final int ADD_EVENT_RESULT_CODE = 200;
 
     public static ReportEditListFragment newInstance(ParseTask task) {
 
@@ -244,7 +243,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
                     dialog.dismiss();
                 });
             } else {
-                CreateEventHandlerActivity.start(getContext(), task);
+                CreateEventHandlerActivity.start(Objects.requireNonNull(getContext()), task);
             }
         });
     }

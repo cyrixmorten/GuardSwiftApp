@@ -1,5 +1,6 @@
 package com.guardswift.ui.parse.data.client;
 
+import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
@@ -48,27 +49,26 @@ public class ClientListFragment extends AbstractParseRecyclerFragment<Client, Cl
 
     @Override
     protected ParseQueryAdapter.QueryFactory<Client> createNetworkQueryFactory() {
-        return new ParseQueryAdapter.QueryFactory<Client>() {
-            @Override
-            public ParseQuery<Client> create() {
-                return new ClientQueryBuilder(false).notAutomatic().sort(ClientListFragment.this.sortBy).build();
-            }
-        };
+        return () -> new ClientQueryBuilder(false)
+                    .notAutomatic().sort(ClientListFragment.this.sortBy).build();
     }
 
     @Override
     protected ParseRecyclerQueryAdapter<Client, ClientAdapter.ClientViewHolder> createRecycleAdapter() {
-        return new ClientAdapter(createNetworkQueryFactory(), new RecyclerViewClickListener() {
-            @Override
-            public void recyclerViewListClicked(View v, int position) {
-                Client client = getAdapter().getItem(position);
+        return new ClientAdapter(createNetworkQueryFactory(), (v, position) -> {
+            Client client = getAdapter().getItem(position);
 
-                if (onClientSelectedListener != null) {
-                    // Custom click handler
-                    onClientSelectedListener.clientSelected(client);
-                }
-
+            if (onClientSelectedListener != null) {
+                // Custom click handler
+                onClientSelectedListener.clientSelected(client);
             }
+
+            // TODO make optional from arguments
+            Activity activity = this.getActivity();
+            if (activity instanceof GenericToolbarActivity) {
+                activity.finish();
+            }
+
         });
     }
 

@@ -25,7 +25,7 @@ public class CommonDialogsBuilder {
             this.fragmentManager = fragmentManager;
         }
 
-        public NumberPickerBuilder enterEventAmount(String eventType, NumberPickerDialogFragment.NumberPickerDialogHandlerV2 numberPickerDialogHandler) {
+        public NumberPickerBuilder enterEventAmount(String labelText, NumberPickerDialogFragment.NumberPickerDialogHandlerV2 numberPickerDialogHandler) {
 
     //        String eventName = eventType.getName().toLowerCase().substring(0, 8);
     //        eventName += (eventName.length() == 7) ? "&#8230;" : "";
@@ -34,7 +34,7 @@ public class CommonDialogsBuilder {
                     .setFragmentManager(fragmentManager)
                     .setStyleResId(R.style.BetterPickersDialogFragment_Light)
                     .addNumberPickerDialogHandler(numberPickerDialogHandler)
-                    .setLabelText(eventType.toLowerCase())
+                    .setLabelText(labelText.toLowerCase())
                     .setPlusMinusVisibility(View.INVISIBLE)
                     .setDecimalVisibility(View.INVISIBLE);
         }

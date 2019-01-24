@@ -83,19 +83,6 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
     }
 
     @Override
-    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
-
-        inflater.inflate(R.menu.taskgroup, menu);
-
-        menu.findItem(R.id.menu_add_extra_task).setOnMenuItemClickListener((menuItem) -> {
-            GenericToolbarActivity.start(getContext(), R.string.extra_task, AddExtraTaskFragment.newInstance());
-            return true;
-        });
-
-
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-    @Override
     public void onAttach(Context context) {
 
         newTaskGroupAvailableDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).ok(R.string.update_data, getString(R.string.new_taskgroup_available), (dialog, which) -> {

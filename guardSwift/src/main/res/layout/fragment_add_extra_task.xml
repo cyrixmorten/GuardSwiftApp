@@ -1,101 +1,149 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:bootstrap="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:bootstrap="http://schemas.android.com/apk/res-auto">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:animateLayoutChanges="true"
-        android:orientation="vertical"
-        android:padding="@dimen/small_padding"
-        tools:ctx="com.guardswift.ui.activity.MainActivity">
-
-        <Button
-            android:id="@+id/button_choose_client"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/choose_client"/>
+        android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/layout_task_form"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/small_padding"
             android:orientation="vertical">
 
-            <TextView
-                style="@style/TextAppearance.AppCompat.Caption"
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/button_choose_taskgroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/walking_or_driving"/>
+                android:layout_margin="@dimen/mini_padding"
+                android:text="@string/choose_taskgroup"
+                bootstrap:bootstrapBrand="regular"
+                bootstrap:bootstrapSize="lg"
+                bootstrap:roundedCorners="true" />
 
-            <RadioGroup
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/button_choose_client"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/mini_padding"
+                android:text="@string/choose_client"
+                bootstrap:bootstrapBrand="regular"
+                bootstrap:bootstrapSize="lg"
+                bootstrap:roundedCorners="true" />
+
+            <com.beardedhen.androidbootstrap.BootstrapButtonGroup
+                android:id="@+id/button_group_task_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:padding="@dimen/small_padding"
+                bootstrap:bootstrapBrand="primary"
+                bootstrap:bootstrapSize="lg"
+                bootstrap:buttonMode="radio"
+                bootstrap:roundedCorners="true"
+                bootstrap:showOutline="true">
+
+                <com.beardedhen.androidbootstrap.BootstrapButton
+                    android:id="@+id/button_type_regular"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:tag="REGULAR"
+                    android:text="@string/walking"
+                    bootstrap:bootstrapBrand="primary"
+                    bootstrap:bootstrapSize="lg"
+                    bootstrap:roundedCorners="true"
+                    bootstrap:showOutline="true" />
+
+                <com.beardedhen.androidbootstrap.BootstrapButton
+                    android:id="@+id/button_type_raid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:tag="RAID"
+                    android:text="@string/driving"
+                    bootstrap:bootstrapSize="lg"
+                    bootstrap:roundedCorners="true"
+                    bootstrap:showOutline="true" />
+
+            </com.beardedhen.androidbootstrap.BootstrapButtonGroup>
+
+            <com.beardedhen.androidbootstrap.BootstrapButtonGroup
+                android:id="@+id/button_group_week_days"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/micro_padding">
+                android:orientation="vertical"
+                android:paddingStart="@dimen/extra_large_padding"
+                android:paddingTop="@dimen/small_padding"
+                android:paddingEnd="@dimen/extra_large_padding"
+                android:paddingBottom="@dimen/small_padding"
+                bootstrap:bootstrapBrand="primary"
+                bootstrap:bootstrapSize="lg"
+                bootstrap:buttonMode="checkbox"
+                bootstrap:roundedCorners="true"
+                bootstrap:showOutline="true">
 
-                <RadioButton
-                    android:id="@+id/radio_button_walking"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="@string/walking"/>
+                <!-- Week day button generated by code-->
 
-                <RadioButton
-                    android:id="@+id/radio_button_driving"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/driving"/>
-
-            </RadioGroup>
+            </com.beardedhen.androidbootstrap.BootstrapButtonGroup>
 
             <TextView
                 style="@style/TextAppearance.AppCompat.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/planned_week_days"/>
+                android:text="@string/number_of_supervisions_per_day" />
 
-            <LinearLayout
-                android:id="@+id/layout_week_days"
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/button_supervisions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/micro_padding"
-                android:orientation="vertical">
-
-
-            </LinearLayout>
+                android:layout_margin="@dimen/mini_padding"
+                android:text="@string/number_of_supervisions"
+                bootstrap:bootstrapSize="lg"
+                bootstrap:roundedCorners="true" />
 
             <TextView
                 style="@style/TextAppearance.AppCompat.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/planned_timespan_desc"/>
+                android:text="@string/planned_timespan_desc" />
 
-            <Button
+            <com.beardedhen.androidbootstrap.BootstrapButton
                 android:id="@+id/button_time_start"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/earliest_time"/>
+                android:layout_margin="@dimen/mini_padding"
+                android:text="@string/earliest_time"
+                bootstrap:bootstrapSize="lg"
+                bootstrap:roundedCorners="true" />
 
-            <Button
+            <com.beardedhen.androidbootstrap.BootstrapButton
                 android:id="@+id/button_time_end"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/latest_time"/>
+                android:layout_margin="@dimen/mini_padding"
+                android:text="@string/latest_time"
+                bootstrap:bootstrapSize="lg"
+                bootstrap:roundedCorners="true" />
 
             <TextView
                 style="@style/TextAppearance.AppCompat.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/extra_task_expire_date"/>
+                android:text="@string/extra_task_expire_date" />
 
-            <Button
+            <com.beardedhen.androidbootstrap.BootstrapButton
                 android:id="@+id/button_expire_date"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/expire_date"/>
+                android:layout_margin="@dimen/mini_padding"
+                android:text="@string/expire_date"
+                bootstrap:bootstrapSize="lg"
+                bootstrap:roundedCorners="true" />
+
 
         </LinearLayout>
 
@@ -105,8 +153,7 @@
             android:layout_height="wrap_content"
             android:text="@string/create_task"
             bootstrap:bootstrapBrand="primary"
-            bootstrap:bootstrapSize="lg"
-            bootstrap:roundedCorners="true" />
+            bootstrap:bootstrapSize="xl" />
 
     </LinearLayout>
 

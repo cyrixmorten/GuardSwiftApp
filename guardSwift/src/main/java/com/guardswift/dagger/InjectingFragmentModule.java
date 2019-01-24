@@ -34,6 +34,7 @@ import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.guard.GuardListFragment;
 import com.guardswift.ui.parse.data.guard.GuardsMapFragment;
+import com.guardswift.ui.parse.data.taskgroup.TaskGroupListFragment;
 import com.guardswift.ui.parse.data.tracker.TrackerListFragment;
 import com.guardswift.ui.parse.data.tracker.TrackerMapFragment;
 import com.guardswift.ui.parse.documentation.eventlog.AbstractEventFragment;
@@ -61,6 +62,7 @@ import com.guardswift.ui.parse.execution.statictask.FinishedStaticTasksFragment;
 import com.guardswift.ui.parse.execution.statictask.PendingStaticTasksFragment;
 import com.guardswift.ui.parse.execution.statictask.StaticTaskViewPagerFragment;
 import com.guardswift.ui.parse.planning.AddExtraTaskFragment;
+import com.guardswift.ui.parse.planning.ListExtraTasksFragment;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -90,11 +92,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		BaseMapFragment.class,
 		GuardListFragment.class,
 		GuardsMapFragment.class,
+		TaskGroupListFragment.class,
 		// -- Client
 		ClientListFragment.class,
 		TrackerListFragment.class,
 		TrackerMapFragment.class,
 		// - Planning
+		ListExtraTasksFragment.class,
 		AddExtraTaskFragment.class,
 		// - Execution
 		AbstractTasksRecycleFragment.class,

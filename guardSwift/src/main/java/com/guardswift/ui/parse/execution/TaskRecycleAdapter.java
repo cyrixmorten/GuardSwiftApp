@@ -2,8 +2,8 @@ package com.guardswift.ui.parse.execution;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.CardView;
@@ -26,8 +26,6 @@ import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapSize;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
-import com.guardswift.core.ca.location.FusedLocationTrackerService;
-import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.core.tasks.controller.TaskController;
@@ -49,7 +47,6 @@ import com.guardswift.util.OpenLocalPDF;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.parse.GetCallback;
-import com.parse.Parse;
 import com.parse.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
@@ -67,10 +64,24 @@ import butterknife.ButterKnife;
 import static com.guardswift.core.tasks.controller.TaskController.ACTION;
 import static com.guardswift.ui.helpers.ViewHelper.TintBackground.tintBackgroundColor;
 
+
 public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, TaskRecycleAdapter.TaskViewHolder> {
 
     private static final String TAG = TaskRecycleAdapter.class.getSimpleName();
 
+    public interface OnOpenTaskListener {
+        void openTask(ParseTask task);
+    }
+
+    /**
+     * Overrides default task open action if set
+     * Also hides task event actions (pending, arrive, finish, etc)
+     */
+    private OnOpenTaskListener openTaskListener;
+
+    public void setOpenTaskListener(OnOpenTaskListener openTaskListener) {
+        this.openTaskListener = openTaskListener;
+    }
 
     public static class StaticTaskViewHolder extends TaskViewHolder {
 
@@ -410,7 +421,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         }
 
         private void confirmIfMissingSupervisions(final Context context, final ParseTask task, final GetCallback<ParseTask> okCallback) {
-            int plannedSupervision = task.getPlannedSuperVisions();
+            int plannedSupervision = task.getPlannedSupervisions();
             int timesArrived = task.getTimesArrived();
             int diff = plannedSupervision - timesArrived;
 
@@ -553,7 +564,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
                 String infoText = context.getString(R.string.times_supervised,
                         task.getTimesArrived(),
-                        task.getPlannedSuperVisions());
+                        task.getPlannedSupervisions());
 
                 vInfo.setText(infoText);
 
@@ -574,7 +585,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
     }
 
 
-    static class TaskViewHolder extends PositionedViewHolder {
+    public static class TaskViewHolder extends PositionedViewHolder {
 
 
         @BindView(R.id.cardview)
@@ -634,9 +645,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             setTaskState(context, task);
         }
 
-        public void onActionOpen(Context context, ParseTask task) {
-
-        }
+        public void onActionOpen(Context context, ParseTask task) { }
 
         void expandFooter() {
             AnimationHelper.expand(vContentFooter);
@@ -706,7 +715,9 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         protected void setupTaskActionButtons(final Context context, final ParseTask task) {
 
 
-            this.cardview.setOnClickListener(view -> onActionOpen(context, task));
+            if (!this.cardview.hasOnClickListeners()) {
+                this.cardview.setOnClickListener(view -> onActionOpen(context, task));
+            }
 
             this.vBtnAccepted.setOnClickListener(view -> onActionAccept(context, task));
             this.vBtnPending.setOnClickListener(view -> onActionPending(context, task));
@@ -875,8 +886,6 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             }
             return color;
         }
-
-
     }
 
     private int lastPosition = -1;
@@ -915,6 +924,9 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         final ParseTask task = getItem(position);
 
+        if (openTaskListener != null) {
+            holder.cardview.setOnClickListener((v) -> openTaskListener.openTask(task));
+        }
 
         holder.vClientNumber.setText(task.getClientId());
         holder.vName.setText(task.getClientName());
@@ -929,6 +941,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
 
         holder.update(context, task);
+
 
 //        debugGeofenceStatus(task, holder);
 
@@ -1036,7 +1049,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
     };
 
     @Override
-    public TaskViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TaskViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.
                 from(parent.getContext()).
                 inflate(R.layout.gs_card_task, parent, false);
@@ -1055,6 +1068,11 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 inflate(taskContentHeaderLayoutId, parent, false);
 
         contentBody.addView(taskPlannedTimesView, 0);
+
+        if (openTaskListener != null) {
+            ButterKnife.findById(itemView, R.id.content_header).setVisibility(View.GONE);
+            ButterKnife.findById(itemView, R.id.task_distance).setVisibility(View.GONE);
+        }
 
         if (viewType == ParseTask.TASK_TYPE.STATIC.ordinal()) {
             return new StaticTaskViewHolder(itemView);

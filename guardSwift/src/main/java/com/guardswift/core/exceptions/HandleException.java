@@ -10,7 +10,6 @@ import com.parse.ParseException;
 public class HandleException {
 
 
-
     public HandleException(String tag, String message, Throwable e) {
         this(null, tag, message, e);
     }

@@ -16,7 +16,7 @@ public class PendingStaticTasksFragment extends AbstractTasksRecycleFragment {
 	}
 
 	public PendingStaticTasksFragment() {
-        this.setReloadOnResume(true);
+        this.setReloadOnResume();
     }
 
 

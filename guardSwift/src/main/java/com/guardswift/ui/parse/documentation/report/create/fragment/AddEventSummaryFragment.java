@@ -1,6 +1,7 @@
 package com.guardswift.ui.parse.documentation.report.create.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,7 @@ import com.guardswift.ui.view.card.EventLogCard;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -47,8 +49,8 @@ public class AddEventSummaryFragment extends InjectingFragment implements
 	private AddEventHandler parentActivity;
 
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+							 Bundle savedInstanceState) {
 
 
 		eventLogCard = new EventLogCard(getActivity());
@@ -56,48 +58,20 @@ public class AddEventSummaryFragment extends InjectingFragment implements
 		eventLogCard.setDeletable(false);
 
 
-		eventLogCard.onEventClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				UpdateEventHandlerActivity.newInstance(getActivity(), clientCache.getSelected(), UpdateEventHandler.REQUEST_EVENT_TYPE, parentActivity.getEventType());
-			}
-		});
+		eventLogCard.onEventClickListener(view -> UpdateEventHandlerActivity.newInstance(Objects.requireNonNull(getActivity()), clientCache.getSelected(), UpdateEventHandler.REQUEST_EVENT_TYPE, parentActivity.getEventType()));
 //
-		eventLogCard.onAmountClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(final View view) {
-				new CommonDialogsBuilder.BetterPicks(getActivity().getSupportFragmentManager()).enterEventAmount(parentActivity.getEventType(),
-						new NumberPickerDialogFragment.NumberPickerDialogHandlerV2() {
-							@Override
-							public void onDialogNumberSet(int reference, BigInteger number, double decimal, boolean isNegative, BigDecimal fullNumber) {
-								((AddEventHandler) getActivity()).setAmount(number.intValue());
-								((TextView)view).setText(String.valueOf(number));
-							}
-						}
-				).show();
-			}
-		});
+		eventLogCard.onAmountClickListener(view -> new CommonDialogsBuilder.BetterPicks(Objects.requireNonNull(getActivity()).getSupportFragmentManager()).enterEventAmount(parentActivity.getEventType(),
+				(reference, number, decimal, isNegative, fullNumber) -> {
+					((AddEventHandler) getActivity()).setAmount(number.intValue());
+					((TextView) view).setText(String.valueOf(number));
+				}
+		).show());
 
-		eventLogCard.onPeopleClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				UpdateEventHandlerActivity.newInstance(getActivity(), clientCache.getSelected(), UpdateEventHandler.REQUEST_EVENT_PEOPLE, parentActivity.getPeople());
-			}
-		});
+		eventLogCard.onPeopleClickListener(view -> UpdateEventHandlerActivity.newInstance(Objects.requireNonNull(getActivity()), clientCache.getSelected(), UpdateEventHandler.REQUEST_EVENT_PEOPLE, parentActivity.getPeople()));
 
-		eventLogCard.onLocationsClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				UpdateEventHandlerActivity.newInstance(getActivity(), clientCache.getSelected(), UpdateEventHandler.REQUEST_EVENT_LOCATIONS, parentActivity.getLocations());
-			}
-		});
+		eventLogCard.onLocationsClickListener(view -> UpdateEventHandlerActivity.newInstance(Objects.requireNonNull(getActivity()), clientCache.getSelected(), UpdateEventHandler.REQUEST_EVENT_LOCATIONS, parentActivity.getLocations()));
 
-		eventLogCard.onRemarksClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				UpdateEventHandlerActivity.newInstance(getActivity(), clientCache.getSelected(), UpdateEventHandler.REQUEST_EVENT_REMARKS, parentActivity.getRemarks());
-			}
-		});
+		eventLogCard.onRemarksClickListener(view -> UpdateEventHandlerActivity.newInstance(Objects.requireNonNull(getActivity()), clientCache.getSelected(), UpdateEventHandler.REQUEST_EVENT_REMARKS, parentActivity.getRemarks()));
 
 		return eventLogCard;
 	}
@@ -120,7 +94,7 @@ public class AddEventSummaryFragment extends InjectingFragment implements
 	@Override
 	public void fragmentBecameVisible() {
 
-		eventLogCard.setEventLog(new EventLog.Builder(getContext())
+		eventLogCard.setEventLog(new EventLog.Builder(Objects.requireNonNull(getContext()))
 				.event(parentActivity.getEventType())
 				.amount(parentActivity.getAmount())
 				.people(parentActivity.getPeople())
