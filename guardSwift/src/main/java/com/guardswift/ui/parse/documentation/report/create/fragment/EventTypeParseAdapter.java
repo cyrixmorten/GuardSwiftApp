@@ -14,9 +14,6 @@ import butterknife.ButterKnife;
 
 public class EventTypeParseAdapter extends ParseQueryAdapter<EventType> {
 
-	private static final String TAG = EventTypeParseAdapter.class
-			.getSimpleName();
-
 	public EventTypeParseAdapter(Context context,
 			QueryFactory<EventType> queryFactory) {
 		super(context, queryFactory);

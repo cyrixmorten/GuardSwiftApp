@@ -48,6 +48,8 @@ import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -59,7 +61,6 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public static final int DEFAULT_RADIUS_RAID = 50;
     public static final int DEFAULT_RADIUS_REGULAR = 100;
     public static final int DEFAULT_RADIUS_ALARM = 100;
-
 
     public enum TASK_TYPE {REGULAR, RAID, STATIC, ALARM}
 
@@ -113,6 +114,8 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public static final String timeEndDate = "timeEndDate";
     public static final String supervisions = "supervisions";
     public static final String timesArrived = "timesArrived";
+
+    public static final String expireDate = "expireDate";
 
 
     public static class STATUS {
@@ -233,7 +236,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public String getTaskTypeString() {
-        return getString(ParseTask.taskType);
+        return getStringSafe(ParseTask.taskType);
     }
 
     public TASK_TYPE getTaskType() {
@@ -247,8 +250,6 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
             case "Raid":
                 return TASK_TYPE.RAID;
         }
-
-        new HandleException(TAG, "Task missing taskType", null);
 
         return null;
     }
@@ -273,6 +274,9 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return (TaskGroup) getParseObject(ParseTask.taskGroup);
     }
 
+    public void setTaskGroup(TaskGroup taskGroup) {
+        put(ParseTask.taskGroup, taskGroup);
+    }
 
     public TaskGroupStarted getTaskGroupStarted() {
         return (TaskGroupStarted) getParseObject(ParseTask.taskGroupStarted);
@@ -374,6 +378,14 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         }
 
         return true;
+    }
+
+    public void addDays(Set<Integer> days) {
+        addAllUnique(ParseTask.days, days);
+    }
+
+    public List<Integer> getDays() {
+        return getList(ParseTask.days);
     }
 
     public Guard getGuard() {
@@ -633,6 +645,10 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return getStringSafe(ParseTask.name);
     }
 
+    public void setTimeStart(Date timeStart) {
+        put(ParseTask.timeStartDate, timeStart);
+    }
+
     public Date getTimeStart() {
         return getDate(ParseTask.timeStartDate);
     }
@@ -641,6 +657,10 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         Date date = getTimeStart();
         DateTime dt = new DateTime(date);
         return dt.toString(DateTimeFormat.shortTime());
+    }
+
+    public void setTimeEnd(Date timeEnd) {
+        put(ParseTask.timeEndDate, timeEnd);
     }
 
     public Date getTimeEnd() {
@@ -653,7 +673,19 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return dt.toString(DateTimeFormat.shortTime());
     }
 
-    public int getPlannedSuperVisions() {
+    public void setExpireDate(Date date) {
+        put(ParseTask.expireDate, date);
+    }
+
+    public Date getExpireDate() {
+        return getDate(ParseTask.expireDate);
+    }
+
+    public void setPlannedSupervisions(int supervisions) {
+        put(ParseTask.supervisions, supervisions);
+    }
+
+    public int getPlannedSupervisions() {
         return getInt(ParseTask.supervisions);
     }
 
@@ -663,24 +695,15 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public boolean isCompletedButNotMarkedFinished() {
-        return isPending() && getTimesArrived() >= getPlannedSuperVisions();
+        return isPending() && getTimesArrived() >= getPlannedSupervisions();
     }
-
-    /**
-     * STATIC
-     */
 
     public static void createStaticTask(Client client, final GetCallback<ParseTask> getCallback) {
         final ParseTask task = new ParseTask();
         task.setTaskType(TASK_TYPE.STATIC);
         task.setDefaultOwner();
         task.setClient(client);
-        task.saveEventuallyAndNotify(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                getCallback.done(task, e);
-            }
-        });
+        task.saveEventuallyAndNotify(e -> getCallback.done(task, e));
     }
 
     public void addReportEntry(Context context, String remarks, GetCallback<EventLog> pinned) {
@@ -702,38 +725,35 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public Task<Report> findReport(final boolean fromLocalDataStore) {
-        return Report.getQueryBuilder(fromLocalDataStore).matching(this).build().getFirstInBackground().continueWithTask(new Continuation<Report, Task<Report>>() {
-            @Override
-            public Task<Report> then(Task<Report> reportTask) throws Exception {
-                if (reportTask.isFaulted()) {
-                    Exception error = reportTask.getError();
-                    if (error instanceof ParseException && ((ParseException) error).getCode() != ParseException.OBJECT_NOT_FOUND) {
-                        // it is expected that new reports are not found, any other errors, however, are reported
-                        new HandleException(TAG, "FindReport", error);
+        return Report.getQueryBuilder(fromLocalDataStore).matching(this).build().getFirstInBackground().continueWithTask(reportTask -> {
+            if (reportTask.isFaulted()) {
+                Exception error = reportTask.getError();
+                if (error instanceof ParseException && ((ParseException) error).getCode() != ParseException.OBJECT_NOT_FOUND) {
+                    // it is expected that new reports are not found, any other errors, however, are reported
+                    new HandleException(TAG, "FindReport", error);
 
-                        return reportTask;
+                    return reportTask;
+                } else {
+                    if (fromLocalDataStore) {
+                        Log.w(TAG, "Report not found locally - attempt online");
+                        return findReport(false);
                     } else {
-                        if (fromLocalDataStore) {
-                            Log.w(TAG, "Report not found locally - attempt online");
-                            return findReport(false);
-                        } else {
 
-                            new HandleException(TAG, "Not able to find report", error);
+                        new HandleException(TAG, "Not able to find report", error);
 
-                            throw error;
-                        }
+                        throw error;
                     }
                 }
-                Report report = reportTask.getResult();
-
-                // successfully located report
-                // store in LDS if found online
-                if (!fromLocalDataStore) {
-                    report.pinInBackground();
-                }
-
-                return Task.forResult(report);
             }
+            Report report = reportTask.getResult();
+
+            // successfully located report
+            // store in LDS if found online
+            if (!fromLocalDataStore) {
+                report.pinInBackground();
+            }
+
+            return Task.forResult(report);
         });
     }
 

@@ -137,4 +137,9 @@ public class RegularRaidTaskQueryBuilder extends ParseQueryBuilder<ParseTask> {
         query.whereEqualTo(ParseTask.taskType, taskType.toString());
         return this;
     }
+
+    public RegularRaidTaskQueryBuilder isExtraTask() {
+        query.whereExists(ParseTask.expireDate);
+        return this;
+    }
 }

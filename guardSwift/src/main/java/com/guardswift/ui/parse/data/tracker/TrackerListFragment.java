@@ -80,33 +80,24 @@ public class TrackerListFragment extends AbstractParseRecyclerFragment<Tracker, 
         new MenuItemBuilder(getContext())
                 .icon(MenuItemIcons.create(getContext(), FontAwesome.Icon.faw_calendar))
                 .showAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-                .addToMenu(menu, R.string.date, new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
+                .addToMenu(menu, R.string.date, menuItem -> {
 
-                        DateTime dateTimeToday = new DateTime(fromDate);
+                    DateTime dateTimeToday = new DateTime(fromDate);
 
-                        CalendarDatePickerDialogFragment cdp = new CalendarDatePickerDialogFragment()
-                                .setOnDateSetListener(new CalendarDatePickerDialogFragment.OnDateSetListener() {
-                                    @Override
-                                    public void onDateSet(CalendarDatePickerDialogFragment dialog, int year, int monthOfYear, int dayOfMonth) {
-                                        Log.d(TAG, "year: "+year);
-                                        Log.d(TAG, "monthOfYear: "+monthOfYear);
-                                        Log.d(TAG, "dayOfMonth: "+dayOfMonth);
+                    CalendarDatePickerDialogFragment cdp = new CalendarDatePickerDialogFragment()
+                            .setOnDateSetListener((dialog, year, monthOfYear, dayOfMonth) -> {
 
-                                        setSearchDate(new DateTime()
-                                                .withYear(year)
-                                                .withMonthOfYear(monthOfYear + 1)
-                                                .withDayOfMonth(dayOfMonth).toDate());
-                                    }
-                                })
-                                .setFirstDayOfWeek(Calendar.SUNDAY)
-                                .setPreselectedDate(dateTimeToday.year().get(), dateTimeToday.monthOfYear().get() - 1, dateTimeToday.dayOfMonth().get())
-                                .setDateRange(null, new MonthAdapter.CalendarDay())
-                                .setThemeDark();
-                        cdp.show(getChildFragmentManager(), "FRAGMENT_DATE_PICKER");
-                        return false;
-                    }
+                                setSearchDate(new DateTime()
+                                        .withYear(year)
+                                        .withMonthOfYear(monthOfYear + 1)
+                                        .withDayOfMonth(dayOfMonth).toDate());
+                            })
+                            .setFirstDayOfWeek(Calendar.MONDAY)
+                            .setPreselectedDate(dateTimeToday.year().get(), dateTimeToday.monthOfYear().get() - 1, dateTimeToday.dayOfMonth().get())
+                            .setDateRange(null, new MonthAdapter.CalendarDay())
+                            .setThemeDark();
+                    cdp.show(getChildFragmentManager(), "FRAGMENT_DATE_PICKER");
+                    return false;
                 });
 
         super.onCreateOptionsMenu(menu, inflater);
@@ -115,12 +106,7 @@ public class TrackerListFragment extends AbstractParseRecyclerFragment<Tracker, 
 
     @Override
     protected ParseQueryAdapter.QueryFactory<Tracker> createNetworkQueryFactory() {
-        return new ParseQueryAdapter.QueryFactory<Tracker>() {
-            @Override
-            public ParseQuery<Tracker> create() {
-                return new TrackerQueryBuilder(false).build().whereLessThanOrEqualTo(Tracker.createdAt, fromDate).addDescendingOrder(Tracker.createdAt);
-            }
-        };
+        return () -> new TrackerQueryBuilder(false).build().whereLessThanOrEqualTo(Tracker.createdAt, fromDate).addDescendingOrder(Tracker.createdAt);
     }
 
     @Override
