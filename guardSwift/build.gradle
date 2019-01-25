@@ -132,7 +132,7 @@ dependencies {
     annotationProcessor 'com.squareup.dagger:dagger-compiler:1.2.2'
     implementation 'de.greenrobot:eventbus:2.4.1'
     implementation 'com.squareup.picasso:picasso:2.5.2'
-    implementation 'com.beardedhen:androidbootstrap:2.3.2'
+    implementation 'com.beardedhen:androidbootstrap:2.3.0'
     implementation 'com.getbase:floatingactionbutton:1.10.1'
     implementation 'com.github.thomper:sweet-alert-dialog:v1.4.0'
     implementation 'com.code-troopers.betterpickers:library:3.1.0'

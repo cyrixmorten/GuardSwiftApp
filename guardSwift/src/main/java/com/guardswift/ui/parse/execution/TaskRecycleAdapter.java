@@ -261,23 +261,16 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
             if (task.isRegularTask() || task.isRaidTask()) {
                 vBtnPending.setVisibility(View.VISIBLE);
-
             }
 
             if (task.isAlarmTask()) {
-//                vBtnAborted.setVisibility(View.GONE);
-//                vBtnTaskdescription.setVisibility(View.GONE);
+                vBtnPending.setVisibility(View.GONE);
 
                 if (task.isPending()) {
                     vBtnAccepted.setVisibility(View.VISIBLE);
                     vBtnArrived.setVisibility(View.GONE);
-//                    vBtnAborted.setVisibility(View.GONE);
                     vBtnFinished.setVisibility(View.GONE);
                 }
-
-//                if (task.isAccepted()) {
-//                    vBtnFinished.setText(contextWeakReference.getString(R.string.onActionAbort));
-//                }
 
                 if (task.isAborted() || task.isFinished()) {
                     vBtnArrived.setVisibility(View.GONE);
@@ -287,14 +280,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                         context.getText(R.string.keybox) + ": " + task.getKeybox() + "\n" +
                         context.getText(R.string.remarks) + ": " + task.getRemarks();
 
-//                if (alarmTask.getGuard() != null) {
-//                    description += "\n\n";
-//                    description += contextWeakReference.getString(R.string.guard) + ": " + alarmTask.getGuard().getName();
-//                }
-
                 vTaskDesc.setText(description);
-//                alarmTaskViewHolder.vTimeStart.setText(alarmTask.getTimeStartString());
-//                alarmTaskViewHolder.vTimeEnd.setText(alarmTask.getTimeEndString());
 
                 String centralName = task.getCentralName();
 
@@ -702,14 +688,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             super(v);
             ButterKnife.bind(this, v);
 
-            this.vBtnPending.setBootstrapSize(DefaultBootstrapSize.MD);
-            this.vBtnAccepted.setBootstrapSize(DefaultBootstrapSize.MD);
-            this.vBtnArrived.setBootstrapSize(DefaultBootstrapSize.MD);
-//            this.vBtnAborted.setBootstrapSize(DefaultBootstrapSize.LG);
-            this.vBtnFinished.setBootstrapSize(DefaultBootstrapSize.MD);
-
             setRemoveItemCallback(removeItemCallback);
-
         }
 
         protected void setupTaskActionButtons(final Context context, final ParseTask task) {
