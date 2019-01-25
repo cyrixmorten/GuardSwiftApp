@@ -2,6 +2,7 @@ package com.guardswift.ui.parse.documentation.report.create.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -40,6 +41,7 @@ import com.parse.ParseQueryAdapter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -96,7 +98,7 @@ public class AddEventRemarkFragment extends InjectingFragment implements
 //	@BindView(R.id.tv_client_location) TextView client_and_location;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_event_remark, container,
                 false);
@@ -354,7 +356,7 @@ public class AddEventRemarkFragment extends InjectingFragment implements
     @Override
     public void onPause() {
         Log.e(TAG, "onPause");
-        InputMethodManager imm = (InputMethodManager) getActivity()
+        InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity())
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(remarkEditText.getWindowToken(), 0);
         super.onPause();

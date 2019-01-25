@@ -41,6 +41,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -54,7 +55,7 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
 
 
     //    protected static final String FILTER_EVENT = "FILTER_EVENT";
-    protected static final String FILTER_EXCLUDE_PERIMITER = "FILTER_EXCLUDE_PERIMITER";
+    protected static final String FILTER_EXCLUDE_PERIMETER = "FILTER_EXCLUDE_PERIMETER";
     protected static final String FILTER_EXCLUDE_AUTOMATIC = "FILTER_EXCLUDE_AUTOMATIC";
 
 
@@ -80,7 +81,7 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
     boolean excludePerimiter;
     boolean excludeAutomatic;
 
-    private MenuItem filterMenu;
+//    private MenuItem filterMenu;
     private List<String> eventTypes;
     private List<String> filterEvents = new ArrayList<>();
     private Integer[] filterIndexes = new Integer[0];
@@ -112,9 +113,9 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.filter, menu);
-        filterMenu = menu.findItem(R.id.menu_filter);
-        filterMenu.setEnabled(false);
+//        inflater.inflate(R.menu.filter, menu);
+//        filterMenu = menu.findItem(R.id.menu_filter);
+//        filterMenu.setEnabled(false);
 
         super.onCreateOptionsMenu(menu, inflater);
 
@@ -127,29 +128,26 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
             return;
         }
 
-        EventType.getQueryBuilder(true).matchingIncludes(mClient).sortByTimesUsed().build().findInBackground(new FindCallback<EventType>() {
-            @Override
-            public void done(List<EventType> eventTypes, ParseException e) {
-                if (e != null) {
-                    Crashlytics.logException(e);
-                    return;
-                }
-
-                if (eventTypes.isEmpty()) {
-                    return;
-                }
-
-                AbstractEventFragment.this.eventTypes = new ArrayList<String>();
-                for (EventType event : eventTypes) {
-                    AbstractEventFragment.this.eventTypes.add(event.getName());
-                }
-
-                if (filterMenu != null) {
-                    filterMenu.setEnabled(true);
-                }
-
-
+        EventType.getQueryBuilder(true).matchingIncludes(mClient).sortByTimesUsed().build().findInBackground((eventTypes, e) -> {
+            if (e != null) {
+                Crashlytics.logException(e);
+                return;
             }
+
+            if (eventTypes.isEmpty()) {
+                return;
+            }
+
+            AbstractEventFragment.this.eventTypes = new ArrayList<String>();
+            for (EventType event : eventTypes) {
+                AbstractEventFragment.this.eventTypes.add(event.getName());
+            }
+
+//            if (filterMenu != null) {
+//                filterMenu.setEnabled(true);
+//            }
+
+
         });
     }
 
@@ -165,70 +163,54 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
         return selectionsArray;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_filter:
-                new MaterialDialog.Builder(getActivity())
-                        .title(R.string.filter_by_event)
-                        .items(eventTypes.toArray(new CharSequence[eventTypes.size()]))
-                        .itemsCallbackMultiChoice(getSelectedEventTypeFilters(), new MaterialDialog.ListCallbackMultiChoice() {
-                            @Override
-                            public boolean onSelection(MaterialDialog dialog, Integer[] which, CharSequence[] filters) {
-                                /**
-                                 * If you use alwaysCallMultiChoiceCallback(), which is discussed below,
-                                 * returning false here won't allow the newly selected check box to actually be selected.
-                                 * See the limited multi choice dialog example in the sample project for details.
-                                 **/
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        switch (item.getItemId()) {
+//            case R.id.menu_filter:
+//                new MaterialDialog.Builder(getActivity())
+//                        .title(R.string.filter_by_event)
+//                        .items(eventTypes.toArray(new CharSequence[eventTypes.size()]))
+//                        .itemsCallbackMultiChoice(getSelectedEventTypeFilters(), (dialog, which, filters) -> {
+//                            /**
+//                             * If you use alwaysCallMultiChoiceCallback(), which is discussed below,
+//                             * returning false here won't allow the newly selected check box to actually be selected.
+//                             * See the limited multi choice dialog example in the sample project for details.
+//                             **/
+//
+//                            Log.d(TAG, Arrays.toString(which));
+//                            Log.d(TAG, Arrays.toString(filters));
+//
+//                            filterEvents.clear();
+//                            for (CharSequence filter : filters) {
+//                                filterEvents.add(filter.toString());
+//                            }
+//
+//
+//                            applySearch(filterEvents);
+//
+//                            return true;
+//                        })
+//                        .negativeText(android.R.string.cancel)
+//                        .positiveText(android.R.string.ok)
+//                        .show();
+//
+//                return true;
+//
+//        }
+//        return super.onOptionsItemSelected(item);
+//    }
 
-                                Log.d(TAG, Arrays.toString(which));
-                                Log.d(TAG, Arrays.toString(filters));
-
-                                filterEvents.clear();
-                                for (CharSequence filter : filters) {
-                                    filterEvents.add(filter.toString());
-                                }
-
-
-                                applySearch(filterEvents);
-
-                                return true;
-                            }
-                        })
-                        .negativeText(android.R.string.cancel)
-                        .positiveText(android.R.string.ok)
-                        .show();
-
-//                SingleChoiceDialogFragment.newInstance(true, R.string.filter_by_event, eventTypes, new SingleChoiceDialogFragment.SingleChoiceDialogCallback() {
-//                    @Override
-//                    public void singleChoiceDialogItemSelected(int index, String value) {
-//                        applySearch(value);
-//                        Analytics.eventEventLogTrend(Analytics.CreateEventlogAction.Filter, value, 1);
-//                    }
-//                }).show(getChildFragmentManager(), "dialog_filter");
-                return true;
-
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    public void applySearch(final List<String> filterEvents) {
-//        applySearch(filterEvents, whereIsReportEntry, excludeAutomatic);
-        applySearch(filterEvents, true, true);
-    }
+//    public void applySearch(final List<String> filterEvents) {
+////        applySearch(filterEvents, whereIsReportEntry, excludeAutomatic);
+//        applySearch(filterEvents, true, true);
+//    }
 
     public void applySearch(final List<String> filterEvents, final boolean excludePerimiterEvents, final boolean excludeAutomaticEvent) {
 
         Log.d(TAG, "applySearch " + excludePerimiterEvents + " " + excludeAutomaticEvent);
 
         mAdapter = new EventAdapter(getActivity(),
-                new ParseQueryAdapter.QueryFactory<EventLog>() {
-
-                    @Override
-                    public ParseQuery<EventLog> create() {
-                        return getEventLogQuery(filterEvents, excludePerimiterEvents, excludeAutomaticEvent);
-                    }
-                });
+                () -> getEventLogQuery(filterEvents, excludePerimiterEvents, excludeAutomaticEvent));
 
 
         mAdapter.addOnQueryLoadListener(new ParseQueryAdapter.OnQueryLoadListener<EventLog>() {
@@ -262,13 +244,13 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
         Bundle arguments = getArguments();
 
         btn_addevent.setText(getString(R.string.add_event));
-        if (!arguments.getBoolean(ParseTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON)) {
+        if (!Objects.requireNonNull(arguments).getBoolean(ParseTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON)) {
             btn_addevent.setVisibility(View.GONE);
         }
 
         // filters
         String filterEvent = arguments.getString(ParseTaskCreateReportActivity.FILTER_EVENT);
-        excludePerimiter = arguments.getBoolean(FILTER_EXCLUDE_PERIMITER);
+        excludePerimiter = arguments.getBoolean(FILTER_EXCLUDE_PERIMETER);
         excludeAutomatic = arguments.getBoolean(FILTER_EXCLUDE_AUTOMATIC);
 
 //        applySearch(filterEvent, whereIsReportEntry, excludeAutomatic);
@@ -282,30 +264,24 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         if (getArguments().getBoolean(ParseTaskCreateReportActivity.MODE_ADD_EVENT)) {
-            getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    EventLog eventLog = mAdapter.getItem(position);
-                    showCreateEventDialog(eventLog);
-                }
+            getListView().setOnItemClickListener((parent, view12, position, id) -> {
+                EventLog eventLog = mAdapter.getItem(position);
+                showCreateEventDialog(eventLog);
             });
         } else if (getArguments().getBoolean(ParseTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON)) {
-            getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    EventLog eventLog = mAdapter.getItem(position);
-                    // go to details view
-                    Intent intent = new Intent(getActivity(),
-                            ParseTaskCreateReportActivity.class)
-                            .putExtra(ParseTaskCreateReportActivity.FILTER_EVENT, eventLog.getEvent())
-                            .putExtra(ParseTaskCreateReportActivity.TASK_TYPE, getFragmentType())
-                            .putExtra(ParseTaskCreateReportActivity.MODE_ADD_EVENT, true)
-                            .putExtra(ParseTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON, true);
+            getListView().setOnItemClickListener((parent, view1, position, id) -> {
+                EventLog eventLog = mAdapter.getItem(position);
+                // go to details view
+                Intent intent = new Intent(getActivity(),
+                        ParseTaskCreateReportActivity.class)
+                        .putExtra(ParseTaskCreateReportActivity.FILTER_EVENT, eventLog.getEvent())
+                        .putExtra(ParseTaskCreateReportActivity.TASK_TYPE, getFragmentType())
+                        .putExtra(ParseTaskCreateReportActivity.MODE_ADD_EVENT, true)
+                        .putExtra(ParseTaskCreateReportActivity.HAS_ADD_EVENT_BUTTON, true);
 
-                    startActivity(intent);
+                startActivity(intent);
 
 
-                }
             });
         }
         super.onViewCreated(view, savedInstanceState);
@@ -337,23 +313,16 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
         location.setText(eventLog.getLocations());
         remarks.setText(eventLog.getRemarks());
 
-        amountLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new NumberPickerBuilder()
+        amountLayout.setOnClickListener(view1 -> {
+            new NumberPickerBuilder()
 
-                        .setFragmentManager(getActivity().getSupportFragmentManager())
-                        .setStyleResId(R.style.BetterPickersDialogFragment_Light)
-                        .addNumberPickerDialogHandler(new NumberPickerDialogFragment.NumberPickerDialogHandlerV2() {
-                            @Override
-                            public void onDialogNumberSet(int reference, BigInteger number, double decimal, boolean isNegative, BigDecimal fullNumber) {
-                                amount.setText(String.valueOf(number));
-                            }
-                        })
-                        .setLabelText(getString(R.string.amount))
-                        .setPlusMinusVisibility(View.INVISIBLE)
-                        .setDecimalVisibility(View.INVISIBLE)
-                        .show();
+                    .setFragmentManager(getActivity().getSupportFragmentManager())
+                    .setStyleResId(R.style.BetterPickersDialogFragment_Light)
+                    .addNumberPickerDialogHandler((reference, number, decimal, isNegative, fullNumber) -> amount.setText(String.valueOf(number)))
+                    .setLabelText(getString(R.string.amount))
+                    .setPlusMinusVisibility(View.INVISIBLE)
+                    .setDecimalVisibility(View.INVISIBLE)
+                    .show();
 
 //                new MaterialDialog.Builder(getActivity())
 //                        .title(getString(R.string.amount))
@@ -366,32 +335,25 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
 //                                amount.setText(input);
 //                            }
 //                        }).show();
-            }
         });
 
 
-        new MaterialDialog.Builder(getActivity())
+        new MaterialDialog.Builder(Objects.requireNonNull(getActivity()))
                 .title(R.string.add_event)
                 .positiveText(R.string.save)
 //                .negativeText(R.string.edit)
                 .negativeColor(getResources().getColor(android.R.color.holo_blue_light))
                 .neutralText(android.R.string.cancel)
                 .customView(view, true)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                        new EventLog.Builder(getActivity()).from(eventLog, getTaskPointer())
-                                .amount(amount.getText())
-                                .saveAsync();
-                        Analytics.eventEventLogTrend(Analytics.CreateEventlogAction.Copy);
-                    }
+                .onPositive((materialDialog, dialogAction) -> {
+                    new EventLog.Builder(getActivity()).from(eventLog, getTaskPointer())
+                            .amount(amount.getText())
+                            .saveAsync();
+                    Analytics.eventEventLogTrend(Analytics.CreateEventlogAction.Copy);
                 })
-                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
+                .onNegative((materialDialog, dialogAction) -> {
 //                        CreateEventActivityFactory.start(getActivity(), eventLog);
-                        Analytics.eventEventLogTrend(Analytics.CreateEventlogAction.Edit);
-                    }
+                    Analytics.eventEventLogTrend(Analytics.CreateEventlogAction.Edit);
                 })
                 .show();
     }

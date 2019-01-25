@@ -31,6 +31,8 @@ import com.guardswift.ui.parse.data.tracker.TrackerListFragment;
 import com.guardswift.ui.parse.execution.alarm.AlarmsViewPagerFragment;
 import com.guardswift.ui.parse.execution.regular.RegularTaskViewPagerFragment;
 import com.guardswift.ui.parse.execution.statictask.StaticTaskViewPagerFragment;
+import com.guardswift.ui.parse.planning.AddExtraTaskFragment;
+import com.guardswift.ui.parse.planning.ListExtraTasksFragment;
 import com.guardswift.ui.preferences.AlarmNotificationPreferencesFragment;
 import com.guardswift.ui.preferences.GuardPreferencesFragment;
 import com.guardswift.util.Analytics;
@@ -156,7 +158,6 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
         return navigationDrawer;
     }
 
-
     private AccountHeader getHeader(Activity activity) {
         // Create navigation header
         return new AccountHeaderBuilder()
@@ -167,6 +168,13 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                 )
                 .withOnAccountHeaderListener((view, profile, currentProfile) -> false)
                 .withSelectionListEnabledForSingleProfile(false).build();
+    }
+
+    private IDrawerItem getAddExtraTaskItem() {
+        return new PrimaryDrawerItem().withName(context.getString(R.string.extra_task)).withOnDrawerItemClickListener((view, position, drawerItem) -> {
+            GenericToolbarActivity.start(context, R.string.extra_task, ListExtraTasksFragment.newInstance());
+            return false;
+        });
     }
 
     private IDrawerItem getSelectedTaskGroupDrawerItem() {
@@ -263,7 +271,11 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
             circuitItems.clear();
         }
 
-        return circuitItems.toArray(new IDrawerItem[circuitItems.size()]);
+        if (!circuitItems.isEmpty()) {
+            circuitItems.add(1, getAddExtraTaskItem());
+        }
+
+        return circuitItems.toArray(new IDrawerItem[0]);
     }
 
     private IDrawerItem[] getAlarmsDrawerItems() {

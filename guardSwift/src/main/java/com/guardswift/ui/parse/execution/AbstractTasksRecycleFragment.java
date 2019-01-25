@@ -1,7 +1,6 @@
 package com.guardswift.ui.parse.execution;
 
 import android.location.Location;
-import android.util.Log;
 
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.eventbus.events.UpdateUIEvent;
@@ -18,8 +17,7 @@ public abstract class AbstractTasksRecycleFragment extends AbstractParseRecycler
 
     public abstract ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory();
 
-    public AbstractTasksRecycleFragment() {
-    }
+    public AbstractTasksRecycleFragment() { }
 
     @Override
     protected ParseRecyclerQueryAdapter<ParseTask, TaskRecycleAdapter.TaskViewHolder> createRecycleAdapter() {
@@ -42,28 +40,6 @@ public abstract class AbstractTasksRecycleFragment extends AbstractParseRecycler
         if (obj instanceof EventBusController.ForceUIUpdate) {
             isRelevant = true;
         }
-
-        if (obj instanceof ParseTask) {
-            isRelevant = true;
-//            ParseTask task = (ParseTask) obj;
-//
-//            switch (ev.getAction()) {
-//                case CREATE: {
-//                    getAdapter().addItem(task);
-//                    break;
-//                }
-//                case UPDATE: {
-//                    getAdapter().updateItem(task);
-//                    break;
-//                }
-//                case DELETE: {
-//                    getAdapter().removeItem(task);
-//                    break;
-//                }
-//            }
-        }
-
-        Log.d(TAG, "Abstract isRelevantUIEvent " + isRelevant);
 
         return isRelevant ;
     }

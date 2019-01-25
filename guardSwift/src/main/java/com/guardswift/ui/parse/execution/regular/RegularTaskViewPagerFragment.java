@@ -5,11 +5,14 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.common.collect.Maps;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.LogError;
+import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
@@ -17,9 +20,11 @@ import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
 import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
+import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.activity.MainActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
+import com.guardswift.ui.parse.planning.AddExtraTaskFragment;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 
@@ -38,7 +43,6 @@ public class RegularTaskViewPagerFragment extends AbstractTabsViewPagerFragment 
 
     public static RegularTaskViewPagerFragment newInstance(TaskGroupStarted circuitStarted) {
 
-        Log.e(TAG, "SHOW: " + circuitStarted.getName());
         GuardSwiftApplication.getInstance()
                 .getCacheFactory()
                 .getTaskGroupStartedCache()

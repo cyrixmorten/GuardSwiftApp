@@ -8,7 +8,6 @@ import android.support.v4.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
@@ -31,24 +30,18 @@ import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventH
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.view.DownloadReport;
 import com.guardswift.util.GSIntents;
-import com.guardswift.util.ToastHelper;
-import com.parse.GetCallback;
-import com.parse.ParseException;
-import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
 
-import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
 public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventLog, ReportEditRecycleAdapter.ReportViewHolder> implements UpdateFloatingActionButton, FragmentVisibilityListener {
-
-    private static final int ADD_EVENT_RESULT_CODE = 200;
 
     public static ReportEditListFragment newInstance(ParseTask task) {
 
@@ -97,7 +90,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     @Override
     public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
 
-        inflater.inflate(R.menu.task_report, menu);
+        inflater.inflate(R.menu.report, menu);
 
         menu.findItem(R.id.menu_add_arrival).setOnMenuItemClickListener((menuItem) -> {
             task.getController().performAction(TaskController.ACTION.ARRIVE, task);
@@ -250,7 +243,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
                     dialog.dismiss();
                 });
             } else {
-                CreateEventHandlerActivity.start(getContext(), task);
+                CreateEventHandlerActivity.start(Objects.requireNonNull(getContext()), task);
             }
         });
     }

@@ -19,7 +19,7 @@ public class ActiveAlarmsFragment extends AbstractTasksRecycleFragment {
 
 	public ActiveAlarmsFragment() {
         // update view using network query on resume
-        this.setReloadOnResume(true);
+        this.setReloadOnResume();
 	}
 
     @Override
