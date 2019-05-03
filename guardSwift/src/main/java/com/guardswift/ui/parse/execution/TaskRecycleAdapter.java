@@ -23,7 +23,6 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.AwesomeTextView;
 import com.beardedhen.androidbootstrap.BootstrapButton;
-import com.beardedhen.androidbootstrap.api.defaults.DefaultBootstrapSize;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
@@ -51,7 +50,6 @@ import com.parse.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -200,26 +198,12 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         }
 
-//        public void abort(final Context contextWeakReference, final ParseTask task) {
-//            new CommonDialogsBuilder.MaterialDialogs(contextWeakReference).okCancel(R.string.confirm_action, contextWeakReference.getString(R.string.mark_aborted, task.getClientName()), new MaterialDialog.SingleButtonCallback() {
-//                @Override
-//                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-//                    AlarmTaskViewHolder.super.onActionAbort(contextWeakReference, task);
-//                }
-//            }).show();
-//        }
 
         @Override
         public void onActionFinish(final Context context, final ParseTask task) {
 
-//            if (task.isAccepted()) {
-//                abort(contextWeakReference, task);
-//                return;
-//            }
-
             // arrived
-            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_finished), (materialDialog, dialogAction) -> AlarmTaskViewHolder.super.onActionFinish(context, task)
-            ).show();
+            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action, context.getString(R.string.mark_finished), (materialDialog, dialogAction) -> AlarmTaskViewHolder.super.onActionFinish(context, task)).show();
 
         }
 
@@ -243,14 +227,6 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                         task.getClient().getFullAddress(),
                         fragment);
             });
-
-//            vBtnTaskdescription.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    TaskDescriptionActivity.start(contextWeakReference, task);
-//                }
-//            });
-
 
             vBtnClientContacts.setOnClickListener(view -> new CommonDialogsBuilder.MaterialDialogs(context).clientContacts(task.getClient()).show());
         }
@@ -360,26 +336,6 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         }
 
-        @Override
-        public void onActionArrive(final Context context, final ParseTask task) {
-            if (task.isWithinScheduledTime()) {
-                super.onActionArrive(context, task);
-            } else {
-                // Show dialog explaining that time is outside scheduled
-//                new CommonDialogsBuilder.MaterialDialogs(contextWeakReference).ok(R.string.outside_schedule, R.string.arrived_outside_schedule, new MaterialDialog.SingleButtonCallback() {
-//                    @Override
-//                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                // TODO date dialog (today or yesterday)
-                addArrivalEvent(context, task, (task1, e) -> {
-                    task1.setArrived();
-                    task1.saveEventually();
-
-                    update(context, task1);
-                });
-//                    }
-//                }).show();
-            }
-        }
 
         @Override
         public void onActionAbort(Context context, ParseTask task) {
@@ -427,21 +383,15 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         private void addArrivalEvent(final Context context, final ParseTask task, final GetCallback<ParseTask> callback) {
             final DateTime timestamp = new DateTime();
 
-            // TODO date dialog (today or yesterday)
             RadialTimePickerDialogFragment timePickerDialog = new RadialTimePickerDialogFragment()
                     .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
                     .setOnTimeSetListener((dialog, hourOfDay, minute) -> {
-                        final Calendar cal = Calendar.getInstance();
-                        cal.setTime(new Date());
-                        cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        cal.set(Calendar.MINUTE, minute);
-
 
                         new EventLog.Builder(context)
                                 .taskPointer(task, ParseTask.EVENT_TYPE.ARRIVE)
                                 .event(context.getString(R.string.event_arrived))
                                 .automatic(false)
-                                .deviceTimeStamp(cal.getTime())
+                                .deviceTimeStamp(task.getArrivalDate(hourOfDay, minute))
                                 .eventCode(EventLog.EventCodes.REGULAR_ARRIVED).saveAsync();
 
 
@@ -659,7 +609,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         }
 
-        public void onActionPending(final Context context, final ParseTask task) {
+        void onActionPending(final Context context, final ParseTask task) {
 
             if (ParseModule.distanceToMeters(task.getPosition()) <= task.getRadius()) {
                 new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.manual_pending, context.getString(R.string.manual_pending_distance, task.getRadius())).show();

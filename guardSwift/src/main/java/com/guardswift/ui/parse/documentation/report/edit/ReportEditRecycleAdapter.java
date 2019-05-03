@@ -19,7 +19,6 @@ import com.parse.ParseQueryAdapter;
 import org.joda.time.DateTime;
 
 import java.lang.ref.WeakReference;
-import java.util.Calendar;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -153,12 +152,9 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
             RadialTimePickerDialogFragment timePickerDialog = new RadialTimePickerDialogFragment()
                     .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
                     .setOnTimeSetListener((dialog, hourOfDay, minute) -> {
-                        final Calendar cal = Calendar.getInstance();
-                        cal.setTime(timestamp.toDate());
-                        cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                        cal.set(Calendar.MINUTE, minute);
+                        ParseTask task = eventLog.getTask();
                         // update locally
-                        eventLog.setDeviceTimestamp(cal.getTime());
+                        eventLog.setDeviceTimestamp(task.getArrivalDate(hourOfDay, minute));
                         // update card
                         eventLogCard.setEventLog(eventLog);
                         // update online

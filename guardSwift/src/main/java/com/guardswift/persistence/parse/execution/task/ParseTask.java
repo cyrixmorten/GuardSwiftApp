@@ -40,7 +40,6 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.SaveCallback;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -51,7 +50,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import bolts.Continuation;
 import bolts.Task;
 
 
@@ -446,6 +444,30 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         setGuardCurrent();
     }
 
+    public Date getArrivalDate(int hourOfDay, int minuteOfHour) {
+        DateTimeZone dtz = DateTimeZone.getDefault();
+
+        LocalDateTime taskGroupResetTime = new LocalDateTime(getTaskGroupResetDate(), dtz);
+
+        LocalDateTime now = new LocalDateTime(dtz);
+        LocalDateTime hourAndMinuteTime = new LocalDateTime(dtz)
+                .withHourOfDay(hourOfDay)
+                .withMinuteOfHour(minuteOfHour);
+
+        boolean nowHasPastMidnight = now.getHourOfDay() <= taskGroupResetTime.getHourOfDay();
+        boolean inputTimeHasPastMidnight = hourAndMinuteTime.getHourOfDay() <= taskGroupResetTime.getHourOfDay();
+
+        if (nowHasPastMidnight && !inputTimeHasPastMidnight) {
+            hourAndMinuteTime = hourAndMinuteTime.minusDays(1);
+        }
+
+        if (inputTimeHasPastMidnight && !nowHasPastMidnight) {
+            hourAndMinuteTime = hourAndMinuteTime.plusDays(1);
+        }
+
+        return hourAndMinuteTime.toDate();
+    }
+
     public void setArrived() {
         setStatus(STATUS.ARRIVED);
         setGuardCurrent();
@@ -528,7 +550,6 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
         return time;
     }
-
 
     public boolean isAfterScheduledStartTime() {
         if (isRegularTask() || isRaidTask()) {
