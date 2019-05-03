@@ -34,8 +34,6 @@ import com.parse.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -163,18 +161,13 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     }
 
     private void updateArrivalTime(EventLog eventLog) {
-        final DateTime timestamp = new DateTime();
+        final DateTime timestamp = new DateTime(eventLog.getDeviceTimestamp());
 
         RadialTimePickerDialogFragment timePickerDialog = new RadialTimePickerDialogFragment()
                 .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
                 .setOnTimeSetListener((dialog, hourOfDay, minute) -> {
-                    final Calendar cal = Calendar.getInstance();
-                    cal.setTime(new Date());
-                    cal.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                    cal.set(Calendar.MINUTE, minute);
 
-
-                    eventLog.setDeviceTimestamp(cal.getTime());
+                    eventLog.setDeviceTimestamp(task.getArrivalDate(hourOfDay, minute));
 
                     eventLog.saveEventuallyAndNotify();
                 })
