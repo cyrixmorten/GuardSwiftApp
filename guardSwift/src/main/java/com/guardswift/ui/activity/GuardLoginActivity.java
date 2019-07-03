@@ -220,7 +220,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.FOREGROUND_SERVICE})
     public void attemptLogin() {
 
         Log.d(TAG, "attemptLogin");
@@ -326,30 +326,24 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 //                return GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard);
 //            }
 //        })
-                .continueWithTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) {
-                        if (task.isFaulted()) {
-                            handleFailedLogin("updateAllClasses", task.getError());
-                        }
-                        return task;
+                .continueWithTask(task -> {
+                    if (task.isFaulted()) {
+                        handleFailedLogin("updateAllClasses", task.getError());
                     }
+                    return task;
                 })
-                .onSuccess(new Continuation<Void, Void>() {
-                    @Override
-                    public Void then(Task<Void> task) {
+                .onSuccess((Continuation<Void, Void>) task -> {
 
-                        mGuardIdView.setText("");
+                    mGuardIdView.setText("");
 
-                        parseModule.login(guard);
+                    parseModule.login(guard);
 
-                        Intent intent = new Intent(context, MainActivity.class);
-                        context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
+                    Intent intent = new Intent(context, MainActivity.class);
+                    context.startActivity(Intent.makeRestartActivityTask(intent.getComponent()));
 
-                        GuardLoginActivity.this.finish();
+                    GuardLoginActivity.this.finish();
 
-                        return null;
-                    }
+                    return null;
                 });
 
     }
@@ -390,22 +384,19 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         }
 
         new Update.QueryBuilder(false).build().addDescendingOrder(Update.versionNumber).getFirstInBackground()
-                .continueWith(new Continuation<Update, Object>() {
-                    @Override
-                    public Object then(Task<Update> task) {
-                        if (task.isFaulted()) {
-                            new HandleException(GuardLoginActivity.this, TAG, "Fetch updates", task.getError());
-                            return null;
-                        }
-
-                        Update update = task.getResult();
-
-                        if (update.isNewerThanInstalled()) {
-                            showDownloadOption(update);
-                        }
-
+                .continueWith(task -> {
+                    if (task.isFaulted()) {
+                        new HandleException(GuardLoginActivity.this, TAG, "Fetch updates", task.getError());
                         return null;
                     }
+
+                    Update update = task.getResult();
+
+                    if (update.isNewerThanInstalled()) {
+                        showDownloadOption(update);
+                    }
+
+                    return null;
                 });
     }
 
@@ -421,34 +412,26 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         }
 
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+        runOnUiThread(() -> {
 
-                if (!targetUpdate.getVersionName().equals(updateVersionName)) {
-                    if (updateDialog != null) {
-                        updateDialog.dismiss();
-                    }
-
-                    updateVersionName = targetUpdate.getVersionName();
-                    updateDialog = new MaterialDialog.Builder(GuardLoginActivity.this)
-                            .title(R.string.new_update_available)
-                            .positiveText(R.string.install_update)
-                            .negativeText(R.string.later)
-                            .content(getString(R.string.current_and_latest_version, device.getVersionName(), targetUpdate.getVersionName()))
-                            .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    GuardLoginActivityPermissionsDispatcher.downloadAndInstallWithCheck(GuardLoginActivity.this, targetUpdate);
-                                }
-                            }).build();
+            if (!targetUpdate.getVersionName().equals(updateVersionName)) {
+                if (updateDialog != null) {
+                    updateDialog.dismiss();
                 }
 
-                if (!updateDialog.isShowing()) {
-                    updateDialog.show();
-                }
-
+                updateVersionName = targetUpdate.getVersionName();
+                updateDialog = new MaterialDialog.Builder(GuardLoginActivity.this)
+                        .title(R.string.new_update_available)
+                        .positiveText(R.string.install_update)
+                        .negativeText(R.string.later)
+                        .content(getString(R.string.current_and_latest_version, device.getVersionName(), targetUpdate.getVersionName()))
+                        .onPositive((dialog, which) -> GuardLoginActivityPermissionsDispatcher.downloadAndInstallWithCheck(GuardLoginActivity.this, targetUpdate)).build();
             }
+
+            if (!updateDialog.isShowing()) {
+                updateDialog.show();
+            }
+
         });
     }
 
@@ -474,30 +457,24 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
 
         Log.i(TAG, "downloading update");
-        apkFile.getFileInBackground(new GetFileCallback() {
-            @Override
-            public void done(File file, ParseException e) {
+        apkFile.getFileInBackground((file, e) -> {
 
-                Log.i(TAG, "downloading update done: " + (e == null));
+            Log.i(TAG, "downloading update done: " + (e == null));
 
-                if (e != null) {
-                    new HandleException(TAG, "Failed to download update", e);
-                    installInProgress = false;
-                    return;
-                }
-
-                UpdateApp.fromFile(GuardLoginActivity.this, file);
-
-                downloadDialog.dismiss();
-
+            if (e != null) {
+                new HandleException(TAG, "Failed to download update", e);
+                installInProgress = false;
+                return;
             }
-        }, new ProgressCallback() {
-            @Override
-            public void done(Integer percentDone) {
-                Log.i(TAG, "downloading update: " + percentDone);
 
-                downloadDialog.setProgress(percentDone);
-            }
+            UpdateApp.fromFile(GuardLoginActivity.this, file);
+
+            downloadDialog.dismiss();
+
+        }, percentDone -> {
+            Log.i(TAG, "downloading update: " + percentDone);
+
+            downloadDialog.setProgress(percentDone);
         });
     }
 
@@ -532,13 +509,10 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
             return;
         }
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "showLogin");
-                mLoginFormView.setVisibility(show ? GONE : VISIBLE);
-                mLoginStatusView.setVisibility(show ? VISIBLE : GONE);
-            }
+        runOnUiThread(() -> {
+            Log.d(TAG, "showLogin");
+            mLoginFormView.setVisibility(show ? GONE : VISIBLE);
+            mLoginStatusView.setVisibility(show ? VISIBLE : GONE);
         });
     }
 
@@ -581,17 +555,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     @OnShowRationale({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     void showRationaleForPermissions(final PermissionRequest request) {
         new CommonDialogsBuilder.MaterialDialogs(this).okCancel(R.string.permissions, getString(R.string.permissions_rationale),
-                new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        request.proceed();
-                    }
-                }, new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        request.cancel();
-                    }
-                }
+                (dialog, which) -> request.proceed(), (dialog, which) -> request.cancel()
         ).show();
 
     }

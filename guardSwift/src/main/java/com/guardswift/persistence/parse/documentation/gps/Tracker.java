@@ -66,39 +66,36 @@ public class Tracker extends ExtendedParseObject {
 
         Log.d(TAG, "Tracker create: " + guard.getName());
 
-        return new TrackerQueryBuilder(false).matching(guard).inProgress(true).build().getFirstInBackground().continueWithTask(new Continuation<Tracker, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Tracker> task) throws Exception {
+        return new TrackerQueryBuilder(false).matching(guard).inProgress(true).build().getFirstInBackground().continueWithTask(task -> {
 
-                Tracker tracker = task.getResult();
+            Tracker tracker = task.getResult();
 
-                DateTime started = new DateTime(guard.getLastLogin());
-                DateTime ended = DateTime.now();
+            DateTime started = new DateTime(guard.getLastLogin());
+            DateTime ended = DateTime.now();
 
-                if (task.isFaulted()) {
-                    Exception e = task.getError();
+            if (task.isFaulted()) {
+                Exception e = task.getError();
 
-                    if (e instanceof ParseException && ((ParseException) e).getCode() == ParseException.OBJECT_NOT_FOUND) {
-                        Log.d(TAG, "Creating new Tracker");
-                        tracker = new Tracker();
+                if (e instanceof ParseException && ((ParseException) e).getCode() == ParseException.OBJECT_NOT_FOUND) {
+                    Log.d(TAG, "Creating new Tracker");
+                    tracker = new Tracker();
 
-                        tracker.put(Tracker.sampleStart, started.toDate());
-                        tracker.put(Tracker.guard, ParseObject.createWithoutData(Guard.class, guard.getObjectId()));
-                        tracker.put(Tracker.installation, ParseInstallation.getCurrentInstallation());
-                        tracker.put(ExtendedParseObject.owner, ParseUser.getCurrentUser());
-                    } else {
-                        new HandleException(TAG, "Error finding existing Tracker", e);
+                    tracker.put(Tracker.sampleStart, started.toDate());
+                    tracker.put(Tracker.guard, ParseObject.createWithoutData(Guard.class, guard.getObjectId()));
+                    tracker.put(Tracker.installation, ParseInstallation.getCurrentInstallation());
+                    tracker.put(ExtendedParseObject.owner, ParseUser.getCurrentUser());
+                } else {
+                    new HandleException(TAG, "Error finding existing Tracker", e);
 
-                        throw e;
-                    }
+                    throw e;
                 }
-
-                tracker.put(Tracker.sampleEnd, ended.toDate());
-                tracker.put(Tracker.sampleMinutes, Minutes.minutesBetween(started, ended).getMinutes());
-                tracker.put(Tracker.clientTimestamp, ended.toDate());
-
-                return tracker.uploadData(context, progressCallback, partialUpload);
             }
+
+            tracker.put(Tracker.sampleEnd, ended.toDate());
+            tracker.put(Tracker.sampleMinutes, Minutes.minutesBetween(started, ended).getMinutes());
+            tracker.put(Tracker.clientTimestamp, ended.toDate());
+
+            return tracker.uploadData(context, progressCallback, partialUpload);
         });
 
     }
@@ -124,34 +121,23 @@ public class Tracker extends ExtendedParseObject {
     private Task<Void> saveGPSParseFile(final Context context, final ParseFile file, final ProgressCallback progressCallback, final boolean partialUpload) {
 
 
-        return deleteExistingGPSParseFile(context).onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
-                return file.saveInBackground(progressCallback);
-            }
-        }).onSuccessTask(new Continuation<Void, Task<Void>>() {
-            @Override
-            public Task<Void> then(Task<Void> task) {
+        return deleteExistingGPSParseFile(context).onSuccessTask(task -> file.saveInBackground(progressCallback)).onSuccessTask(task -> {
 
-                put(Tracker.gpsFile, file);
-                put(Tracker.inProgress, partialUpload);
+            put(Tracker.gpsFile, file);
+            put(Tracker.inProgress, partialUpload);
 
-                return saveInBackground();
-            }
-        }).continueWith(new Continuation<Void, Void>() {
-            @Override
-            public Void then(Task<Void> task) {
-                if (task.isFaulted()) {
-                    new HandleException(context, TAG, "Error saving GPS file", task.getError());
-                    return null;
-                }
-
-                if (!partialUpload) {
-                    context.deleteFile(LOCAL_GPS_FILE_NAME);
-                }
-
+            return saveInBackground();
+        }).continueWith(task -> {
+            if (task.isFaulted()) {
+                new HandleException(context, TAG, "Error saving GPS file", task.getError());
                 return null;
             }
+
+            if (!partialUpload) {
+                context.deleteFile(LOCAL_GPS_FILE_NAME);
+            }
+
+            return null;
         });
 
 
@@ -198,18 +184,15 @@ public class Tracker extends ExtendedParseObject {
             return;
         }
 
-        getParseFile(Tracker.gpsFile).getDataInBackground(new GetDataCallback() {
-            @Override
-            public void done(byte[] data, ParseException e) {
-                if (e != null) {
-                    callback.done(null, e);
-                }
+        getParseFile(Tracker.gpsFile).getDataInBackground((data, e) -> {
+            if (e != null) {
+                callback.done(null, e);
+            }
 
-                try {
-                    callback.done(TrackerData.locationJSONArraytoTrackerData(FileIO.decompress(data)), null);
-                } catch (IOException e1) {
-                    callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Unable to parse GPS data"));
-                }
+            try {
+                callback.done(TrackerData.locationJSONArraytoTrackerData(FileIO.decompress(data)), null);
+            } catch (IOException e1) {
+                callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Unable to parse GPS data"));
             }
         }, progressCallback);
     }

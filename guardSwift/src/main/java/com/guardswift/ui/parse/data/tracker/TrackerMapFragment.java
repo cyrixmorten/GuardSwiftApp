@@ -122,12 +122,7 @@ public class TrackerMapFragment extends BaseMapFragment {
             mSlideUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             mSlideUpPanel.setTouchEnabled(false);
             mSlideUpPanel.setAnchorPoint(0.3f);
-            mSlideUpPanel.setFadeOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mSlideUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                }
-            });
+            mSlideUpPanel.setFadeOnClickListener(view1 -> mSlideUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED));
             mSlideUpPanel.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
                 @Override
                 public void onPanelSlide(View panel, float slideOffset) {
@@ -192,15 +187,13 @@ public class TrackerMapFragment extends BaseMapFragment {
     public void onMapReady(final GoogleMap googleMap) {
         Log.d(TAG, "onMapReady: " + (tracker != null));
         if (tracker != null) {
-            loadTrack(tracker, new Tracker.DownloadTrackerDataCallback() {
-                @Override
-                public void done(final TrackerData[] trackerData, Exception e) {
-                    if (e != null) {
-                        LogError.log(TAG, "Unable to download trackerData for Tracker: " + tracker.getObjectId(), e);
-                        return;
-                    }
+            loadTrack(tracker, (trackerData, e) -> {
+                if (e != null) {
+                    LogError.log(TAG, "Unable to download trackerData for Tracker: " + tracker.getObjectId(), e);
+                    return;
+                }
 
-                    updateTrackData(trackerData);
+                updateTrackData(trackerData);
 
 
 //                    mChart.setLineChartData(chartData);
@@ -212,30 +205,29 @@ public class TrackerMapFragment extends BaseMapFragment {
 
 
 
-                    if (mPositions.size() > 50) {
-                        addGraphData(trackerData);
-                        mPreviewChart.setLineChartData(previewData);
-                        mPreviewChart.setViewportChangeListener(new ViewportListener(googleMap));
+                if (mPositions.size() > 50) {
+                    addGraphData(trackerData);
+                    mPreviewChart.setLineChartData(previewData);
+                    mPreviewChart.setViewportChangeListener(new ViewportListener(googleMap));
 
-                        previewX(false, 10);
-                    } else {
-                        mPreviewChart.setVisibility(View.GONE);
-                    }
-
-
-
-                    googleMap.clear();
-
-
-
-                    if (!mPositions.isEmpty()) {
-                        zoomFit(googleMap, mPositions);
-                        addPolyLines(googleMap, mPositions);
-                    } else {
-                        ToastHelper.toast(getContext(), getString(R.string.error_downloading_file));
-                    }
-
+                    previewX(false, 10);
+                } else {
+                    mPreviewChart.setVisibility(View.GONE);
                 }
+
+
+
+                googleMap.clear();
+
+
+
+                if (!mPositions.isEmpty()) {
+                    zoomFit(googleMap, mPositions);
+                    addPolyLines(googleMap, mPositions);
+                } else {
+                    ToastHelper.toast(getContext(), getString(R.string.error_downloading_file));
+                }
+
             });
         }
     }
@@ -365,12 +357,9 @@ public class TrackerMapFragment extends BaseMapFragment {
                     new TrackerPolyline(Arrays.asList(a, b), trackerData)
             );
 
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (isAdded()) {
-                        googleMap.addPolyline(option);
-                    }
+            new Handler().postDelayed(() -> {
+                if (isAdded()) {
+                    googleMap.addPolyline(option);
                 }
             }, DELAY_NEXT_RENDER);
 
@@ -378,37 +367,31 @@ public class TrackerMapFragment extends BaseMapFragment {
         }
 
 
-        googleMap.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
-            @Override
-            public void onPolylineClick(Polyline polyline) {
-                Log.d(TAG, polyline.getPoints().toString());
-                for (TrackerPolyline trackerPolyline: trackerPolylines) {
-                    if (trackerPolyline.getPositions().equals(polyline.getPoints())) {
-                        Log.d(TAG, trackerPolyline.getTrackerData().toString());
+        googleMap.setOnPolylineClickListener(polyline -> {
+            Log.d(TAG, polyline.getPoints().toString());
+            for (TrackerPolyline trackerPolyline: trackerPolylines) {
+                if (trackerPolyline.getPositions().equals(polyline.getPoints())) {
+                    Log.d(TAG, trackerPolyline.getTrackerData().toString());
 
-                        TrackerData data = trackerPolyline.getTrackerData();
+                    TrackerData data = trackerPolyline.getTrackerData();
 
-                        String time = data.getHumanReadableLongDate(getContext());
-                        String activity = getString(R.string.activity) + ": " + ActivityDetectionModule.getHumanReadableNameFromType(getContext(), data.getActivityType());
-                        setSlidingPanelTitle(time, activity);
+                    String time = data.getHumanReadableLongDate(getContext());
+                    String activity = getString(R.string.activity) + ": " + ActivityDetectionModule.getHumanReadableNameFromType(getContext(), data.getActivityType());
+                    setSlidingPanelTitle(time, activity);
 
-                        mSlideUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                        mSlideUpPanel.setTouchEnabled(true);
-                        setSlidingPanelFragment(TrackerDataFragment.newInstance(data));
-                    }
+                    mSlideUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    mSlideUpPanel.setTouchEnabled(true);
+                    setSlidingPanelFragment(TrackerDataFragment.newInstance(data));
                 }
             }
         });
 
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                Log.d(TAG, "Map clicked at: " + latLng);
-                setSlidingPanelTitle(getString(R.string.position), getString(R.string.latlng, latLng.latitude, latLng.longitude));
+        googleMap.setOnMapClickListener(latLng -> {
+            Log.d(TAG, "Map clicked at: " + latLng);
+            setSlidingPanelTitle(getString(R.string.position), getString(R.string.latlng, latLng.latitude, latLng.longitude));
 
-                mSlideUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-                mSlideUpPanel.setTouchEnabled(false);
-            }
+            mSlideUpPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            mSlideUpPanel.setTouchEnabled(false);
         });
     }
 
@@ -476,12 +459,7 @@ public class TrackerMapFragment extends BaseMapFragment {
     }
 
     private void loadTrack(Tracker tracker, Tracker.DownloadTrackerDataCallback callback) {
-        tracker.downloadTrackerData(callback, new ProgressCallback() {
-            @Override
-            public void done(Integer percentDone) {
-                Log.d(TAG, "Percent: " + percentDone);
-            }
-        });
+        tracker.downloadTrackerData(callback, percentDone -> Log.d(TAG, "Percent: " + percentDone));
     }
 
 }
