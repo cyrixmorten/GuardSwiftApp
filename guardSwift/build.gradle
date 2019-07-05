@@ -41,8 +41,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 523
-        versionName "5.2.3"
+        versionCode 530
+        versionName "5.3.0"
 
         // Enabling multidex support.
         multiDexEnabled true
