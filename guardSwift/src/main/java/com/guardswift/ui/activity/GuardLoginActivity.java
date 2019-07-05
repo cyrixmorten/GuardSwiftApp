@@ -220,7 +220,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.FOREGROUND_SERVICE})
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     public void attemptLogin() {
 
         Log.d(TAG, "attemptLogin");
@@ -233,31 +233,22 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         // Reset errors.
         mGuardIdView.setError(null);
 
-        boolean cancel = false;
-        View focusView = null;
 
-        int mGuardId = 0;
         // Store values at the time of the login attempt.
         try {
-            mGuardId = Integer.parseInt(mGuardIdView.getText().toString());
-        } catch (NumberFormatException e) {
-            mGuardIdView.setError(getString(R.string.error_invalid_guardid));
-            focusView = mGuardIdView;
-            cancel = true;
-        }
+            int guardId = Integer.parseInt(mGuardIdView.getText().toString());
 
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
-        } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
             showProgress(true);
 
-            loginGuard(mGuardId);
+            loginGuard(guardId);
+        } catch (NumberFormatException e) {
+            mGuardIdView.setError(getString(R.string.error_invalid_guardid));
+            mGuardIdView.requestFocus();
         }
+
     }
 
     private boolean handleFailedLogin(String context, Exception e) {
