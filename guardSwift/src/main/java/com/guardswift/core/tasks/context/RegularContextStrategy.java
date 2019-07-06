@@ -25,6 +25,7 @@ public class RegularContextStrategy extends BaseContextStrategy {
 
     @Override
     boolean pendingTaskUpdate(Location current, Location previous, DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory, float distanceToClientMeters) {
+
         if (distanceToClientMeters < task.getRadius()) {
 
             int inactiveCount = 0;
@@ -38,7 +39,7 @@ public class RegularContextStrategy extends BaseContextStrategy {
 
                 }
             }
-
+            
             boolean onFootOrInactive = ActivityDetectionModule.isOnFoot(currentActivity.getType()) ||
                             inactiveCount == FusedLocationTrackerService.ACTIVITY_HISTORY_SIZE;
 
@@ -62,7 +63,7 @@ public class RegularContextStrategy extends BaseContextStrategy {
     @Override
     boolean arrivedTaskUpdate(Location current, Location previous, DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory, float distanceToClientMeters) {
 
-        boolean isWellOutsideRadius = distanceToClientMeters > task.getRadius() * 2;
+        boolean isWellOutsideRadius = distanceToClientMeters > (task.getRadius() * 4);
         boolean inVehicle = currentActivity.getType() == DetectedActivity.IN_VEHICLE;
         boolean triggerDeparture = (isWellOutsideRadius || inVehicle) && controller.canPerformAction(TaskController.ACTION.PENDING, task);
 

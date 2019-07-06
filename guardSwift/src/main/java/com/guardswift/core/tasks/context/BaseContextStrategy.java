@@ -23,7 +23,7 @@ abstract class BaseContextStrategy implements ContextUpdateStrategy {
     @Override
     public boolean updateContext(Location currentLocation, Location previousLocation, DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory) {
         if (!task.isFinished()) {
-            float distanceToClient = ParseModule.distanceBetweenMeters(currentLocation, task.getClient().getPosition());
+            float distanceToClient = ParseModule.distanceBetweenMeters(currentLocation, task.getPosition());
 
             if (task.isPending()) {
                 return pendingTaskUpdate(currentLocation, previousLocation, currentActivity, activityHistory, distanceToClient);

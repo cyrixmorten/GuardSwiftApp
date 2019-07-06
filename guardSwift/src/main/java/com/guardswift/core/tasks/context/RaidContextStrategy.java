@@ -118,7 +118,7 @@ public class RaidContextStrategy extends BaseContextStrategy {
     @Override
     boolean arrivedTaskUpdate(Location current, Location previous, DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory, float distanceToClientMeters) {
 
-        boolean isWellOutsideRadius = distanceToClientMeters > task.getRadius() * 2;
+        boolean isWellOutsideRadius = distanceToClientMeters > (task.getRadius() * 4);
         boolean triggerDeparture = isWellOutsideRadius && controller.canPerformAction(TaskController.ACTION.PENDING, task);
 
         if (triggerDeparture) {

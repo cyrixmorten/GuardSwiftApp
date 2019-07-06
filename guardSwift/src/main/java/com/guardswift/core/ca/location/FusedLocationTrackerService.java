@@ -23,19 +23,20 @@ import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingService;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.cache.data.GuardCache;
-import com.guardswift.persistence.cache.task.ParseTasksCache;
+import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.query.TaskQueryBuilder;
 import com.guardswift.ui.notification.LocationNotification;
 import com.guardswift.ui.notification.NotificationID;
-import com.guardswift.util.datastructure.CircularArrayList;
 
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
+
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -68,12 +69,14 @@ public class FusedLocationTrackerService extends InjectingService {
     }
 
     private Queue<DetectedActivity> fiveLastDetectedActivities = EvictingQueue.create(ACTIVITY_HISTORY_SIZE);
-    private Location mLastTaskRadiusLocation;
+    private TaskGroupStarted lastTaskGroupStarted;
     private Disposable locationDisposable;
     private Tracker tracker;
 
+    private boolean taskRadiusUpdateInProgress;
+
     @Inject
-    ParseTasksCache tasksCache;
+    TaskGroupStartedCache taskGroupStartedCache;
     @Inject
     GuardCache guardCache;
 
@@ -176,10 +179,6 @@ public class FusedLocationTrackerService extends InjectingService {
                         DetectedActivity currentActivity = ActivityDetectionModule.Recent.getDetectedActivity();
                         fiveLastDetectedActivities.add(currentActivity);
 
-                        Log.d(TAG, "currentActivity: " + currentActivity.getType());
-                        Log.d(TAG, " - activityHistory: " + fiveLastDetectedActivities);
-                        Log.d(TAG, " - activityHistorySize: " + fiveLastDetectedActivities.size());
-
                         Location previousLocation = LocationModule.Recent.getLastKnownLocation();
 
                         inspectContextOfTasksWithinRadius(
@@ -207,10 +206,6 @@ public class FusedLocationTrackerService extends InjectingService {
 
     private void inspectContextOfTasksWithinRadius(Location currentLocation, Location previousLocation, DetectedActivity currentActivity) {
 
-        boolean updateLocalDataStore = mLastTaskRadiusLocation == null || currentLocation.distanceTo(mLastTaskRadiusLocation) >= 500;
-
-        Log.d(TAG, "Radius tasks: " + radiusTasks.size());
-
         boolean triggerUIUpdate = false;
         for (ParseTask task : radiusTasks) {
             boolean trigger = task.getContextUpdateStrategy().updateContext(
@@ -229,24 +224,36 @@ public class FusedLocationTrackerService extends InjectingService {
             EventBusController.postUIUpdate();
         }
 
-        if (updateLocalDataStore) {
+        TaskGroupStarted currentTaskGroupStarted = taskGroupStartedCache.getSelected();
+        boolean taskGroupChanged = lastTaskGroupStarted == null ||
+                !lastTaskGroupStarted.equals(currentTaskGroupStarted);
+
+        if (currentTaskGroupStarted != null && taskGroupChanged && !taskRadiusUpdateInProgress) {
+
+            taskRadiusUpdateInProgress = true;
+
             new TaskQueryBuilder(false)
-                    .matchingTaskTypes(Lists.newArrayList(ParseTask.TASK_TYPE_STRING.REGULAR, ParseTask.TASK_TYPE_STRING.RAID, ParseTask.TASK_TYPE_STRING.ALARM))
-                    .notMarkedFinished()
-                    .within(1, currentLocation).build()
-                    .findInBackground().onSuccess(boltsTask -> {
+                    .matching(currentTaskGroupStarted)
+                    .pendingOrArrived()
+                    .build()
+                    .setLimit(999)
+                    .findInBackground().continueWith(boltsTask -> {
 
                 List<ParseTask> tasks = boltsTask.getResult();
 
+                Log.d(TAG, "Updating radius tasks:");
+                for (ParseTask task : tasks) {
+                    Log.d(TAG, "Client: " + task.getClientName());
+                }
                 Log.d(TAG, "Updated tasks: " + tasks.size());
 
                 radiusTasks = tasks;
-                mLastTaskRadiusLocation = currentLocation;
+                lastTaskGroupStarted = currentTaskGroupStarted;
+                taskRadiusUpdateInProgress = false;
 
                 return null;
             });
         }
-
 
 
     }

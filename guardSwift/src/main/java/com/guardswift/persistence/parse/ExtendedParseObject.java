@@ -164,6 +164,10 @@ public abstract class ExtendedParseObject extends ParseObject implements Compara
         }
     }
 
+    protected int getIntSafe(String key, int defaultValue) {
+        return has(key) ? getInt(key) : defaultValue;
+    }
+
     protected String getStringSafe(String key) {
         return has(key) ? getString(key) : "";
     }

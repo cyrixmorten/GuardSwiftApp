@@ -49,8 +49,8 @@ import bolts.Task;
 @ParseClassName("Task")
 public class ParseTask extends ExtendedParseObject implements Positioned {
 
-    public static final int DEFAULT_RADIUS_RAID = 50;
-    public static final int DEFAULT_RADIUS_REGULAR = 100;
+    public static final int DEFAULT_RADIUS_RAID = 75;
+    public static final int DEFAULT_RADIUS_REGULAR = 150;
     public static final int DEFAULT_RADIUS_ALARM = 100;
 
     public enum TASK_TYPE {REGULAR, RAID, STATIC, ALARM}
@@ -105,6 +105,9 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public static final String timeEndDate = "timeEndDate";
     public static final String supervisions = "supervisions";
     public static final String timesArrived = "timesArrived";
+
+    public static final String minutesBetweenArrivals = "minutesBetweenArrivals";
+    public static final String lastArrivalDate = "lastArrivalDate";
 
     public static final String expireDate = "expireDate";
 
@@ -434,6 +437,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public void setArrived() {
+        setLastArrivalDate(new Date());
         setStatus(STATUS.ARRIVED);
         setGuardCurrent();
     }
@@ -557,7 +561,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         int relaxMinutes = 30;
 
         // always return true if debugging
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG && !getClientName().equals("Lidl")) {
             return true;
         }
 
@@ -567,17 +571,26 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
                 DateTime now = DateTime.now(dtz);
 
+                Log.d(TAG, "CLIENT: " + getClientName());
                 LocalDateTime timeEnd = getAdjustedTime(getTimeEnd(), dtz);
                 long diffMsAfterEnd = Math.abs(now.toDate().getTime() - timeEnd.toDate().getTime());
                 long diffMinutesAfterEnd = TimeUnit.MINUTES.convert(diffMsAfterEnd, TimeUnit.MILLISECONDS);
                 boolean isBeforeEnd = now.isBefore(timeEnd.toDateTime());
                 boolean isBeforeEndRelaxed = isBeforeEnd || diffMinutesAfterEnd < relaxMinutes;
 
+                Log.d(TAG, "diffMinutesAfterEnd: " + diffMinutesAfterEnd);
+                Log.d(TAG, "isBeforeEnd: " + isBeforeEnd);
+                Log.d(TAG, "isBeforeEndRelaxed: " + isBeforeEndRelaxed);
+
                 LocalDateTime timeStart = getAdjustedTime(getTimeStart(), dtz);
                 long diffMsBeforeStart = Math.abs(now.toDate().getTime() - timeStart.toDate().getTime());
                 long diffMinutesBeforeStart = TimeUnit.MINUTES.convert(diffMsBeforeStart, TimeUnit.MILLISECONDS);
                 boolean isAfterStart = now.isAfter(timeStart.toDateTime());
                 boolean isAfterStartRelaxed = isAfterStart || diffMinutesBeforeStart < relaxMinutes;
+
+                Log.d(TAG, "diffMinutesBeforeStart: " + diffMinutesBeforeStart);
+                Log.d(TAG, "isAfterStart: " + isAfterStart);
+                Log.d(TAG, "isAfterStartRelaxed: " + isAfterStartRelaxed);
 
                 return isBeforeEndRelaxed && isAfterStartRelaxed;
             } catch (Exception e) {
@@ -588,6 +601,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
         return true;
     }
+
 
     public int getRadius() {
         if (has(ParseTask.geofenceRadius)) {
@@ -698,6 +712,18 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
     public Date getExpireDate() {
         return getDate(ParseTask.expireDate);
+    }
+
+    public int getMinutesBetweenArrivals() {
+        return getIntSafe(ParseTask.minutesBetweenArrivals, 10);
+    }
+
+    public void setLastArrivalDate(Date date) {
+        put(ParseTask.lastArrivalDate, date);
+    }
+
+    public Date getLastArrivalDate() {
+        return getDate(ParseTask.lastArrivalDate);
     }
 
     public void setPlannedSupervisions(int supervisions) {

@@ -1,10 +1,17 @@
 package com.guardswift.core.tasks.controller;
 
+import android.util.Log;
+
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 public abstract class BaseTaskController implements TaskController {
+
+    private static final String TAG = BaseTaskController.class.getSimpleName();
 
     abstract ParseTask performAction(ACTION action, ParseTask task, boolean automatic);
 
@@ -16,7 +23,19 @@ public abstract class BaseTaskController implements TaskController {
     private boolean actionAllowedByTaskState(ACTION action, ParseTask task) {
         switch (task.getTaskState()) {
             case PENDING:
-                return action != ACTION.ABORT && action != ACTION.PENDING;
+
+                if (action == ACTION.ARRIVE) {
+                    Date lastArrivalDate = task.getLastArrivalDate();
+                    long timeSinceLastArrivalMs = lastArrivalDate != null ? Math.abs(new Date().getTime() - lastArrivalDate.getTime()) : Long.MAX_VALUE;
+                    long timeSinceLastArrivalMinutes = TimeUnit.MINUTES.convert(timeSinceLastArrivalMs, TimeUnit.MILLISECONDS);
+                    boolean enoughTimeSinceLastArrival = timeSinceLastArrivalMinutes > task.getMinutesBetweenArrivals();
+
+                    Log.d(TAG, "timeSinceLastArrivalMinutes: " + timeSinceLastArrivalMinutes);
+
+                    return enoughTimeSinceLastArrival;
+                }
+
+                return action != ACTION.PENDING;
             case ACCEPTED:
                 return action != ACTION.ACCEPT;
             case ARRIVED:
