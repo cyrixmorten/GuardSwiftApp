@@ -454,14 +454,13 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
             if (e != null) {
                 new HandleException(TAG, "Failed to download update", e);
-                installInProgress = false;
                 return;
             }
 
             UpdateApp.fromFile(GuardLoginActivity.this, file);
 
             downloadDialog.dismiss();
-
+            installInProgress = false;
         }, percentDone -> {
             Log.i(TAG, "downloading update: " + percentDone);
 

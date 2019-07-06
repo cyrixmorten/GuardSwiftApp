@@ -22,7 +22,7 @@ public class UpdateApp extends AsyncTask<File,Void,File> {
     public static void fromFile(Context context, File file) {
         Log.i(TAG, "Start update");
 
-        new UpdateApp(context.getApplicationContext()).execute(file);
+        new UpdateApp(context).execute(file);
     }
 
     private WeakReference<Context> activityWeakReference;
@@ -71,7 +71,9 @@ public class UpdateApp extends AsyncTask<File,Void,File> {
             try {
 
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                    Uri uri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".provider", file);
+                    Uri uri = FileProvider.getUriForFile(context,
+                            BuildConfig.APPLICATION_ID + ".provider",
+                            file);
 
                     Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
                     intent.setData(uri);
