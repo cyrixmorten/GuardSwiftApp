@@ -220,7 +220,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.FOREGROUND_SERVICE})
     public void attemptLogin() {
 
         Log.d(TAG, "attemptLogin");

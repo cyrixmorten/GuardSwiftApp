@@ -14,6 +14,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.guardswift.R;
+import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingActivityModule;
 import com.guardswift.persistence.cache.data.GuardCache;
@@ -115,6 +116,7 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
                                         DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_SHOW_DATE);
 
                                 fragmentDrawerCallback.selectItem(RegularTaskViewPagerFragment.newInstance(taskGroupStarted), taskGroupStarted.getName(), dateSubtitle);
+
                                 return false; // close drawer
                             }
                         }

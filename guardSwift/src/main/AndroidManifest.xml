@@ -182,18 +182,6 @@
             android:exported="false" />
 
         <service
-            android:name=".core.ca.geofence.RegisterGeofencesIntentService"
-            android:exported="false" />
-
-        <receiver
-            android:name=".core.ca.geofence.GeofenceBroadcastReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.guardswift.modules.geofence.GeofenceBroadcastReceiver.ACTION_RECEIVE_GEOFENCE" />
-            </intent-filter>
-        </receiver>
-
-        <service
             android:name=".core.ca.activity.ActivityRecognitionService"
             android:exported="false" />
 
@@ -237,6 +225,10 @@
             android:name=".ui.activity.MapsActivity"
             android:label="@string/title_activity_maps" />
 
+        <!-- Fix Google maps on Android 9.0+ -->
+        <!-- https://stackoverflow.com/questions/50782806/android-google-maps-java-lang-noclassdeffounderror-failed-resolution-of-lorg-a -->
+        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
+
         <!-- Needed when previewing PDFs -->
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -247,10 +239,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths"/>
         </provider>
-
-        <!-- Fix Google maps on Android 9.0+ -->
-        <!-- https://stackoverflow.com/questions/50782806/android-google-maps-java-lang-noclassdeffounderror-failed-resolution-of-lorg-a -->
-        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
 
     </application>
 

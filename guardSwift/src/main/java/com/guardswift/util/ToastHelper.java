@@ -13,12 +13,9 @@ import com.guardswift.BuildConfig;
 public class ToastHelper {
 
     public static void toast(final Context context, final String message) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                if (context != null) {
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-                }
+        new Handler(Looper.getMainLooper()).post(() -> {
+            if (context != null) {
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -27,11 +24,6 @@ public class ToastHelper {
         if (!BuildConfig.DEBUG)
             return;
 
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-            }
-        });
+        new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show());
     }
 }

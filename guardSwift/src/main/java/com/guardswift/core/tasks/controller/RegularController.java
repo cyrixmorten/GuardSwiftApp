@@ -58,7 +58,6 @@ public class RegularController extends BaseTaskController {
 
                 if (automatic) {
                     task.setArrived();
-                    tasksCache.addArrived(task);
                 }
                 
                 task.incrementArrivedCount();
@@ -74,8 +73,6 @@ public class RegularController extends BaseTaskController {
 
 
                 task.setAborted();
-                tasksCache.removeArrived(task);
-
 
                 break;
 
@@ -90,7 +87,6 @@ public class RegularController extends BaseTaskController {
 
 
                 task.setFinished();
-                tasksCache.removeArrived(task);
 
                 break;
 
@@ -103,7 +99,6 @@ public class RegularController extends BaseTaskController {
                         .eventCode(EventLog.EventCodes.REGULAR_PENDING);
 
                 task.setPending();
-                tasksCache.removeArrived(task);
                 break;
             case OPEN_WRITE_REPORT:
                 ParseTaskCreateReportActivity.start(ctx, task);

@@ -9,7 +9,6 @@ import android.support.multidex.MultiDex;
 import android.util.Log;
 import android.util.Pair;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.TypefaceProvider;
 import com.crashlytics.android.Crashlytics;
@@ -20,14 +19,12 @@ import com.google.common.collect.Sets;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.ca.activity.ActivityRecognitionService;
-import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
 import com.guardswift.core.ca.location.FusedLocationTrackerService;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingApplication;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.eventbus.events.BootstrapCompleted;
 import com.guardswift.jobs.GSJobCreator;
-import com.guardswift.jobs.oneoff.RebuildGeofencesJob;
 import com.guardswift.jobs.periodic.TrackerUploadJob;
 import com.guardswift.persistence.cache.ParseCacheFactory;
 import com.guardswift.persistence.cache.data.GuardCache;
@@ -61,7 +58,6 @@ import com.parse.ParseObject;
 import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 
@@ -242,13 +238,10 @@ public class GuardSwiftApplication extends InjectingApplication {
     }
 
     private void reconnectLiveQuery(final ParseLiveQueryClient client) {
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!liveQueryConnected) {
-                    client.reconnect();
-                    reconnectLiveQuery(client);
-                }
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (!liveQueryConnected) {
+                client.reconnect();
+                reconnectLiveQuery(client);
             }
         }, 10000);
     }
@@ -293,12 +286,7 @@ public class GuardSwiftApplication extends InjectingApplication {
             installation.put("owner", user);
             user.fetchInBackground();
         }
-        installation.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                ParsePush.subscribeInBackground("alarm");
-            }
-        });
+        installation.saveInBackground(e -> ParsePush.subscribeInBackground("alarm"));
     }
 
     private void setupFabric() {
@@ -319,16 +307,13 @@ public class GuardSwiftApplication extends InjectingApplication {
         ActivityRecognitionService.start(this);
         FusedLocationTrackerService.start(this);
 
-        RebuildGeofencesJob.scheduleJob(false);
         TrackerUploadJob.scheduleJob();
     }
 
     public void stopServices() {
         ActivityRecognitionService.stop(this);
         FusedLocationTrackerService.stop(this);
-        RegisterGeofencesIntentService.stop(this);
 
-        RebuildGeofencesJob.cancelJob();
         TrackerUploadJob.cancelJob();
     }
 
@@ -386,37 +371,34 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         }
 
-        final Continuation<List<ParseObject>, Void> updateClassSuccess = new Continuation<List<ParseObject>, Void>() {
-            @Override
-            public Void then(Task<List<ParseObject>> task) {
+        final Continuation<List<ParseObject>, Void> updateClassSuccess = task -> {
 
-                int currentProgress = updateClassProgress.incrementAndGet();
-                int outOfTotal = updateClassTotal.get();
+            int currentProgress = updateClassProgress.incrementAndGet();
+            int outOfTotal = updateClassTotal.get();
 
-                int percentProgress = (currentProgress / outOfTotal) * 100;
+            int percentProgress = (currentProgress / outOfTotal) * 100;
 
-                if (updateDialog != null) {
-                    updateDialog.setMaxProgress(outOfTotal);
-                    updateDialog.setProgress(currentProgress);
-                }
-
-
-                Log.i(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
-
-                return null;
+            if (updateDialog != null) {
+                updateDialog.setMaxProgress(outOfTotal);
+                updateDialog.setProgress(currentProgress);
             }
+
+
+            Log.i(TAG, String.format("update progress: %1d/%2d percent: %3d", currentProgress, outOfTotal, percentProgress));
+
+            return null;
         };
 
 
         ArrayList<Pair<ExtendedParseObject, ParseQuery>> updateQueries = Lists.newArrayList();
 
         EventType eventType = new EventType();
-        updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(eventType, eventType.getAllNetworkQuery()));
+        updateQueries.add(new Pair<>(eventType, eventType.getAllNetworkQuery()));
 
         TaskGroupStarted taskGroupStarted = new TaskGroupStarted();
 
         if (guard.canAccessRegularTasks()) {
-            updateQueries.add(new Pair<ExtendedParseObject, ParseQuery>(taskGroupStarted, new TaskGroupStartedQueryBuilder(false).whereActive().build()));
+            updateQueries.add(new Pair<>(taskGroupStarted, new TaskGroupStartedQueryBuilder(false).whereActive().build()));
         }
 
         updateClassTotal.set(updateQueries.size());
@@ -428,69 +410,53 @@ public class GuardSwiftApplication extends InjectingApplication {
             final ExtendedParseObject parseObject = objectQueryPair.first;
             final ParseQuery<ParseObject> query = objectQueryPair.second;
 
-            resultTask = resultTask.onSuccessTask(new Continuation<Void, Task<Void>>() {
-                @Override
-                public Task<Void> then(Task<Void> task) {
-                    return parseObject.updateAll(query, 1000).onSuccess(updateClassSuccess);
-                }
-            });
+            resultTask = resultTask.onSuccessTask(task -> parseObject.updateAll(query, 1000).onSuccess(updateClassSuccess));
         }
 
         return resultTask
-                .continueWithTask(new Continuation<Void, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(Task<Void> task) {
+                .continueWithTask((Continuation<Void, Task<Void>>) task -> {
 
-                        Log.i(TAG, "Bootstrap done");
+                    Log.i(TAG, "Bootstrap done");
 
-                        // no matter what happens e.g. success/error, the dialog should be dismissed
-                        if (updateDialog != null) {
-                            updateDialog.dismiss();
-                            updateDialog = null;
-                        }
+                    // no matter what happens e.g. success/error, the dialog should be dismissed
+                    if (updateDialog != null) {
+                        updateDialog.dismiss();
+                        updateDialog = null;
+                    }
 
-                        bootstrapInProgress = false;
+                    bootstrapInProgress = false;
 
-                        if (task.isFaulted()) {
-                            Log.i(TAG, "Bootstrap failed");
-                            new HandleException(TAG, "bootstrapParseObjectsLocally", task.getError());
+                    if (task.isFaulted()) {
+                        Log.i(TAG, "Bootstrap failed");
+                        new HandleException(TAG, "bootstrapParseObjectsLocally", task.getError());
 
 
-                            if (activity != null) {
-                                if (getLoggedIn() != null) {
-                                    retryBootstrapDialog = new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), new MaterialDialog.SingleButtonCallback() {
-                                        @Override
-                                        public void onClick(MaterialDialog materialDialog, DialogAction dialogAction) {
-                                            bootstrapParseObjectsLocally(activity, guard);
-                                        }
-                                    }).cancelable(false).show();
-                                } else {
-                                    ToastHelper.toast(activity, getString(R.string.error_an_error_occured));
-                                }
+                        if (activity != null) {
+                            if (getLoggedIn() != null) {
+                                retryBootstrapDialog = new CommonDialogsBuilder.MaterialDialogs(activity).ok(R.string.title_internet_missing, getString(R.string.bootstrapping_parseobjects_failed), (materialDialog, dialogAction) -> bootstrapParseObjectsLocally(activity, guard)).cancelable(false).show();
+                            } else {
+                                ToastHelper.toast(activity, getString(R.string.error_an_error_occured));
                             }
-
-
-                            return Task.forError(task.getError());
                         }
 
 
-                        return Task.forResult(null);
+                        return Task.forError(task.getError());
                     }
+
+
+                    return Task.forResult(null);
                 })
-                .onSuccess(new Continuation<Void, Void>() {
-                    @Override
-                    public Void then(Task<Void> task) {
+                .onSuccess(task -> {
 
-                        Log.i(TAG, "Bootstrap success");
+                    Log.i(TAG, "Bootstrap success");
 
-                        EventBusController.post(new BootstrapCompleted());
+                    EventBusController.post(new BootstrapCompleted());
 
-                        parseObjectsBootstrapped = true;
+                    parseObjectsBootstrapped = true;
 
-                        startServices();
+                    startServices();
 
-                        return null;
-                    }
+                    return null;
                 });
     }
 

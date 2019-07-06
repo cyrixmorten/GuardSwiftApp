@@ -126,12 +126,6 @@ public class RegularRaidTaskQueryBuilder extends ParseQueryBuilder<ParseTask> {
     }
 
 
-    public RegularRaidTaskQueryBuilder isRaid(boolean isRaid) {
-        String type = isRaid ? ParseTask.TASK_TYPE_STRING.RAID : ParseTask.TASK_TYPE_STRING.REGULAR;
-
-        query.whereEqualTo(ParseTask.taskType, type);
-        return this;
-    }
 
     public RegularRaidTaskQueryBuilder matching(ParseTask.TASK_TYPE taskType) {
         query.whereEqualTo(ParseTask.taskType, taskType.toString());
