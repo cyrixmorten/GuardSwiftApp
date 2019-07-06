@@ -56,6 +56,25 @@ public class ActivityDetectionModule {
         }
     }
 
+    public static boolean isInactive(int type) {
+        return !ActivityDetectionModule.isMoving(type);
+    }
+
+    public static boolean isOnFoot(int type) {
+        switch (type) {
+            // These types mean that the user is probably not moving
+            case DetectedActivity.ON_FOOT:
+            case DetectedActivity.RUNNING:
+            case DetectedActivity.WALKING:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isUnknown(int type) {
+        return type == DetectedActivity.UNKNOWN;
+    }
 
     /**
      * Map detected activity types to strings

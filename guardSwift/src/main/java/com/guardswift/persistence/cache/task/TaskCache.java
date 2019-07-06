@@ -18,9 +18,4 @@ public class TaskCache extends BaseTaskCache<ParseTask> {
         super(ParseTask.class, context);
     }
 
-    @Override
-    public ParseTask getConcreteTask() {
-        return new ParseTask();
-    }
-
 }

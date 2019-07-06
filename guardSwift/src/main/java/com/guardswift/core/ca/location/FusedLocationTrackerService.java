@@ -14,33 +14,28 @@ import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationRequest;
+import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Lists;
-import com.guardswift.core.ca.geofence.GeofencingModule;
-import com.guardswift.core.ca.geofence.RegisterGeofencesIntentService;
+import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
 import com.guardswift.eventbus.EventBusController;
-import com.guardswift.jobs.oneoff.RebuildGeofencesJob;
 import com.guardswift.persistence.cache.data.GuardCache;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
-import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.documentation.gps.Tracker;
-import com.guardswift.persistence.parse.documentation.gps.TrackerData;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.query.TaskQueryBuilder;
 import com.guardswift.ui.notification.LocationNotification;
 import com.guardswift.ui.notification.NotificationID;
-import com.guardswift.util.Util;
-import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
+import com.guardswift.util.datastructure.CircularArrayList;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Queue;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
-
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -54,7 +49,7 @@ public class FusedLocationTrackerService extends InjectingService {
     private static final String TAG = FusedLocationTrackerService.class.getSimpleName();
 
     private static int LOCATION_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY;
-
+    public static final int ACTIVITY_HISTORY_SIZE = 5;
 
     PowerManager.WakeLock wl;
 
@@ -72,17 +67,13 @@ public class FusedLocationTrackerService extends InjectingService {
 
     }
 
-    private static final int DISTANCE_METERS_FOR_GEOFENCEREBUILD = 1500;
-    private static final int DISTANCE_METERS_FOR_UIUPDATE = 20;
-
+    private Queue<DetectedActivity> fiveLastDetectedActivities = EvictingQueue.create(ACTIVITY_HISTORY_SIZE);
+    private Location mLastTaskRadiusLocation;
     private Disposable locationDisposable;
-    private Location mLastUIUpdateLocation;
     private Tracker tracker;
 
     @Inject
     ParseTasksCache tasksCache;
-    @Inject
-    GeofencingModule geofencingModule;
     @Inject
     GuardCache guardCache;
 
@@ -102,7 +93,6 @@ public class FusedLocationTrackerService extends InjectingService {
     }
 
 
-
     @Override
     public int onStartCommand(Intent intent, int flags, final int startId) {
         Log.i(TAG, "Starting GPSTrackerService! " + LOCATION_PRIORITY);
@@ -114,6 +104,7 @@ public class FusedLocationTrackerService extends InjectingService {
         }
         return Service.START_STICKY;
     }
+
 
     /**
      * Manual restart of service
@@ -150,8 +141,6 @@ public class FusedLocationTrackerService extends InjectingService {
     }
 
 
-
-
     private boolean hasGooglePlayServices() {
         return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS;
     }
@@ -180,19 +169,30 @@ public class FusedLocationTrackerService extends InjectingService {
                     location.setAccuracy(100); // do not let past filter
                     return Observable.just(location);
                 })
-                .filter(location -> (mLastUIUpdateLocation == null || location.getAccuracy() < 30))
+                .filter(location -> location.getAccuracy() < 30)
                 .subscribe(location -> {
                     if (guardCache.isLoggedIn()) {
 
-                        LocationModule.Recent.setLastKnownLocation(location);
+                        DetectedActivity currentActivity = ActivityDetectionModule.Recent.getDetectedActivity();
+                        fiveLastDetectedActivities.add(currentActivity);
 
-                        rebuildGeofencesIfDistanceThresholdReached(location);
-                        inspectDistanceToGeofencedTasks(location);
-                        updateUIIfDistanceThresholdReached(location);
+                        Log.d(TAG, "currentActivity: " + currentActivity.getType());
+                        Log.d(TAG, " - activityHistory: " + fiveLastDetectedActivities);
+                        Log.d(TAG, " - activityHistorySize: " + fiveLastDetectedActivities.size());
+
+                        Location previousLocation = LocationModule.Recent.getLastKnownLocation();
+
+                        inspectContextOfTasksWithinRadius(
+                                location,
+                                previousLocation != null ? previousLocation : location,
+                                currentActivity
+                        );
+
+                        LocationModule.Recent.setLastKnownLocation(location);
 
                         LocationNotification.update(FusedLocationTrackerService.this, location);
 
-                        uploadLocation(location);
+                        tracker.appendLocation(getApplicationContext(), location);
                     } else {
                         stopSelf();
                     }
@@ -203,86 +203,50 @@ public class FusedLocationTrackerService extends InjectingService {
                 });
     }
 
-    private void uploadLocation(Location location) {
-        tracker.appendLocation(getApplicationContext(), location);
+    private List<ParseTask> radiusTasks = Lists.newArrayList();
 
-//        Guard guard = guardCache.getLoggedIn();
-//        if (guard != null) {
-//
-//            TrackerData trackerData = TrackerData.create(location, guardCache.getLoggedIn());
-//            guard.setPosition(location);
-//
-//            ParseObject.saveAllInBackground(Lists.newArrayList(guard, trackerData));
-//        }
-    }
+    private void inspectContextOfTasksWithinRadius(Location currentLocation, Location previousLocation, DetectedActivity currentActivity) {
 
+        boolean updateLocalDataStore = mLastTaskRadiusLocation == null || currentLocation.distanceTo(mLastTaskRadiusLocation) >= 500;
 
-    private void rebuildGeofencesIfDistanceThresholdReached(Location location) {
+        Log.d(TAG, "Radius tasks: " + radiusTasks.size());
 
-        Location lastGeofenceRebuildLocation = RegisterGeofencesIntentService.getLastRebuildLocation();
+        boolean triggerUIUpdate = false;
+        for (ParseTask task : radiusTasks) {
+            boolean trigger = task.getContextUpdateStrategy().updateContext(
+                    currentLocation,
+                    previousLocation,
+                    currentActivity,
+                    fiveLastDetectedActivities
+            );
 
-        if (lastGeofenceRebuildLocation == null || RegisterGeofencesIntentService.isRebuildingGeofence()) {
-            return;
+            // if one of the context updates were truthy then trigger ui update
+            triggerUIUpdate = triggerUIUpdate || trigger;
         }
 
-        float distance = Util.distanceMeters(lastGeofenceRebuildLocation, location);
-        boolean triggerByDistance = distance >= DISTANCE_METERS_FOR_GEOFENCEREBUILD;
-
-
-        if (triggerByDistance) {
-            RebuildGeofencesJob.scheduleJob(false);
-        }
-    }
-
-
-    private void updateUIIfDistanceThresholdReached(Location location) {
-        float distance = Util.distanceMeters(mLastUIUpdateLocation, location);
-        if (mLastUIUpdateLocation == null || distance >= DISTANCE_METERS_FOR_UIUPDATE) {
-            mLastUIUpdateLocation = location;
-
-            EventBusController.postUIUpdate(location);
-
-        }
-    }
-
-    private void inspectDistanceToGeofencedTasks(Location location) {
-
-        if (RegisterGeofencesIntentService.isRebuildingGeofence()) {
-            return;
+        if (triggerUIUpdate) {
+            Log.d(TAG, "postUIUpdate");
+            EventBusController.postUIUpdate();
         }
 
-        Set<ParseTask> geofencedTasks = tasksCache.getAllGeofencedTasks();
+        if (updateLocalDataStore) {
+            new TaskQueryBuilder(false)
+                    .matchingTaskTypes(Lists.newArrayList(ParseTask.TASK_TYPE_STRING.REGULAR, ParseTask.TASK_TYPE_STRING.RAID, ParseTask.TASK_TYPE_STRING.ALARM))
+                    .notMarkedFinished()
+                    .within(1, currentLocation).build()
+                    .findInBackground().onSuccess(boltsTask -> {
 
+                List<ParseTask> tasks = boltsTask.getResult();
 
-        List<String> tasksWithinGeofence = Lists.newArrayList();
-        List<String> tasksMovedWithinGeofence = Lists.newArrayList();
-        List<String> tasksMovedOutsideGeofence = Lists.newArrayList();
+                Log.d(TAG, "Updated tasks: " + tasks.size());
 
-        for (ParseTask task : geofencedTasks) {
+                radiusTasks = tasks;
+                mLastTaskRadiusLocation = currentLocation;
 
-            ParseGeoPoint clientPosition = task.getPosition();
-            float distance = ParseModule.distanceBetweenMeters(location, clientPosition);
-            int radius = task.getGeofenceStrategy().getGeofenceRadiusMeters();
-
-            if (distance <= radius) {
-                tasksWithinGeofence.add(task.getObjectId());
-            }
-
-            if (tasksCache.isWithinGeofence(task)) {
-                if (distance > radius) {
-                    tasksMovedOutsideGeofence.add(task.getObjectId());
-                }
-            } else {
-                if (distance < radius) {
-                    tasksMovedWithinGeofence.add(task.getObjectId());
-                }
-            }
-
+                return null;
+            });
         }
 
-        geofencingModule.onWithinGeofences(tasksWithinGeofence.toArray(new String[tasksWithinGeofence.size()]));
-        geofencingModule.onEnteredGeofences(tasksMovedWithinGeofence.toArray(new String[tasksMovedWithinGeofence.size()]), true);
-        geofencingModule.onExitedGeofences(tasksMovedOutsideGeofence.toArray(new String[tasksMovedOutsideGeofence.size()]), true);
 
 
     }

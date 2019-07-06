@@ -6,24 +6,16 @@ import android.util.Log;
 
 import com.guardswift.BuildConfig;
 import com.guardswift.core.exceptions.HandleException;
-import com.guardswift.core.tasks.activity.ArriveWhenNotInVehicleStrategy;
-import com.guardswift.core.tasks.activity.NoActivityStrategy;
-import com.guardswift.core.tasks.activity.TaskActivityStrategy;
-import com.guardswift.core.tasks.automation.FinishOnDepartureAutomationStrategy;
-import com.guardswift.core.tasks.automation.NoAutomationStrategy;
-import com.guardswift.core.tasks.automation.ResetOnDepartureAutomationStrategy;
-import com.guardswift.core.tasks.automation.StandardTaskAutomationStrategy;
-import com.guardswift.core.tasks.automation.TaskAutomationStrategy;
 import com.guardswift.core.tasks.controller.AlarmController;
 import com.guardswift.core.tasks.controller.RaidController;
 import com.guardswift.core.tasks.controller.RegularController;
 import com.guardswift.core.tasks.controller.StaticTaskController;
 import com.guardswift.core.tasks.controller.TaskController;
-import com.guardswift.core.tasks.geofence.AlarmGeofenceStrategy;
-import com.guardswift.core.tasks.geofence.NoGeofenceStrategy;
-import com.guardswift.core.tasks.geofence.RaidGeofenceStrategy;
-import com.guardswift.core.tasks.geofence.RegularGeofenceStrategy;
-import com.guardswift.core.tasks.geofence.TaskGeofenceStrategy;
+import com.guardswift.core.tasks.context.AlarmContextStrategy;
+import com.guardswift.core.tasks.context.NoContextUpdateStrategy;
+import com.guardswift.core.tasks.context.RaidContextStrategy;
+import com.guardswift.core.tasks.context.RegularContextStrategy;
+import com.guardswift.core.tasks.context.ContextUpdateStrategy;
 import com.guardswift.persistence.cache.planning.TaskGroupStartedCache;
 import com.guardswift.persistence.cache.task.BaseTaskCache;
 import com.guardswift.persistence.cache.task.ParseTasksCache;
@@ -49,6 +41,7 @@ import org.joda.time.format.DateTimeFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import bolts.Task;
 
@@ -142,44 +135,16 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return GuardSwiftApplication.getInstance().getCacheFactory().getTaskCache();
     }
 
-    public TaskGeofenceStrategy getGeofenceStrategy() {
+    public ContextUpdateStrategy getContextUpdateStrategy() {
         switch (this.getTaskType()) {
             case ALARM:
-                return AlarmGeofenceStrategy.getInstance(this);
+                return AlarmContextStrategy.getInstance(this);
             case REGULAR:
-                return RegularGeofenceStrategy.getInstance(this);
+                return RegularContextStrategy.getInstance(this);
             case RAID:
-                return RaidGeofenceStrategy.getInstance(this);
+                return RaidContextStrategy.getInstance(this);
             case STATIC:
-                return NoGeofenceStrategy.getInstance(this);
-        }
-        return null;
-    }
-
-    public TaskActivityStrategy getActivityStrategy() {
-        switch (this.getTaskType()) {
-            case ALARM:
-                return NoActivityStrategy.getInstance();
-            case REGULAR:
-                return ArriveWhenNotInVehicleStrategy.getInstance(this);
-            case RAID:
-                return NoActivityStrategy.getInstance();
-            case STATIC:
-                return NoActivityStrategy.getInstance();
-        }
-        return null;
-    }
-
-    public TaskAutomationStrategy getAutomationStrategy() {
-        switch (this.getTaskType()) {
-            case ALARM:
-                return FinishOnDepartureAutomationStrategy.getInstance(this);
-            case REGULAR:
-                return StandardTaskAutomationStrategy.getInstance(this);
-            case RAID:
-                return ResetOnDepartureAutomationStrategy.getInstance(this);
-            case STATIC:
-                return NoAutomationStrategy.getInstance();
+                return NoContextUpdateStrategy.getInstance(this);
         }
         return null;
     }
@@ -485,16 +450,12 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 //        setTimeEndedNow();
         setStatus(STATUS.ABORTED);
         setGuardCurrent();
-
-        tasksCache.removeGeofence(this);
     }
 
     public void setFinished() {
 //        setTimeEndedNow();
         setStatus(STATUS.FINISHED);
         setGuardCurrent();
-
-        tasksCache.removeGeofence(this);
     }
 
     public void addKnownStatus(String status) {
@@ -566,6 +527,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return true;
     }
 
+
     public boolean isBeforeScheduledEndTime() {
         if (isRegularTask() || isRaidTask()) {
             try {
@@ -589,6 +551,42 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         }
 
         return isAfterScheduledStartTime() && isBeforeScheduledEndTime();
+    }
+
+    public boolean isWithinScheduledTimeRelaxed() {
+        int relaxMinutes = 30;
+
+        // always return true if debugging
+        if (BuildConfig.DEBUG) {
+            return true;
+        }
+
+        if (isRegularTask() || isRaidTask()) {
+            try {
+                DateTimeZone dtz = DateTimeZone.getDefault();
+
+                DateTime now = DateTime.now(dtz);
+
+                LocalDateTime timeEnd = getAdjustedTime(getTimeEnd(), dtz);
+                long diffMsAfterEnd = Math.abs(now.toDate().getTime() - timeEnd.toDate().getTime());
+                long diffMinutesAfterEnd = TimeUnit.MINUTES.convert(diffMsAfterEnd, TimeUnit.MILLISECONDS);
+                boolean isBeforeEnd = now.isBefore(timeEnd.toDateTime());
+                boolean isBeforeEndRelaxed = isBeforeEnd || diffMinutesAfterEnd < relaxMinutes;
+
+                LocalDateTime timeStart = getAdjustedTime(getTimeStart(), dtz);
+                long diffMsBeforeStart = Math.abs(now.toDate().getTime() - timeStart.toDate().getTime());
+                long diffMinutesBeforeStart = TimeUnit.MINUTES.convert(diffMsBeforeStart, TimeUnit.MILLISECONDS);
+                boolean isAfterStart = now.isAfter(timeStart.toDateTime());
+                boolean isAfterStartRelaxed = isAfterStart || diffMinutesBeforeStart < relaxMinutes;
+
+                return isBeforeEndRelaxed && isAfterStartRelaxed;
+            } catch (Exception e) {
+                new HandleException(TAG, "isBeforeScheduledEndTime", e);
+            }
+
+        }
+
+        return true;
     }
 
     public int getRadius() {

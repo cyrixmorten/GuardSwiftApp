@@ -237,7 +237,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
 
     public void onEventMainThread(UpdateUIEvent ev) {
         if (!mLoading && isRelevantUIEvent(ev)) {
-            //mAdapter.notifyDataSetChanged();
+            mAdapter.notifyDataSetChanged();
         }
     }
 

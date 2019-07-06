@@ -3,7 +3,6 @@ package com.guardswift.core.ca.activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -15,8 +14,6 @@ import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
-import com.guardswift.core.ca.geofence.GeofencingModule;
-import com.guardswift.core.ca.location.LocationModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingService;
@@ -45,8 +42,6 @@ public class ActivityRecognitionService extends InjectingService {
 
     private Disposable filteredActivityDisposable;
 
-    @Inject
-    GeofencingModule geofencingModule;
     @Inject
     ParseModule parseModule;
 
@@ -161,17 +156,8 @@ public class ActivityRecognitionService extends InjectingService {
                 .filter(activityRecognitionResult -> {
                     DetectedActivity detectedActivity = activityRecognitionResult.getMostProbableActivity();
 
-                    Location locationWithSpeed = LocationModule.Recent.getLastKnownLocationWithSpeed();
-                    boolean hasSpeed = locationWithSpeed != null;
-                    float walkingSpeed = 1.4f;
-
                     int requiredConfidence = 75;
-//                        boolean acceptableSpeed = true;
-                    if (detectedActivity.getType() == DetectedActivity.IN_VEHICLE) {
-                        // driving has reduced confidence requirement but needs a trustworthy GPS speed estimate
-                        requiredConfidence = 75;
-//                            acceptableSpeed = (!hasSpeed) || locationWithSpeed.getSpeed() > walkingSpeed;
-                    }
+
                     if (detectedActivity.getType() == DetectedActivity.STILL) {
                         requiredConfidence = 100;
                     }
@@ -186,7 +172,6 @@ public class ActivityRecognitionService extends InjectingService {
 
                     return mJustStarted || (isNewActivity && highConfidence && notUnknown);
                 }).subscribe(activityRecognitionResult -> {
-                    DetectedActivity previousDetectedActivity = ActivityDetectionModule.Recent.getDetectedActivity();
                     DetectedActivity currentDetectedActivity = activityRecognitionResult.getMostProbableActivity();
 
                     ActivityDetectionModule.Recent.setDetectedActivity(currentDetectedActivity);
@@ -194,8 +179,6 @@ public class ActivityRecognitionService extends InjectingService {
                     if (BuildConfig.DEBUG) {
                         speakText(ActivityDetectionModule.getNameFromType(currentDetectedActivity.getType()));
                     }
-
-                    geofencingModule.matchGeofencedWithDetectedActivity(currentDetectedActivity);
 
 
                     mJustStarted = false;

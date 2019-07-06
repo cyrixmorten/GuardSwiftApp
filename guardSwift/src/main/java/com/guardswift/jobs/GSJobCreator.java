@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobCreator;
-import com.guardswift.jobs.oneoff.RebuildGeofencesJob;
 import com.guardswift.jobs.periodic.TrackerUploadJob;
 
 
@@ -17,8 +16,6 @@ public class GSJobCreator implements JobCreator {
         switch (tag) {
             case TrackerUploadJob.TAG:
                 return new TrackerUploadJob();
-            case RebuildGeofencesJob.TAG:
-                return new RebuildGeofencesJob();
             default:
                 return null;
         }

@@ -1,45 +1,32 @@
-package com.guardswift.core.tasks.geofence;
+package com.guardswift.core.tasks.context;
 
 import android.location.Location;
 
-import com.guardswift.core.ca.location.LocationModule;
+import com.google.android.gms.location.DetectedActivity;
 import com.guardswift.core.parse.ParseModule;
+import com.guardswift.core.tasks.controller.TaskController;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
-import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
-import com.parse.FindCallback;
-import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 
-
-public class RaidGeofenceStrategy extends BaseGeofenceStrategy {
-
-
-    private static final String TAG = RaidGeofenceStrategy.class.getSimpleName();
+import java.util.Queue;
 
 
-    public static TaskGeofenceStrategy getInstance(ParseTask task) {
-        return new RaidGeofenceStrategy(task);
+public class RaidContextStrategy extends BaseContextStrategy {
+
+
+    private static final String TAG = RaidContextStrategy.class.getSimpleName();
+
+
+    public static ContextUpdateStrategy getInstance(ParseTask task) {
+        return new RaidContextStrategy(task);
     }
 
-    private RaidGeofenceStrategy(ParseTask task) {
+    private RaidContextStrategy(ParseTask task) {
         super(task);
     }
 
     @Override
-    public String getName() {
-        return TAG;
-    }
-
-    @Override
-    public void withinGeofence() {
-        super.withinGeofence();
-
-        if (task.getAutomationStrategy() == null)
-            return;
-
-        Location A = LocationModule.Recent.getPreviousKnownLocation();
-        Location B = LocationModule.Recent.getLastKnownLocation();
-
+    boolean pendingTaskUpdate(Location A, Location B, DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory, float distanceToClientMeters) {
 
         ParseGeoPoint C = task.getPosition();
 
@@ -47,12 +34,9 @@ public class RaidGeofenceStrategy extends BaseGeofenceStrategy {
         if (B != null) {
             float LBC = ParseModule.distanceBetweenMeters(B, C);
             if (LBC <= task.getRadius()) {
-                task.getAutomationStrategy().automaticArrival();
-                return;
+                return triggerArrival();
             }
         }
-
-//        Log.d(TAG, "Near geofence: " + task.getTaskTitle(context) + " " + task.getClient().getName());
 
         // Second check - see if projection to line has distance less than geofenceRadius
         if (A != null && B != null) {
@@ -93,9 +77,8 @@ public class RaidGeofenceStrategy extends BaseGeofenceStrategy {
             // compute the euclidean distance from E to C
             double NLEC = ParseModule.distanceBetweenMeters(N, C); // convert to meters
 
-            if (NLEC < task.getRadius()) {
-                task.getAutomationStrategy().automaticArrival();
-                return;
+            if (NLEC <= task.getRadius()) {
+                return triggerArrival();
             }
 
             Float[] tcandidates = new Float[]{LAB/2, LAB/2-(LAB/4), LAB/2+(LAB/4)};
@@ -114,34 +97,36 @@ public class RaidGeofenceStrategy extends BaseGeofenceStrategy {
             }
 
             // segment intersects with geofence geofenceRadius
-            if (LEC < task.getRadius()) {
-                task.getAutomationStrategy().automaticArrival();
+            if (LEC <= task.getRadius()) {
+                return triggerArrival();
             }
         }
+
+        return false;
+    }
+
+    private boolean triggerArrival() {
+        boolean triggerArrival = task.isWithinScheduledTimeRelaxed() && task.matchesSelectedTaskGroupStarted() && controller.canPerformAction(TaskController.ACTION.ARRIVE, task);
+
+        if (triggerArrival) {
+            controller.performAutomaticAction(TaskController.ACTION.ARRIVE, task);
+        }
+
+        return triggerArrival;
     }
 
     @Override
-    public void exitGeofence() {
-        super.exitGeofence();
+    boolean arrivedTaskUpdate(Location current, Location previous, DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory, float distanceToClientMeters) {
 
-        if (task.getAutomationStrategy() != null) {
-            task.getAutomationStrategy().automaticDeparture();
+        boolean isWellOutsideRadius = distanceToClientMeters > task.getRadius() * 2;
+        boolean triggerDeparture = isWellOutsideRadius && controller.canPerformAction(TaskController.ACTION.PENDING, task);
+
+        if (triggerDeparture) {
+            task.getController().performAutomaticAction(TaskController.ACTION.PENDING, task);
         }
+
+        return triggerDeparture;
     }
 
-
-    @Override
-    public void queryGeofencedTasks(final int radiusKm, Location fromLocation, final FindCallback<ParseTask> callback) {
-        if (fromLocation != null) {
-            new RegularRaidTaskQueryBuilder(false)
-                    .isRunToday()
-                    .within(radiusKm, fromLocation)
-                    .isRaid(true)
-                    .build()
-                    .findInBackground(callback);
-        } else {
-            callback.done(null, new ParseException(ParseException.OTHER_CAUSE, "Missing location for raid task"));
-        }
-    }
 
 }

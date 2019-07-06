@@ -924,35 +924,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         return tv;
     }
 
-    private TextView isOutsideGeofence(ParseTask task) {
-        boolean outsideGeofence = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().isMovedOutsideGeofence(task);
 
-        TextView tv = new TextView(context);
-        tv.setText(" OUTSIDE ");
-        tv.setTextColor((outsideGeofence) ? Color.GREEN : Color.RED);
-
-        return tv;
-    }
-
-    private TextView isWithinGeofence(ParseTask task) {
-        boolean withinGeofence = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().isWithinGeofence(task);
-
-        TextView tv = new TextView(context);
-        tv.setText(" WITHIN ");
-        tv.setTextColor((withinGeofence) ? Color.GREEN : Color.RED);
-
-        return tv;
-    }
-
-    private TextView isGeofenced(ParseTask task) {
-        boolean isGeofenced = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache().isGeofenced(task);
-
-        TextView tv = new TextView(context);
-        tv.setText(" GEOFENCED ");
-        tv.setTextColor((isGeofenced) ? Color.GREEN : Color.RED);
-
-        return tv;
-    }
 
     /**
      * Here is the key method to apply the animation

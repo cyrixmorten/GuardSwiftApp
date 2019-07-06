@@ -53,7 +53,6 @@ public class RaidController extends BaseTaskController {
 
                 if (automatic) {
                     task.setArrived();
-                    tasksCache.addArrived(task);
                 }
 
                 task.incrementArrivedCount();
@@ -70,12 +69,9 @@ public class RaidController extends BaseTaskController {
 
 
                 task.setFinished();
-                tasksCache.removeArrived(task);
-
                 break;
             case PENDING:
 
-                tasksCache.removeArrived(task);
                 task.setPending();
 
                 break;
