@@ -220,7 +220,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.FOREGROUND_SERVICE})
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     public void attemptLogin() {
 
         Log.d(TAG, "attemptLogin");
@@ -311,12 +311,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     private void loginSuccess(final Guard guard) {
         GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard)
-//        checkMobileNumber(guard).continueWithTask(new Continuation<Void, Task<Void>>() {
-//            @Override
-//            public Task<Void> then(Task<Void> task) throws Exception {
-//                return GuardSwiftApplication.getInstance().bootstrapParseObjectsLocally(GuardLoginActivity.this, guard);
-//            }
-//        })
                 .continueWithTask(task -> {
                     if (task.isFaulted()) {
                         handleFailedLogin("updateAllClasses", task.getError());
