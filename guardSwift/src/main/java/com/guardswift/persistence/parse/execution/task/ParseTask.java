@@ -561,7 +561,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         int relaxMinutes = 30;
 
         // always return true if debugging
-        if (BuildConfig.DEBUG && !getClientName().equals("Lidl")) {
+        if (BuildConfig.DEBUG) {
             return true;
         }
 
@@ -571,26 +571,17 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
                 DateTime now = DateTime.now(dtz);
 
-                Log.d(TAG, "CLIENT: " + getClientName());
                 LocalDateTime timeEnd = getAdjustedTime(getTimeEnd(), dtz);
                 long diffMsAfterEnd = Math.abs(now.toDate().getTime() - timeEnd.toDate().getTime());
                 long diffMinutesAfterEnd = TimeUnit.MINUTES.convert(diffMsAfterEnd, TimeUnit.MILLISECONDS);
                 boolean isBeforeEnd = now.isBefore(timeEnd.toDateTime());
                 boolean isBeforeEndRelaxed = isBeforeEnd || diffMinutesAfterEnd < relaxMinutes;
 
-                Log.d(TAG, "diffMinutesAfterEnd: " + diffMinutesAfterEnd);
-                Log.d(TAG, "isBeforeEnd: " + isBeforeEnd);
-                Log.d(TAG, "isBeforeEndRelaxed: " + isBeforeEndRelaxed);
-
                 LocalDateTime timeStart = getAdjustedTime(getTimeStart(), dtz);
                 long diffMsBeforeStart = Math.abs(now.toDate().getTime() - timeStart.toDate().getTime());
                 long diffMinutesBeforeStart = TimeUnit.MINUTES.convert(diffMsBeforeStart, TimeUnit.MILLISECONDS);
                 boolean isAfterStart = now.isAfter(timeStart.toDateTime());
                 boolean isAfterStartRelaxed = isAfterStart || diffMinutesBeforeStart < relaxMinutes;
-
-                Log.d(TAG, "diffMinutesBeforeStart: " + diffMinutesBeforeStart);
-                Log.d(TAG, "isAfterStart: " + isAfterStart);
-                Log.d(TAG, "isAfterStartRelaxed: " + isAfterStartRelaxed);
 
                 return isBeforeEndRelaxed && isAfterStartRelaxed;
             } catch (Exception e) {
