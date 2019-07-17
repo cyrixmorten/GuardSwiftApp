@@ -1,5 +1,7 @@
 package com.guardswift.ui.parse.execution;
 
+import android.location.Location;
+
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
@@ -27,8 +29,8 @@ public abstract class AbstractTasksRecycleFragment extends AbstractParseRecycler
 
     @Override
     public boolean isRelevantUIEvent(UpdateUIEvent ev) {
-        // TODO return true on Location?
-        return ev.getObject() instanceof EventBusController.ForceUIUpdate ;
+        return ev.getObject() instanceof EventBusController.ForceUIUpdate ||
+                ev.getObject() instanceof Location;
     }
 
 

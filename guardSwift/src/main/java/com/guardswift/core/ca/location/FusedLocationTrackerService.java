@@ -192,6 +192,10 @@ public class FusedLocationTrackerService extends InjectingService {
                         LocationNotification.update(FusedLocationTrackerService.this, location);
 
                         tracker.appendLocation(getApplicationContext(), location);
+
+                        if (previousLocation != null && previousLocation.distanceTo(location) > 100) {
+                            EventBusController.postUIUpdate(location);
+                        }
                     } else {
                         stopSelf();
                     }
