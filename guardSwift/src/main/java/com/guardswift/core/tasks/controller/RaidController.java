@@ -33,7 +33,6 @@ public class RaidController extends BaseTaskController {
         TrackEvent.taskAction(action, task, automatic);
 
         Context ctx = GuardSwiftApplication.getInstance();
-        ParseTasksCache tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
 
         EventLog.Builder event = null;
 
