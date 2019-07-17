@@ -37,7 +37,6 @@ public class RegularController extends BaseTaskController {
         TrackEvent.taskAction(action, task, automatic);
 
         Context ctx = GuardSwiftApplication.getInstance();
-        ParseTasksCache tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
 
         Log.e(TAG, "invoking action: " + action.toString());
 
@@ -92,11 +91,11 @@ public class RegularController extends BaseTaskController {
 
             case PENDING:
 
-                event = new EventLog.Builder(ctx)
-                        .taskPointer(task, ParseTask.EVENT_TYPE.PENDING)
-                        .event(ctx.getString(R.string.event_left))
-                        .automatic(automatic)
-                        .eventCode(EventLog.EventCodes.REGULAR_PENDING);
+                // event = new EventLog.Builder(ctx)
+                //        .taskPointer(task, ParseTask.EVENT_TYPE.PENDING)
+                //        .event(ctx.getString(R.string.event_left))
+                //        .automatic(automatic)
+                //        .eventCode(EventLog.EventCodes.REGULAR_PENDING);
 
                 task.setPending();
                 break;
