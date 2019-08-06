@@ -91,15 +91,6 @@ public class CommonDialogsBuilder {
 
         }
 
-        public MaterialDialog.Builder yesNo(int title, String content, MaterialDialog.SingleButtonCallback onPositive) {
-            return new MaterialDialog.Builder(getContext())
-                    .title(title)
-                    .content(content)
-                    .positiveText(android.R.string.yes)
-                    .negativeText(android.R.string.no)
-                    .onPositive(onPositive);
-        }
-
         public MaterialDialog.Builder clientContacts(Client client) {
 
             LinearLayout layout = client.createContactsList(getContext());

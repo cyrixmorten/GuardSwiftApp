@@ -32,6 +32,7 @@ import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
+import com.guardswift.persistence.parse.query.EventLogQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
@@ -52,6 +53,7 @@ import org.joda.time.DateTime;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import bolts.Task;
 import bolts.TaskCompletionSource;
@@ -412,6 +414,21 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                     .show();
         }
 
+        private Task<Boolean> confirmExtraTime(Context context, int registeredExtraTime) {
+            if (registeredExtraTime == 0) {
+                return Task.forResult(true);
+            }
+
+            final TaskCompletionSource<Boolean> booleanTaskCompletionSource = new TaskCompletionSource<>();
+
+            new CommonDialogsBuilder.MaterialDialogs(context).okCancel(R.string.confirm_action,
+                    context.getString(R.string.confirm_extra_time, registeredExtraTime),
+                    (dialog, action) -> booleanTaskCompletionSource.setResult(true),
+                    (dialog, action) -> booleanTaskCompletionSource.setResult(false)).show();
+
+            return booleanTaskCompletionSource.getTask();
+        }
+
         private void extraTimeDialog(final Context context, final ParseTask task) {
             new MaterialDialog.Builder(context)
                     .title(R.string.extra_time_spend)
@@ -505,7 +522,31 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 vInfo.setText(infoText);
 
                 vBtnAddExtraTime.setVisibility(View.VISIBLE);
-                vBtnAddExtraTime.setOnClickListener(view -> extraTimeDialog(context, task));
+                vBtnAddExtraTime.setOnClickListener(view -> {
+                    MaterialDialog progressDialog = new CommonDialogsBuilder.MaterialDialogs(context).indeterminate().show();
+                    task.getExtraMinutes().onSuccessTask((minutesTask) -> {
+                        progressDialog.dismiss();
+
+                        return confirmExtraTime(context, minutesTask.getResult());
+                    }, Task.UI_THREAD_EXECUTOR).onSuccess((extraTimeTask) -> {
+                        boolean showExtraTimeDialog = extraTimeTask.getResult();
+
+                        Log.d(TAG, "showExtraTimeDialog: " + showExtraTimeDialog);
+
+                        if (showExtraTimeDialog) {
+                            extraTimeDialog(context, task);
+                        }
+
+                        return null;
+                    }, Task.UI_THREAD_EXECUTOR).continueWith((boltsTask) -> {
+                        if (boltsTask.getError() != null) {
+                            new HandleException(context, TAG, "Error getting extra minutes", boltsTask.getError());
+                        }
+
+                        return null;
+                    });
+
+                });
 
                 setupTaskActionButtons(context, task);
 

@@ -491,10 +491,7 @@ public class EventLog extends ExtendedParseObject {
 
 
     public int getAmount() {
-        if (has(amount)) {
-            return getNumber(amount).intValue();
-        }
-        return 0;
+        return getIntSafe(EventLog.amount, 0);
     }
 
     private String getAmountString() {

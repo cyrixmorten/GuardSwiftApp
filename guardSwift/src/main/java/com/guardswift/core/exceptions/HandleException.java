@@ -21,7 +21,7 @@ public class HandleException {
         Crashlytics.logException(e);
         Crashlytics.log(Log.ERROR, tag, message + " error: " + e.getMessage());
 
-        if (e instanceof ParseException) {
+        if (e instanceof ParseException && context != null) {
             new ParseErrorHandler().handleParseError(context, (ParseException)e);
         }
 

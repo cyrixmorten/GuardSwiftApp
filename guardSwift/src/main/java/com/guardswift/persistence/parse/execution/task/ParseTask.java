@@ -25,6 +25,7 @@ import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.documentation.report.Report;
+import com.guardswift.persistence.parse.query.EventLogQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.GetCallback;
 import com.parse.ParseClassName;
@@ -758,6 +759,22 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         setGuard(guard);
         setArrived();
 //        setTimeStartedNow();
+    }
+
+    public Task<Integer> getExtraMinutes() {
+        return new EventLogQueryBuilder(false)
+                .matching(getTaskGroupStarted())
+                .matching(getClient())
+                .matchingEventCode(EventLog.EventCodes.REGULAR_EXTRA_TIME)
+                .build()
+                .findInBackground().onSuccess(boltsTask -> {
+                    int minutes = 0;
+                    for (EventLog eventLog: boltsTask.getResult()) {
+                        minutes += eventLog.getAmount();
+                    }
+
+                    return minutes;
+                });
     }
 
     public Task<Report> findReport(final boolean fromLocalDataStore) {

@@ -490,4 +490,5 @@
     <string name="delete_extra_task">Slet extra tilsyn</string>
     <string name="not_all_values_are_filled">Ikke alle værdier er udfyldt</string>
     <string name="action_save_changes">Gem ændringer</string>
+    <string name="confirm_extra_time">Der er allerede registreret %1$d minutters ekstra tid, vil du registrere yderligere extra tid?</string>
 </resources>
