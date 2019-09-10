@@ -75,19 +75,16 @@ public class DownloadReport {
     public void execute(ParseTask task, final CompletedCallback callback) {
         showDialog();
 
-        findReportFromTask(task).continueWith(new Continuation<Report, Void>() {
-            @Override
-            public Void then(Task<Report> task) {
-                if (task.isFaulted()) {
-                    new HandleException(TAG, "Error finding report from task", task.getError());
+        findReportFromTask(task).continueWith((Continuation<Report, Void>) task1 -> {
+            if (task1.isFaulted()) {
+                new HandleException(TAG, "Error finding report from task", task1.getError());
 
-                    callback.done(null, task.getError());
-                } else {
-                    execute(task.getResult(), callback);
-                }
-
-                return null;
+                callback.done(null, task1.getError());
+            } else {
+                execute(task1.getResult(), callback);
             }
+
+            return null;
         });
     }
 
@@ -128,7 +125,7 @@ public class DownloadReport {
     }
 
 
-    private class DownloadFileAsyncTask extends AsyncTask<InputStream, Void, File> {
+    private static class DownloadFileAsyncTask extends AsyncTask<InputStream, Void, File> {
 
         final String appDirectoryName = BuildConfig.APPLICATION_ID;
         final File fileRoot = new File(Environment.getExternalStoragePublicDirectory(

@@ -438,12 +438,12 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public void setArrived() {
-        setLastArrivalDate(new Date());
         setStatus(STATUS.ARRIVED);
         setGuardCurrent();
     }
 
     public void incrementArrivedCount() {
+        setLastArrivalDate(new Date());
         increment(ParseTask.timesArrived);
     }
 
@@ -706,16 +706,26 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return getDate(ParseTask.expireDate);
     }
 
+    public long getMinutesSinceLastArrival() {
+        Date lastArrivalDate = getLastArrivalDate();
+        long timeSinceLastArrivalMs = lastArrivalDate != null ? Math.abs(new Date().getTime() - lastArrivalDate.getTime()) : Long.MAX_VALUE;
+
+        Log.d(TAG, "timeSinceLastArrivalMs: " + timeSinceLastArrivalMs);
+
+        return TimeUnit.MINUTES.convert(timeSinceLastArrivalMs, TimeUnit.MILLISECONDS);
+    }
+
     public int getMinutesBetweenArrivals() {
         return getIntSafe(ParseTask.minutesBetweenArrivals, 10);
     }
 
-    public void setLastArrivalDate(Date date) {
+    private void setLastArrivalDate(Date date) {
         put(ParseTask.lastArrivalDate, date);
     }
 
-    public Date getLastArrivalDate() {
-        return getDate(ParseTask.lastArrivalDate);
+    private Date getLastArrivalDate() {
+        Date lastArrivalDate = getDate(ParseTask.lastArrivalDate);
+        return lastArrivalDate != null ? lastArrivalDate : new Date(1970);
     }
 
     public void setPlannedSupervisions(int supervisions) {

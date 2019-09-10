@@ -28,7 +28,7 @@ public class AlarmController extends BaseTaskController {
     private AlarmController() {}
 
 
-    public ParseTask performAction(ACTION action, ParseTask alarm, boolean automatic) {
+    public ParseTask applyAction(ACTION action, ParseTask alarm, boolean automatic) {
 
         TrackEvent.taskAction(action, alarm, automatic);
 

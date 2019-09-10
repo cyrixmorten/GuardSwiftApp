@@ -106,7 +106,7 @@ public class RaidContextStrategy extends BaseContextStrategy {
     }
 
     private boolean triggerArrival() {
-        boolean triggerArrival = task.isWithinScheduledTimeRelaxed() && task.matchesSelectedTaskGroupStarted() && controller.canPerformAction(TaskController.ACTION.ARRIVE, task);
+        boolean triggerArrival = task.isWithinScheduledTimeRelaxed() && task.matchesSelectedTaskGroupStarted();
 
         if (triggerArrival) {
             controller.performAutomaticAction(TaskController.ACTION.ARRIVE, task);
@@ -119,13 +119,12 @@ public class RaidContextStrategy extends BaseContextStrategy {
     boolean arrivedTaskUpdate(Location current, Location previous, DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory, float distanceToClientMeters) {
 
         boolean isWellOutsideRadius = distanceToClientMeters > (task.getRadius() * 4);
-        boolean triggerDeparture = isWellOutsideRadius && controller.canPerformAction(TaskController.ACTION.PENDING, task);
 
-        if (triggerDeparture) {
+        if (isWellOutsideRadius) {
             task.getController().performAutomaticAction(TaskController.ACTION.PENDING, task);
         }
 
-        return triggerDeparture;
+        return isWellOutsideRadius;
     }
 
 

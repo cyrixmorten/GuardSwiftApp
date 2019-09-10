@@ -65,6 +65,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
     private boolean loading;
 
     private MenuItem pdfMenu;
+    private MenuItem addArrivalMenu;
 
     private MaterialDialog progressDialog;
 
@@ -83,6 +84,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         super.onDestroyOptionsMenu();
 
         pdfMenu = null;
+        addArrivalMenu = null;
     }
 
     @Override
@@ -90,10 +92,23 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
         inflater.inflate(R.menu.report, menu);
 
-        menu.findItem(R.id.menu_add_arrival).setOnMenuItemClickListener((menuItem) -> {
-            task.getController().performAction(TaskController.ACTION.ARRIVE, task);
+        addArrivalMenu = menu.findItem(R.id.menu_add_arrival);
+        addArrivalMenu.setOnMenuItemClickListener((menuItem) -> {
+            long minutesSinceLastArrival = task.getMinutesSinceLastArrival();
+            long minutesBetweenArrivals = task.getMinutesBetweenArrivals();
 
-            showProgressDialog();
+            if (minutesSinceLastArrival > minutesBetweenArrivals) {
+                setArrivalMenuEnabled(false);
+                showProgressDialog();
+
+                task.getController().performManualAction(TaskController.ACTION.ARRIVE, task);
+            } else {
+                new CommonDialogsBuilder.MaterialDialogs(getActivity()).ok(
+                        R.string.add_arrival,
+                        getString(R.string.not_enough_time_since_last_arrival, minutesSinceLastArrival, minutesBetweenArrivals))
+                        .show();
+            }
+
             return true;
         });
 
@@ -149,6 +164,12 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
         }
     }
 
+    private void setArrivalMenuEnabled(boolean enabled) {
+        if (addArrivalMenu != null) {
+            addArrivalMenu.setEnabled(enabled);
+        }
+    }
+
     private void showProgressDialog() {
         progressDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate().show();
     }
@@ -184,6 +205,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
 
         if (isEventLog) {
             dissmissProgressDialog();
+            setArrivalMenuEnabled(true);
 
             EventLog eventLog = (EventLog) ev.getObject();
 

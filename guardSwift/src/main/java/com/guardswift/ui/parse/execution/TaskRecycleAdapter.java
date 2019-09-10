@@ -707,15 +707,13 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
             final ParseTask.TASK_STATE previousTaskState = task.getTaskState();
             final TaskController taskController = task.getController();
-            if (taskController.canPerformAction(action, task)) {
-                updateTaskState(context, task, previousTaskState, taskController.translatesToState(action));
-                // may perform LDS and should perhaps be done in background somehow
-                ParseTask updatedTask = taskController.performAction(action, task);
 
-                result.setResult(updatedTask);
-            } else {
-                result.setResult(task);
-            }
+            // may perform LDS and should perhaps be done in background somehow
+            ParseTask updatedTask = taskController.performManualAction(action, task);
+
+            updateTaskState(context, task, previousTaskState, task.getTaskState());
+
+            result.setResult(updatedTask);
 
             return result.getTask();
         }
@@ -812,6 +810,10 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         }
 
         private void updateTaskStateColor(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState, boolean isNew, boolean animate) {
+
+            if (fromState.equals(toState)) {
+                return;
+            }
 
             int prevStateColor = getTaskStateColor(context, fromState);
             int toColor = getTaskStateColor(context, toState);

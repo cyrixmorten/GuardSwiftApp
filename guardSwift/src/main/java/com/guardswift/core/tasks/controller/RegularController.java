@@ -32,7 +32,7 @@ public class RegularController extends BaseTaskController {
 
 
 
-    public ParseTask performAction(ACTION action, final ParseTask task, final boolean automatic) {
+    public ParseTask applyAction(ACTION action, final ParseTask task, final boolean automatic) {
 
         TrackEvent.taskAction(action, task, automatic);
 
