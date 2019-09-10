@@ -23,7 +23,7 @@ public class AlarmContextStrategy extends BaseContextStrategy {
 
     @Override
     boolean pendingTaskUpdate(Location current, Location previous, DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory, float distanceToClientMeters) {
-        boolean triggerArrival = distanceToClientMeters < task.getRadius() && controller.canPerformAction(TaskController.ACTION.ARRIVE, task);
+        boolean triggerArrival = distanceToClientMeters < task.getRadius();
 
         if (triggerArrival) {
             controller.performAutomaticAction(TaskController.ACTION.ARRIVE, task);
@@ -36,13 +36,12 @@ public class AlarmContextStrategy extends BaseContextStrategy {
     boolean arrivedTaskUpdate(Location current, Location previous,  DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory, float distanceToClientMeters) {
 
         boolean isWellOutsideRadius = distanceToClientMeters > task.getRadius() * 2;
-        boolean triggerDeparture = isWellOutsideRadius && controller.canPerformAction(TaskController.ACTION.FINISH, task);
 
-        if (triggerDeparture) {
+        if (isWellOutsideRadius) {
             controller.performAutomaticAction(TaskController.ACTION.FINISH, task);
         }
 
-        return triggerDeparture;
+        return isWellOutsideRadius;
     }
 
 }

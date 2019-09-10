@@ -118,7 +118,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(
                 R.layout.gs_card_report_summary, container,
                 false);
@@ -142,35 +142,25 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
         loadingReport(true);
 
 
-        task.findReport(false).onSuccess(new Continuation<Report, Object>() {
+        task.findReport(false).onSuccess(reportTask -> {
+            report = reportTask.getResult();
 
-            @Override
-            public Object then(Task<Report> reportTask) {
-                report = reportTask.getResult();
-
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isAdded()) {
-                            updateHeader();
-                            updateGuard();
-                            updateRemarksSummary();
-                            updateClientReceivers();
-                            loadingReport(false);
-                        }
-                    }
-                });
-                return null;
-            }
-        }).continueWith(new Continuation<Object, Object>() {
-            @Override
-            public Object then(Task<Object> task) {
-                if (task.getError() != null) {
-                    Log.e(TAG, "update", task.getError());
-                    new HandleException(getContext(), TAG, "find report matching task", task.getError());
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (isAdded()) {
+                    updateHeader();
+                    updateGuard();
+                    updateRemarksSummary();
+                    updateClientReceivers();
+                    loadingReport(false);
                 }
-                return null;
+            });
+            return null;
+        }).continueWith(task -> {
+            if (task.getError() != null) {
+                Log.e(TAG, "update", task.getError());
+                new HandleException(getContext(), TAG, "find report matching task", task.getError());
             }
+            return null;
         });
     }
 
@@ -181,18 +171,15 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
         btnSendReport.setEnabled(false);
         sendReportDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate(R.string.working, R.string.sending_reprt).show();
 
-        CloudFunctions.sendReport(report).continueWith(new Continuation<Void, Object>() {
-            @Override
-            public Object then(Task<Void> task) {
-                if (task.isFaulted()) {
-                    sendReportFailedWithError(task.getError());
-                    return null;
-                }
-
-                sendReportSuccess();
-
+        CloudFunctions.sendReport(report).continueWith(task -> {
+            if (task.isFaulted()) {
+                sendReportFailedWithError(task.getError());
                 return null;
             }
+
+            sendReportSuccess();
+
+            return null;
         });
     }
 
@@ -207,7 +194,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
     }
 
     private void sendReportSuccess() {
-        task.getController().performAction(TaskController.ACTION.FINISH, task);
+        task.getController().performManualAction(TaskController.ACTION.FINISH, task);
         dismissSendReportDialog();
         if (getActivity() != null) {
             new CommonDialogsBuilder.MaterialDialogs(getActivity()).okCancel(R.string.logout, getString(R.string.question_logout_after_sending_report), new MaterialDialog.SingleButtonCallback() {
@@ -215,12 +202,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
                 public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
                     parseModule.logout(getActivity());
                 }
-            }, new MaterialDialog.SingleButtonCallback() {
-                @Override
-                public void onClick(@NonNull MaterialDialog materialDialog, @NonNull DialogAction dialogAction) {
-                    getActivity().finish();
-                }
-            }).show();
+            }, (materialDialog, dialogAction) -> getActivity().finish()).show();
         }
     }
 
@@ -261,30 +243,27 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
             @Override
             public void done(final List<EventLog> objects, ParseException e) {
                 if (!objects.isEmpty() && getActivity() != null) {
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
+                    new Handler(Looper.getMainLooper()).post(() -> {
 
-                            layoutRemarks.removeAllViews();
+                        layoutRemarks.removeAllViews();
 
-                            for (final EventLog eventLog : objects) {
-                                final View timedRemark = getActivity().getLayoutInflater().inflate(R.layout.gs_view_timed_remark, null);
+                        for (final EventLog eventLog : objects) {
+                            final View timedRemark = getActivity().getLayoutInflater().inflate(R.layout.gs_view_timed_remark, null);
 
-                                TextView tvTimestamp = ButterKnife.findById(timedRemark, R.id.tv_timestamp);
-                                String timeStampString = DateUtils.formatDateTime(getContext(), eventLog.getDeviceTimestamp().getTime(), DateUtils.FORMAT_SHOW_TIME);
-                                tvTimestamp.setText(timeStampString);
+                            TextView tvTimestamp = ButterKnife.findById(timedRemark, R.id.tv_timestamp);
+                            String timeStampString = DateUtils.formatDateTime(getContext(), eventLog.getDeviceTimestamp().getTime(), DateUtils.FORMAT_SHOW_TIME);
+                            tvTimestamp.setText(timeStampString);
 
-                                TextView tvRemarks = ButterKnife.findById(timedRemark, R.id.tv_remarks);
-                                String remarkString = eventLog.getRemarks();
-                                tvRemarks.setText(remarkString);
+                            TextView tvRemarks = ButterKnife.findById(timedRemark, R.id.tv_remarks);
+                            String remarkString = eventLog.getRemarks();
+                            tvRemarks.setText(remarkString);
 
-                                Log.w(TAG, timeStampString + " " + remarkString);
+                            Log.w(TAG, timeStampString + " " + remarkString);
 
-                                layoutRemarks.addView(timedRemark);
-                            }
-
-
+                            layoutRemarks.addView(timedRemark);
                         }
+
+
                     });
 
                 }
@@ -321,12 +300,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
     @Override
     public void fragmentBecameVisible() {
         loadingReport(true);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                update();
-            }
-        }, 1000);
+        new Handler().postDelayed(() -> update(), 1000);
     }
 
     @Override

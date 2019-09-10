@@ -28,7 +28,7 @@ public class RaidController extends BaseTaskController {
 
     private RaidController() {}
 
-    public ParseTask performAction(TaskController.ACTION action, final ParseTask task, final boolean automatic) {
+    public ParseTask applyAction(TaskController.ACTION action, final ParseTask task, final boolean automatic) {
 
         TrackEvent.taskAction(action, task, automatic);
 

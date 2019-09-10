@@ -28,7 +28,7 @@ public class StaticTaskController extends BaseTaskController {
 
     private StaticTaskController() {}
 
-    public ParseTask performAction(ACTION action, ParseTask task, boolean automatic) {
+    public ParseTask applyAction(ACTION action, ParseTask task, boolean automatic) {
 
         Context ctx = GuardSwiftApplication.getInstance();
         GuardCache guardCache =  GuardSwiftApplication.getInstance().getCacheFactory().getGuardCache();

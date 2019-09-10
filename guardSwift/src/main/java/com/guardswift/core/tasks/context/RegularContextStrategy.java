@@ -45,8 +45,7 @@ public class RegularContextStrategy extends BaseContextStrategy {
 
             boolean triggerArrival = onFootOrInactive &&
                     task.isWithinScheduledTimeRelaxed() &&
-                    task.matchesSelectedTaskGroupStarted() &&
-                    controller.canPerformAction(TaskController.ACTION.ARRIVE, task);
+                    task.matchesSelectedTaskGroupStarted();
 
             Log.d(TAG, task.getClientName() + ": " + triggerArrival);
 
@@ -65,7 +64,7 @@ public class RegularContextStrategy extends BaseContextStrategy {
 
         boolean isWellOutsideRadius = distanceToClientMeters > (task.getRadius() * 4);
         boolean inVehicle = currentActivity.getType() == DetectedActivity.IN_VEHICLE;
-        boolean triggerDeparture = (isWellOutsideRadius || inVehicle) && controller.canPerformAction(TaskController.ACTION.PENDING, task);
+        boolean triggerDeparture = isWellOutsideRadius || inVehicle;
 
         if (triggerDeparture) {
             task.getController().performAutomaticAction(TaskController.ACTION.PENDING, task);

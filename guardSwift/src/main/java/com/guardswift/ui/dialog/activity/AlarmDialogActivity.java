@@ -140,7 +140,7 @@ public class AlarmDialogActivity extends AbstractDialogActivity {
 
         new CommonDialogsBuilder.MaterialDialogs(AlarmDialogActivity.this).ok(R.string.alarm, alarmMessage, (dialog, which) -> {
             if (alarm.isPending()) {
-                AlarmController.getInstance().performAction(AlarmController.ACTION.ACCEPT, alarm, false);
+                AlarmController.getInstance().performManualAction(AlarmController.ACTION.ACCEPT, alarm);
             }
 
             AlarmDialogActivity.this.finish();
