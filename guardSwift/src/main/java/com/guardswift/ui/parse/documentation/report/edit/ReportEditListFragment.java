@@ -34,6 +34,7 @@ import com.parse.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -188,7 +189,9 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
                 .setStartTime(timestamp.getHourOfDay(), timestamp.getMinuteOfHour())
                 .setOnTimeSetListener((dialog, hourOfDay, minute) -> {
 
-                    eventLog.setDeviceTimestamp(task.getArrivalDate(hourOfDay, minute));
+                    Date arrivalDate = task.getArrivalDate(hourOfDay, minute);
+
+                    eventLog.setDeviceTimestamp(arrivalDate);
 
                     eventLog.saveEventuallyAndNotify();
                 })
