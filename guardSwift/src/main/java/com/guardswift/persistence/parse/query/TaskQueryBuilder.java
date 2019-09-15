@@ -61,6 +61,11 @@ public class TaskQueryBuilder extends
         return this;
     }
 
+    public TaskQueryBuilder isRunToday() {
+        query.whereEqualTo(ParseTask.isRunToday, true);
+        return this;
+    }
+
     public TaskQueryBuilder pendingOrArrived() {
         query.whereContainedIn(ParseTask.status, Lists.newArrayList(ParseTask.STATUS.PENDING, ParseTask.STATUS.ARRIVED));
         return this;

@@ -11,7 +11,6 @@ import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.core.documentation.eventlog.context.LogContextStrategy;
 import com.guardswift.core.documentation.eventlog.context.LogCurrentActivityStrategy;
 import com.guardswift.core.documentation.eventlog.context.LogStrategyFactory;
-import com.guardswift.core.documentation.eventlog.context.LogTimestampStrategy;
 import com.guardswift.core.documentation.eventlog.task.LogTaskStrategy;
 import com.guardswift.core.documentation.eventlog.task.TaskLogStrategyFactory;
 import com.guardswift.core.exceptions.HandleException;
@@ -142,6 +141,9 @@ public class EventLog extends ExtendedParseObject {
         }
 
         private void applyDefaultLogValues() {
+
+            deviceTimeStamp(new Date());
+
             List<LogContextStrategy> logStrategies = new LogStrategyFactory().getStrategies();
 
             for (LogContextStrategy logStrategy : logStrategies) {
@@ -380,11 +382,11 @@ public class EventLog extends ExtendedParseObject {
     public static final String eventCode = "eventCode";
 
     // misc
-    public static final String deviceTimestamp = LogTimestampStrategy.deviceTimestamp;
 
     public static final String automatic = "automatic";
     public static final String correctGuess = "correctGuess";
 
+    public static final String deviceTimestamp = "deviceTimestamp";
 
 
     @SuppressWarnings("unchecked")
@@ -520,7 +522,7 @@ public class EventLog extends ExtendedParseObject {
     }
 
     public Date getDeviceTimestamp() {
-        Date date = getDate(deviceTimestamp);
+        Date date = getDate(EventLog.deviceTimestamp);
         if (date == null) {
             date = getCreatedAt();
         }
@@ -528,7 +530,13 @@ public class EventLog extends ExtendedParseObject {
     }
 
     public void setDeviceTimestamp(Date date) {
-        put(deviceTimestamp, date);
+        ParseTask taskPointer = getTask();
+        if (isArrivalEvent() && taskPointer != null) {
+            taskPointer.fetchIfNeededInBackground((parseTask, e) -> {
+                ((ParseTask)parseTask).setLastArrivalDate(date);
+            });
+        }
+        put(EventLog.deviceTimestamp, date);
     }
 
     public void setAmount(int amount) {

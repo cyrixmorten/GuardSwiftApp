@@ -463,7 +463,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         setGuardCurrent();
     }
 
-    public void addKnownStatus(String status) {
+    private void addKnownStatus(String status) {
         addUnique(ParseTask.knownStatus, status);
     }
 
@@ -471,7 +471,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return getStatus().equals(STATUS.PENDING);
     }
 
-    public boolean isAccepted() {
+    private boolean isAccepted() {
         return getStatus().equals(STATUS.ACCEPTED);
     }
 
@@ -719,8 +719,10 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         return getIntSafe(ParseTask.minutesBetweenArrivals, 10);
     }
 
-    private void setLastArrivalDate(Date date) {
-        put(ParseTask.lastArrivalDate, date);
+    public void setLastArrivalDate(Date date) {
+        if (getLastArrivalDate().before(date)) {
+            put(ParseTask.lastArrivalDate, date);
+        }
     }
 
     private Date getLastArrivalDate() {
