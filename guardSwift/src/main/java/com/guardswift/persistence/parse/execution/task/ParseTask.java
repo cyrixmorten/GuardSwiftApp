@@ -720,9 +720,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public void setLastArrivalDate(Date date) {
-        if (getLastArrivalDate().before(date)) {
-            put(ParseTask.lastArrivalDate, date);
-        }
+        put(ParseTask.lastArrivalDate, date);
     }
 
     private Date getLastArrivalDate() {
