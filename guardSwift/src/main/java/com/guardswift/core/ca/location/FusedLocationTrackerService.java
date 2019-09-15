@@ -238,6 +238,7 @@ public class FusedLocationTrackerService extends InjectingService {
 
             new TaskQueryBuilder(false)
                     .matching(currentTaskGroupStarted)
+                    .isRunToday()
                     .pendingOrArrived()
                     .build()
                     .setLimit(999)
