@@ -244,9 +244,6 @@ public class MainNavigationDrawer extends BaseNavigationDrawer {
             }
 
 
-            // Analytics to see how often duplicates are encountered
-            Analytics.sendEvent("Fix", "Duplicate circuits in drawer", hasDuplicates ? "yes" : "no");
-
             if (hasDuplicates) {
                 circuitsStarted = Lists.newArrayList(uniqueCircuitsStarted.values());
             }

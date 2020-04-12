@@ -33,6 +33,7 @@ import com.guardswift.ui.dialog.activity.AbstractDialogActivity;
 import com.guardswift.ui.dialog.activity.AlarmDialogActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.CreateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
+import com.guardswift.util.Analytics;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -147,6 +148,12 @@ public class InjectingActivityModule {
     @Singleton
     Handler provideHandler() {
         return new Handler(mActivity.getMainLooper());
+    }
+
+    @Provides
+    @Singleton
+    Analytics provideAnalytics() {
+        return new Analytics(mActivity);
     }
 
     /**

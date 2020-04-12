@@ -5,17 +5,15 @@ buildscript {
             dirs 'aars' //this way we can findFrom the .aar file in libs folder
         }
         maven { url "https://jitpack.io" }
-        maven { url 'https://maven.fabric.io/public' }
         maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' } // hotchemi/PermissionsDispatcher
     }
     dependencies {
-//        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.16.0'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-        classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
 apply plugin: 'io.fabric'
 
 // https://stackoverflow.com/questions/18328730/how-to-create-a-release-signed-apk-file-using-gradle
@@ -41,8 +39,8 @@ android {
         applicationId "com.guardswift"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 552
-        versionName "5.5.2"
+        versionCode 560
+        versionName "5.6.0"
 
         // Enabling multidex support.
         multiDexEnabled true
@@ -87,8 +85,6 @@ repositories {
     maven { url 'https://dl.bintray.com/drummer-aidan/maven' }
     maven { url "https://jitpack.io" }
     maven { url "https://github.com/shaubert/maven-repo/raw/master/snapshots" }
-//    maven {url 'https://clojars.org/repo/'} // IcePick
-    maven { url 'https://maven.fabric.io/public' }
 }
 
 dependencies {
@@ -97,9 +93,6 @@ dependencies {
 
     //    implementation fileTree(include: ['*.jar'], dir: 'libs/alexandra')
     implementation('com.mikepenz:materialdrawer:6.0.8@aar') {
-        transitive = true
-    }
-    implementation('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true
     }
     implementation('com.github.hotchemi:permissionsdispatcher:2.4.0') {
@@ -153,8 +146,12 @@ dependencies {
     implementation 'com.takisoft.preferencex:preferencex:1.1.0'
     implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
     implementation 'androidx.vectordrawable:vectordrawable-animated:1.1.0'
-    implementation 'com.google.firebase:firebase-messaging:20.0.1'
-    implementation 'com.google.android.gms:play-services-analytics:17.0.0'
+    implementation "com.google.firebase:firebase-iid:20.0.1"
+    implementation ('com.google.firebase:firebase-messaging:20.0.1'){
+        exclude group: 'com.google.firebase', module: 'firebase-iid' // https://stackoverflow.com/a/54443023/1501613
+    }
+    implementation 'com.google.firebase:firebase-analytics:17.3.0'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
     implementation 'com.google.android.gms:play-services-gcm:17.0.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.android.gms:play-services-location:17.0.0'

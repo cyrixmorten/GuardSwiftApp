@@ -37,7 +37,7 @@ public class ParseErrorHandler {
         // startActivityForResult(new ParseLoginBuilder(getActivity()).build(), 0);
 
 
-        if (context != null && context instanceof Activity) {
+        if (context instanceof Activity) {
             //new CommonDialogsBuilder.MaterialDialogs(context).ok(R.string.session_expired, context.getString(R.string.session_expired_message), new MaterialDialog.SingleButtonCallback() {
             //    @Override
             //    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
