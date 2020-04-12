@@ -155,8 +155,9 @@ public class FusedLocationTrackerService extends InjectingService {
 
         LocationRequest request = LocationRequest.create() //standard GMS LocationRequest
                 .setPriority(LOCATION_PRIORITY)
-                .setInterval(10000)
-                .setFastestInterval(5000);
+                .setInterval(5000)
+                .setSmallestDisplacement(10f) // minimum 10 meters between updates
+                .setFastestInterval(2500);
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(getApplicationContext());
 
@@ -172,7 +173,7 @@ public class FusedLocationTrackerService extends InjectingService {
                     location.setAccuracy(100); // do not let past filter
                     return Observable.just(location);
                 })
-                .filter(location -> location.getAccuracy() < 30)
+                .filter(location -> location.getAccuracy() < 15)
                 .subscribe(location -> {
                     if (guardCache.isLoggedIn()) {
 
