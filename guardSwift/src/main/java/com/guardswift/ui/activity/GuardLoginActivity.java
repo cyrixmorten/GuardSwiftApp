@@ -10,8 +10,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.Toolbar;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -20,7 +20,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.google.android.gms.common.ConnectionResult;
@@ -43,20 +42,16 @@ import com.guardswift.ui.drawer.GuardLoginNavigationDrawer;
 import com.guardswift.util.Device;
 import com.guardswift.util.ToastHelper;
 import com.guardswift.util.UpdateApp;
-import com.parse.GetFileCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
-import com.parse.ProgressCallback;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import bolts.Continuation;
-import bolts.Task;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;

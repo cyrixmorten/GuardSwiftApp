@@ -3,15 +3,14 @@ package com.guardswift.ui.parse;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.RecyclerView;
+
+import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 
 import com.google.common.collect.Lists;
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.ui.GuardSwiftApplication;
-import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseLiveQueryClient;
 import com.parse.ParseQuery;

@@ -1,8 +1,8 @@
 package com.guardswift.persistence.parse.data.client;
 
 import android.content.Context;
-import android.databinding.ObservableField;
-import android.support.v7.widget.LinearLayoutCompat;
+import androidx.databinding.ObservableField;
+import androidx.appcompat.widget.LinearLayoutCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -107,10 +107,10 @@ public class Client extends ExtendedParseObject implements Positioned {
 
         for (final ClientContact contact : contacts) {
             View contactView = li.inflate(R.layout.gs_view_clientcontact, null);
-            TextView name = ButterKnife.findById(contactView, R.id.tvName);
-            TextView phone = ButterKnife.findById(contactView, R.id.tvPhoneNumber);
-            TextView desc = ButterKnife.findById(contactView, R.id.tvDescription);
-            TextView email = ButterKnife.findById(contactView, R.id.tvEmail);
+            TextView name = contactView.findViewById(R.id.tvName);
+            TextView phone = contactView.findViewById(R.id.tvPhoneNumber);
+            TextView desc = contactView.findViewById(R.id.tvDescription);
+            TextView email = contactView.findViewById(R.id.tvEmail);
 
             name.setVisibility((contact.getName().isEmpty()) ? View.INVISIBLE : View.VISIBLE);
             name.setText(contact.getName());

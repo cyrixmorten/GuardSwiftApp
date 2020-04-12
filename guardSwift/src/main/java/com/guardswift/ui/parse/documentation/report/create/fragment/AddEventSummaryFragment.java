@@ -1,13 +1,12 @@
 package com.guardswift.ui.parse.documentation.report.create.fragment;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingFragment;
 import com.guardswift.persistence.cache.data.ClientCache;
@@ -19,8 +18,6 @@ import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventH
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
 import com.guardswift.ui.view.card.EventLogCard;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.Objects;
 
 import javax.inject.Inject;

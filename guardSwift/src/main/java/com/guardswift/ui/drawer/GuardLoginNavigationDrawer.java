@@ -2,8 +2,8 @@ package com.guardswift.ui.drawer;
 
 import android.app.Activity;
 import android.content.Context;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.fragment.app.FragmentActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 
 import com.guardswift.BuildConfig;

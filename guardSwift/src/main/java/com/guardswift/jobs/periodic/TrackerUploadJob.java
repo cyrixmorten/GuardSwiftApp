@@ -1,6 +1,6 @@
 package com.guardswift.jobs.periodic;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 
 import com.evernote.android.job.Job;

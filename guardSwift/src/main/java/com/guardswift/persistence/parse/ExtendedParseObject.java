@@ -1,25 +1,20 @@
 package com.guardswift.persistence.parse;
 
-import android.support.annotation.NonNull;
-import android.util.Log;
+import androidx.annotation.NonNull;
 
 import com.google.common.collect.Lists;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.exceptions.LogError;
 import com.guardswift.eventbus.EventBusController;
 import com.guardswift.eventbus.events.UpdateUIEvent;
-import com.parse.DeleteCallback;
-import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import bolts.Continuation;
 import bolts.Task;
 import bolts.TaskCompletionSource;
 

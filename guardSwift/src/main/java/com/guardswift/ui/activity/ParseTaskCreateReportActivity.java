@@ -38,7 +38,7 @@ public class ParseTaskCreateReportActivity extends InjectingAppCompatActivity {
 
 
     @Inject
-    android.support.v7.app.ActionBar actionBar;
+    androidx.appcompat.app.ActionBar actionBar;
 
     @Inject
     ParseCacheFactory parseCacheFactory;

@@ -1,7 +1,7 @@
 package com.guardswift.ui.parse.documentation.report.edit;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 import com.google.common.collect.Maps;
 import com.guardswift.R;

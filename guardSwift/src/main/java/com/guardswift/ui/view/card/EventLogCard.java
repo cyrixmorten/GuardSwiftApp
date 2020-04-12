@@ -2,7 +2,7 @@ package com.guardswift.ui.view.card;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.support.v7.widget.CardView;
+import androidx.cardview.widget.CardView;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -109,20 +109,20 @@ public class EventLogCard extends LinearLayout {
                 .build());
         btnDelete.setBootstrapBrand(DefaultBootstrapBrand.DANGER);
 
-        cardEvent = ButterKnife.findById(v, R.id.tv_area_event);
-        tvEvent = ButterKnife.findById(cardEvent, R.id.text);
+        cardEvent = v.findViewById(R.id.tv_area_event);
+        tvEvent = cardEvent.findViewById(R.id.text);
 
-        cardAmount = ButterKnife.findById(v, R.id.tv_area_amount);
-        tvAmount = ButterKnife.findById(cardAmount, R.id.text);
+        cardAmount = v.findViewById(R.id.tv_area_amount);
+        tvAmount = cardAmount.findViewById(R.id.text);
 
-        cardPeople = ButterKnife.findById(v, R.id.tv_area_people);
-        tvPeople = ButterKnife.findById(cardPeople, R.id.text);
+        cardPeople = v.findViewById(R.id.tv_area_people);
+        tvPeople = cardPeople.findViewById(R.id.text);
 
-        cardLocations = ButterKnife.findById(v, R.id.tv_area_location);
-        tvLocations = ButterKnife.findById(cardLocations, R.id.text);
+        cardLocations = v.findViewById(R.id.tv_area_location);
+        tvLocations = cardLocations.findViewById(R.id.text);
 
-        cardRemarks = ButterKnife.findById(v, R.id.tv_area_remarks);
-        tvRemarks = ButterKnife.findById(cardRemarks, R.id.text);
+        cardRemarks = v.findViewById(R.id.tv_area_remarks);
+        tvRemarks = cardRemarks.findViewById(R.id.text);
 
     }
 
@@ -200,14 +200,14 @@ public class EventLogCard extends LinearLayout {
 
             String click_to_add_msg = getContext().getString(R.string.click_to_add_x, entryName);
             textView.setText(click_to_add_msg);
-            textView.setTextAppearance(getContext(), android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Body1);
+            textView.setTextAppearance(getContext(), androidx.appcompat.R.style.TextAppearance_AppCompat_Body1);
 //            Log.w("EventLogCard", entryName + " : " + click_to_add_msg);
 
             // indicator that a value is missing
             textView.setTag(null);
         } else {
             textView.setText(value);
-            textView.setTextAppearance(getContext(), android.support.v7.appcompat.R.style.TextAppearance_AppCompat_Body2);
+            textView.setTextAppearance(getContext(), androidx.appcompat.R.style.TextAppearance_AppCompat_Body2);
 //            Log.w("EventLogCard", entryName + " : " + value);
 
             // indicator that a value has been set
@@ -239,10 +239,6 @@ public class EventLogCard extends LinearLayout {
 
     public void onDeleteClickListener(OnClickListener clickListener) {
         btnDelete.setOnClickListener(clickListener);
-    }
-
-    public void onCopyToReportClickListener(OnClickListener clickListener) {
-        btnCopyToReport.setOnClickListener(clickListener);
     }
 
     public void onTimestampClickListener(OnClickListener clickListener) {

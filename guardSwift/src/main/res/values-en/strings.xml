@@ -40,7 +40,7 @@
     <string name="distance_to_client">Distance to client is %1$s %2$s</string>
     <string name="download_canceled">Download canceled</string>
     <string name="download_now">Download now</string>
-    <string name="downloading_update">Downloading update...</string>
+    <string name="downloading_update">Downloading update…</string>
     <string name="edit">Edit</string>
     <string name="enter_other_amount">Other amount</string>
     <string name="error_an_error_occured">An error occurred</string>
@@ -153,4 +153,6 @@
     <string name="times">gange</string>
     <string name="task_description">Runderingsbeskrivelse</string>
     <string name="event_history">Event history</string>
+    <string name="accept">Accept</string>
+    <string name="action_save_changes">Save changed</string>
 </resources>

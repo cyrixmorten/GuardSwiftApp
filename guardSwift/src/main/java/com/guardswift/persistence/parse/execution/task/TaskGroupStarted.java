@@ -1,14 +1,12 @@
 package com.guardswift.persistence.parse.execution.task;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-
-import java.util.Date;
 
 @ParseClassName("TaskGroupStarted")
 public class TaskGroupStarted extends ExtendedParseObject{

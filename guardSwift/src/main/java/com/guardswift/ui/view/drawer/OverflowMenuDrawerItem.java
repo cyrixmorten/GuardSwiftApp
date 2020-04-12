@@ -2,8 +2,8 @@ package com.guardswift.ui.view.drawer;
 
 
 import android.content.Context;
-import android.support.annotation.LayoutRes;
-import android.support.v7.widget.PopupMenu;
+import androidx.annotation.LayoutRes;
+import androidx.appcompat.widget.PopupMenu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ImageButton;

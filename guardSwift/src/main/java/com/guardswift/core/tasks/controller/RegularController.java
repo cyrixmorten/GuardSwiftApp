@@ -38,8 +38,6 @@ public class RegularController extends BaseTaskController {
 
         Context ctx = GuardSwiftApplication.getInstance();
 
-        Log.e(TAG, "invoking action: " + action.toString());
-
         EventLog.Builder event = null;
 
         switch (action) {

@@ -492,4 +492,5 @@
     <string name="action_save_changes">Gem ændringer</string>
     <string name="confirm_extra_time">Der er allerede registreret %1$d minutters ekstra tid, vil du registrere yderligere extra tid?</string>
     <string name="not_enough_time_since_last_arrival">Det er kun %1$d minutter siden sidste ankomst, skal mindst være gået %2$d minutter.\n\nDu kan rette tidspunktet for en ankomst ved at klikke på datoen i nederste højre hjørne.</string>
+    <string name="action_settings">Indstillinger</string>
 </resources>

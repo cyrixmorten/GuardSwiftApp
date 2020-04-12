@@ -43,7 +43,7 @@
 package com.guardswift.dagger;
 
 import android.app.Activity;
-import android.support.v4.app.DialogFragment;
+import androidx.fragment.app.DialogFragment;
 
 import com.guardswift.ui.GuardSwiftApplication;
 import com.squareup.leakcanary.RefWatcher;

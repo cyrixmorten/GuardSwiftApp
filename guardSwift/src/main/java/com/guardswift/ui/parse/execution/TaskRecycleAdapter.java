@@ -3,10 +3,10 @@ package com.guardswift.ui.parse.execution;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.CardView;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.cardview.widget.CardView;
 import android.text.SpannableStringBuilder;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -32,7 +32,6 @@ import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
-import com.guardswift.persistence.parse.query.EventLogQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.activity.GenericToolbarActivity;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
@@ -53,7 +52,6 @@ import org.joda.time.DateTime;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 import bolts.Task;
 import bolts.TaskCompletionSource;
@@ -875,15 +873,6 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
     }
 
 
-    private boolean isNewlyDisplayed(int position) {
-        if (position > lastPosition) {
-            lastPosition = position;
-            return true;
-        }
-        return false;
-    }
-
-
     @Override
     public int getItemViewType(int position) {
         return getItem(position).getTaskType().ordinal();
@@ -891,8 +880,6 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
     @Override
     public void onBindViewHolder(TaskViewHolder holder, final int position) {
-
-        boolean isNew = isNewlyDisplayed(position);
 
         final ParseTask task = getItem(position);
 
@@ -1003,7 +990,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         TaskViewHolder holder = new TaskViewHolder(itemView, defaultRemoveItemCallback);
 
-        LinearLayout contentBody = ButterKnife.findById(itemView, R.id.content_body);
+        LinearLayout contentBody = itemView.findViewById(R.id.content_body);
 
         int taskContentHeaderLayoutId = viewType == ParseTask.TASK_TYPE.ALARM.ordinal() ? R.layout.gs_view_task_central_and_date : R.layout.gs_view_task_planned_times;
 
@@ -1014,8 +1001,8 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         contentBody.addView(taskPlannedTimesView, 0);
 
         if (openTaskListener != null) {
-            ButterKnife.findById(itemView, R.id.content_header).setVisibility(View.GONE);
-            ButterKnife.findById(itemView, R.id.task_distance).setVisibility(View.GONE);
+            itemView.findViewById(R.id.content_header).setVisibility(View.GONE);
+            itemView.findViewById(R.id.task_distance).setVisibility(View.GONE);
         }
 
         if (viewType == ParseTask.TASK_TYPE.STATIC.ordinal()) {

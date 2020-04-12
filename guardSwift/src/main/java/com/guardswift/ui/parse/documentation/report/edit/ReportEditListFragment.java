@@ -3,8 +3,8 @@ package com.guardswift.ui.parse.documentation.report.edit;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.core.content.ContextCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -190,6 +190,8 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
                 .setOnTimeSetListener((dialog, hourOfDay, minute) -> {
 
                     Date arrivalDate = task.getArrivalDate(hourOfDay, minute);
+
+                    task.setLastArrivalDate(arrivalDate);
 
                     eventLog.setDeviceTimestamp(arrivalDate);
 

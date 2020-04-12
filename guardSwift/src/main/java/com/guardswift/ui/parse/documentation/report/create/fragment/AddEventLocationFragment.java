@@ -2,7 +2,7 @@ package com.guardswift.ui.parse.documentation.report.create.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.InputType;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -349,7 +349,7 @@ public class AddEventLocationFragment extends InjectingListFragment implements E
     }
 
     @Override
-    public void updateFloatingActionButton(Context context, android.support.design.widget.FloatingActionButton
+    public void updateFloatingActionButton(Context context, com.google.android.material.floatingactionbutton.FloatingActionButton
             floatingActionButton) {
         floatingActionButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_add_location_white_18dp));
         floatingActionButton.setOnClickListener(new View.OnClickListener() {

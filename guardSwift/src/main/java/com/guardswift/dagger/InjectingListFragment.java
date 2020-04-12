@@ -29,7 +29,7 @@
 package com.guardswift.dagger;
 
 import android.app.Activity;
-import android.support.v4.app.ListFragment;
+import androidx.fragment.app.ListFragment;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.ui.GuardSwiftApplication;
