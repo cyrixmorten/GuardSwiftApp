@@ -2,7 +2,7 @@ package com.guardswift.ui.parse.documentation.report.create.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.text.InputType;
 import android.util.Log;
 import android.util.SparseBooleanArray;

@@ -3,7 +3,7 @@ package com.guardswift.persistence;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.google.common.collect.Sets;
 import com.guardswift.dagger.InjectingApplication.InjectingApplicationModule.ForApplication;

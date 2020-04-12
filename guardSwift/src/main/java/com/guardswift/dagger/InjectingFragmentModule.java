@@ -28,6 +28,8 @@
 
 package com.guardswift.dagger;
 
+import androidx.fragment.app.Fragment;
+
 import com.guardswift.ui.map.BaseMapFragment;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.AbstractTabsViewPagerFragment;
@@ -87,7 +89,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		AbstractTabsViewPagerFragment.class,
 		// Parse
 		AbstractParseRecyclerFragment.class,
-		AbstractTasksRecycleFragment.class,
 		// - Data
 		BaseMapFragment.class,
 		GuardListFragment.class,
@@ -132,7 +133,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 		ReportHistoryListFragment.class
 		}, library = true)
 public class InjectingFragmentModule {
-	private final android.support.v4.app.Fragment mFragment;
+	private final androidx.fragment.app.Fragment mFragment;
 	private final Injector mInjector;
 
 	/**
@@ -141,8 +142,8 @@ public class InjectingFragmentModule {
 	 * @param fragment
 	 *            the Fragment with which this module is associated.
 	 */
-	public InjectingFragmentModule(android.support.v4.app.Fragment fragment,
-			Injector injector) {
+	public InjectingFragmentModule(androidx.fragment.app.Fragment fragment,
+                                   Injector injector) {
 		mFragment = fragment;
 		mInjector = injector;
 	}
@@ -155,7 +156,7 @@ public class InjectingFragmentModule {
 	 * @return the Fragment
 	 */
 	@Provides
-	public android.support.v4.app.Fragment provideFragment() {
+	public androidx.fragment.app.Fragment provideFragment() {
 		return mFragment;
 	}
 

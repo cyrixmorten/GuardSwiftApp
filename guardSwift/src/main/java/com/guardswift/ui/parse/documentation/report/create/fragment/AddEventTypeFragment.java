@@ -26,11 +26,8 @@ import com.guardswift.ui.menu.MenuItemBuilder;
 import com.guardswift.ui.menu.MenuItemIcons;
 import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.parse.ParseException;
-import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import java.util.List;
 
@@ -241,7 +238,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
     }
 
     @Override
-    public void updateFloatingActionButton(Context context, android.support.design.widget.FloatingActionButton floatingActionButton) {
+    public void updateFloatingActionButton(Context context, com.google.android.material.floatingactionbutton.FloatingActionButton floatingActionButton) {
 //        floatingActionButton.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_add_white_18dp));
 //        floatingActionButton.setOnClickListener(new View.OnClickListener() {
 //            @Override

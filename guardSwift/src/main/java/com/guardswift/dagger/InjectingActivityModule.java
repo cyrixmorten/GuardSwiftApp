@@ -16,9 +16,9 @@ package com.guardswift.dagger;
 
 import android.app.ActionBar.TabListener;
 import android.os.Handler;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 
@@ -69,8 +69,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
         ParseTaskCreateReportActivity.class,
         // Create Event
         UpdateEventHandlerActivity.class,
-        CreateEventHandlerActivity.class,
-        CreateEventHandlerActivity.class,
         CreateEventHandlerActivity.class,
         // RFID
         RFIDRegisterActivity.class}, library = true)

@@ -3,9 +3,9 @@ package com.guardswift.ui.parse.documentation.report.edit;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.widget.CardView;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,8 +42,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import bolts.Continuation;
-import bolts.Task;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -164,10 +162,10 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
         });
     }
 
-    MaterialDialog sendReportDialog = null;
+    private MaterialDialog sendReportDialog = null;
 
     @OnClick(R.id.btn_send_report)
-    public void sendReport(Button button) {
+    void sendReport(Button button) {
         btnSendReport.setEnabled(false);
         sendReportDialog = new CommonDialogsBuilder.MaterialDialogs(getActivity()).indeterminate(R.string.working, R.string.sending_reprt).show();
 
@@ -250,11 +248,11 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
                         for (final EventLog eventLog : objects) {
                             final View timedRemark = getActivity().getLayoutInflater().inflate(R.layout.gs_view_timed_remark, null);
 
-                            TextView tvTimestamp = ButterKnife.findById(timedRemark, R.id.tv_timestamp);
+                            TextView tvTimestamp = timedRemark.findViewById(R.id.tv_timestamp);
                             String timeStampString = DateUtils.formatDateTime(getContext(), eventLog.getDeviceTimestamp().getTime(), DateUtils.FORMAT_SHOW_TIME);
                             tvTimestamp.setText(timeStampString);
 
-                            TextView tvRemarks = ButterKnife.findById(timedRemark, R.id.tv_remarks);
+                            TextView tvRemarks = timedRemark.findViewById(R.id.tv_remarks);
                             String remarkString = eventLog.getRemarks();
                             tvRemarks.setText(remarkString);
 
@@ -300,7 +298,7 @@ public class ReportSummaryFragment extends InjectingFragment implements Fragment
     @Override
     public void fragmentBecameVisible() {
         loadingReport(true);
-        new Handler().postDelayed(() -> update(), 1000);
+        new Handler().postDelayed(this::update, 1000);
     }
 
     @Override

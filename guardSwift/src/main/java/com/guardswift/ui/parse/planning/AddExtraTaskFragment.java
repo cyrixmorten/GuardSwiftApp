@@ -1,10 +1,9 @@
 package com.guardswift.ui.parse.planning;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,7 +31,6 @@ import com.guardswift.ui.menu.MenuItemIcons;
 import com.guardswift.ui.parse.data.client.ClientListFragment;
 import com.guardswift.ui.parse.data.taskgroup.TaskGroupListFragment;
 import com.guardswift.util.StringHelper;
-import com.guardswift.util.ToastHelper;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 
 import org.joda.time.DateTime;

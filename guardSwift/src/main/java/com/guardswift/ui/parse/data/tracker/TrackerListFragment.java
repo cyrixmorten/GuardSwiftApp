@@ -1,11 +1,10 @@
 package com.guardswift.ui.parse.data.tracker;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -22,7 +21,6 @@ import com.guardswift.ui.menu.MenuItemIcons;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
 import org.joda.time.DateTime;

@@ -2,17 +2,17 @@ package com.guardswift.ui.preferences;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.preference.PreferenceManager;
+import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.persistence.parse.data.Installation;
 import com.guardswift.util.ToastHelper;
-import com.parse.ParseException;
-import com.parse.SaveCallback;
-import com.takisoft.fix.support.v7.preference.EditTextPreference;
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat;
+import com.takisoft.preferencex.EditTextPreference;
+import com.takisoft.preferencex.PreferenceFragmentCompat;
+
+import java.util.Objects;
 
 import static com.mikepenz.iconics.Iconics.TAG;
 
@@ -87,13 +87,10 @@ public class InstallationPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private void saveChange() {
-        installation.getInstance().saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e != null) {
-                    ToastHelper.toast(getContext(), getContext().getString(R.string.error_saving_changes_try_again_later));
-                    new HandleException(TAG, "Saving changes", e);
-                }
+        installation.getInstance().saveInBackground(e -> {
+            if (e != null) {
+                ToastHelper.toast(getContext(), Objects.requireNonNull(getContext()).getString(R.string.error_saving_changes_try_again_later));
+                new HandleException(TAG, "Saving changes", e);
             }
         });
     }
@@ -119,8 +116,8 @@ public class InstallationPreferencesFragment extends PreferenceFragmentCompat {
 
 
     private void update() {
-        EditTextPreference deviceName = (EditTextPreference) findPreference(PREF_DEVICE_NAME);
-        EditTextPreference smsTo = (EditTextPreference) findPreference(PREF_DEVICE_MOBILE_NUMBER);
+        EditTextPreference deviceName = findPreference(PREF_DEVICE_NAME);
+        EditTextPreference smsTo = findPreference(PREF_DEVICE_MOBILE_NUMBER);
 
         PreferenceHelper.setPreferenceSummary(pref, deviceName, PREF_DEVICE_NAME, getString(R.string.click_here_to_enter, getString(R.string.device_name)).toLowerCase());
         PreferenceHelper.setPreferenceSummary(pref, smsTo, PREF_DEVICE_MOBILE_NUMBER, getString(R.string.click_here_to_enter, getString(R.string.mobile_number).toLowerCase()), getString(R.string.installation_send_to_description));

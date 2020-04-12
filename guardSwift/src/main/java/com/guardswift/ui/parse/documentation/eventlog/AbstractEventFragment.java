@@ -3,24 +3,19 @@ package com.guardswift.ui.parse.documentation.eventlog;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.codetroopers.betterpickers.numberpicker.NumberPickerBuilder;
-import com.codetroopers.betterpickers.numberpicker.NumberPickerDialogFragment;
 import com.crashlytics.android.Crashlytics;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingListFragment;
@@ -31,13 +26,9 @@ import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
 import com.guardswift.util.Analytics;
-import com.parse.FindCallback;
-import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -292,15 +283,15 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.view_adapter_item_event_log, null);
         view.setBackgroundResource(android.R.color.transparent);
 
-        TextView event = ButterKnife.findById(view, R.id.event);
-        LinearLayout amountLayout = ButterKnife.findById(view, R.id.amountLayout);
-        final TextView amount = ButterKnife.findById(view, R.id.amount);
-        TextView location = ButterKnife.findById(view, R.id.location);
-        TextView remarks = ButterKnife.findById(view, R.id.remarks);
+        TextView event = view.findViewById(R.id.event);
+        LinearLayout amountLayout = view.findViewById(R.id.amountLayout);
+        final TextView amount = view.findViewById(R.id.amount);
+        TextView location = view.findViewById(R.id.location);
+        TextView remarks = view.findViewById(R.id.remarks);
 
-        TextView time = ButterKnife.findById(view, R.id.time);
-        TextView guard = ButterKnife.findById(view, R.id.guard);
-        TextView relativeTime = ButterKnife.findById(view, R.id.relativeTime);
+        TextView time = view.findViewById(R.id.time);
+        TextView guard = view.findViewById(R.id.guard);
+        TextView relativeTime = view.findViewById(R.id.relativeTime);
 
         time.setVisibility(View.INVISIBLE);
         guard.setVisibility(View.INVISIBLE);

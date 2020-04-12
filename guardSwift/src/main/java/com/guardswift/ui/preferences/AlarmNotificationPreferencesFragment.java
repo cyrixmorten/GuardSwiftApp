@@ -2,9 +2,9 @@ package com.guardswift.ui.preferences;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.preference.CheckBoxPreference;
-import android.support.v7.preference.Preference;
+import androidx.annotation.Nullable;
+import androidx.preference.CheckBoxPreference;
+import androidx.preference.Preference;
 import android.text.TextUtils;
 
 import com.guardswift.R;
@@ -14,14 +14,12 @@ import com.guardswift.persistence.parse.query.GuardQueryBuilder;
 import com.guardswift.rest.GuardSwiftServer;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.ToastHelper;
-import com.parse.FindCallback;
-import com.parse.ParseException;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
-import com.takisoft.fix.support.v7.preference.PreferenceCategory;
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat;
+import com.takisoft.preferencex.PreferenceCategory;
+import com.takisoft.preferencex.PreferenceFragmentCompat;
 
 import java.util.List;
+import java.util.Objects;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -67,10 +65,10 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
         createAlarmNotificationPreferences();
     }
 
-    public void createTestAlarmPreference() {
+    private void createTestAlarmPreference() {
 
 
-        final Preference testAlarm = new Preference(getContext());
+        final Preference testAlarm = new Preference(Objects.requireNonNull(getContext()));
         testAlarm.setTitle(R.string.test_alarm_create);
         testAlarm.setIcon(R.drawable.ic_add_alert_black_24dp);
 
@@ -86,47 +84,44 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
         }
 
 
-        testAlarm.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
+        testAlarm.setOnPreferenceClickListener(preference -> {
 
-                testAlarm.setEnabled(false);
+            testAlarm.setEnabled(false);
 
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(GuardSwiftServer.API_URL)
-                        .build();
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(GuardSwiftServer.API_URL)
+                    .build();
 
-                GuardSwiftServer.API guardSwift = retrofit.create(GuardSwiftServer.API.class);
+            GuardSwiftServer.API guardSwift = retrofit.create(GuardSwiftServer.API.class);
 
-                showLoading();
+            showLoading();
 
-                guardSwift.testAlarm(sendTo[0]).enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        if (response.isSuccessful()) {
-                            ToastHelper.toast(getContext(), getString(R.string.test_alarm_created));
-                        } else {
-                            ToastHelper.toast(getContext(), getString(R.string.error_an_error_occured));
-                        }
-
-                        dismissLoading();
-                        testAlarm.setEnabled(true);
+            guardSwift.testAlarm(sendTo[0]).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        ToastHelper.toast(getContext(), getString(R.string.test_alarm_created));
+                    } else {
+                        ToastHelper.toast(getContext(), getString(R.string.error_an_error_occured));
                     }
 
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        ToastHelper.toast(getContext(), getString(R.string.title_internet_missing));
+                    dismissLoading();
+                    testAlarm.setEnabled(true);
+                }
 
-                        dismissLoading();
-                        testAlarm.setEnabled(true);
-                    }
-                });
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    ToastHelper.toast(getContext(), getString(R.string.title_internet_missing));
 
-                return false;
-            }
+                    dismissLoading();
+                    testAlarm.setEnabled(true);
+                }
+            });
+
+            return false;
         });
 
-        PreferenceCategory cat = (PreferenceCategory)findPreference("alarm_test");
+        PreferenceCategory cat = findPreference("alarm_test");
         cat.addPreference(testAlarm);
     }
 
@@ -134,28 +129,24 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
         new GuardQueryBuilder(false)
                 .hasSession()
                 .build()
-                .findInBackground(new FindCallback<Guard>() {
+                .findInBackground((guards, e) -> {
 
-            @Override
-            public void done(List<Guard> guards, ParseException e) {
-
-                if (e != null) {
-                    new HandleException(TAG, "Fetching guards", e);
-                    return;
-                }
-                if (guards == null) {
-                    return;
-                }
-
-                ((PreferenceCategory)findPreference("alarm_notifications")).removeAll();
-
-                for (Guard guard: guards) {
-                    if (guard.canAccessAlarms()) {
-                        createAlarmNotifyPreference(guards, guard);
+                    if (e != null) {
+                        new HandleException(TAG, "Fetching guards", e);
+                        return;
                     }
-                }
-            }
-        });
+                    if (guards == null) {
+                        return;
+                    }
+
+                    ((PreferenceCategory) Objects.requireNonNull(findPreference("alarm_notifications"))).removeAll();
+
+                    for (Guard guard: guards) {
+                        if (guard.canAccessAlarms()) {
+                            createAlarmNotifyPreference(guards, guard);
+                        }
+                    }
+                });
     }
 
     private String getLastInstallationText(Guard guard) {
@@ -190,7 +181,7 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
             return;
         }
 
-        PreferenceCategory alarmNotifications = (PreferenceCategory)findPreference("alarm_notifications");
+        PreferenceCategory alarmNotifications = findPreference("alarm_notifications");
 
 
 
@@ -201,53 +192,50 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
         guardNotification.setSummary(description.trim());
         guardNotification.setIcon(R.drawable.ic_alarm_black_24dp);
         guardNotification.setChecked(guard.isAlarmSoundEnabled());
-        guardNotification.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
+        guardNotification.setOnPreferenceChangeListener((preference, newValue) -> {
 
 
-                final Boolean enable = (Boolean)newValue;
+            final Boolean enable = (Boolean)newValue;
 
 //                Guard.getQueryBuilder(true)
 //                        .build().findInBackground(new FindCallback<Guard>() {
 //                    @Override
 //                    public void done(List<Guard> objects, ParseException e) {
-                        int alarmNotifyCount = 0;
-                        for (Guard g: guards) {
-                            alarmNotifyCount += (g.isAlarmSoundEnabled()) ? 1 : 0;
-                        }
+                    int alarmNotifyCount = 0;
+                    for (Guard g: guards) {
+                        alarmNotifyCount += (g.isAlarmSoundEnabled()) ? 1 : 0;
+                    }
 
 
-                        if (!enable && alarmNotifyCount == 1) {
-                            // do not allow 0 alarm receivers
-                            new CommonDialogsBuilder.MaterialDialogs(getContext()).ok(R.string.not_performed, R.string.last_alarm_receiver_message, null).show();
+                    if (!enable && alarmNotifyCount == 1) {
+                        // do not allow 0 alarm receivers
+                        new CommonDialogsBuilder.MaterialDialogs(getContext()).ok(R.string.not_performed, R.string.last_alarm_receiver_message, null).show();
 
-                            guardNotification.setChecked(true);
-                        } else {
-                            showLoading();
+                        guardNotification.setChecked(true);
+                    } else {
+                        showLoading();
 
-                            guard.enableAlarm(enable);
-                            guard.saveInBackground(e -> {
-                                if (isAdded()) {
-                                    if (e != null) {
-                                        ToastHelper.toast(getContext(), getString(R.string.error_an_error_occured));
-                                    }
-
-                                    guardNotification.setChecked(enable);
-                                    dismissLoading();
+                        guard.enableAlarm(enable);
+                        guard.saveInBackground(e -> {
+                            if (isAdded()) {
+                                if (e != null) {
+                                    ToastHelper.toast(getContext(), getString(R.string.error_an_error_occured));
                                 }
-                            });
-                        }
+
+                                guardNotification.setChecked(enable);
+                                dismissLoading();
+                            }
+                        });
+                    }
 //                    }
 //                });
 
 
 
-                return false;
-            }
+            return false;
         });
 
-        alarmNotifications.addPreference(guardNotification);
+        Objects.requireNonNull(alarmNotifications).addPreference(guardNotification);
     }
 
 }

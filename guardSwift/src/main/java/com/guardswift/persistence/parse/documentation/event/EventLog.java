@@ -1,7 +1,7 @@
 package com.guardswift.persistence.parse.documentation.event;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.format.DateFormat;
 import android.util.Log;
 

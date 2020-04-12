@@ -1,6 +1,6 @@
 package com.guardswift.persistence.parse.data.client;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.guardswift.persistence.parse.ExtendedParseObject;
 import com.guardswift.persistence.parse.ParseQueryBuilder;

@@ -2,15 +2,15 @@ package com.guardswift.ui.preferences;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.preference.PreferenceManager;
+import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import com.guardswift.R;
 import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.util.ToastHelper;
-import com.takisoft.fix.support.v7.preference.EditTextPreference;
-import com.takisoft.fix.support.v7.preference.PreferenceFragmentCompat;
+import com.takisoft.preferencex.EditTextPreference;
+import com.takisoft.preferencex.PreferenceFragmentCompat;
 
 // https://github.com/Gericop/Android-Support-Preference-V7-Fix
 public class GuardPreferencesFragment extends PreferenceFragmentCompat {
@@ -106,8 +106,8 @@ public class GuardPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private void update() {
-        EditTextPreference guardName = (EditTextPreference) findPreference(GUARD_NAME);
-        EditTextPreference guardMobile = (EditTextPreference) findPreference(GUARD_MOBILE_NUMBER);
+        EditTextPreference guardName = findPreference(GUARD_NAME);
+        EditTextPreference guardMobile = findPreference(GUARD_MOBILE_NUMBER);
 
         PreferenceHelper.setPreferenceSummary(pref, guardName, GUARD_NAME, getString(R.string.click_here_to_enter, getString(R.string.name)).toLowerCase());
         PreferenceHelper.setPreferenceSummary(pref, guardMobile, GUARD_MOBILE_NUMBER, getString(R.string.click_here_to_enter, getString(R.string.mobile_number).toLowerCase()), getString(R.string.guard_mobile_description));

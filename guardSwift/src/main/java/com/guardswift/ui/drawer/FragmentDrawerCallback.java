@@ -1,6 +1,6 @@
 package com.guardswift.ui.drawer;
 
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 
 /**
  * Created by cyrixmorten on 11/04/2017.

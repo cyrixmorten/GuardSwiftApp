@@ -19,7 +19,7 @@
           "client_type": 1,
           "android_info": {
             "package_name": "com.guardswift",
-            "certificate_hash": "FA4D89B5CAFCA3E833384BEAEEAA1DD82E95824C"
+            "certificate_hash": "fa4d89b5cafca3e833384beaeeaa1dd82e95824c"
           }
         },
         {
@@ -29,24 +29,17 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyByFY9zeigvMUfnkyXmp9KJIge7oqh_h28"
+          "current_key": "AIzaSyBuSqlNo5WZ6IHDlY7O8E9KjguAG9eMtck"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "343541591235-jekq315vfg1srsb10s6ojg8rf83hadep.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     }
