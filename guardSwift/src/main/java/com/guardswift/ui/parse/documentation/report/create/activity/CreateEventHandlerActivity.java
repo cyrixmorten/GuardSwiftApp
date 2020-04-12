@@ -22,12 +22,8 @@ import com.guardswift.persistence.parse.documentation.event.EventRemark;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.documentation.report.create.fragment.AddEventViewPagerFragment;
-import com.guardswift.util.Analytics;
-import com.parse.FindCallback;
-import com.parse.ParseException;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -328,36 +324,31 @@ public class CreateEventHandlerActivity extends
             final Client client = getClient();
             EventRemark.getQueryBuilder(true)
                     .matching(client).matching(eventType)
-                    .build().findInBackground(new FindCallback<EventRemark>() {
+                    .build().findInBackground((eventRemarks, e) -> {
+                        if (e != null) {
+                            return;
+                        }
 
-                @Override
-                public void done(List<EventRemark> eventRemarks, ParseException e) {
-                    if (e != null) {
-                        return;
-                    }
+                        int autocompletesCount = 0;
+                        String[] remarkTokens = remarks.split(",");
+                        for (String remarkToken : remarkTokens) {
+                            String remark = remarkToken.trim();
 
-                    int autocompletesCount = 0;
-                    String[] remarkTokens = remarks.split(",");
-                    for (String remarkToken : remarkTokens) {
-                        String remark = remarkToken.trim();
+                            boolean exists = false;
+                            for (EventRemark eventRemark : eventRemarks) {
+                                if (eventRemark.getRemark().equals(remark)) {
+                                    exists = true;
+                                }
+                            }
 
-                        boolean exists = false;
-                        for (EventRemark eventRemark : eventRemarks) {
-                            if (eventRemark.getRemark().equals(remark)) {
-                                exists = true;
+                            if (!exists) {
+                                EventRemark.create(eventType, clientLocation, remark, getClient(), guardCache.getLoggedIn()).saveEventually();
+                            } else {
+                                autocompletesCount++;
                             }
                         }
 
-                        if (!exists) {
-                            EventRemark.create(eventType, clientLocation, remark, getClient(), guardCache.getLoggedIn()).saveEventually();
-                        } else {
-                            autocompletesCount++;
-                        }
-                    }
-
-                    Analytics.eventEventLogTrend(Analytics.CreateEventlogAction.Autocomplete, null, autocompletesCount);
-                }
-            });
+                    });
         }
     }
 

@@ -29,6 +29,9 @@
 package com.guardswift.dagger;
 
 import android.content.Context;
+import android.os.Bundle;
+
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.guardswift.core.exceptions.HandleException;
@@ -58,6 +61,9 @@ public class InjectingFragment extends Fragment implements Injector {
 
     @Inject
     EventBus eventBus;
+
+    @Inject
+    Analytics mAnalytics;
 
     /**
      * Creates an object graph for this Fragment by extending the hosting
@@ -117,8 +123,6 @@ public class InjectingFragment extends Fragment implements Injector {
         super.onDestroy();
     }
 
-    // implement Injector interface
-
     /**
      * Gets this Fragment's object graph.
      *
@@ -154,10 +158,9 @@ public class InjectingFragment extends Fragment implements Injector {
 
 
     @Override
-    public void onResume() {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        super.onResume();
-
-        Analytics.sendScreenName(getClass().getSimpleName());
+        mAnalytics.sendScreenName(getActivity(), getClass().getSimpleName());
     }
 }

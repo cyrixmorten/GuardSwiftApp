@@ -29,6 +29,9 @@
 package com.guardswift.dagger;
 
 import android.app.Activity;
+import android.os.Bundle;
+
+import androidx.annotation.Nullable;
 import androidx.fragment.app.ListFragment;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
@@ -51,6 +54,8 @@ import de.greenrobot.event.EventBus;
 public class InjectingListFragment extends ListFragment implements Injector {
 
 	@Inject EventBus eventBus;
+
+	@Inject Analytics mAnalytics;
 
 	private ObjectGraph mObjectGraph;
 	private boolean mFirstAttach = true;
@@ -143,11 +148,11 @@ public class InjectingListFragment extends ListFragment implements Injector {
 		return result;
 	}
 
-    @Override
-    public void onResume() {
+	@Override
+	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 
-        super.onResume();
+		mAnalytics.sendScreenName(getActivity(), getClass().getSimpleName());
+	}
 
-        Analytics.sendScreenName(getClass().getSimpleName());
-    }
 }

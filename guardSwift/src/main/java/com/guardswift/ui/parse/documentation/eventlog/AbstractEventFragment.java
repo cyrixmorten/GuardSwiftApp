@@ -25,7 +25,6 @@ import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
-import com.guardswift.util.Analytics;
 import com.parse.ParseQuery;
 import com.parse.ParseQueryAdapter;
 
@@ -278,6 +277,10 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
+    /**
+     * // TODO think this is never being used anymore
+     * @param eventLog
+     */
     private void showCreateEventDialog(final EventLog eventLog) {
 
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.view_adapter_item_event_log, null);
@@ -340,11 +343,9 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
                     new EventLog.Builder(getActivity()).from(eventLog, getTaskPointer())
                             .amount(amount.getText())
                             .saveAsync();
-                    Analytics.eventEventLogTrend(Analytics.CreateEventlogAction.Copy);
                 })
                 .onNegative((materialDialog, dialogAction) -> {
 //                        CreateEventActivityFactory.start(getActivity(), eventLog);
-                    Analytics.eventEventLogTrend(Analytics.CreateEventlogAction.Edit);
                 })
                 .show();
     }
@@ -370,8 +371,6 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
     @OnClick(R.id.btn_header)
     public void add() {
         openAddEvent();
-
-        Analytics.eventEventLogTrend(Analytics.CreateEventlogAction.New);
     }
 
 

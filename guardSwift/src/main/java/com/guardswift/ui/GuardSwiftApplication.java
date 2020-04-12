@@ -13,7 +13,6 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.TypefaceProvider;
 import com.crashlytics.android.Crashlytics;
 import com.evernote.android.job.JobManager;
-import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.guardswift.BuildConfig;
@@ -315,20 +314,6 @@ public class GuardSwiftApplication extends InjectingApplication {
         FusedLocationTrackerService.stop(this);
 
         TrackerUploadJob.cancelJob();
-    }
-
-    private com.google.android.gms.analytics.Tracker tracker;
-
-    public synchronized com.google.android.gms.analytics.Tracker getGoogleAnalyticsTracker() {
-        if (tracker == null) {
-
-            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
-
-            tracker = analytics.newTracker(R.xml.app_tracker);
-
-            analytics.setDryRun(BuildConfig.DEBUG);
-        }
-        return tracker;
     }
 
     public ParseCacheFactory getCacheFactory() {

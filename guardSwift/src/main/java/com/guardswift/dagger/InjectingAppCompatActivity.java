@@ -38,7 +38,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.google.android.gms.analytics.GoogleAnalytics;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
@@ -76,6 +75,8 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     EventBus eventBus;
     @Inject
     GuardCache guardCache;
+    @Inject
+    Analytics mAnalytics;
 
     private ObjectGraph mObjectGraph;
 
@@ -213,9 +214,8 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
         try {
             super.onStart();
 
-            Analytics.sendScreenName(getClass().getSimpleName());
+            mAnalytics.sendScreenName(this, getClass().getSimpleName());
 
-            GoogleAnalytics.getInstance(this).reportActivityStart(this);
         } catch (Exception e) {
             new HandleException(TAG, "onStart", e);
         }
@@ -226,7 +226,6 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
     protected void onStop() {
         try {
             super.onStop();
-            GoogleAnalytics.getInstance(this).reportActivityStop(this);
         } catch (Exception e) {
             new HandleException(TAG, "onStop", e);
         }

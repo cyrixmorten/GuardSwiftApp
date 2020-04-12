@@ -1,11 +1,10 @@
 package com.guardswift.util;
 
+import android.app.Activity;
+import android.os.Bundle;
 import android.util.Log;
 
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
-import com.guardswift.BuildConfig;
-import com.guardswift.ui.GuardSwiftApplication;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 /**
  * Created by cyrix on 3/29/15.
@@ -15,62 +14,28 @@ public class Analytics {
 
     private static final String TAG = Analytics.class.getSimpleName();
 
+    public enum UserProperty {COMPANY_NAME}
 
-    public enum EventLabelGuess {Correct, Incorrect, Missed}
+    private FirebaseAnalytics mFirebaseAnalytics;
 
-    public enum EventLabelTask {Overview, Details}
+    public Analytics(Activity context) {
+        this.mFirebaseAnalytics = FirebaseAnalytics.getInstance(context);
+    }
 
-    public enum CreateEventlogAction {New, Copy, Edit, Filter, Autocomplete}
-
-    public enum EventAction {Arrival, Departure, CreateEvent}
-
-    public static void sendScreenName(String screenName) {
+    public void sendScreenName(Activity activity, String screenName) {
 
         Log.i(TAG, "sendScreenName: " + screenName);
 
-        Tracker t = GuardSwiftApplication.getInstance().getGoogleAnalyticsTracker();
-        t.setScreenName(screenName);
-        t.send(new HitBuilders.ScreenViewBuilder().build());
+        this.mFirebaseAnalytics.setCurrentScreen(activity, screenName, null);
     }
 
-    public static void sendEvent(String category, String action, String label) {
-        sendEvent(category, action, label, 1);
+    public void setUserProperty(UserProperty key, String value) {
+        this.mFirebaseAnalytics.setUserProperty(key.toString().toLowerCase(), value);
     }
 
-    public static void sendEvent(String category, String action, String label, long value) {
 
-        if (BuildConfig.DEBUG)
-            category = "Debug " + category;
-
-        Log.i(TAG, "sendEvent cat:" + category + " action: " + action + " label: " + label);
-
-        GuardSwiftApplication.getInstance().getGoogleAnalyticsTracker().send(new HitBuilders.EventBuilder()
-                .setCategory(category)
-                .setAction(action)
-                .setLabel(label)
-                .setValue(value)
-                .build());
-
-    }
-
-    public static void eventCheckpointAutomation(EventAction action, EventLabelGuess label) {
-        sendEvent("Automation indoor", action.toString(), label.toString());
-    }
-
-    public static void eventTaskAutomation(EventAction action, EventLabelGuess label) {
-        sendEvent("Automation outdoor", action.toString(), label.toString());
-    }
-
-    public static void eventTaskTrend(EventAction action, EventLabelTask label) {
-        sendEvent("ParseTask trends", action.toString(), label.toString());
-    }
-
-    public static void eventEventLogTrend(CreateEventlogAction action) {
-        eventEventLogTrend(action, null, 1);
-    }
-
-    public static void eventEventLogTrend(CreateEventlogAction action, String label, long value) {
-        sendEvent("Eventlog trends", action.toString(), label, value);
+    public void sendEvent(String name, Bundle properties) {
+        mFirebaseAnalytics.logEvent(name, properties);
     }
 
 

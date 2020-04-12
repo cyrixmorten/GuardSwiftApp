@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.guardswift.BuildConfig;
@@ -39,6 +40,7 @@ import com.guardswift.persistence.parse.misc.Update;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.ui.drawer.GuardLoginNavigationDrawer;
+import com.guardswift.util.Analytics;
 import com.guardswift.util.Device;
 import com.guardswift.util.ToastHelper;
 import com.guardswift.util.UpdateApp;
@@ -83,6 +85,8 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     ParseModule parseModule;
     @Inject
     TaskGroupStartedCache taskGroupStartedCache;
+    @Inject
+    Analytics mAnalytics;
 
     @Inject
     GuardLoginNavigationDrawer navigationDrawer;
@@ -128,6 +132,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         context.startActivity(intent);
     }
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -157,6 +162,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         if (savedInstanceState == null) {
             hasGooglePlayServices();
             ignoreBatteryOptimizations();
+            mAnalytics.setUserProperty(Analytics.UserProperty.COMPANY_NAME, ParseUser.getCurrentUser().getUsername());
         }
 
     }
