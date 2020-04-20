@@ -198,20 +198,10 @@ public class Tracker extends ExtendedParseObject {
     }
 
 
-    // Assume still until proven otherwise
-    private int previousActivityType = DetectedActivity.STILL;
-
     public void appendLocation(final Context context, Location location) {
 
 
         if (location == null || location.isFromMockProvider()) {
-            return;
-        }
-
-        int currentActivityType = ActivityDetectionModule.Recent.getDetectedActivityType();
-
-        // Only add one location while still
-        if (previousActivityType == DetectedActivity.STILL && currentActivityType == DetectedActivity.STILL) {
             return;
         }
 
@@ -220,8 +210,6 @@ public class Tracker extends ExtendedParseObject {
         try {
             FileIO.writeToFile(context, LOCAL_GPS_FILE_NAME, Context.MODE_APPEND, jsonLocation.toString());
             FileIO.writeToFile(context, LOCAL_GPS_FILE_NAME, Context.MODE_APPEND, ",");
-
-            previousActivityType = currentActivityType;
 
         } catch (IOException e) {
             new HandleException(context, TAG, "append location to local file", e);
