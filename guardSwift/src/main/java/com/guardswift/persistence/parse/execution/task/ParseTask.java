@@ -448,6 +448,10 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public void deleteArrival() {
+        // disable time between arrivals restriction
+        // TODO: here we should query eventlogs and pick the most recent arrival date
+        setLastArrivalDate(new Date(1970));
+
         put(ParseTask.timesArrived, getTimesArrived() - 1);
     }
 
