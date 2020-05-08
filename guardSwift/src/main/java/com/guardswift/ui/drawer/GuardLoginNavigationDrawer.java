@@ -20,7 +20,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
-import com.parse.ui.ParseLoginBuilder;
+import com.parse.ui.login.ParseLoginBuilder;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,7 +34,6 @@ public class GuardLoginNavigationDrawer extends BaseNavigationDrawer {
     private final Context context;
 
     private Drawer navigationDrawer;
-    private FragmentDrawerCallback fragmentDrawerCallback;
 
 
     @Inject
@@ -47,9 +46,6 @@ public class GuardLoginNavigationDrawer extends BaseNavigationDrawer {
     }
 
     public Drawer create(final FragmentActivity activity, Toolbar toolbar, final FragmentDrawerCallback fragmentDrawerCallback) {
-
-        this.fragmentDrawerCallback = fragmentDrawerCallback;
-
 
         // initPreferences navigationdrawer
         navigationDrawer = new DrawerBuilder()

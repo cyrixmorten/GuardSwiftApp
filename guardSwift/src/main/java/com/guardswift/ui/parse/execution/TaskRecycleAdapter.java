@@ -46,7 +46,7 @@ import com.guardswift.util.OpenLocalPDF;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.parse.GetCallback;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
 

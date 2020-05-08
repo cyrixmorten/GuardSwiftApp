@@ -1,6 +1,6 @@
 package com.guardswift.ui.activity;
 
-import com.parse.ui.ParseLoginDispatchActivity;
+import com.parse.ui.login.ParseLoginDispatchActivity;
 
 /**
  * Created by cyrix on 1/31/16.

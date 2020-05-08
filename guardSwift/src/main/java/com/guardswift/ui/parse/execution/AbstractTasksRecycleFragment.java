@@ -7,7 +7,7 @@ import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 public abstract class AbstractTasksRecycleFragment extends AbstractParseRecyclerFragment<ParseTask, TaskRecycleAdapter.TaskViewHolder> {
 
@@ -21,7 +21,7 @@ public abstract class AbstractTasksRecycleFragment extends AbstractParseRecycler
 
     @Override
     protected ParseRecyclerQueryAdapter<ParseTask, TaskRecycleAdapter.TaskViewHolder> createRecycleAdapter() {
-        return new TaskRecycleAdapter(getContext(), getFragmentManager(), createNetworkQueryFactory());
+        return new TaskRecycleAdapter(getContext(), getParentFragmentManager(), createNetworkQueryFactory());
     }
 
 

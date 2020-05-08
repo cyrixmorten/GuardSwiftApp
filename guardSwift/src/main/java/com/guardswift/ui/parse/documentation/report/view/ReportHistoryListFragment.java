@@ -12,7 +12,7 @@ import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.parse.ParseQuery;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import javax.inject.Inject;
 
@@ -44,18 +44,15 @@ public class ReportHistoryListFragment extends AbstractParseRecyclerFragment<Rep
 
     @Override
     protected ParseQueryAdapter.QueryFactory<Report> createNetworkQueryFactory() {
-        return new ParseQueryAdapter.QueryFactory<Report>() {
-            @Override
-            public ParseQuery<Report> create() {
+        return () -> {
 //                ParseTask.TASK_TYPE taskType = (ParseTask.TASK_TYPE) getArguments().getSerializable("taskType");
-                return new ReportQueryBuilder(false)
-                        .include(Report.eventLogs)
-                        .matching(clientCache.getSelected())
+            return new ReportQueryBuilder(false)
+                    .include(Report.eventLogs)
+                    .matching(clientCache.getSelected())
 //                        .matching(taskType)
-                        .build()
-                        .setLimit(10)
-                        .addDescendingOrder("createdAt");
-            }
+                    .build()
+                    .setLimit(10)
+                    .addDescendingOrder("createdAt");
         };
     }
 

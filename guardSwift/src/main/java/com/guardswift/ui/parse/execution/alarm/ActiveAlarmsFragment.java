@@ -3,8 +3,7 @@ package com.guardswift.ui.parse.execution.alarm;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.query.AlarmTaskQueryBuilder;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
-import com.parse.ParseQuery;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 
 public class ActiveAlarmsFragment extends AbstractTasksRecycleFragment {
@@ -26,17 +25,10 @@ public class ActiveAlarmsFragment extends AbstractTasksRecycleFragment {
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
 
 
-        return new ParseQueryAdapter.QueryFactory<ParseTask>() {
-
-            @Override
-            public ParseQuery<ParseTask> create() {
-                return new AlarmTaskQueryBuilder(false)
-                        .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ACCEPTED, ParseTask.STATUS.ARRIVED)
-                        .sortByCreatedAtDescending()
-                        .build();
-
-            }
-        };
+        return () -> new AlarmTaskQueryBuilder(false)
+                .whereStatus(ParseTask.STATUS.PENDING, ParseTask.STATUS.ACCEPTED, ParseTask.STATUS.ARRIVED)
+                .sortByCreatedAtDescending()
+                .build();
 
 
     }

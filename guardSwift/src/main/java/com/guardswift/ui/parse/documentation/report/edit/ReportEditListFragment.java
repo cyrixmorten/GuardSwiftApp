@@ -30,7 +30,7 @@ import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventH
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
 import com.guardswift.ui.parse.documentation.report.view.DownloadReport;
 import com.guardswift.util.GSIntents;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
 

@@ -4,7 +4,7 @@ import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.persistence.parse.query.StaticTaskQueryBuilder;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.parse.ParseQuery;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 public class PendingStaticTasksFragment extends AbstractTasksRecycleFragment {
 
@@ -22,17 +22,11 @@ public class PendingStaticTasksFragment extends AbstractTasksRecycleFragment {
 
     @Override
     public ParseQueryAdapter.QueryFactory<ParseTask> createNetworkQueryFactory() {
-        return new ParseQueryAdapter.QueryFactory<ParseTask>() {
-
-            @Override
-            public ParseQuery<ParseTask> create() {
-                return new StaticTaskQueryBuilder(false).
-                        status(ParseTask.STATUS.PENDING).
-                        daysBack(7).
-                        sortedByCreated().
-                        build();
-            }
-        };
+        return () -> new StaticTaskQueryBuilder(false).
+                status(ParseTask.STATUS.PENDING).
+                daysBack(7).
+                sortedByCreated().
+                build();
     }
 
 //    @Override

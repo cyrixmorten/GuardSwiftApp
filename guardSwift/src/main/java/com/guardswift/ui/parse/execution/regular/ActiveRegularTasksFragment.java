@@ -9,8 +9,7 @@ import com.guardswift.persistence.parse.execution.task.TaskGroupStarted;
 import com.guardswift.persistence.parse.query.RegularRaidTaskQueryBuilder;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
-import com.parse.ParseQuery;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import javax.inject.Inject;
 

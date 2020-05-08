@@ -36,7 +36,7 @@ import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHand
 import com.guardswift.util.StringUtil;
 import com.guardswift.util.Util;
 import com.parse.ParseQuery;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;

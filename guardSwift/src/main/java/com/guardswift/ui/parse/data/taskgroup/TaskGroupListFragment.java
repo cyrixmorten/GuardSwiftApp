@@ -2,6 +2,8 @@ package com.guardswift.ui.parse.data.taskgroup;
 
 import android.app.Activity;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +14,7 @@ import com.guardswift.dagger.InjectingListFragment;
 import com.guardswift.persistence.parse.execution.task.TaskGroup;
 import com.guardswift.persistence.parse.query.TaskGroupQueryBuilder;
 import com.guardswift.ui.activity.GenericToolbarActivity;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 public class TaskGroupListFragment extends InjectingListFragment {
 
@@ -67,7 +69,7 @@ public class TaskGroupListFragment extends InjectingListFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(
                 R.layout.gs_listview_selectable_fab, container,

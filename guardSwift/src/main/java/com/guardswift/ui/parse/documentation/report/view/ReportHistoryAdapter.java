@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import com.guardswift.persistence.parse.documentation.report.Report;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.view.card.ReportCard;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 /**
  * Created by cyrix on 11/21/15.

@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import com.guardswift.R;
 import com.guardswift.persistence.parse.data.EventType;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

@@ -1,6 +1,8 @@
 package com.guardswift.ui.parse.data.tracker;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,7 +23,7 @@ import com.guardswift.ui.menu.MenuItemIcons;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
 
@@ -50,7 +52,7 @@ public class TrackerListFragment extends AbstractParseRecyclerFragment<Tracker, 
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         setSearchDate(fromDate);
@@ -74,7 +76,7 @@ public class TrackerListFragment extends AbstractParseRecyclerFragment<Tracker, 
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         new MenuItemBuilder(getContext())
                 .icon(MenuItemIcons.create(getContext(), FontAwesome.Icon.faw_calendar))
                 .showAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)

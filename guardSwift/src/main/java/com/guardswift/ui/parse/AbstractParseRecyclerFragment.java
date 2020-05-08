@@ -22,7 +22,7 @@ import com.guardswift.ui.activity.SlidingPanelActivity;
 import com.guardswift.ui.parse.execution.AbstractTasksRecycleFragment;
 import com.guardswift.ui.parse.execution.TaskRecycleAdapter;
 import com.malinskiy.superrecyclerview.SuperRecyclerView;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import java.util.List;
 
@@ -145,7 +145,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
         mAdapter = createRecycleAdapter();
 
         LinearLayoutManager llm = new LinearLayoutManager(getContext());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        llm.setOrientation(RecyclerView.VERTICAL);
 
         mRecycleView.setLayoutManager(llm);
 
@@ -158,7 +158,7 @@ public abstract class AbstractParseRecyclerFragment<T extends ExtendedParseObjec
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onViewCreated");
         super.onViewCreated(view, savedInstanceState);
 

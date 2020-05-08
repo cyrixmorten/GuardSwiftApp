@@ -26,7 +26,7 @@ import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.persistence.parse.execution.task.ParseTask;
 import com.guardswift.ui.activity.ParseTaskCreateReportActivity;
 import com.parse.ParseQuery;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;

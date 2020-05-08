@@ -1,8 +1,6 @@
 package com.guardswift.ui.parse;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,12 +8,9 @@ import android.util.Log;
 
 import com.google.common.collect.Lists;
 import com.guardswift.persistence.parse.ExtendedParseObject;
-import com.guardswift.ui.GuardSwiftApplication;
 import com.parse.ParseException;
-import com.parse.ParseLiveQueryClient;
 import com.parse.ParseQuery;
-import com.parse.ParseQueryAdapter.QueryFactory;
-import com.parse.SubscriptionHandling;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +64,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
     protected Context context;
     protected FragmentManager fragmentManager;
 
-    private ParseQuery<T> liveQuery;
+    //private ParseQuery<T> liveQuery;
 
     public void onAttach(Context context) {
         this.context = context;
@@ -78,15 +73,15 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
     public void onDetach() {
         this.context = null;
 
-        unsubscribeLiveQuery();
+        //unsubscribeLiveQuery();
     }
 
 
 
-    private final QueryFactory<T> mFactory;
+    private final ParseQueryAdapter.QueryFactory<T> mFactory;
     private final List<T> mItems;
 
-    public ParseRecyclerQueryAdapter(final QueryFactory<T> factory) {
+    public ParseRecyclerQueryAdapter(final ParseQueryAdapter.QueryFactory<T> factory) {
         mFactory = factory;
         mItems = new ArrayList<>();
         mDataSetListeners = Lists.newCopyOnWriteArrayList();
@@ -143,6 +138,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
 //        subscribeLiveQuery(query);
     }
 
+    /*
     private void unsubscribeLiveQuery() {
         if (this.liveQuery != null) {
 
@@ -151,6 +147,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
             this.liveQuery = null;
         }
     }
+
 
     private void subscribeLiveQuery(ParseQuery<T> query) {
         ParseLiveQueryClient liveQueryClient = GuardSwiftApplication.getInstance().getLiveQueryClient();
@@ -187,6 +184,7 @@ public abstract class ParseRecyclerQueryAdapter<T extends ExtendedParseObject, U
             });
         });
     }
+    */
 
     private int indexOf(T object) {
         int index = -1;

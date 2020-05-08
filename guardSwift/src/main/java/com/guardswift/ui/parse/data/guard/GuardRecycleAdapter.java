@@ -13,7 +13,7 @@ import com.guardswift.persistence.parse.data.Guard;
 import com.guardswift.ui.GuardSwiftApplication;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

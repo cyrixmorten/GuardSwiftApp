@@ -13,7 +13,7 @@ import com.guardswift.ui.menu.MenuItemBuilder;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.execution.TaskRecycleAdapter;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 public class ListExtraTasksFragment extends AbstractParseRecyclerFragment<ParseTask, TaskRecycleAdapter.TaskViewHolder> {
 
@@ -31,7 +31,7 @@ public class ListExtraTasksFragment extends AbstractParseRecyclerFragment<ParseT
 
     @Override
     protected ParseRecyclerQueryAdapter<ParseTask, TaskRecycleAdapter.TaskViewHolder> createRecycleAdapter() {
-        TaskRecycleAdapter adapter = new TaskRecycleAdapter(getContext(), getFragmentManager(), createNetworkQueryFactory());
+        TaskRecycleAdapter adapter = new TaskRecycleAdapter(getContext(), getParentFragmentManager(), createNetworkQueryFactory());
         adapter.setOpenTaskListener((task) -> GenericToolbarActivity.start(getContext(), R.string.create_extra_task, AddExtraTaskFragment.newInstance(task)));
         return adapter;
     }

@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
+
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.guardswift.R;
@@ -26,8 +28,8 @@ import com.guardswift.ui.menu.MenuItemBuilder;
 import com.guardswift.ui.menu.MenuItemIcons;
 import com.guardswift.ui.parse.documentation.report.create.activity.AddEventHandler;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
-import com.parse.ParseQueryAdapter;
 import com.parse.ParseUser;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import java.util.List;
 
@@ -78,7 +80,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.gs_listview_selectable_fab,
                 container, false);
@@ -123,7 +125,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         new MenuItemBuilder(getContext())
                 .icon(MenuItemIcons.create(getContext(), FontAwesome.Icon.faw_plus_circle))
                 .showAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)

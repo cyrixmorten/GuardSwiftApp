@@ -95,11 +95,8 @@ dependencies {
     implementation('com.mikepenz:materialdrawer:6.0.8@aar') {
         transitive = true
     }
-    implementation('com.github.hotchemi:permissionsdispatcher:2.4.0') {
-        // if you don't use android.app.Fragment you can exclude support for them
-        exclude module: "support-v13"
-    }
-    annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:2.4.0"
+    implementation "org.permissionsdispatcher:permissionsdispatcher:4.7.0"
+    annotationProcessor "org.permissionsdispatcher:permissionsdispatcher-processor:4.7.0"
     implementation 'com.google.maps.android:android-maps-utils:0.5'
     implementation 'com.evernote:android-job:1.2.4'
     implementation 'com.sothree.slidinguppanel:library:3.3.1'
@@ -113,10 +110,9 @@ dependencies {
     implementation 'com.afollestad.material-dialogs:core:0.9.4.4'
     implementation 'net.sf.jopt-simple:jopt-simple:4.9'
     implementation 'com.squareup.retrofit2:retrofit:2.0.2'
-    implementation 'com.parse:parseui-login-android:0.0.1'
-    implementation 'com.parse:parseui-widget-android:0.0.1'
-    implementation 'com.parse:parse-android:1.16.5'
-    implementation 'com.parse:parse-livequery-android:1.0.4'
+    implementation "com.github.parse-community.ParseUI-Android:widget:0.0.6"
+    implementation "com.github.parse-community.ParseUI-Android:login:0.0.6"
+    implementation "com.github.parse-community.Parse-SDK-Android:parse:1.24.1"
     implementation 'com.squareup:javawriter:2.5.1'
     implementation 'javax.inject:javax.inject:1'
     implementation 'com.jakewharton:butterknife:10.0.0'

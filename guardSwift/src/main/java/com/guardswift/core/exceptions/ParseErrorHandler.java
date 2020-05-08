@@ -5,7 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 
 import com.parse.ParseException;
-import com.parse.ui.ParseLoginBuilder;
+import com.parse.ui.login.ParseLoginBuilder;
 
 public class ParseErrorHandler {
 

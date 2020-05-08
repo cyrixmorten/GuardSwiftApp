@@ -6,6 +6,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
+
 import com.guardswift.R;
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.data.Guard;
@@ -16,8 +18,7 @@ import com.guardswift.ui.menu.MenuItemIcons;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
-import com.parse.ParseQuery;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 public class GuardListFragment extends AbstractParseRecyclerFragment<Guard, GuardRecycleAdapter.GuardViewHolder> {
 
@@ -41,19 +42,16 @@ public class GuardListFragment extends AbstractParseRecyclerFragment<Guard, Guar
 
 
     @Override
-    public void onCreateOptionsMenu(final Menu menu, final MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull final Menu menu, @NonNull final MenuInflater inflater) {
 
         new MenuItemBuilder(getContext())
                 .icon(MenuItemIcons.create(getContext(), GoogleMaterial.Icon.gmd_google_maps))
                 .showAsActionFlags(MenuItem.SHOW_AS_ACTION_IF_ROOM)
-                .addToMenu(menu, R.string.map, new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem menuItem) {
+                .addToMenu(menu, R.string.map, menuItem -> {
 
-                        GenericToolbarActivity.start(getContext(), R.string.title_drawer_guards, GuardsMapFragment.newInstance());
+                    GenericToolbarActivity.start(getContext(), R.string.title_drawer_guards, GuardsMapFragment.newInstance());
 
-                        return false;
-                    }
+                    return false;
                 });
 
 
@@ -63,12 +61,7 @@ public class GuardListFragment extends AbstractParseRecyclerFragment<Guard, Guar
 
     @Override
     protected ParseQueryAdapter.QueryFactory<Guard> createNetworkQueryFactory() {
-        return new ParseQueryAdapter.QueryFactory<Guard>() {
-            @Override
-            public ParseQuery<Guard> create() {
-                return new GuardQueryBuilder(false).sortByName(true).build();
-            }
-        };
+        return () -> new GuardQueryBuilder(false).sortByName(true).build();
     }
 
     @Override

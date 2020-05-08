@@ -9,7 +9,7 @@ import android.widget.TextView;
 import com.guardswift.R;
 import com.guardswift.persistence.parse.documentation.event.EventLog;
 import com.guardswift.util.Util;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import java.util.Date;
 

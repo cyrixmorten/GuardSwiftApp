@@ -1,5 +1,6 @@
 package com.guardswift.ui.parse.documentation.report.edit;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
@@ -14,7 +15,7 @@ import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandler;
 import com.guardswift.ui.parse.documentation.report.create.activity.UpdateEventHandlerActivity;
 import com.guardswift.ui.view.card.EventLogCard;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import org.joda.time.DateTime;
 
@@ -51,7 +52,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
     }
 
     @Override
-    public ReportViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ReportViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (activityWeakReference.get() != null) {
             EventLogCard eventLogCard = new EventLogCard(activityWeakReference.get());
 
@@ -67,7 +68,7 @@ public class ReportEditRecycleAdapter extends ParseRecyclerQueryAdapter<EventLog
     }
 
     @Override
-    public void onBindViewHolder(final ReportViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ReportViewHolder holder, final int position) {
         final EventLog eventLog = getItem(position);
         Log.d(TAG, "onBindViewHolder: " + eventLog);
         final FragmentActivity activity = activityWeakReference.get();

@@ -5,12 +5,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.guardswift.R;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.ui.helpers.RecyclerViewClickListener;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
 import com.guardswift.ui.parse.PositionedViewHolder;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -61,7 +63,7 @@ public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapt
 	}
 
 	@Override
-	public ClientViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+	public ClientViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 		View itemView = LayoutInflater.
 				from(parent.getContext()).
 				inflate(R.layout.gs_card_client, parent, false);
@@ -71,7 +73,7 @@ public class ClientAdapter extends ParseRecyclerQueryAdapter<Client, ClientAdapt
 	}
 
 	@Override
-	public void onBindViewHolder(ClientViewHolder holder, int position) {
+	public void onBindViewHolder(@NonNull ClientViewHolder holder, int position) {
 		final Client client = getItem(position);
 
 		holder.clientName.setText(client.getName());

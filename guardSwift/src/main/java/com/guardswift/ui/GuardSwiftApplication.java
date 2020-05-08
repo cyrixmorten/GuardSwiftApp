@@ -46,13 +46,10 @@ import com.guardswift.persistence.parse.misc.Update;
 import com.guardswift.persistence.parse.query.TaskGroupStartedQueryBuilder;
 import com.guardswift.ui.dialog.CommonDialogsBuilder;
 import com.guardswift.util.ToastHelper;
-import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseACL;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
-import com.parse.ParseLiveQueryClient;
-import com.parse.ParseLiveQueryClientCallbacks;
 import com.parse.ParseObject;
 import com.parse.ParsePush;
 import com.parse.ParseQuery;
@@ -98,7 +95,7 @@ public class GuardSwiftApplication extends InjectingApplication {
     private boolean parseObjectsBootstrapped;
     private boolean bootstrapInProgress;
 
-    private ParseLiveQueryClient parseLiveQueryClient;
+    //private ParseLiveQueryClient parseLiveQueryClient;
     private boolean liveQueryConnected = false;
 
     @Override
@@ -236,6 +233,7 @@ public class GuardSwiftApplication extends InjectingApplication {
                 .readTimeout(10_000, TimeUnit.MILLISECONDS).connectionPool(new ConnectionPool(0, 1, TimeUnit.NANOSECONDS));
     }
 
+    /*
     private void reconnectLiveQuery(final ParseLiveQueryClient client) {
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (!liveQueryConnected) {
@@ -276,7 +274,7 @@ public class GuardSwiftApplication extends InjectingApplication {
 
         return parseLiveQueryClient;
     }
-
+    */
 
     private void saveInstallation() {
         ParseInstallation installation = ParseInstallation.getCurrentInstallation();
@@ -453,10 +451,12 @@ public class GuardSwiftApplication extends InjectingApplication {
             retryBootstrapDialog = null;
         }
 
+        /*
         if (parseLiveQueryClient != null) {
             parseLiveQueryClient.disconnect();
             parseLiveQueryClient = null;
         }
+        */
 
         if (unpinParseObjects) {
             ParseObject.unpinAllInBackground();

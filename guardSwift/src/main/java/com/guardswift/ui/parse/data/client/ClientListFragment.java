@@ -3,17 +3,14 @@ package com.guardswift.ui.parse.data.client;
 import android.app.Activity;
 import android.location.Location;
 import android.os.Bundle;
-import android.view.View;
 
 import com.guardswift.eventbus.events.UpdateUIEvent;
 import com.guardswift.persistence.parse.data.client.Client;
 import com.guardswift.persistence.parse.query.ClientQueryBuilder;
 import com.guardswift.ui.activity.GenericToolbarActivity;
-import com.guardswift.ui.helpers.RecyclerViewClickListener;
 import com.guardswift.ui.parse.AbstractParseRecyclerFragment;
 import com.guardswift.ui.parse.ParseRecyclerQueryAdapter;
-import com.parse.ParseQuery;
-import com.parse.ParseQueryAdapter;
+import com.parse.ui.widget.ParseQueryAdapter;
 
 public class ClientListFragment extends AbstractParseRecyclerFragment<Client, ClientAdapter.ClientViewHolder> {
 

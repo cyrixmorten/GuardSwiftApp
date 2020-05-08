@@ -161,7 +161,11 @@ public class FusedLocationTrackerService extends InjectingService {
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(getApplicationContext());
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        boolean fineLocationGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+        boolean coarseLocationGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED;
+
+
+        if (fineLocationGranted && coarseLocationGranted) {
             new HandleException(TAG, "Missing location permission", new SecurityException("Missing permission"));
             return;
         }

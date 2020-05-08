@@ -22,7 +22,6 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.BootstrapButton;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.guardswift.BuildConfig;
@@ -50,6 +49,7 @@ import com.parse.ParseUser;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -211,17 +211,17 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     @OnClick(R.id.sign_in_button)
     public void login(BootstrapButton button) {
-        GuardLoginActivityPermissionsDispatcher.attemptLoginWithCheck(this);
+        GuardLoginActivityPermissionsDispatcher.attemptLoginWithPermissionCheck(this);
     }
 
     public static void closeKeyboard(Context c, IBinder windowToken) {
         InputMethodManager mgr = (InputMethodManager) c
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
-        mgr.hideSoftInputFromWindow(windowToken, 0);
+        Objects.requireNonNull(mgr).hideSoftInputFromWindow(windowToken, 0);
     }
 
 
-    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACTIVITY_RECOGNITION})
     public void attemptLogin() {
 
         Log.d(TAG, "attemptLogin");
@@ -411,7 +411,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
                         .positiveText(R.string.install_update)
                         .negativeText(R.string.later)
                         .content(getString(R.string.current_and_latest_version, device.getVersionName(), targetUpdate.getVersionName()))
-                        .onPositive((dialog, which) -> GuardLoginActivityPermissionsDispatcher.downloadAndInstallWithCheck(GuardLoginActivity.this, targetUpdate)).build();
+                        .onPositive((dialog, which) -> GuardLoginActivityPermissionsDispatcher.downloadAndInstallWithPermissionCheck(GuardLoginActivity.this, targetUpdate)).build();
             }
 
             if (!updateDialog.isShowing()) {
@@ -537,7 +537,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         GuardLoginActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
-    @OnShowRationale({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    @OnShowRationale({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACTIVITY_RECOGNITION})
     void showRationaleForPermissions(final PermissionRequest request) {
         new CommonDialogsBuilder.MaterialDialogs(this).okCancel(R.string.permissions, getString(R.string.permissions_rationale),
                 (dialog, which) -> request.proceed(), (dialog, which) -> request.cancel()

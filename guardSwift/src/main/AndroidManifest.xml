@@ -38,6 +38,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!-- Activity -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
     <!-- Parse Push -->
@@ -96,7 +97,7 @@
 
             </activity>
         <activity
-            android:name="com.parse.ui.ParseLoginActivity"
+            android:name="com.parse.ui.login.ParseLoginActivity"
             android:label="@string/app_name"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -104,10 +105,10 @@
 
             <!-- For more options, see https://www.parse.com/docs/android_guide#ui-login -->
             <meta-data
-                android:name="com.parse.ui.ParseLoginActivity.APP_LOGO"
+                android:name="com.parse.ui.login.ParseLoginActivity.APP_LOGO"
                 android:resource="@drawable/ic_launcher" />
             <meta-data
-                android:name="com.parse.ui.ParseLoginActivity.PARSE_LOGIN_ENABLED"
+                android:name="com.parse.ui.login.ParseLoginActivity.PARSE_LOGIN_ENABLED"
                 android:value="true" />
             <!-- <meta-data -->
             <!-- android:name="com.parse.ui.ParseLoginActivity.PARSE_LOGIN_EMAIL_AS_USERNAME" -->
@@ -178,6 +179,7 @@
         <!-- CONTEXT AWARENESS -->
         <service
             android:name=".core.ca.location.FusedLocationTrackerService"
+            android:foregroundServiceType="location"
             android:enabled="true"
             android:exported="false" />
 
