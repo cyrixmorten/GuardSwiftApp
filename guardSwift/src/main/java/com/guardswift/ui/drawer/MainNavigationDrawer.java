@@ -33,7 +33,6 @@ import com.guardswift.ui.parse.execution.statictask.StaticTaskViewPagerFragment;
 import com.guardswift.ui.parse.planning.ListExtraTasksFragment;
 import com.guardswift.ui.preferences.AlarmNotificationPreferencesFragment;
 import com.guardswift.ui.preferences.GuardPreferencesFragment;
-import com.guardswift.util.Analytics;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;

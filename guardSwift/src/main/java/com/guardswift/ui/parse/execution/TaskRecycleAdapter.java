@@ -513,11 +513,16 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
                 vInfoLayout.addView(iconView, 0);
 
-                String infoText = context.getString(R.string.times_supervised,
+                String supervised = context.getString(R.string.times_supervised,
                         task.getTimesArrived(),
                         task.getPlannedSupervisions());
 
-                vInfo.setText(infoText);
+                String occurence = (task.isWeekly() ? context.getString(R.string.weekly)
+                        : context.getString(R.string.daily));
+
+                String supervisionInfo = supervised + " " + occurence;
+
+                vInfo.setText(supervisionInfo);
 
                 vBtnAddExtraTime.setVisibility(View.VISIBLE);
                 vBtnAddExtraTime.setOnClickListener(view -> {

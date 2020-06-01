@@ -40,7 +40,7 @@ public class TaskGroup extends ExtendedParseObject {
 		return getParseObject(owner);
 	}
 
-	private Date getTimeResetDate() {
+	public Date getTimeResetDate() {
 		return getDate(TaskGroup.timeResetDate);
 	}
 

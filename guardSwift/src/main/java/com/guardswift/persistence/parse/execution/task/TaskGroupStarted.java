@@ -8,6 +8,8 @@ import com.parse.ParseClassName;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
+import java.util.Date;
+
 @ParseClassName("TaskGroupStarted")
 public class TaskGroupStarted extends ExtendedParseObject{
 
@@ -69,6 +71,7 @@ public class TaskGroupStarted extends ExtendedParseObject{
     public static final String taskGroup = "taskGroup";
     public static final String timeStarted = "timeStarted";
     public static final String timeEnded = "timeEnded";
+    public static final String resetDate = "resetDate";
     public static final String hasExtras = "hasExtras"; // has extra
 
     public static final String extrasCount = "extrasCount"; // number of extras
@@ -106,5 +109,7 @@ public class TaskGroupStarted extends ExtendedParseObject{
     }
 
 
-
+    public Date getResetDate() {
+        return getDate(resetDate);
+    }
 }

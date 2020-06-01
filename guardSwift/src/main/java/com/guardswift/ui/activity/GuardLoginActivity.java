@@ -206,12 +206,16 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
 
     private void loadBanner() {
         String logo = ParseUser.getCurrentUser().getString("logoUrl");
-        Picasso.with(context).load(logo).into(bannerImageView);
+        Picasso.get().load(logo).into(bannerImageView);
     }
 
     @OnClick(R.id.sign_in_button)
     public void login(BootstrapButton button) {
-        GuardLoginActivityPermissionsDispatcher.attemptLoginWithPermissionCheck(this);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            GuardLoginActivityPermissionsDispatcher.loginAndroidEqualToAndAboveQWithPermissionCheck(this);
+        } else {
+            GuardLoginActivityPermissionsDispatcher.loginAndroidBelowQWithPermissionCheck(this);
+        }
     }
 
     public static void closeKeyboard(Context c, IBinder windowToken) {
@@ -221,11 +225,20 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
     }
 
 
-    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACTIVITY_RECOGNITION})
-    public void attemptLogin() {
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.ACTIVITY_RECOGNITION})
+    public void loginAndroidEqualToAndAboveQ() {
+        login();
+    }
 
-        Log.d(TAG, "attemptLogin");
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE})
+    public void loginAndroidBelowQ() {
+        login();
+    }
 
+    private void login() {
         if (!device.isOnline()) {
             eventBus.post(new MissingInternetEvent());
             return;
@@ -249,7 +262,6 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
             mGuardIdView.setError(getString(R.string.error_invalid_guardid));
             mGuardIdView.requestFocus();
         }
-
     }
 
     private boolean handleFailedLogin(String context, Exception e) {
@@ -537,7 +549,8 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
         GuardLoginActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
-    @OnShowRationale({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACTIVITY_RECOGNITION})
+
+    @OnShowRationale({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE})
     void showRationaleForPermissions(final PermissionRequest request) {
         new CommonDialogsBuilder.MaterialDialogs(this).okCancel(R.string.permissions, getString(R.string.permissions_rationale),
                 (dialog, which) -> request.proceed(), (dialog, which) -> request.cancel()

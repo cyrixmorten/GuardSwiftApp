@@ -106,6 +106,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     public static final String timeEndDate = "timeEndDate";
     public static final String supervisions = "supervisions";
     public static final String timesArrived = "timesArrived";
+    public static final String isWeekly = "isWeekly";
 
     public static final String minutesBetweenArrivals = "minutesBetweenArrivals";
     public static final String lastArrivalDate = "lastArrivalDate";
@@ -836,5 +837,9 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
         // if guard forget to select a taskgroup, always return true
         return taskGroupStartedCache.getSelected() == null;
+    }
+
+    public boolean isWeekly() {
+        return getBooleanSafe(ParseTask.isWeekly, false);
     }
 }
