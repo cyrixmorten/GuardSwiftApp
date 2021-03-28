@@ -9,9 +9,9 @@ import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
@@ -185,8 +185,6 @@ public class ActivityRecognitionService extends InjectingService {
 
                     ActivityNotification.update(ActivityRecognitionService.this, currentDetectedActivity);
                 }, throwable -> {
-                    Log.e(TAG, "Error on Activity observable", throwable);
-                    Crashlytics.logException(throwable);
                     new HandleException(TAG, "Error on Activity observable", throwable);
                 });
     }

@@ -2,8 +2,6 @@ package com.guardswift.ui;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.StrictMode;
 import androidx.multidex.MultiDex;
 import android.util.Log;
@@ -11,10 +9,11 @@ import android.util.Pair;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.TypefaceProvider;
-import com.crashlytics.android.Crashlytics;
 import com.evernote.android.job.JobManager;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.ca.activity.ActivityRecognitionService;
@@ -70,7 +69,6 @@ import javax.inject.Inject;
 import bolts.Continuation;
 import bolts.Task;
 import de.greenrobot.event.EventBus;
-import io.fabric.sdk.android.Fabric;
 import io.reactivex.plugins.RxJavaPlugins;
 import okhttp3.ConnectionPool;
 import okhttp3.OkHttpClient;
@@ -133,7 +131,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         JodaTimeAndroid.init(this);
 
         setupParse();
-        setupFabric();
+        setupFirebase(this);
         setupJobs();
 
         // Global capture of RxJava errors
@@ -286,14 +284,15 @@ public class GuardSwiftApplication extends InjectingApplication {
         installation.saveInBackground(e -> ParsePush.subscribeInBackground("alarm"));
     }
 
-    private void setupFabric() {
-        Fabric.with(this, new Crashlytics());
+    private void setupFirebase(Context context) {
+        FirebaseAnalytics analytics = FirebaseAnalytics.getInstance(context);
+        FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
 
         ParseUser user = ParseUser.getCurrentUser();
         if (user != null) {
-            Crashlytics.setUserIdentifier(user.getObjectId());
-            Crashlytics.setUserEmail(user.getEmail());
-            Crashlytics.setUserName(user.getUsername());
+            String userId = user.getObjectId();
+            crashlytics.setUserId(userId);
+            analytics.setUserId(userId);
         }
     }
 

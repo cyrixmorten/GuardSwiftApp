@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.codetroopers.betterpickers.numberpicker.NumberPickerBuilder;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.guardswift.R;
 import com.guardswift.dagger.InjectingListFragment;
 import com.guardswift.eventbus.events.UpdateUIEvent;
@@ -120,7 +120,7 @@ public abstract class AbstractEventFragment extends InjectingListFragment {
 
         EventType.getQueryBuilder(true).matchingIncludes(mClient).sortByTimesUsed().build().findInBackground((eventTypes, e) -> {
             if (e != null) {
-                Crashlytics.logException(e);
+                FirebaseCrashlytics.getInstance().recordException(e);
                 return;
             }
 

@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.guardswift.R;
 import com.guardswift.core.parse.ParseModule;
 import com.guardswift.dagger.InjectingAppCompatActivity;

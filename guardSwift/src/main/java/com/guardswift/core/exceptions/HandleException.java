@@ -1,9 +1,8 @@
 package com.guardswift.core.exceptions;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.parse.ParseException;
 
 
@@ -18,8 +17,7 @@ public class HandleException {
 
         e.printStackTrace();
 
-        Crashlytics.logException(e);
-        Crashlytics.log(Log.ERROR, tag, message + " error: " + e.getMessage());
+        FirebaseCrashlytics.getInstance().recordException(e);
 
         if (e instanceof ParseException && context != null) {
             new ParseErrorHandler().handleParseError(context, (ParseException)e);

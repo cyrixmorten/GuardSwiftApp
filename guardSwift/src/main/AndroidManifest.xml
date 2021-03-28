@@ -192,9 +192,6 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="1d3137a16e5b81623a1376cbae7962314b9c8d6a" />
 
         <activity android:name=".ui.activity.GenericToolbarActivity"
             android:screenOrientation="portrait"/>

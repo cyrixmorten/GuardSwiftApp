@@ -11,13 +11,13 @@ import android.os.PowerManager;
 import androidx.core.app.ActivityCompat;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationRequest;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Lists;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingService;
@@ -206,7 +206,7 @@ public class FusedLocationTrackerService extends InjectingService {
                     }
                 }, throwable -> {
                     Log.e(TAG, "Error on Fused Location observable", throwable);
-                    Crashlytics.logException(throwable);
+                    FirebaseCrashlytics.getInstance().recordException(throwable);
                     new HandleException(TAG, "Error on Fused Location observable", throwable);
                 });
     }
