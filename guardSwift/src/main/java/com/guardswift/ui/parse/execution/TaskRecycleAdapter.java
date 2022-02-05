@@ -24,6 +24,7 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.beardedhen.androidbootstrap.AwesomeTextView;
 import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.codetroopers.betterpickers.radialtimepicker.RadialTimePickerDialogFragment;
+import com.guardswift.BuildConfig;
 import com.guardswift.R;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.core.parse.ParseModule;
@@ -907,16 +908,16 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
         holder.update(context, task);
 
 
-//        debugGeofenceStatus(task, holder);
+        // debugGeofenceStatus(task, holder);
 
         new PositionedViewHolder.CalcDistanceAsync(task, holder).execute();
 //        new UpdateTaskStateAsync(task, holder, isNew).execute();
     }
 
     private void debugGeofenceStatus(ParseTask task, TaskViewHolder holder) {
-//        if (!BuildConfig.DEBUG) {
-//            return;
-//        }
+        if (!BuildConfig.DEBUG) {
+            return;
+        }
 
         LinearLayout linearLayout = holder.vContentBody.findViewById(R.id.layout_debug_geofence);
         if (linearLayout == null) {

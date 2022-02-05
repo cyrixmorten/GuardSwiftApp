@@ -43,11 +43,11 @@ public class RegularContextStrategy extends BaseContextStrategy {
             boolean onFootOrInactive = ActivityDetectionModule.isOnFoot(currentActivity.getType()) ||
                             inactiveCount == FusedLocationTrackerService.ACTIVITY_HISTORY_SIZE;
 
+
             boolean triggerArrival = onFootOrInactive &&
                     task.isWithinScheduledTimeRelaxed() &&
                     task.matchesSelectedTaskGroupStarted();
-
-            Log.d(TAG, task.getClientName() + ": " + triggerArrival);
+            
 
             if (triggerArrival) {
                 controller.performAutomaticAction(TaskController.ACTION.ARRIVE, task);
