@@ -26,9 +26,6 @@ public class RegularContextStrategy extends BaseContextStrategy {
     @Override
     boolean pendingTaskUpdate(Location current, Location previous, DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory, float distanceToClientMeters) {
 
-
-        Log.d(TAG, task.getClientName());
-
         if (distanceToClientMeters < task.getRadius()) {
 
             int inactiveCount = 0;
@@ -42,8 +39,6 @@ public class RegularContextStrategy extends BaseContextStrategy {
 
                 }
             }
-
-
             
             boolean onFootOrInactive = ActivityDetectionModule.isOnFoot(currentActivity.getType()) ||
                             inactiveCount == FusedLocationTrackerService.ACTIVITY_HISTORY_SIZE;
