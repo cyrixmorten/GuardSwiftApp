@@ -135,9 +135,7 @@ public class GuardSwiftApplication extends InjectingApplication {
         setupJobs();
 
         // Global capture of RxJava errors
-        RxJavaPlugins.setErrorHandler(throwable -> {
-            new HandleException(TAG, "RxJava", throwable);
-        });
+        RxJavaPlugins.setErrorHandler(throwable -> new HandleException(TAG, "RxJava", throwable));
 
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
 
@@ -148,7 +146,7 @@ public class GuardSwiftApplication extends InjectingApplication {
                     .detectLeakedSqlLiteObjects()
                     .detectLeakedClosableObjects()
                     .penaltyLog()
-                    .penaltyDeath()
+                    //.penaltyDeath()
                     .build());
         } else {
             // Fixes android.os.FileUriExposedException

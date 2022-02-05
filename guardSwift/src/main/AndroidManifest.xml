@@ -35,6 +35,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!-- Position -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!-- Activity -->
@@ -68,6 +69,7 @@
 
         <!-- ACTIVITIES -->
         <activity
+            android:exported="true"
             android:name=".ui.activity.MainActivityDispatcher"
             android:label="@string/app_name"
             android:launchMode="singleTop">
@@ -78,6 +80,7 @@
             </intent-filter>
         </activity>
         <activity
+            android:exported="true"
             android:name=".ui.activity.MainActivity"
             android:configChanges="keyboardHidden"
             android:label="@string/app_name"
@@ -149,8 +152,6 @@
 
 
         <!-- PARSE -->
-        <service android:name="com.parse.PushService" />
-
         <receiver
             android:name="com.parse.ParsePushBroadcastReceiver"
             android:exported="false">
@@ -158,16 +159,6 @@
                 <action android:name="com.parse.push.intent.RECEIVE" />
                 <action android:name="com.parse.push.intent.DELETE" />
                 <action android:name="com.parse.push.intent.OPEN" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="com.parse.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
-                <category android:name="com.guardswift" />
             </intent-filter>
         </receiver>
 
@@ -197,7 +188,7 @@
             android:screenOrientation="portrait"/>
 
         <!-- Firebase -->
-        <service android:name=".firebase.AlarmReceiver">
+        <service android:exported="false" android:name=".firebase.AlarmReceiver">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
