@@ -165,7 +165,7 @@ public class GuardLoginActivity extends InjectingAppCompatActivity {
             mAnalytics.setUserProperty(Analytics.UserProperty.COMPANY_NAME, ParseUser.getCurrentUser().getUsername());
         }
 
-        //throw new RuntimeException("Test crashlytics");
+        //throw new RuntimeException("Test crashlytics!!");
     }
 
     @Override

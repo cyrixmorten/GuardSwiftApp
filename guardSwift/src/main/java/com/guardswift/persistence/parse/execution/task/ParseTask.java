@@ -113,6 +113,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 
     public static final String expireDate = "expireDate";
 
+    public static final String disableAutomaticArrival = "disableAutomaticArrival";
 
     public static class STATUS {
         public static String PENDING = "pending";
@@ -129,12 +130,6 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
         public static String STATIC = "Static";
     }
 
-
-    private ParseTasksCache tasksCache;
-
-    public ParseTask() {
-        tasksCache = GuardSwiftApplication.getInstance().getCacheFactory().getTasksCache();
-    }
 
     public BaseTaskCache<ParseTask> getCache() {
         return GuardSwiftApplication.getInstance().getCacheFactory().getTaskCache();
@@ -291,6 +286,10 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
 //        }
 //        return groupId;
 //    }
+
+    public boolean disableAutomaticArrival() {
+        return getBooleanSafe(ParseTask.disableAutomaticArrival, false);
+    }
 
 
     public ExtendedParseObject getParseObject() {

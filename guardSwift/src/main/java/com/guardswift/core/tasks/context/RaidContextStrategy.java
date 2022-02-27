@@ -106,6 +106,10 @@ public class RaidContextStrategy extends BaseContextStrategy {
     }
 
     private boolean triggerArrival() {
+        if (task.disableAutomaticArrival()) {
+            return false;
+        }
+
         boolean triggerArrival = task.isWithinScheduledTimeRelaxed() && task.matchesSelectedTaskGroupStarted();
 
         if (triggerArrival) {

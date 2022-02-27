@@ -18,6 +18,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Lists;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.guardswift.BuildConfig;
 import com.guardswift.core.ca.activity.ActivityDetectionModule;
 import com.guardswift.core.exceptions.HandleException;
 import com.guardswift.dagger.InjectingService;
@@ -50,6 +51,8 @@ public class FusedLocationTrackerService extends InjectingService {
     private static final String TAG = FusedLocationTrackerService.class.getSimpleName();
 
     private static int LOCATION_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY;
+    private static float SMALLEST_DISPLACEMENT = 10f;
+    private static float MIN_ACCURACY_METERS = 30;
     public static final int ACTIVITY_HISTORY_SIZE = 5;
 
     PowerManager.WakeLock wl;
@@ -155,8 +158,9 @@ public class FusedLocationTrackerService extends InjectingService {
 
         LocationRequest request = LocationRequest.create() //standard GMS LocationRequest
                 .setPriority(LOCATION_PRIORITY)
+                //.setSmallestDisplacement(SMALLEST_DISPLACEMENT) // minimum 10 meters between updates
+                .setMaxWaitTime(7500)
                 .setInterval(5000)
-                .setSmallestDisplacement(10f) // minimum 10 meters between updates
                 .setFastestInterval(2500);
 
         ReactiveLocationProvider locationProvider = new ReactiveLocationProvider(getApplicationContext());
@@ -177,7 +181,10 @@ public class FusedLocationTrackerService extends InjectingService {
                     location.setAccuracy(100); // do not let past filter
                     return Observable.just(location);
                 })
-                .filter(location -> location.getAccuracy() < 15)
+                .filter(location -> {
+                    Log.d(TAG, "location: " + location.getAccuracy());
+                    return location.getAccuracy() < MIN_ACCURACY_METERS;
+                })
                 .subscribe(location -> {
                     if (guardCache.isLoggedIn()) {
 

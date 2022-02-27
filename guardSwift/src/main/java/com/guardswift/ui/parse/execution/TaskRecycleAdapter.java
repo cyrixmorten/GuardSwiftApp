@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.cardview.widget.CardView;
@@ -554,7 +555,7 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                 setupTaskActionButtons(context, task);
 
                 if (task.isCompletedButNotMarkedFinished()) {
-                    updateTaskState(context, ParseTask.TASK_STATE.ACCEPTED);
+                    updateTaskState(context, ParseTask.TASK_STATE.ACCEPTED, task);
                 }
             }
 
@@ -724,12 +725,13 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
 
         void setTaskState(Context context, ParseTask task) {
             ParseTask.TASK_STATE state = task.getTaskState();
-            updateTaskState(context, state);
+            updateTaskState(context, state, task);
         }
 
-        void updateTaskState(Context context, ParseTask.TASK_STATE toState) {
-            int color = getTaskStateColor(context, toState);
-            updateTaskStateButtons(context, toState);
+
+        void updateTaskState(Context context, ParseTask.TASK_STATE toState, ParseTask task) {
+            int color = getTaskStateColor(context, toState, task);
+            updateTaskStateButtons(context, toState, task);
             for (View border : this.vColorBorders) {
                 tintBackgroundColor(border, color, 100);
             }
@@ -760,21 +762,21 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
                     return;
                 }
             }
-            updateTaskState(context, fromState, toState, false, true);
+            updateTaskState(context, fromState, toState, task);
         }
 
-        void updateTaskState(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState, boolean isNew, boolean animate) {
-            updateTaskStateColor(context, fromState, toState, isNew, animate);
-            updateTaskStateButtons(context, toState);
+        void updateTaskState(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState, ParseTask task) {
+            updateTaskStateColor(context, fromState, toState, task);
+            updateTaskStateButtons(context, toState, task);
         }
 
-        private void updateTaskStateButtons(Context context, ParseTask.TASK_STATE state) {
+        private void updateTaskStateButtons(Context context, ParseTask.TASK_STATE state, ParseTask task) {
             bootstrapActionButtonDefaults(context, this.vBtnPending);
             bootstrapActionButtonDefaults(context, this.vBtnArrived);
 //            bootstrapActionButtonDefaults(contextWeakReference, this.vBtnAborted);
             bootstrapActionButtonDefaults(context, this.vBtnFinished);
 
-            int colorRes = getTaskStateColorResource(state);
+            int colorRes = getTaskStateColorResource(state, task);
             switch (state) {
                 case PENDING:
                     bootstrapActionButtonSelect(context, this.vBtnPending, colorRes);
@@ -812,27 +814,27 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             this.vBtnFinished.setEnabled(false);
         }
 
-        private void updateTaskStateColor(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState, boolean isNew, boolean animate) {
+        private void updateTaskStateColor(Context context, ParseTask.TASK_STATE fromState, ParseTask.TASK_STATE toState, ParseTask task) {
 
             if (fromState.equals(toState)) {
                 return;
             }
 
-            int prevStateColor = getTaskStateColor(context, fromState);
-            int toColor = getTaskStateColor(context, toState);
-            int tintDuration = (animate) ? 500 : 0;
-            int fromColor = (isNew) ? Color.WHITE : prevStateColor;
+            int prevStateColor = getTaskStateColor(context, fromState, task);
+            int toColor = getTaskStateColor(context, toState, task);
+            int tintDuration = 500;
 
 //            Log.d(TAG, "updateTaskStateColor " + fromState + "->" + toState);
 //            Log.d(TAG, "updateTaskStateColor " + fromColor + "->" + toColor);
 
-            ViewHelper.TintBackground.tintBackgroundColor(this.vColorBorders, fromColor, toColor, 100, tintDuration);
-            ViewHelper.TintBackground.tintBackgroundColor(this.cardview, fromColor, toColor, 50, tintDuration);
+            ViewHelper.TintBackground.tintBackgroundColor(this.vColorBorders, prevStateColor, toColor, 100, tintDuration);
+            ViewHelper.TintBackground.tintBackgroundColor(this.cardview, prevStateColor, toColor, 50, tintDuration);
 
         }
 
-        private int getTaskStateColor(Context context, ParseTask.TASK_STATE state) {
-            int colorRes = getTaskStateColorResource(state);
+
+        private int getTaskStateColor(Context context, ParseTask.TASK_STATE state, ParseTask task) {
+            int colorRes = getTaskStateColorResource(state, task);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 return context.getColor(colorRes);
             } else {
@@ -840,11 +842,15 @@ public class TaskRecycleAdapter extends ParseRecyclerQueryAdapter<ParseTask, Tas
             }
         }
 
-        private int getTaskStateColorResource(ParseTask.TASK_STATE state) {
+        private int getTaskStateColorResource(ParseTask.TASK_STATE state, ParseTask task) {
             int color = R.color.bootstrap_brand_info; // default pending
             switch (state) {
                 case PENDING:
-                    color = R.color.bootstrap_brand_info;
+                    if (task.disableAutomaticArrival()) {
+                        color = R.color.md_deep_purple_200;
+                    } else {
+                        color = R.color.bootstrap_brand_info;
+                    }
                     break;
                 case ACCEPTED:
                     color = R.color.bootstrap_brand_warning;

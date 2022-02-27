@@ -25,6 +25,12 @@ public class RegularContextStrategy extends BaseContextStrategy {
 
     @Override
     boolean pendingTaskUpdate(Location current, Location previous, DetectedActivity currentActivity, Queue<DetectedActivity> activityHistory, float distanceToClientMeters) {
+        Log.d(TAG, "pendingTaskUpdate " + task.getClientName());
+        
+        if (task.disableAutomaticArrival()) {
+            Log.d(TAG, "task.disableAutomaticArrival()" + task.disableAutomaticArrival());
+            return false;
+        }
 
         if (distanceToClientMeters < task.getRadius()) {
 
@@ -47,7 +53,7 @@ public class RegularContextStrategy extends BaseContextStrategy {
                     task.isWithinScheduledTimeRelaxed() &&
                     task.matchesSelectedTaskGroupStarted();
 
-            Log.d(TAG, task.getClientName() + ": " + triggerArrival);
+            Log.d(TAG, task.getClientName() + ": " + triggerArrival + " inactiveCount: " + inactiveCount);
 
             if (triggerArrival) {
                 controller.performAutomaticAction(TaskController.ACTION.ARRIVE, task);
