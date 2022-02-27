@@ -263,7 +263,7 @@ public class ReportEditListFragment extends AbstractParseRecyclerFragment<EventL
                     dialog.dismiss();
                 });
             } else {
-                CreateEventHandlerActivity.start(Objects.requireNonNull(getContext()), task);
+                CreateEventHandlerActivity.start(requireContext(), task);
             }
         });
     }

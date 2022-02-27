@@ -563,7 +563,7 @@ public class ParseTask extends ExtendedParseObject implements Positioned {
     }
 
     public boolean isWithinScheduledTimeRelaxed() {
-        int relaxMinutes = 30;
+        int relaxMinutes = 10;
 
         // always return true if debugging
         if (BuildConfig.DEBUG) {
