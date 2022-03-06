@@ -52,7 +52,14 @@ public class AlarmNotification {
         Intent intent = new Intent(context, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
         intent.putExtra(MainActivity.SELECT_ALARMS, true);
-        return PendingIntent.getActivity(context,0 /* request code */, intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return PendingIntent.getActivity(context,0 /* request code */, intent,PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            return PendingIntent.getActivity(context,0 /* request code */, intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
+
     }
 
     private static Notification create(Context context, ParseTask alarm) {

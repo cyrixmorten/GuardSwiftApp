@@ -41,7 +41,7 @@ android {
     defaultConfig {
         applicationId "com.guardswift"
         minSdkVersion 19
-        targetSdkVersion 31
+        targetSdkVersion 30
         versionCode 580
         versionName "5.8.0"
 

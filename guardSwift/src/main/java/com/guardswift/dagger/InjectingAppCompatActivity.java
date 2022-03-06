@@ -132,9 +132,8 @@ public class InjectingAppCompatActivity extends AppCompatActivity implements
         // injection in their
         // onAttach override.
 
-        mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, RFIDRegisterActivity.class), 0);
-
-        mAdapter = NfcAdapter.getDefaultAdapter(this);
+        // mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this, RFIDRegisterActivity.class), 0);
+        // mAdapter = NfcAdapter.getDefaultAdapter(this);
 
         if (mAdapter == null) {
             // TODO show warning that device cannot read RFID tags

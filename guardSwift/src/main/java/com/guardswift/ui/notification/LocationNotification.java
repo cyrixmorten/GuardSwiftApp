@@ -50,7 +50,11 @@ public class LocationNotification {
 
     private static PendingIntent getPendingIntent(Context context) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
-        return PendingIntent.getActivity(context, 0, notificationIntent, 0);
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            return PendingIntent.getActivity(context, 0, notificationIntent, 0);
+        }
     }
 
     public static Notification create(Context context, String contentText) {
