@@ -5,6 +5,7 @@ import com.guardswift.BuildConfig;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.Streaming;
@@ -22,6 +23,9 @@ public final class GuardSwiftServer {
 
         @GET("cpsms?from=4528718353&message=Test")
         Call<ResponseBody> testAlarm(@Query("number") String toNumber);
+
+        @POST("alarm/rest?key=crNMVY4rf6zCwf7VHYveWPZ9guNQDvEVwar")
+        Call<ResponseBody> testAlarmRedningsRingen(@Query("message") String message);
     }
 
 

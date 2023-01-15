@@ -68,7 +68,7 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
     private void createTestAlarmPreference() {
 
 
-        final Preference testAlarm = new Preference(Objects.requireNonNull(getContext()));
+        final Preference testAlarm = new Preference(requireContext());
         testAlarm.setTitle(R.string.test_alarm_create);
         testAlarm.setIcon(R.drawable.ic_add_alert_black_24dp);
 
@@ -122,6 +122,7 @@ public class AlarmNotificationPreferencesFragment extends PreferenceFragmentComp
         });
 
         PreferenceCategory cat = findPreference("alarm_test");
+        assert cat != null;
         cat.addPreference(testAlarm);
     }
 

@@ -34,14 +34,14 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdkVersion 31
+    compileSdkVersion 33
     dataBinding {
         enabled = true
     }
     defaultConfig {
         applicationId "com.guardswift"
         minSdkVersion 19
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode 580
         versionName "5.8.0"
 
