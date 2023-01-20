@@ -21,11 +21,11 @@ public class UpdateApp extends AsyncTask<File,Void,File> {
 
     public static void fromFile(Context context, File file) {
         Log.i(TAG, "Start update");
-
-        new UpdateApp(context).execute(file);
+        File writePath = context.getExternalCacheDir();
+        new UpdateApp(context).execute(file, writePath);
     }
 
-    private WeakReference<Context> activityWeakReference;
+    private final WeakReference<Context> activityWeakReference;
 
     UpdateApp(Context context) {
         activityWeakReference = new WeakReference<>(context);
@@ -35,18 +35,13 @@ public class UpdateApp extends AsyncTask<File,Void,File> {
     protected File doInBackground(File... arg0) {
         try {
             File fromFile = arg0[0];
+            File toFilePath = arg0[1];
 
-            String PATH = Environment.getExternalStorageDirectory().getAbsolutePath();
+            String PATH = toFilePath.getAbsolutePath();
             String FILENAME = "update.apk";
             File file = new File(PATH);
 
-            boolean dirCreated = file.mkdirs();
-            Log.i(TAG, "dirCreated: " + dirCreated);
-
-            if (file.exists()) {
-                boolean fileDeleted = file.delete();
-                Log.i(TAG, "fileDeleted: " + fileDeleted);
-            }
+            Log.i(TAG, "file exists: " + file.exists());
 
             File outputFile = new File(file, FILENAME);
 
@@ -64,10 +59,10 @@ public class UpdateApp extends AsyncTask<File,Void,File> {
     protected void onPostExecute(File file) {
         super.onPostExecute(file);
 
-        Log.i(TAG, "onPostExecute: " + file.exists());
+        Log.i(TAG, "onPostExecute file: " + file);
 
         Context context = activityWeakReference.get();
-        if (context != null) {
+        if (context != null && file != null) {
             try {
 
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
