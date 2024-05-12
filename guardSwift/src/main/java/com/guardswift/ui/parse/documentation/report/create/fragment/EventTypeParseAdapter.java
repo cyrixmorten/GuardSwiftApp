@@ -17,6 +17,7 @@ public class EventTypeParseAdapter extends ParseQueryAdapter<EventType> {
 	public EventTypeParseAdapter(Context context,
 			QueryFactory<EventType> queryFactory) {
 		super(context, queryFactory);
+		setObjectsPerPage(50);
 	}
 
 	@BindView(R.id.text) TextView text;

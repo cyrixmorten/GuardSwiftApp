@@ -89,7 +89,7 @@ public class AddEventTypeFragment extends InjectingListFragment implements Event
 
         // mAdapter = new AddEventTypeAdapter(getActivity());
         mAdapter = new EventTypeParseAdapter(getActivity(),
-                () -> new EventTypeQueryBuilder(true)
+                () -> new EventTypeQueryBuilder(false)
                         .matchingIncludes(clientCache.getSelected())
                         .sortByTimesUsed()
                         .build());
