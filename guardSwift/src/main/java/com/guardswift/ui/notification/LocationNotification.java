@@ -50,19 +50,13 @@ public class LocationNotification {
 
     private static PendingIntent getPendingIntent(Context context) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            return PendingIntent.getActivity(context, 0, notificationIntent, 0);
-        }
+        return PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     public static Notification create(Context context, String contentText) {
 
-        String channelId = "";
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            channelId = createChannel(context);
-        }
+        String channelId = createChannel(context);
+
 
         mBuilder = new NotificationCompat.Builder(context, channelId)
                 .setOngoing(true)
