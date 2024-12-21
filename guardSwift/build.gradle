@@ -34,16 +34,16 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdkVersion 31
+    compileSdk 31
     dataBinding {
         enabled = true
     }
     defaultConfig {
         applicationId "com.guardswift"
         minSdkVersion 19
-        targetSdkVersion 31
-        versionCode 582
-        versionName "5.8.2"
+        targetSdkVersion 30
+        versionCode 583
+        versionName "5.8.3"
 
         // Enabling multidex support.
         multiDexEnabled true
